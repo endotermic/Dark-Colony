@@ -1,0 +1,42 @@
+size 112 160 304 176
+pictures intrface/popp
+font 0 intrface/mfonto7
+font_offset  0 31
+colour erase  0 0 0
+colour textbg  0 0 0
+colour selbg  0 255 0
+
+%        # desc  x    y    w    h
+
+picture  0   0  112   160  288  32   0
+picture  1   0  112   176  288  32   1
+picture  2   0  112   192  288  32   1
+picture  3   0  208   168  288  32   6
+picture  4   0  112   208  288  32   1
+picture  5   0  112   224  288  32   1
+picture  6   0  112   240  288  32   1
+picture  11   0  112   256  288  32   1
+picture  12   0  112   272  288  32   1
+picture  13   0  112   288  288  32   1
+picture  14   0  112   304  288  32   1
+picture  15   0  112   320  288  32   2
+picture  20   0  144   224  288  32   6
+picture  21   0  144   272  288  32   6
+
+
+textmsg 1 REALLY QUIT?
+textmsg 2 YES, QUIT
+textmsg 3 NO, CONTINUE
+
+%list     50  0  132   147  256 172  scroll 51  -  read_only bg textbg remap 4
+%scroll   51  0  398   160   5   144 list 50
+%pushb    52  0  392   144   16   16  10  -10  list  50  -3
+%pushb    53  0  392   304   16   16  11  -10  list  50  3q
+
+pushb    56  0  344  220   32  32  -16 7
+pushb    57  0  344  268   32  32  -16 8
+label    60  0  212  176  106 10 label 1 align centre font 0 - bg textbg remap 4
+label    61  0  148  232  106 10 label 2 align left font 0 - bg textbg remap 4
+label    62  0  148  280  106 10 label 3 align left font 0 - bg textbg remap 4
+
+end

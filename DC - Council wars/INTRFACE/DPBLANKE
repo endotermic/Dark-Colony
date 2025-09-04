@@ -1,0 +1,14 @@
+size 640 480
+text intrface/knob                          % Text Graphics   (10000+snum)
+pictures intrface/knobe                      % Text Graphics   (10000+snum)
+font 0 intrface/mfonto5                     % font
+font 1 intrface/mfonto2                     % font
+font_offset  0   31
+font_offset  1   31
+background intrface/gtsux
+bright_pushed    8
+bright_highlight 4
+
+%       number  desc    xpos    ypos    pushed  normal  greyed  flags
+
+end

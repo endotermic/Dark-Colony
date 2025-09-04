@@ -1,0 +1,67 @@
+size 640 480
+text intrface/knob                      % Text Graphics   (10000+snum)
+pictures intrface/knobe                      % Text Graphics   (10000+snum)
+font 0 intrface/mfonto5                     % font
+font_offset  0   31
+background intrface/choo
+bright_pushed    8
+bright_highlight 4
+colour  erase  0 0 0
+colour  1      0 0 0
+colour  2      125 125 125
+
+%       number  desc    xpos    ypos    pushed  normal  greyed  flags
+
+checkb  0       0       193     23      90      26       -11    2        label centre 1 0 - remap 0
+checkb  1       0       357     23      90      26       -11    2        label centre 2 0 - remap 0
+pushb   2       0       399     349     179     26       -11    0        label centre 3 0 - remap 0
+pushb   3       0       399     349     179     26       -11    0        label centre 4 0 - remap 0
+pushb   4       0       521     431     90      26       -11    2        label centre 5 0 - remap 0
+in_text 5       0       205     308     17      1        0               - remap 2 bg 1
+
+gadget  6       0       193     23      90      26      MEDBUTTON   anim_oneoff
+gadget  7       0       357     23      90      26      MEDBUTTON   anim_stopped
+gadget  9       0       399     349     179     26      LARGEBUTTON anim_stopped
+gadget  10      0       521     431     90      26      MEDBUTTON   anim_stopped
+
+gadget  13      0       24      280     113     97      CHOA       anim_stopped  unmask - bg 1
+gadget  14      0       248     152     129     41      CHOB       anim_stopped  unmask - bg 1
+gadget  15      0       224     72      105     41      CHOC       anim_stopped  unmask - bg 1
+gadget  16      0       424     384     81      65      CHOD       anim_stopped  unmask - bg 1
+
+label   17      0       235    118     124     18      label 6  font 0  align left  -  remap 4
+label   18      0       173    279     124     18      label 7  font 0  align left  -  remap 4
+
+in_text 19      0       205     400     10      1        0               - remap 2 bg 2
+in_text 20      0       205     420     10      1        0               - remap 2 bg 2
+group 40 0 19 20 
+
+gadget  21      0       27      23      112     232     HREZIN     anim_stopped  unmask - bg erase
+gadget  22      0       27      23      112     232     HREZOUT    anim_stopped  unmask - bg erase
+gadget  23      0       27      23      112     232     HLOOP      anim_stopped  unmask - bg erase
+gadget  24      0       500     23      112     232     AREZIN     anim_stopped  unmask - bg erase
+gadget  25      0       500     23      112     232     AREZOUT    anim_stopped  unmask - bg erase
+gadget  26      0       500     23      112     232     ALOOP      anim_stopped  unmask - bg erase
+
+group   27      0       21 22 23 24 25 26
+
+banim   28      0  4 5  6 7 9 10  0 1 2 3 4
+
+gadget  29      0       186     231     272     32      SERA2      anim_stopped  unmask - bg 1
+gadget  30      0       247     378     128     88      SERB2      anim_stopped  unmask - bg 1
+gadget  31      0       0       411     232     40      NETE2      anim_stopped  unmask - bg 1
+gadget  32      0       554     311     58      11      MISC       anim_stopped  unmask - bg 1
+gadget  33      0       496     290     95      9       MISE       anim_stopped  unmask - bg 1
+gadget  34      0       7       68      8       99      MISG       anim_stopped  unmask - bg 1
+gadget  35      0       624     68      8       99      MISG       anim_stopped  unmask - bg 1
+
+
+textmsg 1       HUMANO
+textmsg 2       GRIS
+textmsg 3       COMENZAR ENTRENAMIENTO
+textmsg 4       COMENZAR CAMPA•A
+textmsg 5       ATRAS
+textmsg 6       Elegir bando
+textmsg 7       Teclear nombre del lçder
+
+end

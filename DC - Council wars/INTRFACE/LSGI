@@ -1,0 +1,52 @@
+size 112 48 304 386
+pictures intrface/popp
+font 0 intrface/mfonto5
+font_offset  0 31
+colour erase  0 0 0
+colour textbg  0 0 0
+colour selbg  0 255 0
+
+%        # desc  x    y    w    h
+
+picture  19   0  112   48   28  32   0
+picture  20   0  112   64   28  32   1
+picture  21   0  112   80   28  32   1
+picture  0   0  112   96   28  32   3
+picture  1   0  112   112  28  32   5
+picture  2   0  112   128  28  32   1
+picture  30  0  208    56  28  32   6
+picture  4   0  112   144  28  32   3
+picture  5   0  112   160  28  32   4
+picture  6   0  112   176  288  32   4
+picture  7   0  112   192  288  32   4
+picture  8   0  112   208  288  32   4
+picture  9   0  112   224  288  32   4
+picture  10   0  112   240  288  32   4
+picture  11   0  112   256  288  32   4
+picture  12   0  112   272  288  32   4
+picture  13   0  112   288  288  32   4
+picture  14   0  112   304  288  32   4
+picture  15   0  112   320  288  32   4
+picture  16   0  112   336  288  32   4
+picture  17   0  112   352  288  32   5
+picture  18   0  112   368  288  32   1
+picture  22   0  112   384  288  32   1
+picture  23   0  112   400  288  32   1
+picture  24   0  112   416  288  32   1
+
+textmsg 1 Salva Gioco
+
+list     50  0  132   147  256 217  scroll 51  -  bg textbg remap 4
+scroll   51  0  398   160   10   192 list 50
+pushb    52  0  395   144   16   16  10  -10  list  50  -3
+pushb    53  0  395   352   16   16  11  -10  list  50  3
+in_text  54  0  132   104  32    1  0  -  bg textbg
+pushb    55  0  376  392   32  32  -16 8
+pushb    56  0  336  392   32  32  -16 7
+label    60  0  212  64  106 10 label 1 align centre font 0 - bg textbg remap 4
+
+
+%pushb    55  0   50  355   90   26  -11 2  label centre 1 0  -  remap 0
+%pushb    56  0  350  355   90   26  -11 2  label centre 2 0  -  remap 0
+
+end

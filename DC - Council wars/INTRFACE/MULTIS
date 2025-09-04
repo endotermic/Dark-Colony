@@ -1,0 +1,268 @@
+size 640 480
+pictures        intrface/knobe
+font  0         intrface/mfonto5
+font_offset     0   31
+font  1         intrface/mfonto7
+font_offset     1   31
+background      intrface/tcpwait
+colour erase		0 0 0
+colour cyan		0 255 255
+bright_pushed           8
+bright_highlight        4
+
+
+%          # desc  x    y   w    h
+
+% player name
+in_text    0  0  247   21   16    1  1  -  remap 4 bg erase immediate
+in_text    1  0  247   40   16    1  1  -  remap 4 bg erase immediate
+in_text    2  0  247   59   16    1  1  -  remap 4 bg erase immediate
+in_text    3  0  247   78   16    1  1  -  remap 4 bg erase immediate
+in_text    4  0  247   97   16    1  1  -  remap 4 bg erase immediate
+in_text    5  0  247  116   16    1  1  -  remap 4 bg erase immediate
+in_text    6  0  247  135   16    1  1  -  remap 4 bg erase immediate
+in_text    7  0  247  154   16    1  1  -  remap 4 bg erase immediate
+
+picture  180  0  376   22    14   12 148
+picture  181  0  376   41    14   12 148
+picture  182  0  376   60    14   12 148
+picture  183  0  376   79    14   12 148
+picture  184  0  376   98    14   12 148
+picture  185  0  376  117    14   12 148
+picture  186  0  376  136    14   12 148
+picture  187  0  376  155    14   12 148
+
+% human/gray
+gadget     8  0  204   21   26   22  RACEFACE  anim_stopped  -  read_write
+gadget     9  0  204   40   26   22  RACEFACE  anim_stopped  -  read_write
+gadget    10  0  204   59   26   22  RACEFACE  anim_stopped  -  read_write
+gadget    11  0  204   78   26   22  RACEFACE  anim_stopped  -  read_write
+gadget    12  0  204   97   26   22  RACEFACE  anim_stopped  -  read_write
+gadget    13  0  204  116   26   22  RACEFACE  anim_stopped  -  read_write
+gadget    14  0  204  135   26   22  RACEFACE  anim_stopped  -  read_write
+gadget    15  0  204  154   26   22  RACEFACE  anim_stopped  -  read_write
+
+% ready
+checkb    16  0  610   18   27   17  9   8   -
+checkb    17  0  610   37   27   17  9   8   -
+checkb    18  0  610   56   27   17  9   8   -
+checkb    19  0  610   75   27   17  9   8   -
+checkb    20  0  610   94   27   17  9   8   -
+checkb    21  0  610  113   27   17  9   8   -
+checkb    22  0  610  132   27   17  9   8   -
+checkb    23  0  610  151   27   17  9   8   -
+
+% chat window
+in_text   24  0   21  325   41    10  1  -  remap 4 read_only bg erase
+in_text   25  0   20  452   42    1  1  bufsize 255 -  remap 4 bg erase
+
+% map info
+in_text   26  0   61  174   55    1  0  -  remap 4 bg erase
+
+% scenario browser
+%list      27  0   19  200  545  114  scroll 30  selbg cyan  -  bg erase
+list      27  0   29  200  535  114  scroll 30  selbg cyan  -  bg erase
+pushb     28  0  588  194   26   26  -11 13  list 27 -1  -  bg erase
+pushb     29  0  588  294   26   26  -11 11  list 27 1  -  bg erase
+scroll    30  0  596  227   10   61  list 27
+
+% color wheel backward
+pushb     32  0  409   22   14   14  -11  14
+pushb     33  0  409   41   14   14  -11  14
+pushb     34  0  409   60   14   14  -11  14
+pushb     35  0  409   79   14   14  -11  14
+pushb     36  0  409   98   14   14  -11  14
+pushb     37  0  409  117   14   14  -11  14
+pushb     38  0  409  136   14   14  -11  14
+pushb     39  0  409  155   14   14  -11  14
+
+% color wheel forward
+pushb     40  0  473   22   14   14  -11  16
+pushb     41  0  473   41   14   14  -11  16
+pushb     42  0  473   60   14   14  -11  16
+pushb     43  0  473   79   14   14  -11  16
+pushb     44  0  473   98   14   14  -11  16
+pushb     45  0  473  117   14   14  -11  16
+pushb     46  0  473  136   14   14  -11  16
+pushb     47  0  473  155   14   14  -11  16
+
+% player type name
+in_text   72  0   45   21    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   73  0   45   40    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   74  0   45   59    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   75  0   45   78    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   76  0   45   97    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   77  0   45  116    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   78  0   45  135    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   79  0   45  154    6    1  0  align  centre  -  remap 4 read_only  bg erase
+
+% player race name
+in_text   80  0  150   21    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   81  0  150   40    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   82  0  150   59    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   83  0  150   78    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   84  0  150   97    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   85  0  150  116    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   86  0  150  135    6    1  0  align  centre  -  remap 4 read_only  bg erase
+in_text   87  0  150  154    6    1  0  align  centre  -  remap 4 read_only  bg erase
+
+% player type picture
+gadget    88  0   99   21   35   16  PLAYERTYPE  anim_stopped  -  read_write
+gadget    89  0   99   40   35   16  PLAYERTYPE  anim_stopped  -  read_write
+gadget    90  0   99   59   35   16  PLAYERTYPE  anim_stopped  -  read_write
+gadget    91  0   99   78   35   16  PLAYERTYPE  anim_stopped  -  read_write
+gadget    92  0   99   97   35   16  PLAYERTYPE  anim_stopped  -  read_write
+gadget    93  0   99  116   35   16  PLAYERTYPE  anim_stopped  -  read_write
+gadget    94  0   99  135   35   16  PLAYERTYPE  anim_stopped  -  read_write
+gadget    95  0   99  154   35   16  PLAYERTYPE  anim_stopped  -  read_write
+
+% player colour wheel
+gadget    96  0  425   23   48   12  CUBE  anim_stopped
+gadget    97  0  425   42   48   12  CUBE  anim_stopped
+gadget    98  0  425   61   48   12  CUBE  anim_stopped
+gadget    99  0  425   80   48   12  CUBE  anim_stopped
+gadget   100  0  425   99   48   12  CUBE  anim_stopped
+gadget   101  0  425  118   48   12  CUBE  anim_stopped
+gadget   102  0  425  137   48   12  CUBE  anim_stopped
+gadget   103  0  425  156   48   12  CUBE  anim_stopped
+
+% storage cell level
+label    104  0  332  326  124   18  label 9  font 0  align left  -  remap 4
+checkb   105  0  456  326   41   18  -11  58  label centre 20 0  -  remap 0
+checkb   106  0  497  326   41   18  -11  58  label centre 21 0  -  remap 0
+checkb   107  0  538  326   41   18  -11  58  label centre 22 0  -  remap 0
+checkb   108  0  579  326   41   18  -11  58  label centre 23 0  -  remap 0
+
+% artifact stat
+label    109  0  332  345  124   18  label 8  font 0  align left  -  remap 4
+checkb   110  0  456  344   41   18  -11  58  label centre 20 0  -  remap 0
+checkb   111  0  497  344   41   18  -11  58  label centre 21 0  -  remap 0
+checkb   112  0  538  344   41   18  -11  58  label centre 22 0  -  remap 0
+checkb   113  0  579  344   41   18  -11  58  label centre 23 0  -  remap 0
+
+% erupting mines
+label    114  0  332  363  206   18  label 7  font 0  align left  -  remap 4
+checkb   115  0  538  362   41   18  -11  58  label centre 20 0  -  remap 0
+checkb   116  0  579  362   41   18  -11  58  label centre 19 0  -  remap 0
+
+% renewable mines
+label    117  0  332  381  206   18  label 6  font 0  align left  -  remap 4
+checkb   118  0  538  380   41   18  -11  58  label centre 20 0  -  remap 0
+checkb   119  0  579  380   41   18  -11  58  label centre 19 0  -  remap 0
+
+% resource rate multiplier
+label    120  0  332  399  207   18  label 5  font 0  align left  -  remap 4
+in_text  121  0  539  400    5    1  0  align centre  -  read_only  bg erase
+pushb    122  0  521  400   41   18  -11  14
+pushb    123  0  603  400   41   18  -11  16
+
+% money  multiplier
+label    124  0  332  417  207   18  label 4  font 0  align left  -  remap 4
+in_text  125  0  539  418    5    1  0  align centre  -  read_only  bg erase
+pushb    126  0  521  418   41   18  -11  14
+pushb    127  0  603  418   41   18  -11  16
+
+% commander  rank
+label    128  0  332  435  207   18  label 3  font 0  align left  -  remap 4
+in_text  129  0  539  436    5    1  0  align centre  -  read_only  bg erase
+pushb    130  0  521  436   41   18  -11  14
+pushb    131  0  603  436   41   18  -11  16
+
+% quit
+pushb    132  0  430  452   90   26  -11 2  label centre 1 0  -  remap 0
+% ready
+checkb   133  0  530  452   90   26  -11 2  label centre 2 0  -  remap 0
+
+% quit/ready button animation overlays
+gadget   134  0  430  452   90   26  MEDBUTTON  anim_oneoff
+gadget   135  0  530  452   90   26  MEDBUTTON  anim_stopped
+
+% column headings 
+
+label    136  0   36    3  102   12  label 10  font 0  align left -  remap 5
+label    137  0  141    3  102   12  label 11  font 0  align left -  remap 5
+label    138  0  246    3  160   12  label 12  font 0  align left -  remap 5
+label    139  0  409    3   84   12  label 13  font 0  align left -  remap 5
+label    140  0  496    3   84   12  label 14  font 0  align left -  remap 5
+label    141  0  577    3   60   12  label 15  font 0  align left -  remap 5
+
+% player team wheel
+gadget   142  0  512   23   48   12  TEAMS anim_stopped
+gadget   143  0  512   42   48   12  TEAMS anim_stopped
+gadget   144  0  512   61   48   12  TEAMS anim_stopped
+gadget   145  0  512   80   48   12  TEAMS anim_stopped
+gadget   146  0  512   99   48   12  TEAMS anim_stopped
+gadget   147  0  512  118   48   12  TEAMS anim_stopped
+gadget   148  0  512  137   48   12  TEAMS anim_stopped
+gadget   149  0  512  156   48   12  TEAMS anim_stopped
+
+% color wheel backward
+pushb    150  0  496   22   14   14  -11  14
+pushb    151  0  496   41   14   14  -11  14
+pushb    152  0  496   60   14   14  -11  14
+pushb    153  0  496   79   14   14  -11  14
+pushb    154  0  496   98   14   14  -11  14
+pushb    155  0  496  117   14   14  -11  14
+pushb    156  0  496  136   14   14  -11  14
+pushb    157  0  496  155   14   14  -11  14
+
+% color wheel forward
+pushb    158  0  560   22   14   14  -11  16
+pushb    159  0  560   41   14   14  -11  16
+pushb    160  0  560   60   14   14  -11  16
+pushb    161  0  560   79   14   14  -11  16
+pushb    162  0  560   98   14   14  -11  16
+pushb    163  0  560  117   14   14  -11  16
+pushb    164  0  560  136   14   14  -11  16
+pushb    165  0  560  155   14   14  -11  16
+
+gadget   166  0   33   18  609   19  CHAB anim_stopped mask
+gadget   167  0   33   37  609   19  CHAB anim_stopped mask
+gadget   168  0   33   56  609   19  CHAB anim_stopped mask
+gadget   169  0   33   75  609   19  CHAB anim_stopped mask
+gadget   170  0   33   94  609   19  CHAB anim_stopped mask
+gadget   171  0   33  113  609   19  CHAB anim_stopped mask
+gadget   172  0   33  132  609   19  CHAB anim_stopped mask
+gadget   173  0   33  151  609   19  CHAB anim_stopped mask
+gadget   174  0    0    0   34   173 CHAA anim_stopped unmask
+
+group    175  0  166 167 168 169 170 171 172 173
+
+banim    176  0  2 2  134 135  132 133
+
+textmsg 1 MENU
+textmsg 2 LISTO
+textmsg 3 Rango Comandante
+textmsg 4 Multipl. corriente P7
+textmsg 5 Multipl. cantidad P7
+textmsg 6 Vÿlvulas renovables 
+textmsg 7 Vÿlvulas explosivas
+textmsg 8 Artefactos
+textmsg 9 C,lul. dep›t.
+textmsg 10 Tipo
+textmsg 11 Bando 
+textmsg 12 Nombre
+textmsg 13 Color
+textmsg 14 Equipo
+textmsg 15 Listo
+textmsg 19 ON
+textmsg 20 OFF
+textmsg 21 BAJO
+textmsg 22 MED.
+textmsg 23 ALT.
+textmsg 30 TENT.
+textmsg 31 CAPT.
+textmsg 32 COMAND.
+textmsg 33 CORON.
+textmsg 40 XIMALC.
+textmsg 41 IDRAC.
+textmsg 42 SITRUC.
+textmsg 43 REGLIA
+textmsg 50 Humano
+textmsg 51 Gris
+textmsg 52 AI
+textmsg 53 AI+
+textmsg 54 Humano
+textmsg 55 Ning.
+
+end

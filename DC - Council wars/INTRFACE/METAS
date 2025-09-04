@@ -1,0 +1,35 @@
+size 640 480
+pictures        intrface/knobe
+font  0         intrface/mfont
+font  1         intrface/mfonto2
+background      intrface/loader
+font_offset     1   31
+% colour 0 is erase, leave at default value
+colour  1               64 128 192
+colour  2               0 0 0
+colour sel 0 255 0
+colour erase 0 0 0
+bright_pushed           8
+bright_highlight        4
+animation intrface/loadg.dat
+
+
+%       # desc    x    y   w   h    push  norm  misc   flags
+
+list    0 0     120  102 392 258  scroll 10 selbg sel - remap 4
+in_text 2 0      90   44  11   1  1 - bg 2
+
+pushb   1 0	313  447  90  26  -11 2  label centre 1 0  -  remap 0
+checkb  3 0	403  447  90  26  -11 2  label centre 2 0  -  remap 0
+
+%pushb   4 0     588  194  24  25  -11 13  list 0 -3  - bg 2
+%pushb   5 0     588  219  24  25  -11 11  list 0 3  - bg 2
+
+scroll 10 0     532  139  10  186  list 0
+pushb  11 0     524  106  26  26   -11  12  list 0 -3  - remap 0
+pushb  12 0     524  332  26  26   -11  10  list 0  3  - remap 0
+
+textmsg 1 MENU
+textmsg 2 LISTO
+
+end

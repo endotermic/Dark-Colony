@@ -1,0 +1,51 @@
+
+ Volume in drive C is MS-DOS_6   
+ Volume Serial Number is 22BA-7972
+ Directory of C:\game\source\intrface
+
+GLOBEG   SPR       244,468  06-01-97  3:32p globeg.spr
+ACAR     SPR       236,567  06-01-97  3:10p acar.spr
+ACOM     SPR        87,959  06-01-97  3:15p acom.spr
+GLOBES   SPR     1,401,542  06-01-97  3:33p globes.spr
+BLOGO    SPR       179,292  06-01-97 10:24a blogo.spr
+BUTTON   SPR       255,176  06-01-97 10:24a button.spr
+CLIENT   SPR         5,695  06-01-97 10:24a client.spr
+CODE     SPR           814  06-01-97 10:24a code.spr
+DCSS     SPR       458,196  06-01-97  3:01p dcss.spr
+DOT      SPR       191,384  06-01-97 10:24a dot.spr
+EPIC     SPR        10,173  06-01-97 10:25a epic.spr
+FLASH    SPR         8,022  06-01-97 10:25a flash.spr
+FONT     SPR        56,941  06-01-97 10:25a font.spr
+GETSVRE  SPR        16,056  06-01-97 10:25a getsvre.spr
+GLIGHT   SPR         4,753  06-01-97 10:25a glight.spr
+HCAR     SPR       236,567  06-01-97  3:09p hcar.spr
+HCOM     SPR        87,959  06-01-97  3:17p hcom.spr
+INTRO    SPR        86,710  06-01-97 10:25a intro.spr
+INTROE   SPR        86,710  06-01-97 10:25a introe.spr
+KNOB     SPR        75,242  06-01-97 10:25a knob.spr
+KNOBE    SPR        75,242  06-01-97 10:25a knobe.spr
+LEVEL    SPR       138,737  06-01-97 10:25a level.spr
+LSG      SPR         2,572  06-01-97 10:26a lsg.spr
+MAINBUT  SPR       225,312  06-01-97 10:26a mainbut.spr
+METR     SPR       248,936  06-01-97 10:26a metr.spr
+MFONT    SPR        15,591  06-01-97 10:26a mfont.spr
+MFONTO1  SPR        44,038  06-01-97 10:26a mfonto1.spr
+MFONTO2  SPR        32,222  06-01-97 10:26a mfonto2.spr
+MFONTO5  SPR        10,495  06-01-97 10:26a mfonto5.spr
+MFONTO7  SPR         8,297  06-01-97 10:26a mfonto7.spr
+MULTIE   SPR         5,991  06-01-97 10:26a multie.spr
+NETBUTE  SPR       161,248  06-01-97 10:26a netbute.spr
+NEWGAME  SPR        74,240  06-01-97 10:26a newgame.spr
+PLASMA   SPR       103,525  06-01-97 10:26a plasma.spr
+POLO     SPR        74,444  06-01-97 10:26a polo.spr
+ROUND    SPR         7,622  06-01-97 10:26a round.spr
+SCNE     SPR        32,144  06-01-97 10:26a scne.spr
+SGREYE   SPR        74,240  06-01-97 10:26a sgreye.spr
+SHUMANE  SPR        74,240  06-01-97 10:26a shumane.spr
+SOKAYE   SPR         6,538  06-01-97 10:26a sokaye.spr
+WEATH    SPR       174,686  06-01-97 10:27a weath.spr
+WHOO     SPR       431,052  06-01-97 10:27a whoo.spr
+WIND     SPR        58,590  06-01-97 10:27a wind.spr
+WLNT     SPR       346,374  06-01-97 10:27a wlnt.spr
+        44 file(s)      6,156,602 bytes
+         0 dir(s)   1,804,697,600 bytes free

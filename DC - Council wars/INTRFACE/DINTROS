@@ -1,0 +1,26 @@
+size 640 480
+pictures         intrface/knobe                      % Text Graphics   (10000+snum)
+font         0   intrface/mfonto5                     % font
+font_offset  0   31
+background       intrface/intro
+bright_pushed    8
+bright_highlight 4
+colour  0       0 0 0
+
+
+%       number  desc    xpos    ypos    pushed  normal  greyed  flags
+
+pushb   0       0       230     340     179     25      -11     0        label centre   1 0 - remap 0
+pushb   1       0       230     366     179     25      -11     0        label centre   2 0 - remap 0
+pushb   2       0       230     392     179     25      -11     0        label centre   3 0 - remap 0
+
+gadget  3       0       230     340     179     25      LARGEBUTTON  anim_oneoff
+gadget  4       0       230     366     179     25      LARGEBUTTON  anim_stopped
+gadget  5       0       230     392     179     25      LARGEBUTTON  anim_stopped
+
+textmsg 1 EJEC. DEMO
+textmsg 2 PEDIR INFORMACION
+textmsg 3 SALIR
+
+
+end

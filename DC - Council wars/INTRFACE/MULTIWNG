@@ -1,0 +1,40 @@
+size 640 480
+text intrface/knob                          % Text Graphics   (10000+snum)
+pictures intrface/knobe                     % Text Graphics   (10000+snum)
+font 0 intrface/mfonto5                     % font
+font 1 intrface/mfonto2                     % font
+font_offset  0   31
+font_offset  1   31
+background intrface/multiwin
+bright_pushed    8
+bright_highlight 4
+colour  1               0 0 0
+
+
+%       number  desc    xpos    ypos    pushed  normal  greyed  flags
+
+in_text 0       0       36      265     66      1       0 -  read_only  bg 1
+in_text 1       0       36      279     66      1       0 -  read_only  bg 1
+in_text 2       0       36      293     66      1       0 -  read_only  bg 1
+in_text 3       0       36      307     66      1       0 -  read_only  bg 1
+in_text 4       0       36      321     66      1       0 -  read_only  bg 1
+in_text 5       0       36      335     66      1       0 -  read_only  bg 1
+in_text 6       0       36      349     66      1       0 -  read_only  bg 1
+in_text 7       0       36      363     66      1       0 -  read_only  bg 1
+
+in_text 8       0       70      31      9      1       1 align centre  mask - read_only  bg 1
+
+pushb   9       0       409     381     179     25      -11     0    label centre 1 0 - remap 0
+
+gadget  10      0       409     381     179     26      LARGEBUTTON    anim_oneoff
+
+gadget  11      0       432     56      208     48      MWIA         anim_stopped unmask -  bg 1
+gadget  12      0       336     32      96      72      MWIB         anim_stopped unmask -  bg 1
+gadget  13      0       16      224     192     32      MWIC         anim_stopped unmask -  bg 1
+gadget  14      0       264     408     312     56      MWID         anim_stopped unmask -  bg 1
+
+banim   15  0  1 1  10  9
+
+textmsg 1       MENš
+
+end

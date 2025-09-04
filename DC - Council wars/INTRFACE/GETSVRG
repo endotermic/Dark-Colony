@@ -1,0 +1,43 @@
+size 640 480
+text             intrface/knob           % Text Graphics   (10000+snum)
+pictures         intrface/knobe           % Text Graphics   (10000+snum)
+font         0   intrface/mfonto2        % Text Graphics   (10000+snum)
+font         1   intrface/mfonto5        % Text Graphics   (10000+snum)
+font         2   intrface/mfonto8        % Text Graphics   (10000+snum)
+font_offset  0   31
+font_offset  1   31
+font_offset  2   31
+background intrface/server
+colour  1       0 0 0
+bright_pushed    8
+bright_highlight 4
+
+
+textmsg 1 VERBINDEN
+textmsg 2 MENš
+textmsg 3 IP-ADRESSE
+textmsg 4 PORT-NUMMER
+
+
+%        # desc  x   y    w     h   norm  push  flags
+
+pushb    0  0  292  334   90   26  -11   2    label centre 1 1 - remap 0
+pushb    1  0  292  360   90   26  -11   2    label centre 2 1 - remap 0
+%in_text  3  0  174   56   35    1   1  - bg 1 
+in_text  3  0  174   62   35    1   1  - bg 1 
+in_text  5  0   24   71   15    1   1  align right init 3 - read_only bg 1 remap 4
+
+gadget   7  0  292  334   90   26  MEDBUTTON  anim_oneoff
+gadget   8  0  292  360   90   26  MEDBUTTON  anim_stopped
+
+banim    9  0  2 2  7 8  0 1
+
+gadget  10      0       64      8       272     32      SERA         anim_stopped unmask - bg 1
+gadget  11      0       496     8       128     88      SERB         anim_stopped unmask - bg 1
+gadget  12      0       462     386     95      79      SERC         anim_stopped unmask - bg 1
+gadget  13      0       312     248     176     40      SERD         anim_stopped unmask - bg 1
+gadget  14      0       40      240     176     16      SERE         anim_stopped unmask - bg 1
+gadget  15      0       339     207     192     32      MWIC         anim_stopped unmask - bg 1
+gadget  16      0       30      432     105     41      CHOC         anim_stopped unmask - bg 1
+
+end

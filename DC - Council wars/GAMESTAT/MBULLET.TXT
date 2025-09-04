@@ -1,0 +1,42 @@
+10
+9
+
+% 0	1	2	3	4	5	6	7	8      9
+%warrio scythe	air	atril 	psy	bot	towr    mine	Inv    buld
+
+% 0 warrior
+
+25	12	25	18	25	90	5	50	0      5
+
+% 1 scythe
+
+100	25	0	25	50	100	10	50	0      10
+
+% 2 air ship
+
+7       25      0       8       25      45       5	25	0      5
+
+% 3 atril
+
+100	35	0	25	70 	180	15	50	0      10
+
+% 4 psych
+
+100	25	25	25	50	100	10	200	0      10
+
+% 5 Turret
+
+100	33	50	33	66	80	33	50	0      33
+
+% 6 mine
+
+164	25	0	25	50	130	13	2	0      2
+
+% 7 healing ray resistance
+
+100	50	50	50	50 	100	50	50	0     200
+
+% 8 Ultimate artifact
+
+100	33	50	33	66	80	33	50	0      5
+

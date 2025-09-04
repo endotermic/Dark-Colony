@@ -1,0 +1,78 @@
+Pan Luma                                            .
+Stratus                                             .
+Taar                                                .
+Taar Council                                        .
+Unknown                                             .
+Enemy Drones                                        .
+Unknown                                             .
+Aerogen                                             .
+7
+test/atrain1.scn
+TRAINING 1
+AREA 51
+scenario/test/atrain1
+avi/pp.avi
+avi/pp.avi
+1 80 43
+1
+1 2 -1
+
+test/atrain2.scn
+TRAINING 2
+AREA 51
+scenario/test/atrain2
+avi/pp.avi
+avi/pp.avi
+1 80 43
+1
+1 2 -1
+
+test/atrain3.scn
+TRAINING 3
+AREA 51
+scenario/test/atrain3
+avi/pp.avi
+avi/pp.avi
+1 80 43
+1
+1 2 -1
+
+test/atrain4.scn
+TRAINING 4
+AREA 51
+scenario/test/atrain4
+avi/pp.avi
+avi/pp.avi
+1 80 43
+1
+1 2 -1
+
+test/atrain5.scn
+TRAINING 5
+AREA 51
+scenario/test/atrain5
+avi/pp.avi
+avi/pp.avi
+1 80 43
+1
+1 2 -1
+
+test/atrain6.scn
+TRAINING  6
+AREA 51
+scenario/test/atrain6
+avi/pp.avi
+avi/pp.avi
+1 80 43
+1
+1 2 -1
+
+test/atrain7.scn
+TRAINING 7
+AREA 51
+scenario/test/atrain7
+avi/atrain.avi
+avi/pp.avi
+1 80 43
+1
+1 2 -1

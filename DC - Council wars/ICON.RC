@@ -1,0 +1,5 @@
+#include "windows.h"
+
+dc ICON dc.ico
+
+

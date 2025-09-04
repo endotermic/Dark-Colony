@@ -1,0 +1,40 @@
+size 640 480
+text	intrface/multi			% Text Graphics   (10000+snum)
+font	intrface/mfont			% Text Graphics   (10000+snum)
+background intrface/tcpwait
+% colour 0 is erase, leave at default value
+colour  1	64 128 192
+
+
+%	number	  desc	x   y   w   h	 push  norm  misc   flags
+
+in_text 0	  0	10  10	 10   1
+in_text 1	  0	10  25	 10   1
+in_text 2	  0	10  40	 10   1
+in_text 3	  0	10  55	 10   1
+in_text 4	  0	10  70	 10   1
+in_text 5	  0	10  85	 10   1
+
+checkb 6	  0	160  10  75  15  10000 10001 bg 1
+checkb 7	  0	160  25  75  15  10000 10001 bg 1
+checkb 8	  0	160  40  75  15  10000 10001 bg 1
+checkb 9	  0	160  55  75  15  10000 10001 bg 1
+checkb 10	  0	160  70  75  15  10000 10001 bg 1
+checkb 11	  0	160  85  75  15  10000 10001 bg 1
+
+checkb	12	  0	240  10  75  15  10002 10003
+checkb	13	  0	240  25  75  15  10002 10003
+checkb	14	  0	240  40  75  15  10002 10003
+checkb	15	  0	240  55  75  15  10002 10003
+checkb	16	  0	240  70  75  15  10002 10003
+checkb	17	  0	240  85  75  15  10002 10003
+
+in_text	18	  0	10 110	 40  20	 read_only
+in_text 19	  0	10 420	 40   1  - bg 1
+
+pushb	20	  0	325  10  45  15  10004 10004 - bg 1
+in_text	21	  0	325  35  20   1  read_only
+
+group	22	  0	20 21
+
+end

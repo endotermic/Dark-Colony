@@ -1,0 +1,104 @@
+  0 options screen (O)
+  1 exit game (E)
+  2 surrender (X)
+  3 load game (F11)
+  4 save game (F12)
+  5 bomberman (gray or human)
+  6 human trooper
+  7 artillery
+  8 exploiter
+  9 scout
+ 10 turret
+ 11 mech
+ 12 cyborg
+ 13 gray trooper
+ 14 atril
+ 15 worker slug
+ 16 ortu (bird thing)
+ 17 xenowort (gray turret)
+ 18 scythe demon
+ 19 psych raider
+ 20 barracks (human)
+ 21 science pod (human & gray)
+ 22 robot factory (human)
+ 23 artifact research (human & gray)
+ 24 barracks (gray)
+ 25 genetics lab (gray)
+ 26 science pod level 2 (human & gray)
+ 27 human trooper gun upgrade
+ 28 human artillery upgrade
+ 29 BUILD HEALER (HUMAN & GRAY)
+ 30 robot factory level 2
+ 31 scout bomb upgrade (human)
+ 32 turret gun upgrade (human)
+ 33 mech gun upgrade
+ 34 cyborg gun upgrade
+ 35 cyborg cruise missile ability
+ 36 turret teleport ability (human)
+ 37 gray trooper gun upgrade
+ 38 atril firing upgrade
+ 39 genetics lab level 2
+ 40 repair/heal ACTION BUTTON (human & gray)
+ 41 ortu bomb upgrade (gray scout)
+ 42 xenowort gun upgrade (gray turret)
+ 43 scythe demon blade upgrade
+ 44 psych raider brain upgrade
+ 45 psych raider virus ability
+ 46 xenowort teleport ability (gray turret)
+ 47 human gun upgrade level 2
+ 48 human trooper armor upgrade
+ 49 artillery armor upgrade (human)
+ 50 exploiter armor upgrade
+ 51 scout armor upgrade (human)
+ 52 turret armor upgrade (human)
+ 53 mech armor upgrade
+ 54 cyborg armor upgrade
+ 55 gray trooper armor upgrade
+ 56 atril armor upgrade
+ 57 worker slug armor upgrade
+ 58 ortu armor upgrade (gray scout)
+ 59 xenowort armor upgrade (gray turret)
+ 60 scythe demon armor upgrade
+ 61 psych raider armor upgrade
+ 62 stop (S)
+ 63 move (M)
+ 64 artillery upgrade level 2 (human)
+ 65 patrol (P)
+ 66 waypoints (W)
+ 67 dig (slug & exploiter) (ENTER)
+ 68 deploy human turret (ENTER)
+ 69 deploy xenowort (gray turret) (ENTER)
+ 70 human turret as teleporter (ENTER)
+ 71 xenowort as teleporter (ENTER)
+ 72 cyborg call cruise missile (ENTER)
+ 73 psych raider deploy virus (ENTER)
+ 74 activate spare (artifacts etc.)
+ 75 deploy mine slom/engineer (human /alien)
+ 76 BUILD BUTTON
+ 77 tab1
+ 78 tab2
+ 79 tab3
+ 80 upgrade scout bombs level 2
+ 81 upgrade turret level 2
+ 82 upgrade mech. gun level 2
+ 83 upgrade cyborg gun level 2
+ 84 upgrade gray trooper gun level 2
+ 85 upgrade atril firing level 2
+ 86 upgrade ortu bombs level 2
+ 87 upgrade xenowort (alien turret) level 2
+ 88 upgrade scythe demon attack level 2
+ 89 upgrade psych raider blast level 2
+ 90 upgrade human armor level 2
+ 91 upgrade upgrade artillery armor level 2
+ 92 upgrade exploiter armour level 2
+ 93 upgrade scout armor level 2
+ 94 upgrade mech armor level 2
+ 95 upgrade turret armor level 2
+ 96 upgrade cyborg armor level 2
+ 97 upgrade gray trroper armor level 2
+ 98 upgrade atril armor level 2
+ 99 upgrade slug armor level 2
+100 upgrade ortu armor level 2
+101 upgrade xenowort (alien turret) armor level 2
+102 upgrade scythe demon armor level 2
+103 upgrade psych raider armor level 2

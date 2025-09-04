@@ -1,0 +1,78 @@
+10
+Gray            :
+encyclo/gray
+1
+Atril           :
+encyclo/atril
+2
+Sy Demon       :
+encyclo/syth
+3
+Ortu            :
+encyclo/ortu
+4
+Gorrem          :
+encyclo/psych
+5
+Brozaar         :
+encyclo/slug
+6
+Xenowort        :
+encyclo/xeno
+7
+Slom            :
+encyclo/slom
+8
+Saucer          :
+encyclo/sauc
+9
+Zisp            :
+encyclo/zisp
+10
+10
+Trooper         :
+encyclo/troop
+11
+Barrager        :
+encyclo/barr
+12
+Reaper          :
+encyclo/reap
+13
+Osprey IV       :
+encyclo/scgm
+14
+S.A.R.G.E       :
+encyclo/cybo
+15
+Exploiter       :
+encyclo/expl
+16
+Firestorm       :
+encyclo/turr
+17
+Sentinel        :
+encyclo/engi
+18
+Angel One       :
+encyclo/drop
+19
+Medi-Craft      :
+encyclo/beon
+20
+5
+Tektaara        :
+encyclo/tkt
+21
+Maktor          :
+encyclo/mkt
+22
+Solaris         :
+encyclo/lns
+23
+LunaTek         :
+encyclo/lna
+24
+Kaox            :
+encyclo/hyk
+25

@@ -1,0 +1,504 @@
+size 640 480 
+pictures intrface/mainbutg
+font 0 intrface/mfonto7 
+font_offset 0 31 
+font 1 intrface/mfontos
+font_offset 1 31 
+background intrface/intrfacg
+palette palette 
+% no text sprites 
+colour  erase       0 0 0 
+bright_pushed    4 
+bright_highlight 4 
+ 
+%       number  desc    xpos    ypos    xsize   ysize   normal  pushed  flags   text 
+ 
+% tabs 
+textmsg 0       Construire  
+pushb   0       0       518     92      40      20      -1      -1 
+textmsg 1       Rechercher  
+pushb   1       1       557     92      41      20      -1      -1 
+textmsg 2       Option de jeu  
+pushb   2       2       598     92      40      20      -1      -1 
+picture 3       0       521     96      110     12      77               
+picture 4       0       521     96      110     12      78               
+picture 5       0       521     96      110     12      79               
+picture 6       0       521     96      110     12      77               
+ 
+% Build button 
+textmsg 19      Clic=construire  
+pushb   19      19      516     422     86      27      -1      -1 
+ 
+% unit menu 
+textmsg 33      Mouvement  
+checkb  33      33      518     153     59      41      63      -24 
+textmsg 35      Mouvement+Attaque  
+checkb  35      35      518     194     59      41      65      -24 
+textmsg 36      Points de repŠre  
+pushb   36      36      518     235     59      41      66      -24 
+textmsg 37      D‚ployer 
+pushb   37      37      518     276     59      41      74      -24 
+textmsg 138     Soigner unit‚s 
+pushb   138     138     518     276     59      41      122     -24 
+textmsg 139     D‚ployer tourelle  
+pushb   139     139     518     276     59      41      68      -24 
+textmsg 140     D‚ployer mine 
+pushb   140     140     518     276     59      41      69      -24 
+textmsg 141     Inspirer soldats  
+pushb   141     141     518     276     59      41      121     -24 
+textmsg 142     Voler argent  
+pushb   142     142     518     276     59      41      75      -24 
+textmsg 150     Arrˆter 
+pushb   150     150     518     112     59      41      62      -24 
+ 
+ 
+% Cyborg Second Attack 
+ 
+% Psych Raider Second Attack 
+ 
+textmsg 143     Seconde attaque  
+pushb   143     143     518     317     59      41       2      -24 
+ 
+textmsg 144     Attaque napalm  
+pushb   144     144     518     317     59      41      72      -24 
+ 
+textmsg 145     Attaque maladie  
+pushb   145     145     518     317     59      41      73      -24 
+ 
+textmsg 146     Attaque au sol  
+pushb   146     146     518     317     59      41      02      -24 
+ 
+textmsg 197     Vaisseau largage  
+pushb   197     197     518     317     59      41     125      -24 
+ 
+textmsg 198     Saucer 
+pushb   198     198     518     317     59      41     126      -24 
+ 
+group   40      0       33 35 36 37 138 139 140 141 142 143 144 145 146 150 197 198 6 
+ 
+% Grey building group 
+ 
+textmsg   41    Camp Guerrier 1000 
+count     41    41      577  235  59   41   24   -24  offset 3 3 - bg erase 
+textmsg   42    Cosse reprod. 2000 
+count     42    42      577  276  59   41   114  -24  offset 3 3 - bg erase 
+textmsg   43    Sac g‚n‚tique 2000 
+count     43    43      577  317  59   41   25   -24  offset 3 3 - bg erase 
+textmsg   44    Ruche neurale 3000 
+count     44    44      577  358  59   41   46   -24  offset 3 3 - bg erase 
+textmsg   97    Am‚lio. cosse 2000 
+count     97    97      577  276  59   41   115  -24  offset 3 3 - bg erase 
+textmsg   98    Am‚lio. g‚n‚t 2000 
+count     98    98      577  317  59   41   39   -24  offset 3 3 - bg erase 
+textmsg   205   Ruche mentale 2000 
+count     205   205     577  194  59   41   130  -24  offset 3 3 - bg erase 
+ 
+group   45      0       41 42 43 44 97 98 205 
+ 
+% Grey troop group 
+ 
+textmsg   46    Brozaar    1500 
+count     46   46       518  112  59   41   15   -24  offset 38 3 - bg erase 
+textmsg   48    Gray        350 
+count     48   48       518  153  59   41   13   -24  offset 38 3 - bg erase 
+textmsg   71    Slom        450 
+count     71   71       518  194  59   41   116  -24  offset 38 3 - bg erase 
+textmsg   49    Ortu        600 
+count     49   49       518  235  59   41   16   -24  offset 38 3 - bg erase 
+textmsg   50    D‚mon Sy 600 
+count     50   50       518  276  59   41   18   -24  offset 38 3 - bg erase 
+textmsg   47    Xenowort    900 
+count     47   47       518  317  59   41   17  -24  offset 38 3 - bg erase 
+textmsg   51    Atril      1000 
+count     51   51       518  358  59   41   14   -24  offset 38 3 - bg erase 
+ 
+textmsg   52    Gorrem     1500 
+count     52   52       577  112  59   41   19   -24  offset 38 3 - bg erase 
+textmsg   134   Zisp       900 
+count     134   134     577  153  59   41   36   -24  offset 38 3 - bg erase 
+ 
+group     53    0       45 46 47 48 49 50 51 52 71 134 3 
+ 
+% Grey upgrades 
+ 
+% textmsg   54    Armure + 1000 
+% count     54    54      518  111  59   41   57   -24  offset 3 3 - bg erase 
+% textmsg   76    Armure + 2000 
+% count     76    76      518  111  59   41   99   -24  offset 3 3 - bg erase 
+ 
+textmsg   55    Arme +1  1000 
+count     55    55      518  235  59   41   87   -24  highlight offset 3 3 - bg erase 
+ 
+textmsg   77    Arme +2  2000 
+count     77    77      518  235  59   41   42   -24  highlight offset 3 3 - bg erase 
+ 
+textmsg   56    Arme +1  1000 
+count     56    56      518  112  59   41   84   -24  highlight offset 3 3 - bg erase 
+ 
+textmsg   100   Arme +2  2000 
+count     100    100    518  112  59   41   37   -24  highlight offset 3 3 - bg erase 
+ 
+textmsg   57    Arme +1  1000 
+count     57    57      518  194  59   41   86   -24  offset 3 3 - bg erase 
+ 
+textmsg   101   Arme +2  2000 
+count     101   101     518  194  59   41   41   -24  offset 3 3 - bg erase 
+ 
+textmsg   58    Arme +1  1000 
+count     58    58      518  153  59   41   88   -24  offset 3 3 - bg erase 
+ 
+textmsg   103    Arme +2  2000 
+count     103   103    518  153  59   41   43   -24  offset 3 3 - bg erase 
+ 
+textmsg   59    Arme +1  1000 
+count     59    59      518  276  59   41   85   -24  offset 3 3 - bg erase 
+ 
+textmsg   105   Arme +2  2000 
+count     105   105     518  276  59   41   38   -24  offset 3 3 - bg erase 
+ 
+textmsg   60    Psych +    1000 
+count     60    60      518  317  59   41   89   -24  offset 3 3 - bg erase 
+ 
+textmsg   78    Sac virus 2000 
+count     78    78      518  316  59   41   45   -24  offset 3 3 - bg erase 
+ 
+textmsg   66    Armure  +1  1000 
+count     66    66      577  235  59   41   59   -24  offset 3 3 - bg erase 
+ 
+textmsg   67    Armure  +2  2000 
+count     67    67      577  235  59   41   101  -24  offset 3 3 - bg erase 
+ 
+textmsg   99    Armure  +1  1000 
+count     99    99      577  112  59   41   55   -24  offset 3 3 - bg erase 
+ 
+textmsg   68    Armure  +2  2000 
+count     68    68      577  112  59   41   97   -24  offset 3 3 - bg erase 
+ 
+textmsg   69    Armure  +1  1000 
+count     69    69      577  194  59   41   58   -24  offset 3 3 - bg erase 
+ 
+textmsg   102   Armure  +2  2000 
+count     102   102     577  194  59   41   100  -24  offset 3 3 - bg erase 
+ 
+textmsg   72    Armure  +1  1000 
+count     72    72      577  153  59   41   60   -24  offset 3 3 - bg erase 
+ 
+textmsg   104   Armure  +2  2000 
+count     104   104     577  153  59   41   102  -24  offset 3 3 - bg erase 
+ 
+textmsg   73    Armure  +1  1000 
+count     73    73      577  276  59   41   56   -24  offset 3 3 - bg erase 
+ 
+textmsg   106   Armure  +2  2000 
+count     106   106     577  276  59   41   98   -24  offset 3 3 - bg erase 
+ 
+textmsg   74    Armure  +1  1000 
+count     74    74      577  317  59   41   61   -24  offset 3 3 - bg erase 
+ 
+textmsg   107   Armure  +2  2000  
+count     107   107     577  317  59   41   103  -24  offset 3 3 - bg erase 
+ 
+group   61      0       55 56 57 58 59 60 66 67 68 69 72 73 74 77 78 100 99 101 102 103 104 105 106 107 4 
+ 
+% Load Save stuff 
+ 
+textmsg 62      Quitter 
+pushb   62      0       518     111     59      41      1  -24 
+textmsg 63      Enregistrer partie 
+pushb   63      0       518     152     59      41      4  -24 
+textmsg 64      Options 
+pushb   64      0       518     193     59      41      0  -24 
+textmsg 151     Menu Alli‚s 
+pushb   151     0       518     234     59      41      117  -24 
+textmsg 196     Bouton pause 
+pushb   196     0       518     275     59      41      131 -24 
+textmsg 202     Objectifs 
+pushb   202     0       518     316     59      41      118 -24 
+ 
+% Ally menu 
+ 
+picture 152     0       518     112     118     42      92 
+ 
+% 120 was circle 
+% 119 was x 
+ 
+pushb   154     0       540     154     24      35      124  -24 
+pushb   155     0       564     154     24      35      124  -24 
+%pushb   156     0       588     154     24      17      124  -24 
+checkb  156     0       588     154     24      35      124  119 
+in_text 157     0       520     172     16      1       0       - remap 4 read_only 
+%pushb   157     0       598     154     19      35      124  -24 
+pushb   158     0       612     154     24      35      123  -24 
+picture 159     0       518     154     23      35      99 
+ 
+pushb   160     0       540     189     24      35      124  -24 
+pushb   161     0       564     189     24      35      124  -24 
+%pushb   162     0       588     189     24      35      124  -24 
+checkb  162     0       588     189     24      35      124  119 
+in_text 163     0       520     207     16      1       0       - remap 4 read_only 
+%pushb   163     0       598     189     19      35      124  -24 
+pushb   164     0       612     189     24      35      123  -24 
+picture 165     0       518     189     23      35      99 
+ 
+pushb   166     0       540     224     24      35      124  -24 
+pushb   167     0       564     224     24      35      124  -24 
+%pushb   168     0       588     224     24      35      124  -24 
+checkb  168     0       588     224     24      35      124  119 
+in_text 169     0       520     242     16      1       0       - remap 4 read_only 
+%pushb   169     0       598     224     19      35      124  -24 
+pushb   170     0       612     224     24      35      123  -24 
+picture 171     0       518     224     23      35      99 
+ 
+pushb   172     0       540     259     24      35      124  -24 
+pushb   173     0       564     259     24      35      124  -24 
+%pushb   174     0       588     259     24      35      124  -24 
+checkb  174     0       588     259     24      35      124  119 
+in_text 175     0       520     277     16      1       0       - remap 4 read_only 
+%pushb   175     0       598     259     19      35      124  -24 
+pushb   176     0       612     259     24      35      123  -24 
+picture 177     0       518     259     23      35      99 
+ 
+pushb   178     0       540     294     24      35      124  -24 
+pushb   179     0       564     294     24      35      124  -24 
+%pushb   180     0       588     294     24      35      124  -24 
+checkb  180     0       588     294     24      35      124  119 
+in_text 181     0       520     312     16      1       0       - remap 4 read_only 
+%pushb   181     0       598     294     19      35      124  -24 
+pushb   182     0       612     294     24      35      123  -24 
+picture 183     0       518     294     23      35      99 
+ 
+pushb   184     0       540     329     24      35      124  -24 
+pushb   185     0       564     329     24      35      124  -24 
+%pushb   186     0       588     329     24      35      124  -24 
+checkb  186     0       588     329     24      35      124  119 
+in_text 187     0       520     347     16      1       0       - remap 4 read_only 
+%pushb   187     0       598     329     19      35      124  -24 
+pushb   188     0       612     329     24      35      123  -24 
+picture 189     0       518     329     23      35      99 
+ 
+pushb   190     0       540     364     24      35      124  -24 
+pushb   191     0       564     364     24      35      124  -24 
+%pushb   192     0       588     364     24      35      124  -24 
+checkb  192     0       588     364     24      35      124  119 
+in_text 193     0       520     382     16      1       0       - remap 4 read_only 
+%pushb   193     0       598     364     19      35      124  -24 
+pushb   194     0       612     364     24      35      123  -24 
+picture 195     0       518     364     23      35      99 
+ 
+group   153     0       154 152 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 5 
+ 
+group   65      0       202 62 63 64 151 196 5  
+ 
+ 
+scount  75      0       524     456     72      17      104     - intens 31 
+ 
+in_text 79      0       520     404     23      1   1    - read_only  bg erase  remap 2  intens 31 
+in_text 148     0       50      462     86      1   1    - read_only  bg erase  remap 2  intens 31 
+in_text 204     0       10      425     86      1   1  mask  - read_only  remap 2  intens 31 
+in_text 203     0       10      440     86      1   1  mask  - read_only  remap 2  intens 31 
+ 
+% Human building group 
+ 
+textmsg   80    Caserne 1000 
+count     80    80      577  235  59   41   20   -24  offset -1 -1 - bg erase 
+textmsg   81    Cosse scient. 2000 
+count     81    81      577  276  59   41   21   -24  offset -1 -1 - bg erase 
+textmsg   82    Usine robots 2000 
+count     82    82      577  317  59   41   22   -24  offset -1 -1 - bg erase 
+textmsg   83    Plate-f. rech 3000 
+count     83    83      577  358  59   41   23   -24  offset -1 -1 - bg erase 
+textmsg   85    Cosse scient + 2000 
+count     85    85      577  276  59   41   26   -24  offset -1 -1 - bg erase 
+textmsg   86    Usine robots + 2000 
+count     86    86      577  317  59   41   30   -24  offset -1 -1 - bg erase 
+textmsg   206   Exocentre 2000 
+count     206   206     577  194  59   41   129  -24  offset 3 3 - bg erase 
+ 
+ 
+% Human troop group 
+ 
+textmsg   87    Exploiteur 1500 
+count     87   87       518  112  59   41   8    -24  offset 38 3 - bg erase 
+textmsg   89    Soldat 350 
+count     89   89       518  153  59   41   6    -24  offset 38 3 - bg erase 
+textmsg   90    Sentinel   450 
+count     90   90       518  194  59   41   5    -24  offset 38 3 - bg erase 
+textmsg   92    Osprey IV  600 
+count     92   92       518  235  59   41   9    -24  offset 38 3 - bg erase 
+textmsg   91    Reaper     600 
+count     91   91       518  276  59   41   11   -24  offset 38 3 - bg erase 
+textmsg   88    Firestorm  900 
+count     88   88       518  317  59   41   10   -24  offset 38 3 - bg erase 
+textmsg   93    Barrager  1000 
+count     93   93       518  358  59   41   7    -24  offset 38 3 - bg erase 
+ 
+textmsg   94    S.A.R.G.E 1500 
+count     94   94       577  112  59   41   12   -24  offset 38 3 - bg erase 
+textmsg   135   M‚di-vaisseau 900 
+count     135   135     577  153  59   41   29   -24  offset 38 3 - bg erase 
+ 
+group   95      0      80 81 82 83 85 86 206 
+group   84      0      87 88 89 90 91 92 93 94 135 95 3  
+ 
+% 
+% Human upgrades 
+% 
+ 
+ 
+%textmsg   108   Armure  +1 1000 
+%count     108   108     517  111 59   41   50   -24  offset 38 3 - bg erase 
+% 
+%textmsg   109   Armure  +2 2000 
+%count     109   109     518  111 59   41   92   -24  offset 38 3 - bg erase 
+ 
+textmsg   110   Arme +1 1000 
+count     110   110     518  112 59   41   47   -24  offset 38 3 - bg erase 
+ 
+textmsg   111   Arme +2 2000 
+count     111   111     518  112 59   41   27   -24  offset 38 3 - bg erase 
+ 
+textmsg   112   Armure  +1 1000 
+count     112   112     577  112 59   41   48   -24  offset 38 3 - bg erase 
+ 
+textmsg   113   Armure  +2 2000 
+count     113   113     577  112 59   41   90   -24  offset 38 3 - bg erase 
+ 
+textmsg   114   Arme +1 1000 
+count     114   114     518  194 59   41   80   -24  offset 38 3 - bg erase 
+ 
+textmsg   115   Arme +2 2000 
+count     115   115     518  194 59   41   31   -24  offset 38 3 - bg erase 
+ 
+textmsg   116   Armure  +1 1000 
+count     116   116     577  194 59   41   51   -24  offset 38 3 - bg erase 
+ 
+textmsg   117   Armure  +2 2000 
+count     117   117     577  194 59   41   93   -24  offset 38 3 - bg erase 
+ 
+textmsg   118   Arme +1 1000 
+count     118   118     518  153 59   41   82   -24  offset 38 3 - bg erase 
+ 
+textmsg   119   Arme +2 2000 
+count     119   119     518  153 59   41   33   -24  offset 38 3 - bg erase 
+ 
+textmsg   120   Armure  +1 1000 
+count     120   120     577  153 59   41   53   -24  offset 38 3 - bg erase 
+ 
+textmsg   121   Armure  +2 2000 
+count     121   121     577  153 59   41   95   -24  offset 38 3 - bg erase 
+ 
+textmsg   122   Arme +1 1000 
+count     122   122     518  235 59   41   81   -24  offset 38 3 - bg erase 
+ 
+textmsg   123   Arme +2 2000 
+count     123   123     518  235 59   41   32   -24  offset 38 3 - bg erase 
+ 
+textmsg   124   Armure  +1 1000 
+count     124   124     577  235 59   41   52   -24  offset 38 3 - bg erase 
+ 
+textmsg   125   Armure  +2 2000 
+count     125   125     577  235 59   41   94   -24  offset 38 3 - bg erase 
+ 
+textmsg   126   Arme +1 1000 
+count     126   126     518  276 59   41   64   -24  offset 38 3 - bg erase 
+ 
+textmsg   127   Arme +2 2000 
+count     127   127     518  276 59   41   28   -24  offset 38 3 - bg erase 
+ 
+textmsg   128   Armure  +1 1000 
+count     128   128     577  276 59   41   49   -24  offset 38 3 - bg erase 
+ 
+textmsg   129   Armure  +2 2000 
+count     129   129     577  276 59   41   91   -24  offset 38 3 - bg erase 
+ 
+textmsg   130   Arme +1 1000 
+count     130   130     518  317 59   41   83   -24  offset 38 3 - bg erase 
+ 
+textmsg   131   Napalm    2000 
+count     131   131     518  317 59   41   35   -24  offset 38 3 - bg erase 
+ 
+textmsg   132   Armure  +1 1000 
+count     132   132     577  317 59   41   54   -24  offset 38 3 - bg erase 
+ 
+textmsg   133   Armure  +2 2000 
+count     133   133     577  317 59   41   96   -24  offset 38 3 - bg erase 
+ 
+textmsg   147   Dernier message 
+pushb     147   147     4    460 20   19   40  50 
+ 
+textmsg   149   Message suivant 
+pushb     149   149     24   460 20   19   57  76   
+ 
+textmsg   180   Points de repŠre 
+textmsg   181   S‚lection cible 
+textmsg   182   Trop d'unit‚s 
+textmsg   183   Remboursement 
+ 
+%days counter 
+in_text   234   0       613      433     3    1   0    align centre - read_only bg erase  remap 0  intens 31 
+ 
+in_text   200   0       480      463     3    1   0    - read_only  bg erase  remap 2  intens 31 
+ 
+group 96 0 4 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 
+ 
+picture 199   0       200 160  5 5 132 
+ 
+group  201  0  199 
+ 
+textmsg   230   LIEUTENANT 
+textmsg   231   CAPITAINE 
+textmsg   232   MAJOR 
+textmsg   233   COLONEL 
+textmsg   234   XIMAL 
+textmsg   235   IDRAC 
+textmsg   236   SITRUC 
+textmsg   237   REGLIA 
+textmsg   238   OXY-GENE 2000 
+textmsg   239   SALLE CRYOGENIQUE 
+textmsg   240   TOUR RELAIS 
+textmsg   241   INCUBAAR 
+textmsg   242   PRISONNIER HUMAIN 
+textmsg   243   INFORMATEUR 
+textmsg   244   GUETTEUR 
+textmsg   245   CAMERA 
+textmsg   246   SOLARIS 
+textmsg   247   MAKTOR 
+textmsg   248   LUNATEK 
+textmsg   249   KAOX 
+textmsg   250   TEKTARRA 
+textmsg   251   ESGAAR 
+textmsg   252   PORTALIS 
+textmsg   253   SALISE 
+textmsg   254   BAAT 
+textmsg   255   RENNAT 
+textmsg   256   FLYNT 
+textmsg   257   LARVE 
+textmsg   258   FIRESTORM 
+textmsg   259   XENOWORT 
+textmsg   260   MINE TERRESTRE 
+textmsg   261   MINE TERRESTRE 
+textmsg   262   EXPLOITEUR 
+textmsg   263   BROZAAR 
+textmsg   264   USINE DE ROBOTS II 
+textmsg   265   COSSE SCIENT. II 
+textmsg   266   SAC GENETIQUE II 
+textmsg   267   COSSE REPROD. II 
+textmsg   268   EXOCENTRE 
+textmsg   269   CASERNE 
+textmsg   270   USINE DE ROBOTS 
+textmsg   271   COSSE SCIENTIFIQUE 
+textmsg   272   PLATE-F RECHERCHE 
+textmsg   273   RUCHE MENTALE 
+textmsg   274   RUCHE DE GUERRIER 
+textmsg   275   SAC GENETIQUE 
+textmsg   276   COSSE REPROD. 
+textmsg   277   RUCHE NEURALE 
+textmsg   278   DRONE TERRESTRE 
+textmsg   279   DRONE AERIEN 
+textmsg   280   DRONE TERRESTRE 
+textmsg   281   DRONE AERIEN 
+textmsg   282   Vous avez ‚t‚ vaincu. Vous ˆtes pass‚ au mode d'observation. 
+textmsg   283   S.A.R.G.E. 
+textmsg   284   GORREM 
+
+end

@@ -1,0 +1,46 @@
+size 640 480
+%text intrface/knob               % Text Graphics   (10000+snum)
+pictures intrface/knobe           % Text Graphics   (10000+snum)
+font 0 intrface/mfonto5           % font
+font_offset  0   31
+background intrface/net
+bright_pushed    8
+bright_highlight 4
+colour  1               0 0 0
+
+%       number  desc    xpos    ypos    width   height  normal  pushed  flags
+
+checkb  0       0       38      41      178     24      -11     0       label centre 1 0 - remap 0
+checkb  1       0       38      89      178     24      -11     0       label centre 2 0 - remap 0
+checkb  2       0       38      137     178     24      -11     0       label centre 3 0 - remap 0
+checkb  3       0       38      185     178     24      -11     0       label centre 4 0 - remap 0
+
+pushb   4       0       454     377     178     24      -11     0       label centre 5 0 - remap 0
+pushb   5       0       454     409     178     24      -11     0       label centre 6 0 - remap 0
+pushb   6       0       454     441     178     24      -11     0       label centre 7 0 - remap 0
+
+gadget  7       0       38      41      179     25      LARGEBUTTON  anim_oneoff
+gadget  8       0       38      89      179     25      LARGEBUTTON  anim_stopped
+gadget  9       0       38      137     179     25      LARGEBUTTON  anim_stopped
+gadget  10      0       38      185     179     25      LARGEBUTTON  anim_stopped
+gadget  11      0       454     377     179     25      LARGEBUTTON  anim_stopped
+gadget  12      0       454     409     179     25      LARGEBUTTON  anim_stopped
+gadget  13      0       454     441     179     25      LARGEBUTTON  anim_stopped
+
+gadget  14      0       160     296     152     168     NETA         anim_stopped unmask - bg 1
+gadget  15      0       344     336     104     136     NETB         anim_stopped unmask - bg 1
+gadget  16      0       248     48      64      158     NETC         anim_stopped unmask - bg 1
+gadget  17      0       472     4       108     8       NETD         anim_stopped unmask - bg 1
+gadget  18      0       360     283     232     40      NETE         anim_stopped unmask - bg 1
+
+banim   19  0  7 7  7 8 9 10 11 12 13  0 1 2 3 4 5 6
+
+textmsg 1       TCP/IP
+textmsg 2       RETE IPX 
+textmsg 3       MODEM
+textmsg 4       CAVO SERIALE
+textmsg 5       FA DA SERVER
+textmsg 6       COLLEGA AL SERVER
+textmsg 7       MENU PRINCIPALE
+
+end

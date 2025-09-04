@@ -1,0 +1,89 @@
+/README.TXT/1.3/Sun Aug 10 16:45:58 1997//
+/anim.dat/1.1/Sun Aug 10 16:45:58 1997/-kb/
+/atlantis.gif/1.3/Sun Aug 10 16:45:58 1997/-kb/
+/atlantis.ncy/1.1/Sun Aug 10 16:45:58 1997//
+/atlantis.rgb/1.2/Sun Aug 10 16:45:59 1997/-kb/
+/atlantis.rmp/1.3/Sun Aug 10 16:45:59 1997/-kb/
+/colour.set/1.3/Sun Aug 10 16:45:59 1997//
+/dc.bat/1.4/Sun Aug 10 16:45:59 1997//
+/dc.ico/1.2/Sun Aug 10 16:46:01 1997//
+/dc16.ico/1.3/Sun Aug 10 16:46:03 1997//
+/desert.gif/1.2/Sun Aug 10 16:46:11 1997/-kb/
+/desert.rgb/1.1/Sun Aug 10 16:46:11 1997/-kb/
+/desert.rmp/1.2/Sun Aug 10 16:46:12 1997/-kb/
+/dos.mac/1.3/Sun Aug 10 16:46:12 1997//
+/dossub.bat/1.1.1.1/Sun Aug 10 16:46:12 1997//
+/error.log/1.15/Sun Aug 10 16:46:12 1997//
+/fade.dat/1.1/Sun Aug 10 16:46:12 1997/-kb/
+/fd.exe/1.1/Sun Aug 10 16:46:12 1997/-kb/
+/fixsub.c/1.1.1.1/Sun Aug 10 16:46:12 1997//
+/fixsunix/1.2/Sun Aug 10 16:46:12 1997//
+/full/1.1/Sun Aug 10 16:46:12 1997//
+/hbnfufl.a01/1.11/Sun Aug 10 16:46:13 1997//
+/htrain.gif/1.4/Sun Aug 10 16:46:13 1997/-kb/
+/htrain.rgb/1.1/Sun Aug 10 16:46:13 1997/-kb/
+/htrain.rmp/1.1/Sun Aug 10 16:46:13 1997/-kb/
+/icon.rc/1.1/Sun Aug 10 16:46:13 1997//
+/icon16.rc/1.1/Sun Aug 10 16:46:13 1997//
+/juice.exe/1.1.1.1/Sun Aug 10 16:46:14 1997/-kb/
+/jungle.gif/1.3/Sun Aug 10 16:46:14 1997/-kb/
+/jungle.rgb/1.1/Sun Aug 10 16:46:14 1997/-kb/
+/jungle.rmp/1.2/Sun Aug 10 16:46:15 1997/-kb/
+/kevin.exe/1.2/Sun Aug 10 16:46:18 1997/-kb/
+/make20m.bat/1.3/Sun Aug 10 16:46:18 1997//
+/make5m.bat/1.2/Sun Aug 10 16:46:18 1997//
+/make60m.bat/1.4/Sun Aug 10 16:46:18 1997//
+/makedemo.bat/1.2/Sun Aug 10 16:46:18 1997//
+/makedos.bat/1.1.1.1/Sun Aug 10 16:46:18 1997//
+/makefile.tpl/1.26/Sun Aug 10 16:46:18 1997//
+/makegame.bat/1.5/Sun Aug 10 16:46:18 1997//
+/makegame16.bat/1.5/Sun Aug 10 16:46:18 1997//
+/maketext.exe/1.1.1.1/Sun Aug 10 16:46:19 1997/-kb/
+/makeunix/1.3/Sun Aug 10 16:46:19 1997//
+/makewin.bat/1.5/Sun Aug 10 16:46:19 1997//
+/maped.exe/1.1/Sun Aug 10 16:46:20 1997/-kb/
+/nukeall.bat/1.2/Sun Aug 10 16:46:20 1997//
+/nukesrc.bat/1.2/Sun Aug 10 16:46:20 1997//
+/palette.gif/1.14/Sun Aug 10 16:46:20 1997/-kb/
+/palette.ppm/1.2/Sun Aug 10 16:46:20 1997/-kb/
+/palette.rgb/1.2/Sun Aug 10 16:46:20 1997/-kb/
+/palette.rmp/1.2/Sun Aug 10 16:46:21 1997/-kb/
+/palette.sif/1.1/Sun Aug 10 16:46:21 1997/-kb/
+/primes.dat/1.1/Sun Aug 10 16:46:21 1997/-kb/
+/sauc.fin/1.1/Sun Aug 10 16:46:21 1997/-kb/
+/special.gif/1.1/Sun Aug 10 16:46:22 1997/-kb/
+/unix-bcc.mac/1.6/Sun Aug 10 16:46:22 1997//
+/unix.mac/1.27/Sun Aug 10 16:46:22 1997//
+/unix8.mac/1.1/Sun Aug 10 16:46:22 1997//
+/win95.mac/1.34/Sun Aug 10 16:46:22 1997//
+/wingame.mac/1.74/Sun Aug 10 16:46:22 1997//
+/wingame16.mac/1.12/Sun Aug 10 16:46:22 1997//
+D/animate////
+D/avi////
+D/cursor////
+D/doc////
+D/encyclo////
+D/gamestat////
+D/intrface////
+D/macsound////
+D/maketext////
+D/mission////
+D/msound////
+D/music////
+D/q3englib////
+D/q3netlib////
+D/q3stdlib////
+D/q3widlib////
+D/save////
+D/scenario////
+D/sound////
+D/sprites////
+D/tool2////
+D/tools////
+D/wallpapr////
+D/warblade////
+D/wav////
+D/zlib////
+/makebig.bat/1.7/Sun Aug 10 18:46:09 1997//
+/dc.exe/1.8/Mon Aug 11 19:59:36 1997/-kb/
+/dc16.exe/1.16/Mon Aug 11 20:15:53 1997/-kb/

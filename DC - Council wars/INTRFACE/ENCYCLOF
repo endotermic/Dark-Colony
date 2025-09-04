@@ -1,0 +1,65 @@
+size 640 480
+pictures         intrface/knobe                      % Text Graphics   (10000+snum)
+font         0   intrface/mfonto5                     % font
+font_offset  0   31
+font         1   intrface/mfonto2                     % font
+font_offset  1   31
+background       intrface/ency
+colour  erase   0 0 0
+bright_pushed    8
+bright_highlight 4
+
+%       number  desc    xpos    ypos    pushed  normal  greyed  flags
+
+pushb   0       0       309     446     89      25      -11     2        label centre 1 0 - remap 0
+pushb   1       0       464     310     89      25      -11     2        label centre 2 0 - remap 0
+pushb   2       0       464     386     89      25      -11     2        label centre 3 0 - remap 0
+pushb   3       0       272     102     25      25      -11     12
+pushb   4       0       272     441     25      25      -11     10
+pushb   5       0       343     220     23      14      -11     14
+pushb   6       0       445     220     23      14      -11     16
+pushb   7       0       511     220     27      14      -11     18
+pushb   8       0       601     220     27      14      -11     20
+pushb   9       0       370     220     23      14      -11     40
+pushb   10      0       400     220     23      14      -11     38
+
+pushb   11      0       464     348     89      25      -11     2        label centre 4 0 - remap 0
+
+in_text  12  0  570  340   6  1  0  mask  -  read_only  bg erase  remap 4
+in_text  13  0  570  417   6  1  0  mask  -  read_only  bg erase  remap 4
+%in_text  14  0  360  248   6  1  0  mask  -  read_only  bg erase  remap 4
+%in_text  15  0  492  248   6  1  0  mask  -  read_only  bg erase  remap 4
+in_text  16  0  307  287  16  1  0  -  read_only  bg erase  remap 2
+in_text  17  0   20   20  10  1  1  -  read_only  bg erase  remap 2
+
+gadget  18      0       577     298     40      40      GREEN  anim_loop unmask - bg erase
+gadget  19      0       577     376     40      40      RED    anim_loop unmask - bg erase
+
+gadget  20      0       272     102     24      26      UP        anim_oneoff  mask - bg erase
+gadget  21      0       272     441     24      26      DOWN      anim_stopped mask - bg erase
+gadget  22      0       343     220     23      14      LEFT      anim_stopped mask - bg erase
+gadget  23      0       445     220     23      14      RIGHT     anim_stopped mask - bg erase
+gadget  24      0       511     220     27      14      REW       anim_stopped mask - bg erase
+gadget  25      0       601     220     27      14      FFW       anim_stopped mask - bg erase
+gadget  26      0       464     310     90      26      MEDBUTTON anim_stopped mask - bg erase
+gadget  27      0       464     348     90      26      MEDBUTTON anim_stopped mask - bg erase
+gadget  28      0       464     386     90      26      MEDBUTTON anim_stopped mask - bg erase
+gadget  29      0       309     446     90      26      MEDBUTTON anim_stopped mask - bg erase
+
+gadget  30      0       306     307     149     33      ENCA   anim_loop unmask - bg erase
+gadget  31      0       562     441     69      36      ENCB   anim_loop unmask - bg erase
+gadget  32      0       322     343     128     13      ENCC   anim_loop unmask - bg erase
+gadget  33      0       305     365     150     51      ENCD   anim_loop unmask - bg erase
+gadget  34      0       491     245     113     23      ENCE   anim_loop unmask - bg erase
+gadget  35      0       311     246     169     38      ENCF   anim_loop unmask - bg erase
+
+banim   36  0  10 10  20 21 22 23 24 25 26 27 28 29  3 4 5 6 7 8 1 11 2 0 
+
+scroll  37      0       280     137     10      297
+
+textmsg 1       ARRIERE
+textmsg 2       HUMAINS
+textmsg 3       GRAYS
+textmsg 4       OBJETS 
+
+end

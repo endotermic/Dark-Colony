@@ -1,0 +1,48 @@
+size 640 480
+pictures intrface/knobe
+background intrface/loader
+font 0 intrface/mfonto5
+font_offset  0 31
+font 1 intrface/mfonto8
+font_offset  1 31
+animation intrface/loadg.dat
+colour erase  0 0 0
+colour sel  0 255 0
+
+%         # desc  x    y    w    h
+list      0  0  120  102  392  258  scroll 1  selbg sel  -  remap 4
+scroll    1  0  532  139   10  186  list 0
+pushb     2  0  524  106   26   26  -11  12  list 0 -3  -  remap 0
+pushb     3  0  524  332   26   26  -11  10  list 0  3  -  remap 0
+pushb     4  0  313  447   90   26  -11 2  label centre 3 0  -  remap 0
+pushb     5  0  403  447   90   26  -11 2  label centre 2 0  -  remap 0
+label     6  0  100   44  200   20  label 1  align centre  font 1  -  remap 4
+
+gadget    7  0  524  106   26   26  UP         anim_oneoff
+gadget    8  0  524  332   26   26  DOWN       anim_stopped
+gadget    9  0  313  447   90   26  MEDBUTTON  anim_stopped
+gadget   10  0  403  447   90   26  MEDBUTTON  anim_stopped
+
+gadget   11  0  527    0  113   97  CHOA       anim_loop unmask - bg erase
+gadget   12  0  504  436  129   41  CHOB       anim_loop unmask - bg erase
+gadget   13  0  393    2  128   13  ENCC       anim_loop unmask - bg erase
+gadget   14  0  438  386  169   38  ENCF       anim_loop unmask - bg erase
+gadget   15  0   13   87   95   79  SERC       anim_loop unmask - bg erase
+
+banim    16  0  4 4  7 8 9 10  2 3 4 5
+
+in_text  17  0  110  368   16    1  0
+label    18  0  120   44  200   20  label 4  align centre  font 1  -  remap 4
+
+group    20  0  6 5
+
+pushb    21  0  403  447   90   26  -11 2  label centre 5 0  -  remap 0
+
+group    19  0  17 18 21
+
+textmsg  1  Charger partie
+textmsg  2  CHARGER
+textmsg  3  ARRIERE
+textmsg  4  Enregistrer partie
+textmsg  5  RANGER
+end

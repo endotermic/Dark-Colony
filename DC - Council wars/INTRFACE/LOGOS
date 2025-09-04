@@ -1,0 +1,48 @@
+size 640 480
+text             intrface/knob                   % Text Graphics   (10000+snum)
+pictures         intrface/knobe                   % Text Graphics   (10000+snum)
+font         0   intrface/mfonto5                % Text Graphics   (10000+snum)
+font_offset  0   31
+background       intrface/choo
+% colour 0 is erase, leave at default value
+colour  1       64 128 192
+colour  2       0 0 0
+bright_pushed    8
+bright_highlight 4
+
+%       number    desc  x   y   w   h    push  norm  misc   flags
+
+pushb   0         0     178  382 90  26  -11     3        label centre   1 0 - remap 0 
+pushb   1         0     268  382 90  26  -11     3        label centre   2 0 - remap 0 
+
+checkb  2         0     330  238 27  17  -11     9  
+checkb  3         0     330  256 27  17  -11     9 
+checkb  4         0     330  274 27  17  -11     9 
+checkb  5         0     330  292 27  17  -11     9 
+checkb  6         0     330  310 27  17  -11     9 
+checkb  7         0     330  328 27  17  -11     9 
+checkb  8         0     330  346 27  17  -11     9 
+checkb  9         0     330  364 27  17  -11     9 
+
+in_text 10        0     218 208  25   1  0 - bg 2
+
+pushb   11        0     348  108 26  26  -11     13 
+pushb   12        0     348  134 26  26  -11     11 
+
+in_text 13        0     362     241     10      1       0  align left   mask     - read_only bg 2 remap 0
+in_text 14        0     362     259     10      1       0  align left   mask     - read_only bg 2 remap 1
+in_text 15        0     362     277     10      1       0  align left   mask     - read_only bg 2 remap 2
+in_text 16        0     362     295     10      1       0  align left   mask     - read_only bg 2 remap 3
+in_text 17        0     362     313     10      1       0  align left   mask     - read_only bg 2 remap 4
+in_text 18        0     362     331     10      1       0  align left   mask     - read_only bg 2 remap 5
+in_text 19        0     362     349     10      1       0  align left   mask     - read_only bg 2 remap 6
+in_text 20        0     362     367     10      1       0  align left   mask     - read_only bg 2 remap 7
+
+in_text 21        0     62      96      15      1       0                        - read_only bg 2 remap 4
+in_text 22        0     24      208     25      1       0                        - read_only bg 2 remap 4
+in_text 23        0     140     312     20      1       0                        - read_only bg 2 remap 4
+
+textmsg 1 COMPLETADO
+textmsg 2 MENU
+
+end

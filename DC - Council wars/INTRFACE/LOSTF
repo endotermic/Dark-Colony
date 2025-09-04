@@ -1,0 +1,30 @@
+size 640 480
+pictures intrface/knobe
+font 0 intrface/mfonto5
+font_offset  0   31
+background intrface/lost
+bright_pushed    8
+bright_highlight 4
+colour erase  0 0 0
+
+
+%        # desc   x    y    w    h
+
+in_text  1   0  240  160   22    6  0  align left  -  read_only
+pushb    9   0  289  263   90   26  -11  2  label centre 1 0  -  remap 0
+
+textmsg   1  CONTINUER
+
+textmsg   2  Connexion perdue
+textmsg   3  0 message initialisation
+textmsg   4  version-m incorrecte
+textmsg   5  p-num incorrect
+textmsg   6  version incorrecte
+textmsg   7  inconnu
+textmsg   8  Erreur dans fichier enreg
+textmsg   9  SERVEUR PERDU!?!
+textmsg  10  COMMANDE_CONFIG FAUSSE
+textmsg  11  CONNEXION IMPOSSIBLE
+textmsg  12  Erreur d'enregistrement
+
+end

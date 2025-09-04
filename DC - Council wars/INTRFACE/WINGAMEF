@@ -1,0 +1,115 @@
+size 640 480
+text intrface/knob                          % Text Graphics   (10000+snum)
+pictures intrface/knobe                     % Text Graphics   (10000+snum)
+font 0 intrface/mfonto5                     % font
+font 1 intrface/mfonto2                     % font
+font 2 intrface/mfontos
+font_offset  0   31
+font_offset  1   31
+font_offset  2   31
+background intrface/wingame
+bright_pushed    8
+bright_highlight 4
+colour  erase       0 0 0
+
+
+%         # desc  x    y    w    h 
+
+in_text   0  0   30  327   66    1  0  -  read_only
+in_text   1  0   30  341   66    1  0  -  read_only
+in_text   2  0   30  355   66    1  0  -  read_only
+in_text   3  0   30  369   66    1  0  -  read_only
+in_text   4  0   30  383   66    1  0  -  read_only
+in_text   5  0   30  397   66    1  0  -  read_only
+in_text   6  0   30  411   66    1  0  -  read_only
+in_text   7  0   30  425   66    1  0  -  read_only
+
+in_text   8  0  390    9    9    1  1  align centre  mask  -  read_only 
+
+pushb     9  0  319  446   90   25  -11  2  label centre 1 0  -  remap 0
+pushb    10  0  409  446  179   25  -11  0  label centre 2 0  -  remap 0
+pushb    12  0  229  446   90   25  -11  2  label centre 15 0  -  remap 0
+pushb    36  0  139  446   90   25  -11  2  label centre 19 0  -  remap 0
+
+in_text  11  0  125   12   30    1  0  -  remap 4  read_only
+
+label    13  0  141  122   90   16  label 16  font 0  align centre  -  remap 4
+label    14  0   39  165   90   16  label 17  font 0  align centre  -  remap 4
+
+gadget   37  0  139  446   90   26  MEDBUTTON    anim_stopped
+gadget   35  0  229  446   90   26  MEDBUTTON    anim_stopped
+gadget   16  0  319  446   90   26  MEDBUTTON    anim_stopped
+gadget   17  0  409  446  179   26  LARGEBUTTON  anim_stopped
+
+gadget   18  0  485  188   26   26  UP           anim_oneoff
+gadget   19  0  485  277   26   26  DOWN         anim_stopped
+
+pushb    20  0  485  188   26   25  -11  12
+pushb    21  0  485  277   26   25  -11  10
+
+gadget   25  0  138  139   16   22  SMALLMEDALS  anim_stopped  unmask - read_write
+gadget   26  0  160  139   16   22  SMALLMEDALS  anim_stopped  unmask - read_write
+gadget   27  0  182  139   16   22  SMALLMEDALS  anim_stopped  unmask - read_write
+gadget   28  0  204  139   16   22  SMALLMEDALS  anim_stopped  unmask - read_write
+gadget   29  0  226  139   16   22  SMALLMEDALS  anim_stopped  unmask - read_write
+gadget   30  0  248  139   16   22  SMALLMEDALS  anim_stopped  unmask - read_write
+
+gadget   31  0  116   35   24   28  RANKS        anim_stopped  unmask
+gadget   32  0  420  137  187   24  MISH         anim_stopped  unmask
+
+gadget   33  0   28   11   80  120  ACOM         anim_stopped 
+gadget   34  0   28   11   80  120  HCOM         anim_stopped 
+
+gadget   50  0  448   56  184   72  WINA         anim_stopped  unmask
+gadget   51  0  192   48  248   16  WINB         anim_stopped  unmask
+gadget   52  0  512  184   24  112  WINC         anim_stopped  unmask
+gadget   53  0  144   88  120   32  WINE         anim_stopped  unmask
+
+gadget   54  0  301  306  176   16  SERE         anim_stopped  unmask
+gadget   55  0  168   72  108    8  NETD         anim_stopped  unmask
+
+label    57  0  225  163  310   18  label  3  font 2  align right  -  remap 4 
+label    58  0  225  163  310   18  label  4  font 2  align right  -  remap 4 
+label    59  0  225  163  310   18  label  5  font 2  align right  -  remap 4 
+label    60  0  225  163  310   18  label  6  font 2  align right  -  remap 4 
+label    61  0  225  163  310   18  label  7  font 2  align right  -  remap 4 
+label    62  0  225  163  310   18  label  8  font 2  align right  -  remap 4 
+label    63  0  225  163  310   18  label  9  font 2  align right  -  remap 4 
+label    64  0  225  163  310   18  label 10  font 2  align right  -  remap 4 
+label    65  0  225  163  310   18  label 11  font 2  align right  -  remap 4 
+label    66  0  225  163  310   18  label 12  font 2  align right  -  remap 4 
+label    67  0  225  163  310   18  label 13  font 2  align right  -  remap 4 
+label    68  0  225  163  310   18  label 14  font 2  align right  -  remap 4 
+
+group    69  0  57 58 59 60 61 62 63 64 65 66 67 68
+
+banim    70  0  6 6  18 19 37 35 16 17  20 21 36 12 9 10
+
+scroll   71  0  493  222   10   47
+
+group    72  0   25 26 27 28 29 30
+
+
+textmsg 1       MENU
+textmsg 2       MISSION SUIVANTE
+textmsg 3       MEDAILLE DU THEATRE MARTIEN: SERVICE SUR MARS
+textmsg 4       ETOILE DU COMBAT: NOMBREUSES VICTIMES/MISSIONS
+textmsg 5       ETOILE DU COMMANDEMENT: + DE VICTIMES/MISSIONS
+textmsg 6       ETOILE DU COURAGE: NOMBRE DE VICTIMES LE + GRAND
+textmsg 7       ORDRE DE L'HUMANITE: DECOUVERTE TECHNOLOGIQUE
+textmsg 8       CROISSANT CELESTE: + HAUTE RECOMPENSE TERRIENNE
+textmsg 9       XEXPAAR: SERVICE DANS LE NOUVEAU MONDE
+textmsg 10      TELTRAAX: NOMBREUSES VICTIMES/MISSIONS
+textmsg 11      ALTAARKAN: + DE VICTIMES/MISSIONS
+textmsg 12      XENARE: NOMBRE DE VICTIMES LE + GRAND
+textmsg 13      KAOXTAAR: DECOUVERTE TECHNOLOGIQUE
+textmsg 14      MAALGOSP: LE PLUS GRAND HONNEUR DES TAARS
+textmsg 15      RANGER
+textmsg 16      R‚compenses
+textmsg 17      Compte-rendu
+textmsg 19      CHARGER
+
+textmsg 20      Victory
+textmsg 21      Defeat
+
+end

@@ -1,0 +1,28 @@
+size 640 480
+pictures intrface/knobe
+font 0 intrface/mfonto5
+font_offset  0   31
+background intrface/lost
+bright_pushed    8
+bright_highlight 4
+colour erase  0 0 0
+
+
+%        # desc   x    y    w    h
+
+in_text  1   0  240  160   22    6  0  align left  -  read_only
+pushb    9   0  289  263   90   26  -11  2  label centre 1 0  -  remap 0
+
+textmsg   1  CONTINUA
+textmsg   2  Perso collegamento
+textmsg   3  nessun messg init
+textmsg   4  errata versione m
+textmsg   5  num p errato
+textmsg   6  errata versione
+textmsg   7  ignoto
+textmsg   8  Errore nel salva file 
+textmsg   9  PERSO IL SERVER!?!
+textmsg  10  CATTIVI COMANDI_SETUP
+textmsg  11  INABILE A COLLEGARE
+textmsg  12  Errore nel salvare gioco 
+end

@@ -1,0 +1,22 @@
+size 640 480
+text intrface/knob                      % Text Graphics   (10000+snum)
+pictures intrface/knobe                      % Text Graphics   (10000+snum)
+font 0 intrface/mfonto5                     % font
+font_offset  0   31
+background intrface/name
+bright_pushed    8
+bright_highlight 4
+colour  erase  0 0 0
+colour  1      0 0 0
+colour  2      125 125 125
+
+%       number  desc    xpos    ypos    pushed  normal  greyed  flags
+
+pushb   0       0       439     384     90      26       -11    2        label centre 1 0 - remap 0
+in_text 1       0       219     211     24      1        0               - remap 2 bg 1
+label   2       0       185     188     124     18      label 2  font 0  align left  -  remap 4
+
+textmsg 1       OK
+textmsg 2       INSERIRE NOME SESSIONE:
+
+end
