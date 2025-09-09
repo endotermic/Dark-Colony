@@ -4,6 +4,7 @@ Dark Colony - real time strategy released in 1997
 Repository contains:
 1) working copy of the original game
 2) working copy of standalone expansion pack
+3) decompilation project (Ghidra decompiler 11.4.2)
 
 Right now you'll need to have original CDs to play them (this will be fixed)
 
