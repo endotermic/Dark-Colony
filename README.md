@@ -6,8 +6,6 @@ Repository contains:
 2) working copy of standalone expansion pack
 3) decompilation project (Ghidra decompiler 11.4.2)
 
-Right now you'll need to have original CDs to play them (this will be fixed)
-
 The purpose of this repository is to make this old game better by some assembly tweaks:
 1) (TODO) increase screen resolution from 640x480 to 800x600 and maybe to 1024x768
 2) (DONE) remove the CD check to play campaign
