@@ -1,1 +1,7 @@
 1;jelen;1758563363086;initial engexp16.exe
+2;jelen;1758828284124;Reverted one check for cd disk.\nNow user will not be thrown out of Council Wars game.\nBut main menu buttons still are gray and unclickable
+3;jelen;1758875912724;update naming of some functions which leads to exit process and to create window
+4;jelen;1758879480459;better naming for functions. Found and updated naming for AVI processing functions
+5;jelen;1758885412008;updated naming for more functions and one data field
+6;jelen;1759055646604;updated naming of functions. Found where interface buttons are disabled if no CD found
+7;jelen;1759056616032;EXP GAME DON'T NEED CD ANYMORE!!!
