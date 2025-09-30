@@ -1,4 +1,5 @@
 trying to open D:\dc\anim.dat
+cd open D:\dc\anim.dat failed
 Setting to 16 bit mode
 entered CreateGameBuffers
 here 2
@@ -994,7 +995,7 @@ Animation BRDRHIVDIE0 (158-188)
 Animation BIOHIVDIE0 (189-220)
 Animation WARHIVEDIE0 (221-251)
 Animation BRDRHIV2DIE0 (252-277)
-TIE BIOHIVDIE0, frame 189071542, 6 101 9
+TIE BIOHIVDIE0, frame 189137078, 6 101 9
 Scanned burn.fin
 Attempt to load burn.fin (8)
 LOADSPR: hubu
@@ -1163,14 +1164,14 @@ Animation DISHBLOODA0 (44-47)
 Animation DISHBLOODB0 (48-51)
 Animation DISHBLOODC0 (52-55)
 Animation DISHBLOODD0 (56-59)
-TIE DISHBLOODA0, frame 189253720, 6 7 -45
+TIE DISHBLOODA0, frame 189319256, 6 7 -45
 Scanned tong.fin
 Attempt to load tong.fin (8)
 LOADSPR: tong
 Animation TONGSTAND0 (0-17)
 Animation POINT (18-18)
 Animation TONGDIE0 (19-38)
-TIE POINT, frame 189261432, 6 2 -46
+TIE POINT, frame 189326968, 6 2 -46
 Scanned tort.fin
 Attempt to load tort.fin (8)
 LOADSPR: tort
@@ -1226,7 +1227,7 @@ Animation FUELDIE0 (150-194)
 Animation CHOOPY (195-212)
 Animation FILLSTAND0 (213-224)
 Animation FILLDIE0 (225-267)
-TIE FUELDIE0, frame 189530206, 6 -10 -59
+TIE FUELDIE0, frame 189595742, 6 -10 -59
 Scanned fetu.fin
 Attempt to load fetu.fin (8)
 LOADSPR: fetu
@@ -1608,10 +1609,10 @@ Animation HIGH (561-561)
 Animation SARGSTLDIE2 (562-599)
 Animation SARGSTLDIE14 (600-637)
 Animation CMNDRBULLET0 (638-639)
-TIE SARGDIE2, frame 189989119, 0 3 -56
-TIE SARGDIE2, frame 189989193, 0 0 -61
-TIE SARGDIE2, frame 189989227, 0 0 -55
-TIE HIGH, frame 189989399, 6 -2 -54
+TIE SARGDIE2, frame 190054655, 0 3 -56
+TIE SARGDIE2, frame 190054729, 0 0 -61
+TIE SARGDIE2, frame 190054763, 0 0 -55
+TIE HIGH, frame 190054935, 6 -2 -54
 Scanned light1f.fin
 Attempt to load light1f.fin (11)
 LOADSPR: side
@@ -1920,15 +1921,15 @@ Animation GRAYBULLET0 (421-421)
 Animation BANGBULLET0 (422-427)
 Animation GRAYFUNK14 (428-438)
 Animation GRAYFUNK2 (439-449)
-TIE GRAYSTAND0, frame 190185766, 0 252 16
-TIE GRAYFIREA8, frame 190185766, 3 0 0
-TIE GRAYSHUF1, frame 190185768, 0 1 0
-TIE GRAYSTAND0, frame 190185768, 2 214 16
-TIE GRAYSTAND0, frame 190185768, 3 0 2
-TIE GRAYSTAND0, frame 190185768, 5 1 0
-TIE GRAYSHUF1, frame 190185770, 0 1 0
-TIE GRAYSTAND0, frame 190185770, 2 214 16
-TIE GRAYSTAND0, frame 190185770, 3 0 128
+TIE GRAYSTAND0, frame 190251302, 0 252 16
+TIE GRAYFIREA8, frame 190251302, 3 0 0
+TIE GRAYSHUF1, frame 190251304, 0 1 0
+TIE GRAYSTAND0, frame 190251304, 2 214 16
+TIE GRAYSTAND0, frame 190251304, 3 0 2
+TIE GRAYSTAND0, frame 190251304, 5 1 0
+TIE GRAYSHUF1, frame 190251306, 0 1 0
+TIE GRAYSTAND0, frame 190251306, 2 214 16
+TIE GRAYSTAND0, frame 190251306, 3 0 128
 Scanned atril.fin
 Attempt to load atril.fin (9)
 LOADSPR: pusb
@@ -1998,14 +1999,14 @@ Animation ATRILBLOODG0 (277-285)
 Animation ATRILMOVE1 (286-286)
 Animation ATRILMOVE3 (287-287)
 Animation ATRILMOVE5 (288-288)
-TIE ATRILBLOODC0, frame 190218035, 7 0 -4
-TIE ATRILBLOODC0, frame 190218041, 7 12 -12
-TIE ATRILBLOODC0, frame 190218047, 7 15 -18
-TIE ATRILBLOODC0, frame 190218053, 7 15 -24
-TIE ATRILBLOODC0, frame 190218059, 7 -2 -31
-TIE ATRILBLOODC0, frame 190218064, 7 -14 -23
-TIE ATRILBLOODC0, frame 190218069, 7 -20 -15
-TIE ATRILBLOODC0, frame 190218074, 7 -15 -9
+TIE ATRILBLOODC0, frame 190283571, 7 0 -4
+TIE ATRILBLOODC0, frame 190283577, 7 12 -12
+TIE ATRILBLOODC0, frame 190283583, 7 15 -18
+TIE ATRILBLOODC0, frame 190283589, 7 15 -24
+TIE ATRILBLOODC0, frame 190283595, 7 -2 -31
+TIE ATRILBLOODC0, frame 190283600, 7 -14 -23
+TIE ATRILBLOODC0, frame 190283605, 7 -20 -15
+TIE ATRILBLOODC0, frame 190283610, 7 -15 -9
 Scanned buildng.fin
 Attempt to load buildng.fin (11)
 LOADSPR: buildng
@@ -2403,16 +2404,16 @@ Animation SLOMBUILD0 (402-431)
 Animation SLUGBUILD0 (432-445)
 Animation ZISPBUILDSTAND0 (446-464)
 Animation ORTUBUILDSTAND0 (465-485)
-TIE SLOMBUILD0, frame 190316592, 6 -62 -91
-TIE SLOMBUILD0, frame 190316595, 6 63 -78
-TIE SLOMBUILD0, frame 190316597, 6 64 -80
-TIE SLOMBUILD0, frame 190316599, 6 63 -78
-TIE SLOMBUILD0, frame 190316600, 6 -37 -143
-TIE SLOMBUILD0, frame 190316602, 6 -36 -143
-TIE SLOMBUILD0, frame 190316603, 6 46 -139
-TIE SLOMBUILD0, frame 190316605, 6 0 -146
-TIE SLOMBUILD0, frame 190316609, 6 47 -140
-TIE SLOMBUILD0, frame 190316611, 6 176 11
+TIE SLOMBUILD0, frame 190382128, 6 -62 -91
+TIE SLOMBUILD0, frame 190382131, 6 63 -78
+TIE SLOMBUILD0, frame 190382133, 6 64 -80
+TIE SLOMBUILD0, frame 190382135, 6 63 -78
+TIE SLOMBUILD0, frame 190382136, 6 -37 -143
+TIE SLOMBUILD0, frame 190382138, 6 -36 -143
+TIE SLOMBUILD0, frame 190382139, 6 46 -139
+TIE SLOMBUILD0, frame 190382141, 6 0 -146
+TIE SLOMBUILD0, frame 190382145, 6 47 -140
+TIE SLOMBUILD0, frame 190382147, 6 176 11
 Scanned fact.fin
 Attempt to load fact.fin (8)
 LOADSPR: fact
@@ -2532,8 +2533,8 @@ Animation SCYTDIE2 (197-206)
 Animation SCYTBLOODA0 (207-213)
 Animation SCYTBLOODB0 (214-223)
 Animation SCYTBLOODC0 (224-231)
-TIE SCYTDIE2, frame 190401314, 7 1 59
-TIE SCYTDIE2, frame 190401318, 7 22 50
+TIE SCYTDIE2, frame 190466850, 7 1 59
+TIE SCYTDIE2, frame 190466854, 7 22 50
 Scanned psyc.fin
 Attempt to load psyc.fin (8)
 LOADSPR: psyc
@@ -2780,13 +2781,13 @@ Animation BARRDIE10 (177-192)
 Animation BARRDIE2 (193-207)
 Animation BARRDIE6 (208-222)
 Animation BARR2BULLET0 (223-228)
-TIE BARRDIE10, frame 190513290, 7 0 -19
-TIE BARRDIE10, frame 190513298, 7 15 -12
-TIE BARRDIE10, frame 190513308, 7 13 -34
-TIE BARRDIE10, frame 190513313, 7 0 -28
-TIE BARRDIE10, frame 190513318, 7 0 -30
-TIE BARRDIE10, frame 190513323, 7 0 -25
-TIE BARRDIE10, frame 190513328, 7 1 -16
+TIE BARRDIE10, frame 190578826, 7 0 -19
+TIE BARRDIE10, frame 190578834, 7 15 -12
+TIE BARRDIE10, frame 190578844, 7 13 -34
+TIE BARRDIE10, frame 190578849, 7 0 -28
+TIE BARRDIE10, frame 190578854, 7 0 -30
+TIE BARRDIE10, frame 190578859, 7 0 -25
+TIE BARRDIE10, frame 190578864, 7 1 -16
 Scanned expl.fin
 Attempt to load expl.fin (8)
 Animation EXPLSTAND0 (0-0)
@@ -2876,9 +2877,9 @@ Animation SCGMDIE0 (72-101)
 Animation SPIKEBULLET0 (102-105)
 Animation SCGMBLOODA (106-106)
 Animation SPOOIRIT (107-107)
-TIE SCGMSTAND2, frame 190560546, 0 0 0
-TIE SCGMMOVE15, frame 190560546, 2 1 16
-TIE SCGMMOVE0, frame 190560546, 5 16 0
+TIE SCGMSTAND2, frame 190626082, 0 0 0
+TIE SCGMMOVE15, frame 190626082, 2 1 16
+TIE SCGMMOVE0, frame 190626082, 5 16 0
 Scanned engi.fin
 Attempt to load engi.fin (8)
 Animation ENGISTAND0 (0-0)
@@ -3000,22 +3001,22 @@ Animation XDEPLOYBLOODB0 (278-285)
 Animation XDPLOYBLOODC0 (286-292)
 Animation XDEPLOYBLOODD0 (293-301)
 Animation XDEPLOYBLOODE0 (302-311)
-TIE XENOBULLET0, frame 190590087, 7 -3 -12
-TIE XENOBULLET0, frame 190590089, 7 -3 -12
-TIE XENOBULLET0, frame 190590091, 7 -3 -12
-TIE XENOBULLET0, frame 190590093, 7 -3 -12
-TIE XENOBULLET0, frame 190590095, 7 -3 -12
-TIE XENOBULLET0, frame 190590097, 7 -3 -12
-TIE XENOBULLET0, frame 190590099, 7 -3 -12
-TIE XENOBULLET0, frame 190590101, 7 -4 -12
-TIE XENOBULLET0, frame 190590103, 7 -4 -12
-TIE XENOBULLET0, frame 190590105, 7 -4 -12
-TIE XENOBULLET0, frame 190590107, 7 -4 -12
-TIE XENOBULLET0, frame 190590109, 7 -4 -12
-TIE XENOBULLET0, frame 190590111, 7 -4 -12
-TIE XENOBULLET0, frame 190590113, 7 -4 -12
-TIE XENOBULLET0, frame 190590115, 7 -4 -12
-TIE XENOBULLET0, frame 190590117, 7 -4 -12
+TIE XENOBULLET0, frame 190655623, 7 -3 -12
+TIE XENOBULLET0, frame 190655625, 7 -3 -12
+TIE XENOBULLET0, frame 190655627, 7 -3 -12
+TIE XENOBULLET0, frame 190655629, 7 -3 -12
+TIE XENOBULLET0, frame 190655631, 7 -3 -12
+TIE XENOBULLET0, frame 190655633, 7 -3 -12
+TIE XENOBULLET0, frame 190655635, 7 -3 -12
+TIE XENOBULLET0, frame 190655637, 7 -4 -12
+TIE XENOBULLET0, frame 190655639, 7 -4 -12
+TIE XENOBULLET0, frame 190655641, 7 -4 -12
+TIE XENOBULLET0, frame 190655643, 7 -4 -12
+TIE XENOBULLET0, frame 190655645, 7 -4 -12
+TIE XENOBULLET0, frame 190655647, 7 -4 -12
+TIE XENOBULLET0, frame 190655649, 7 -4 -12
+TIE XENOBULLET0, frame 190655651, 7 -4 -12
+TIE XENOBULLET0, frame 190655653, 7 -4 -12
 Scanned turr.fin
 Attempt to load turr.fin (8)
 Animation TURRSTAND0 (0-0)
@@ -3096,38 +3097,38 @@ Animation TBLOODC0 (225-227)
 Animation TBLOODD0 (228-232)
 Animation TBLOODE0 (233-236)
 Animation TBLOODF0 (237-241)
-TIE TURRBULLET0, frame 190622881, 7 6 -24
-TIE TURRBULLET0, frame 190622882, 7 4 -24
-TIE TURRBULLET0, frame 190622883, 7 1 -23
-TIE TURRBULLET0, frame 190622884, 7 -4 -24
-TIE TURRBULLET0, frame 190622885, 7 -4 -24
-TIE TURRBULLET0, frame 190622886, 7 -7 -24
-TIE TURRBULLET0, frame 190622887, 7 -6 -27
-TIE TURRBULLET0, frame 190622888, 7 -6 -28
-TIE TURRBULLET0, frame 190622889, 7 -3 -32
-TIE TURRBULLET0, frame 190622890, 7 -4 -31
-TIE TURRBULLET0, frame 190622891, 7 0 -32
-TIE TURRBULLET0, frame 190622892, 7 6 -31
-TIE TURRBULLET0, frame 190622893, 7 5 -31
-TIE TURRBULLET0, frame 190622894, 7 5 -29
-TIE TURRBULLET0, frame 190622895, 7 7 -27
-TIE TURRBULLET0, frame 190622896, 7 7 -26
-TIE TDIE14, frame 190622914, 7 -8 5
-TIE TDIE14, frame 190622916, 7 -5 3
-TIE TDIE14, frame 190622918, 7 -5 3
-TIE TDIE14, frame 190622920, 7 -4 3
-TIE TDIE14, frame 190622922, 7 -3 1
-TIE TDIE14, frame 190622924, 7 -3 1
-TIE TDIE14, frame 190622926, 7 -4 -2
-TIE TDIE14, frame 190622928, 7 -6 -2
-TIE TDIE14, frame 190622930, 7 -8 -3
-TIE TDIE14, frame 190622932, 7 -11 -2
-TIE TDIE14, frame 190622934, 7 -13 -2
-TIE TDIE14, frame 190622936, 7 -14 0
-TIE TDIE14, frame 190622938, 7 -14 1
-TIE TDIE14, frame 190622940, 7 -12 2
-TIE TDIE14, frame 190622942, 7 -12 3
-TIE TDIE14, frame 190622944, 7 -11 3
+TIE TURRBULLET0, frame 190688417, 7 6 -24
+TIE TURRBULLET0, frame 190688418, 7 4 -24
+TIE TURRBULLET0, frame 190688419, 7 1 -23
+TIE TURRBULLET0, frame 190688420, 7 -4 -24
+TIE TURRBULLET0, frame 190688421, 7 -4 -24
+TIE TURRBULLET0, frame 190688422, 7 -7 -24
+TIE TURRBULLET0, frame 190688423, 7 -6 -27
+TIE TURRBULLET0, frame 190688424, 7 -6 -28
+TIE TURRBULLET0, frame 190688425, 7 -3 -32
+TIE TURRBULLET0, frame 190688426, 7 -4 -31
+TIE TURRBULLET0, frame 190688427, 7 0 -32
+TIE TURRBULLET0, frame 190688428, 7 6 -31
+TIE TURRBULLET0, frame 190688429, 7 5 -31
+TIE TURRBULLET0, frame 190688430, 7 5 -29
+TIE TURRBULLET0, frame 190688431, 7 7 -27
+TIE TURRBULLET0, frame 190688432, 7 7 -26
+TIE TDIE14, frame 190688450, 7 -8 5
+TIE TDIE14, frame 190688452, 7 -5 3
+TIE TDIE14, frame 190688454, 7 -5 3
+TIE TDIE14, frame 190688456, 7 -4 3
+TIE TDIE14, frame 190688458, 7 -3 1
+TIE TDIE14, frame 190688460, 7 -3 1
+TIE TDIE14, frame 190688462, 7 -4 -2
+TIE TDIE14, frame 190688464, 7 -6 -2
+TIE TDIE14, frame 190688466, 7 -8 -3
+TIE TDIE14, frame 190688468, 7 -11 -2
+TIE TDIE14, frame 190688470, 7 -13 -2
+TIE TDIE14, frame 190688472, 7 -14 0
+TIE TDIE14, frame 190688474, 7 -14 1
+TIE TDIE14, frame 190688476, 7 -12 2
+TIE TDIE14, frame 190688478, 7 -12 3
+TIE TDIE14, frame 190688480, 7 -11 3
 Scanned reap.fin
 Attempt to load reap.fin (8)
 LOADSPR: spuc
@@ -3295,17 +3296,17 @@ Animation ROBOPOD2BLOODE0 (453-456)
 Animation ROBOPOD2BLOODC0 (457-461)
 Animation ROBOPOD2BLOODD0 (462-465)
 Animation SCNCPOD2BURN0 (466-481)
-TIE REAPBUILD0, frame 190709808, 6 -68 -144
-TIE ROBOPOD2BLOODE0, frame 190709816, 6 -64 -128
-TIE SPOT, frame 190709817, 6 -57 -241
-TIE EXCOPODSTAND0, frame 190709826, 6 -60 -201
-TIE EXCOPODSTAND0, frame 190709827, 6 4 -76
-TIE EXCOPODSTAND0, frame 190709829, 6 3 -74
-TIE EXCOPODSTAND0, frame 190709830, 6 63 -80
-TIE ROBOPOD2BLOODE0, frame 190709831, 6 64 -96
-TIE EXCOPODSTAND0, frame 190709832, 6 65 -111
-TIE EXCOPODSTAND0, frame 190709856, 6 34 -214
-TIE EXCOPODSTAND0, frame 190709876, 6 33 -215
+TIE REAPBUILD0, frame 190775344, 6 -68 -144
+TIE ROBOPOD2BLOODE0, frame 190775352, 6 -64 -128
+TIE SPOT, frame 190775353, 6 -57 -241
+TIE EXCOPODSTAND0, frame 190775362, 6 -60 -201
+TIE EXCOPODSTAND0, frame 190775363, 6 4 -76
+TIE EXCOPODSTAND0, frame 190775365, 6 3 -74
+TIE EXCOPODSTAND0, frame 190775366, 6 63 -80
+TIE ROBOPOD2BLOODE0, frame 190775367, 6 64 -96
+TIE EXCOPODSTAND0, frame 190775368, 6 65 -111
+TIE EXCOPODSTAND0, frame 190775392, 6 34 -214
+TIE EXCOPODSTAND0, frame 190775412, 6 33 -215
 Scanned gasy.fin
 Attempt to load gasy.fin (8)
 Animation GHASY2 (0-19)
@@ -4800,10 +4801,10 @@ SPAM SPAM SPAM SPAM starting threads
 SPAM SPAM SPAM SPAM starting threads
 Creating audio thread
 making pipes
+PIPE created with 5 items size 172803
 Puck, Ready!
 PIPE created with 5 items size 172803
-peasbottom, READY!
-musturdseed, READY!
+Puck, Ready!
 PIPE created with 20 items size 57600
 PIPE created with 55 items size 739
 inited random shit
@@ -4817,6 +4818,8 @@ SPAM SPAM SPAM SPAM going into wait loop
 SPAM SPAM SPAM SPAM going into wait loop
 SPAM SPAM SPAM SPAM going into wait loop
 SPAM SPAM SPAM SPAM going into wait loop
+SPAM SPAM sbSoAt m, REgoDng Ynt wit loop
+SPAM SPAM SPAM SPAM going iusturds wait lADYoopoing into wait loop
 SPAM SPAM SPAM SPAM going into wait loop
 SPAM SPAM SPAM SPAM going into wait loop
 SPAM SPAM SPAM SPAM going into wait loop
@@ -4869,57 +4872,33 @@ SPAM SPAM SPAM SPAM going into wait loop
 SPAM SPAM SPAM SPAM going into wait loop
 SPAM SPAM SPAM SPAM going into wait loop
 SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
-SPAM SPAM SPAM SPAM going into wait loop
+PAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting threads
+SPAM SPAM SPAM SPAM starting tcobweb, STARTED!
 cobweb, STARTED!
 Puck, STARTED!
 Closing write end of pipe
 done
 musturdseed, STARTED!
-sound started, play cursor was 1 offset 0 in 634463554 out 634463554 start 634463577
+sound started, play cursor was 1 offset 0 in 1031114231 out 1031114231 start 1031114257
 peasbottom, STARTED!
-User interrupt detected
-Closing read end of pipe
-done
-audio process exited
 User interrupt detected
 Closing read end of pipe
 done
@@ -5017,6 +4996,7 @@ Animation DCUT (0-3)
 Closing and returning
 UI_NEW : intrface/bintro
 trying to open D:\dc\anim.dat
+cd open D:\dc\anim.dat failed
 FONT #0 size:7 14
 Palette Setup Screwy (Win_Set_Palette - Set Primary) 
 Palette Setup Screwy (Win_Set_Palette - Set Mask)
@@ -5053,50 +5033,3 @@ Palette Setup Screwy (Win_Set_Palette - Set Mouse)
 Palette Setup Screwy (Win_Set_Palette - Set Mouse)
 Palette Setup Screwy (Win_Set_Palette - Set Mouse)
 Win_Set_Palette Finnished
-SMALLOC: Freeing images
-SMALLOC: Freeing message
-SMALLOC: Freeing message
-SMALLOC: Freeing message
-SMALLOC: Freeing message
-SMALLOC: Freeing message
-SMALLOC: Freeing message
-SMALLOC: Freeing message
-SMALLOC: Freeing message
-SMALLOC: Freeing create_banim
-SMALLOC: Freeing create_banim
-SMALLOC: Freeing gadget widget
-SMALLOC: Freeing push button
-SMALLOC: Freeing gadget widget
-SMALLOC: Freeing gadget widget
-SMALLOC: Freeing gadget widget
-SMALLOC: Freeing push button
-SMALLOC: Freeing gadget widget
-SMALLOC: Freeing gadget widget
-SMALLOC: Freeing push button
-SMALLOC: Freeing push button
-SMALLOC: Freeing font
-SMALLOC: Freeing Interface
-SMALLOC: Freeing Frame parts
-SMALLOC: Freeing Animation Frames
-SMALLOC: Freeing Animation Headers
-SMALLOC: Freeing Frame parts
-SMALLOC: Freeing Animation Frames
-SMALLOC: Freeing Animation Headers
-SMALLOC: Freeing Cell Memory
-SMALLOC: Freeing stackcells
-SMALLOC: Freeing animation cell header
-SMALLOC: Freeing animation cell header
-SMALLOC: Freeing Cell Memory
-SMALLOC: Freeing stackcells
-SMALLOC: Freeing animation cell header
-SMALLOC: Freeing animation cell header
-SMALLOC: Freeing Frame parts
-SMALLOC: Freeing Animation Frames
-SMALLOC: Freeing Animation Headers
-SMALLOC: Freeing Cell Memory
-SMALLOC: Freeing stackcells
-SMALLOC: Freeing animation cell header
-SMALLOC: Freeing animation cell header
-Popped Animations
-Killing TTY 0
-There is a problem with your media device.  Make sure it is working correctly o
