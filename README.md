@@ -11,7 +11,7 @@ The purpose of this repository is to make this old game better by some assembly 
 1) (TODO) increase screen resolution from 640x480 to 800x600 and maybe to 1024x768
 2) (DONE) remove the CD check to play campaign
 3) (TODO) increase quality of movies
-4) (TODO) tweak multiplayer to be modern and online
+4) (DONE) tweak multiplayer to be modern and online: see project [Dark-Colony-Server](https://github.com/endotermic/Dark-Colony-Server)
 5) (DONE) fix original map editor
 6) etc.
 
