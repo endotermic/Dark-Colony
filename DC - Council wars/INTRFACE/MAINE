@@ -433,8 +433,7 @@ textmsg   182   Too many units
 textmsg   183   Issuing refund
 
 %days counter
-textmsg   290   Days Counter
-in_text   234   290     613      433     3    1   0    align centre - read_only bg erase  remap 0  intens 31
+in_text   234   0       613      433     3    1   0    align centre - read_only bg erase  remap 0  intens 31
 
 in_text   200   0       480      463     3    1   0    - read_only  bg erase  remap 2  intens 31
 

@@ -1,0 +1,47 @@
+size 640 480
+pictures         intrface/knobe
+font         0   intrface/mfonto5
+font_offset  0   31
+background       intrface/intro
+bright_pushed    8
+bright_highlight 4
+colour  erase       0 0 0
+
+
+%       #  desc  x    y    w    h
+
+pushb    0  0  228 314  179   25  -11  0  label centre 1 0  -  remap  0
+% pushb    1  0  138  340  179   25  -11  0  label centre 2 0  -  remap  0
+pushb    2  0  228  340  179   25  -11  0  label centre 3 0  -  remap  0
+% pushb    3  0  318  314  179   25  -11  0  label centre 4 0  -  remap  0
+% pushb    4  0  318  340  179   25  -11  0  label centre 5 0  -  remap  0
+% pushb    5  0  318  366  179   25  -11  0  label centre 6 0  -  remap  0
+
+gadget   6  0  228 314  179   25  LARGEBUTTON  anim_oneoff
+% gadget   7  0  138  340  179   25  LARGEBUTTON  anim_stopped
+gadget   8  0  228  340  179   25  LARGEBUTTON  anim_stopped
+% gadget   9  0  318  314  179   25  LARGEBUTTON  anim_stopped
+% gadget  10  0  318  340  179   25  LARGEBUTTON  anim_stopped
+% gadget  11  0  318  366  179   25  LARGEBUTTON  anim_stopped
+
+pushb   12  0  228  392  179   25  -11  0  label centre 7 0  -  remap 0
+gadget  13  0  228  392  179   25  LARGEBUTTON  anim_stopped
+
+gadget  14  0  130    0  378  123  DCSS  anim_stopped  unmask  -  bg erase
+
+pushb   16  0  228  366  179   25  -11  0  label centre 8 0  -  remap 0
+gadget  17  0  228  366  179   25  LARGEBUTTON  anim_stopped
+
+banim   18  0  4 4  6 8 17 13  0 2 16 12
+% banim   18  0  8 8  6 7 8 9 10 11 17 13  0 1 2 3 4 5 16 12
+
+textmsg 1       NEW CAMPAIGN
+textmsg 2       TRAINING
+textmsg 3       LOAD GAME
+textmsg 4       MULTI PLAYER WAR
+textmsg 5       SINGLE PLAYER WAR
+textmsg 6       ENCYCLOPEDIA
+textmsg 7       QUIT
+textmsg 8       PLAY INTRO
+
+end

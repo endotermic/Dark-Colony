@@ -14,7 +14,7 @@ background intrface/shuman
 %       number  desc    xpos    ypos    width   height  normal  pushed  flags
 
 pushb   0       0       140     446     90      26      -11     2        label centre   2 0     - remap 0
-pushb   1       0       230     446     179     26      -11     0        label centre   3 0     - remap 0
+%pushb   1       0       230     446     179     26      -11     0        label centre   3 0     - remap 0
 pushb   2       0       410     446     179     26      -11     0        label centre   1 0     - remap 0
 
 pushb   3       0       609     415     26      25      -11     10 
@@ -54,7 +54,7 @@ gadget  30      0       535     129    16      22      SMALLMEDALS  anim_stopped
 gadget  31      0       576     49     24      28      RANKS        anim_stopped unmask - bg erase
 
 gadget  32      0       140     446     90      25     MEDBUTTON    anim_stopped
-gadget  33      0       230     446     179     25     LARGEBUTTON  anim_stopped
+%gadget  33      0       230     446     179     25     LARGEBUTTON  anim_stopped
 gadget  34      0       410     446     179     25     LARGEBUTTON  anim_stopped
 
 gadget  35      0       306     23      80     120     ACOM         anim_stopped 
@@ -62,7 +62,8 @@ gadget  36      0       306     23      80     120     HCOM         anim_stopped
 
 label   37      0       500     52      100    18  label 5  font 0  align left  -  remap 4
 
-banim   38  0  5 6  13 14 32 33 34  3 4 0 10 1 2
+%banim   38  	0  	5 6	 13 14 32 33 34  3 4 0 10 1 2
+banim   38  0  4 5  	13 14 32 34  3 4 0 10 2
 
 gadget  39      0       174     315    108     8       NETD         anim_stopped unmask - bg erase
 

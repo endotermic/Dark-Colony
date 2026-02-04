@@ -28,6 +28,6 @@ pushb   9       0       409     381     179     25      -11     0        label c
 
 gadget  10      0       409     381     179     26      LARGEBUTTON    anim_oneoff
 
-textmsg 1       WEITER
+textmsg 1       CONTINUE
 
 end

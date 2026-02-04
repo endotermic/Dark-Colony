@@ -1,5 +1,0 @@
-#include "windows.h"
-
-dc16 ICON dc16.ico
-
-
