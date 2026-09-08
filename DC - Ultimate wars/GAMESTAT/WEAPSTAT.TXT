@@ -1,0 +1,216 @@
+64
+
+% weapons ranges  for wpns 5,6,8,9,10,11,12,13,14,15,30,31,32 must be fixed
+
+
+% sprite  weapon_class sound rate_of_fire  damage speed range shots reload magic_chewing
+
+% Human weapon 0 (1)
+1 weapons 0 1 15 100 60 4 0 -1 -1 0 0
+
+% Human weapon 1 (2)
+2 weapons 0 2 15 125 60 4 0 -1 -1 0 0
+
+% Human weapon 2 (3)
+3 weapons 0 3 15 150 60 4 0 -1 -1 0 0
+
+% Tac Missile                  (4)
+4 weapons 0 4 15 100 50 5 0 -1 -1 0 0
+
+% Human Leutenant pistol           (5)
+5 SMOK 0 5 15 160 50 6 0 -1 -1 0 0
+
+% Warlance Tacmissile           (6)
+6 weapons 0 6 15 180 50 8 0 -1 -1 0 0
+
+% 85% of 100
+
+% Mech weaoon 0 (7)
+7 weapons 1 7 15 100  60 2 0 -1 -1 0 0
+
+% Mech weapon 1 (8)
+8 weapons 1 8 15 125 60 2 0 -1 -1 0 0
+
+% Mech weapon 1 (9)
+9 weapons 1 9 15 150 60 2 0 -1 -1 0 0
+
+% Artillery weapon 0 (10)
+10 BARR 3 10 75 250 60 12 1 -1 -1 1 0
+
+% Artillery weapon 1 (11)
+11 BARR 3 11 75 250 60 14 1 -1 -1 1 0
+
+% Artillery weapon 2 (12)
+12 BARR 3 12 75 250 60 16 1 -1 -1 1 0
+
+% Sniper weapon 0 (13)
+13 weapons 4 13 15 200 60 8 0 -1 -1 0 0
+
+% Sniper weapon 1 (14)
+14 weapons 4 13 15 250 60 8 0 -1 -1 0 0
+
+% Grey weapon 0 (15)
+15 GRAY 0 15 15 100 60 4 0 -1 -1 0 0
+
+% Grey weapon 1 (16)
+16 weapons 0 16 15 125 60 4 0 -1 -1 0 0
+
+% Grey weapon 2 (17)
+17 weapons 0 17 15 150 60 4 0 -1 -1 0 0
+
+% Plas Bolt                     (18)
+18 weapons 0 18 15 100 60 5 0 -1 -1 0 0
+
+% Multi-Plas Bolt               (19)
+19 weapons 0 19 15 160 60 6 0 -1 -1 0 0
+
+% Enhanced Plas Bolt           (20)
+20 weapons 0 20 15 180 60 8 0 -1 -1 0 0
+
+% Bio-Scythes                   (21)
+21 weapons 1 21 15 100  60 1 0 -1 -1 0 0
+
+% Mono-Molecular Edges          (22)
+22 weapons 1 22 15 125 60 1 0 -1 -1 0 0
+
+% Force Blades                  (23)
+23 weapons 1 23 15 150 60 1 0 -1 -1 0 0
+
+% Atril 0			(24)
+24 PUS 3 24 75 250 60 12 9  -1 -1 1 0
+
+% Atril 1			(25)
+25 PUS 3 25 150 250 60 14 9 -1 -1 1 0
+
+% Atril 2			(26)
+26 PUS 3 26 150 250 60 16 9 -1 -1 1 0
+
+% Spew Mines\ Mines             (27)
+%27         30 50 0 0 0 -1 -1 0 0
+
+% Spider Mines                  (28)
+%28         30 50 30 5 0 -1 -1 0 0
+
+% Particle Beam                 (29)
+29 weapons 4 29 10 100 60 8 0 -1 -1 0 0
+
+% Psychic Disruptor             (30)
+30 SPAK 4 30 30 200 60 9 0 -1 -1 0 0 
+
+27 SPAK 4 40 30 250 60 9 0 -1 -1 0 0
+
+28 SPAK 4 40 30 300 60 9 0 -1 -1 0 0
+
+% Towergun1  HMG                (31)
+31 weapons 5 31 15 100 60 5 0 -1 -1 0 0
+
+% Towergun2   Missile            (32)
+32 weapons 5 32 15 150 60 6 0 -1 -1 0 0
+
+% Towergun3   Cannon           (33)
+33 weapons 5 33 15 190 60 8 0 -1 -1 0 0
+
+% Nodegun1  Laser              (34)
+34 TURR 5 34 15 100 60 6 0 -1 -1 2 0
+
+% Nodegun2  Missiles            (35)
+35 TURR 5 35 15 125 60 6 0 -1 -1 2 0
+
+% Nodegun3 Cannon               (36)
+36 TURR 5 36 15 150 60 6 0 -1 -1 2 0
+% Scout Bomb                    (37)
+
+37 SPAK 2 37 10 100 15 2 5  3 30 0 0
+
+44 SPIKE 2 42 10 125 15 2 5  3 30 0 0
+
+45 SPIKE 2 43 10 150 15 2 5  3 30 0 0
+
+% mine                          (38)
+38 weapons 6 38  150 1300 60 1 2   -1 -1 0 0
+
+% Boom!                         (39)
+39 weapons 6 39  15 800 60 1 3   -1 -1 0 0
+
+
+% Nodegun1  Laser              (40)
+40 XENO 5 34 15 100 60 6 0 -1 -1 0 0
+
+% Nodegun2  Missiles            (41)
+41 XENO 5 35 15 125 60 6 0 -1 -1 0 0
+
+% Nodegun3 Cannon               (42)
+42 XENO 5 36 15 150 60 6 0 -1 -1 0 0
+
+43 SMOK 5 36 15 150 60 6 0 -1 -1 0 0
+
+46 BARR 6 38  15 8000 60 -1  11 -1 -1 0 0    
+
+47 UA    8 36 5 2000 90 9 0 -1 -1 0 0
+
+% renat teeth
+
+48 weapons 1 48 15 100 60 1 0 -1 -1 0 0
+
+% Spider venom
+
+49 weapons 1 49 15 100 60 1 0 -1 -1 0 0
+
+% Napalm effect
+
+50 BARR  6 50  15 20 60  11  10 -1 -1 4 1
+
+% Plasma effect
+
+51 BARR  6 51 15 20 60  11  12 -1 -1 4 1
+
+% nil 
+
+52 BARR  6 52 15 20 60  11  10 -1 -1 4 0
+
+% Bat fangs
+
+53 weapons 1 53 15 100 60 1 0 -1 -1 0 0
+
+% Grub Fart :(
+
+54 weapons 1 54 15 100 60 1 0 -1 -1 0 0
+
+% GROUND DRONE
+
+55 weapons 1 55 15 25 60 1 0 -1 -1 0 0
+
+% AIR DRONE
+
+56 weapons 1 56 15 25 60 1 0 -1 -1 0 0
+
+% Drop ship packet 1
+
+57 BARR  6 57  15 20 60  11  10 -1 -1 5 1
+
+% Drop ship packet 2
+
+58 CMNDR  6 58  15 20 60  11  10 -1 -1 6 1
+
+% Drop ship packet 3
+
+59 CMNDR  6 59  15 20 60  11  10 -1 -1 7 1
+
+% Abduction packet
+
+60 CMNDR  6 60  15 20 60  11  10 -1 -1 8 1
+
+% Huamn captian weapon
+61 weapons 1 61 15 100 60 2 0 -1 -1 0 0
+
+% ALIEN commander weapon
+62 SMOK 0 62 15 160 50 6 0 -1 -1 0 0
+
+% Abduction packet 2
+
+63 ZIMAL  6 60  15 20 60  11  10 -1 -1 9 1
+
+% Abduction packet 3
+
+64 ZIMAL  6 60  15 20 60  11  10 -1 -1 10 1
+

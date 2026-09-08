@@ -1,0 +1,158 @@
+Pan Luma                                            .
+Stratus                                             .
+Taar                                                .
+Taar Council                                        .
+Unknown                                             .
+Roswell Taar                                        .
+Unknown                                             .
+Aerogen                                             .
+15
+alien/alien01.scn
+FIRST STRIKE
+CYDONIA REGION
+scenario/alien/alien01
+avi/avhd4.avi
+avi/hvad2.avi
+5 160 60
+0
+2 -1
+
+alien/alien02.scn
+INTERFERENCE
+RAMSTRONG VALLEY
+scenario/alien/alien02
+avi/avhd5.avi
+avi/atran3.avi
+10 150 30
+0
+5 3 2 -1
+
+alien/alien03.scn
+LEGACY REVEALED
+ANCONA
+scenario/alien/alien03
+avi/jtalk3.avi
+avi/jcrawl.avi
+75 100 60
+0
+5 3 2 -1
+
+alien/alien04.scn
+OPERATION:BREAKTHROUGH
+TENDIRO PLAINS
+scenario/alien/alien04
+avi/escape.avi
+avi/atran2.avi
+30 130 85
+0
+2 3 -1
+
+alien/alien05.scn
+ROSWELL REVISITED
+AREA 51
+scenario/alien/alien05
+avi/scrub.avi
+avi/waste.avi
+1 80 43
+1
+3 2 -1
+
+alien/alien06.scn
+PUPPET MASTERS
+THE CITADEL
+scenario/alien/alien06
+avi/dtalk2.avi
+avi/atran6.avi
+40 90 130
+0
+5 2 -1
+
+alien/alien07.scn
+CIVIL WAR
+STRATUS SPHERE-3
+scenario/alien/alien07
+avi/jtalk2.avi
+avi/bodys.avi
+20 80 30
+0
+4 2 -1
+
+alien/alien08.scn
+THE SCREAMER
+VALLEY OF SCREAMS
+scenario/alien/alien08
+avi/tick.avi
+avi/atran7.avi
+70 80 40
+0
+3 2 -1
+
+alien/alien09.scn
+BURIED TREASURE
+THE UNDERGROUND
+scenario/alien/alien09
+avi/tektaara.avi
+avi/crawl.avi
+70 80 40
+0
+4 5 -1
+
+alien/alien10.scn
+ANIMAL INSTINCT
+TAAR SWAMP
+scenario/alien/alien10
+avi/lizards.avi
+avi/atran1.avi
+30 150 60
+0
+5 2 -1
+
+alien/alien11.scn
+SPIDER CANYON
+SPIDER CANYON
+scenario/alien/alien11
+avi/avhd.avi
+avi/hvad.avi
+75 70 90
+0
+4 5 -1
+
+alien/alien12.scn
+THEN THERE WAS ONE
+PLAINS OF AABADU
+scenario/alien/alien12
+avi/jtalk1.avi
+avi/atran4.avi
+10 150 30
+0
+5 3 2 -1
+
+alien/alien13.scn
+EARTH INTERVENES
+OREMAN FIELDS
+scenario/alien/alien13
+avi/adtemp.avi
+avi/hvad5.avi
+20 100 38
+0
+4 3 2 -1
+
+alien/alien14.scn
+THE ANSWER
+THE UNDERGROUND
+scenario/alien/alien14
+avi/portalis.avi
+avi/crawl.avi
+20 100 38
+0
+5 4 -1
+
+alien/alien15.scn
+FINAL EVACUATION
+DESTINY ONE
+scenario/alien/alien15
+avi/aending.avi
+avi/council.avi
+15 120 66
+0
+5 2 3 -1

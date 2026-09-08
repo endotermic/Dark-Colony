@@ -1,0 +1,30 @@
+size 640 480
+pictures intrface/knobe
+font 0 intrface/mfonto5
+font_offset  0   31
+background intrface/lost
+bright_pushed    8
+bright_highlight 4
+colour erase  0 0 0
+
+
+%        # desc   x    y    w    h
+
+in_text  1   0  240  160   22    6  0  align left  -  read_only
+pushb    9   0  289  263   90   26  -11  2  label centre 1 0  -  remap 0
+
+textmsg   1  CONTINUE
+
+textmsg   2  Connection Lost
+textmsg   3  no init msg
+textmsg   4  wrong mversion
+textmsg   5  bad pnum
+textmsg   6  wrong version
+textmsg   7  unknown
+textmsg   8  Error in save file
+textmsg   9  SERVER LOST!?!
+textmsg  10  SETUP_COMMANDS BAD
+textmsg  11  UNABLE TO CONNECT
+textmsg  12  Error saving game
+
+end

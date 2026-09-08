@@ -1,0 +1,36 @@
+size 640 480
+pictures intrface/knobe
+background intrface/story
+font 0 intrface/mfonto5
+font_offset  0 31
+%font 1 intrface/mfonto2
+%font_offset  1 31
+animation intrface/loadg.dat
+colour erase  0 0 0
+colour sel  0 255 0
+
+%         # desc  x    y    w    h
+scroll    1  0  610  48    10  353         
+pushb     2  0  602  15    26   26  -11  12  -  remap 0
+pushb     3  0  602  408   26   26  -11  10  -  remap 0
+pushb     4  0  453  449   90   26  -11 2  label centre 2 0  -  remap 0
+pushb     5  0  543  449   90   26  -11 2  label centre 1 0  -  remap 0
+%label     6  0   60   44  200   20  label 1  align centre  font 1  -  remap 4
+
+gadget    7  0  602  15    26   26  UP         anim_oneoff
+gadget    8  0  602  408   26   26  DOWN       anim_stopped
+gadget    9  0  453  449   90   26  MEDBUTTON  anim_stopped
+gadget   10  0  543  449   90   26  MEDBUTTON  anim_stopped
+
+%gadget   11  0  527    0  113   97  CHOA       anim_loop unmask - bg erase
+%gadget   12  0  504  436  129   41  CHOB       anim_loop unmask - bg erase
+%gadget   13  0  393    2  128   13  ENCC       anim_loop unmask - bg erase
+%gadget   14  0  438  386  169   38  ENCF       anim_loop unmask - bg erase
+%gadget   15  0   13   87   95   79  SERC       anim_loop unmask - bg erase
+
+banim    16  0  4 4  7 8 9 10  2 3 4 5
+
+textmsg  1  NEXT
+textmsg  2  BACK
+
+end

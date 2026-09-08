@@ -1,0 +1,21 @@
+size 640 480
+text    intrface/intro                  % Text Graphics   (10000+snum)
+font 0    intrface/font                   % Text Graphics   (10000+snum)
+font_offset  0   30
+background intrface/intro
+bright_pushed    8
+bright_highlight 4
+
+
+picture 5       0       0       70      10000
+
+%       number  desc    xpos    ypos    width   height  normal  pushed  flags
+        
+pushb   0       0       0       150     640     50      10001   10002
+pushb   1       0       0       200     640     50      10004   10005
+pushb   2       0       0       250     640     50      10007   10008
+pushb   3       0       0       300     640     50      10010   10011
+pushb   4       0       0       350     640     50      10013   10014
+
+end
+

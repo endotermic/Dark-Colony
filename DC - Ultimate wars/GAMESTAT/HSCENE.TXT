@@ -1,0 +1,158 @@
+Pan Luma                                            .
+Stratus                                             .
+Taar                                                .
+Taar Council                                        .
+Unknown                                             .
+Roswell Taar                                        .
+Unknown                                             .
+Aerogen                                             .
+15
+human/human01.scn
+RED LANDING
+CHRYSE BASIN
+scenario/human/human01
+avi/hvad2.avi
+avi/avhd4.avi
+25 110 30
+0
+2 -1
+
+human/human02.scn
+BASE CAMP ALPHA
+SEN FIELDS
+scenario/human/human02
+avi/desnight.avi
+avi/htran8.avi
+70 70 70
+0
+4 5 3 -1
+
+human/human03.scn
+ALLIED INTERVENTION
+NEW VLADAVOSTOK
+scenario/human/human03
+avi/hvad5.avi
+avi/htran10.avi
+35 180 90
+0
+2 3 -1
+
+human/human04.scn
+ISLAND ASSAULT
+ALLUSION ISLANDS
+scenario/human/human04
+avi/bodys.avi
+avi/htran4.avi
+60 140 75
+0
+5 2 -1
+
+human/human05.scn
+DARKEST HOUR
+CORYNTHE PLATEAU
+scenario/human/human05
+avi/capture.avi
+avi/lizards.avi
+1 115 90
+0
+2 3 5 -1
+
+human/human06.scn
+ANCIENT LEGACY
+THE UNDERGROUND
+scenario/human/human06
+avi/lenz.avi
+avi/sylunge.avi
+0 0 0
+0
+4 5 -1
+
+human/human07.scn
+RETRIBUTION
+BENTOK MOUNTAINS
+scenario/human/human07
+avi/barbq.avi
+avi/htran7.avi
+20 80 30
+0
+4 3 2 -1
+
+human/human08.scn
+SHATTERED FRONT
+BROWNBILL SWAMPS
+scenario/human/human08
+avi/hvad.avi
+avi/htran5.avi
+30 130 85
+0
+5 3 2 -1
+
+human/human09.scn
+EXTERMINATION
+SUNDARR FOREST
+scenario/human/human09
+avi/stratus.avi
+avi/htran3.avi
+75 70 90
+0
+5 3 2 -1
+
+human/human10.scn
+SILENT STRIKE
+MACHEA VALLEY
+scenario/human/human10
+avi/hdtemp.avi
+avi/avhd5.avi
+10 150 30
+0
+4 5 3 2 -1
+
+human/human11.scn
+THE PRIZE
+THE UNDERGROUND
+scenario/human/human11
+avi/kaoxmakt.avi
+avi/atavhd.avi
+10 150 30
+0
+4 5 -1
+
+human/human12.scn
+BLOOD CANYON
+BLOOD CANYON
+scenario/human/human12
+avi/hvad6.avi
+avi/avhd.avi
+30 130 85
+0
+2 3 -1
+
+human/human13.scn
+LAST FRONT
+SOUTHERN HEMISPHERE
+scenario/human/human13
+avi/hjtemp.avi
+avi/htran1.avi
+15 120 66
+0
+5 3 2 3 -1
+
+human/human14.scn
+ULTIMATE DISCOVERY
+THE UNDERGROUND
+scenario/human/human14
+avi/ultimate.avi
+avi/sylunge.avi
+5 160 60
+0
+5 4 -1
+
+human/human15.scn
+FINEST HOUR
+DROMOS THREE
+scenario/human/human15
+avi/hending.avi
+avi/afield.avi
+40 90 130
+0
+3 2 -1

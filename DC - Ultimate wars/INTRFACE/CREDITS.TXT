@@ -1,0 +1,69 @@
+~2DARK COLONY ......................
+
+~2   Take 2 Interactive Software
+              Canada
+
+~2PROGRAMMING.......................
+          ~0Andy Brownbill
+          ~0Kevin Hoare
+          ~0Marc Moorcroft
+          ~0Stephen Orr
+~2ARTWORK...........................
+          ~0Pete Armstrong
+          ~0Greg Bick
+          ~0Ray Larabie
+          ~0Brian Shelton
+~2SCENARIO DESIGN...................
+          ~0Greg Bick
+          ~0Sergei Kuprejanov
+          ~0Blair Renaud
+          ~0Ed Zolnieryk
+~2SOUND.............................
+          ~0Blair Renaud
+~2MUSIC.............................
+          ~0Barry Blum
+~2CINEMATICS SOUND / ANIMATION......
+          ~0Brian Shelton
+~2CINEMATICS MUSIC..................
+          ~0Sergei Kuprejanov
+~2ADDITIONAL ARTWORK AND ANIMATION..
+          ~0Adam Holbrough
+          ~0Sergei Kuprejanov
+~2BETA TESTING......................
+          ~0Suzanne Brownbill
+          ~0Richard Wilson
+          ~0David Maloney
+~2ADDITIONAL CONTRIBUTIONS..........
+          ~0Dave Mann
+          ~0Quincy Roach
+
+
+~2STRATEGIC SIMULATIONS.............
+
+~2PRODUCER..........................
+          ~0Rick White
+
+~2ASSOCIATE PRODUCER................
+          ~0Jon Kromrey
+
+~2LEAD TESTER.......................
+          ~0Jeremy Dang
+
+~2TESTERS...........................
+          ~0Jesse Anacleto
+          ~0Chris Cates
+          ~0George Chastain
+          ~0Cyrus Harris
+          ~0Dave Pope
+          ~0Dan Rivera
+          ~0Chris Smith
+          ~0Dave Wallick
+
+
+~7Visit the Dark Colony web site at
+~7   http://www.darkcolony.com
+
+
+
+
+
