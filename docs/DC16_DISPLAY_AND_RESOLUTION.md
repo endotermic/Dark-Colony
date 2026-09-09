@@ -659,6 +659,52 @@ offscreen surface, and that the blitters follow `screen->width` as advertised.
 is refused — they print an error and abort. If a machine refuses RGB565 at 1024×768 there is no
 second chance in the code.
 
+**Result, run 9 Sep 2026 on Windows 11 (1280×800 desktop).** Stage 1 applied to a copy of
+Classic `dc16.exe` (20 edits), launched from `DC - Classic/`:
+
+* the mode was granted — `PrimaryScreen.Bounds` read **1024×768** while the game ran, and the
+  desktop was restored on exit;
+* the process ran stably for the whole 20 s observation, no assert, `error.log` stayed empty;
+* `pitch == width * 2` holds and the blitters do follow `screen->width`: the loading screen, the
+  intro movie, the `DC` logo, the title, the credits and the whole button grid rendered sharp and
+  at their correct coordinates in the top-left 640×480. A wrong stride would have sheared every
+  one of them diagonally;
+* the 640×480 loading screen and the letterboxed intro AVI sat in the top-left corner on black,
+  exactly as intended for this stage.
+
+One real defect surfaced, which is what the stage exists for — §10.1 below.
+
+#### 10.1 Full-screen `.GIF` backgrounds skew — repaint them, do not centre them **(verified)**
+
+The main menu came up with its logo, title and buttons correct but its **background** wrecked: the
+Mars limb gone, replaced by diagonal red streaks, and the starfield smeared across the full
+1024 px width. Captured side by side with the stock binary at 640×480, which is clean, so this is
+new and not the menu's own animated interference.
+
+Cause, read out of `gifload.c`: the GIF LZW decoder `0x0044EB7C` writes **straight into the locked
+16-bit framebuffer** (`esi = screen->pixels`, colours through `screen->LUT + 0x602`), and its
+output loop has **no row-stride advance at all** — `add esi,2` per pixel at
+`0x0044ECC5`/`0x0044ECCE`, and `add esi,length*2` for a multi-pixel LZW string at `0x0044ECF4`. It
+streams the whole image as one linear run, which is correct only while
+`image width == framebuffer stride`. Give a 640-wide GIF a 1024-stride framebuffer and every row
+lands 384 px early, so the picture shears left and compresses vertically by 640/1024.
+
+**There is no constant to patch here.** The stride is not wrong, it is absent. Two options:
+
+1. **Repaint every full-screen background at the target resolution** (stage 5). Then width equals
+   stride again and the linear write is correct. This is the cheap route and the art work was
+   going to do it anyway — but it is now **required**, not optional, for any screen with a
+   `background` line.
+2. Inject a row advance into the decoder. There is no room in place, so that means a code cave and
+   a jump: a much bigger change than anything else in this plan.
+
+**Correction to the plan this forces:** re-centring a 640×480 script with `size 192 144 640 480`
+(stage 2) fixes where its *widgets* land but **not its background**, which never goes through the
+widget rect. Scripts naming a `background` need their art repainted; scripts without one are fully
+fixed by the `size` edit alone. The ones naming a background are `MAINE` (`intrface/intrface`),
+`NEWGAMEE` and `LOGOE` (`intrface/choo`), `METAE` and `LOADGE` (`intrface/loader`), `BUTTONSE`
+(`intrface/intro`), plus the `.DAT`-driven intro screens.
+
 ### Stage 2 — full-screen chrome, menus centred
 
 * Mouse clamps and centre → 1023/767, 512/384.
@@ -670,9 +716,14 @@ second chance in the code.
 * Menus: edit one line per `INTRFACE/*E` script (§6) from `size 640 480` to
   `size 192 144 640 480`. This centres every menu, lobby and dialog with **no patching**. The
   in-game map view is positioned separately (`proto.c`, stage 3) and is unaffected.
+  **But this only moves the widgets** — the seven scripts with a `background` line also need
+  their art repainted at the target size, because the GIF decoder ignores the widget rect and
+  writes linearly to the framebuffer (§10.1). Until that art exists those screens show a correct
+  button layout over a skewed background.
 
 At the end of stage 2 the game is a genuine 1024×768 application with 640×480 content boxed in the
-middle. This is already a usable state and a sensible place to stop if the art work stalls.
+middle — clean on the background-less screens, and needing the seven repaints of §10.1 for the
+rest. This is already a usable state and a sensible place to stop if the art work stalls.
 
 ### Stage 3 — enlarge the map viewport
 
