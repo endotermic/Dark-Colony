@@ -811,7 +811,7 @@ lookup, where auditing the 80-odd map-dimension references would have cost an af
 
 `Geometry` now refuses a viewport taller than 127 tiles, since that displacement is a signed byte.
 
-### Stage 3 — enlarge the map viewport **(does not work at full size — see §10.3)**
+### Stage 3 — enlarge the map viewport **(capped at 17×16 tiles — see §10.4)**
 
 * `engmain.c` viewport 512 → 896, 448 → 736; tiles 16 → 28, 14 → 23.
 * Occlusion mask `0x7000` → `0x14200`.
@@ -833,7 +833,11 @@ state and not the camera, and the relay server (`Dark-Colony-Server`) never sees
 it does not desync. It *is* a competitive change if a patched and an unpatched client meet in the
 same game.
 
-#### 10.3 Stage 3 does **not** work above ~20×16 tiles — open, cause narrowed to one local **(verified)**
+#### 10.3 Stage 3 does **not** work above ~20×16 tiles — how the cause was narrowed **(verified)**
+
+> **Resolved in §10.4.** The buffer is `draw_terrain`'s own stack lightmap, and there are two caps,
+> not one. Read this section for the method; §10.4 has the answer and corrects the 640×512
+> recommendation made below.
 
 With the §10.2 `lea` fix in place, a full-size 896×736 viewport (28×23 tiles) still dies, now in a
 different place: access violation reading address 0, faulting instruction
@@ -919,10 +923,10 @@ the view origin is derived with the same half-viewport constants the patcher alr
 globals dead stores; that was a bad grep (the pattern needed the trailing `h` of `[004AAAE4h]`) and
 is retracted — they are read.
 
-##### What is left
+##### What was left — and how it was closed
 
-One question: **what writes 0 to `[ebp+0x56]`, and why only above 20×16 tiles.** The step that
-answers it is a hardware watchpoint on that dword — under `cdb`, armed *from the breakpoint's own
+One question remained: **what writes 0 to `[ebp+0x56]`, and why only above 20×16 tiles.** §10.4
+answers it. The step that got there was a hardware watchpoint on that dword — under `cdb`, armed *from the breakpoint's own
 command list* so that it is set with the frame established:
 
 ```
@@ -936,13 +940,113 @@ by shell quoting, so use `-cf <file>`; and `cdb` needs the full path to the targ
 must be aligned"* whenever the computed address is not 4-byte aligned, which `ebp+0x56` is not for
 every `ebp` — two `ba w2` breakpoints covering the dword avoid the problem entirely.
 
-##### Meanwhile: 640×512 is a shippable middle
+##### ~~Meanwhile: 640×512 is a shippable middle~~ — **retracted, see §10.4**
 
-20×16 tiles is **1.46×** the stock 16×14 view area and is verified stable, so
-`--stage 3 --viewport 640x512` is a real, releasable improvement while the above is open. Caveat
-before shipping it: 20×16 has only been exercised on the attract-mode demo map (128×112 tiles).
-The threshold may be map-dependent, and it is not proven until actual missions are played on the
-largest shipped maps.
+This section recommended `--stage 3 --viewport 640x512` (20×16 tiles, 1.46× the stock area) as a
+releasable state. **It is not one.** §10.4 shows a second, *silent* cap at 17 tiles across: 20×16
+does not crash, but it lights part of the view from the wrong neighbours. The largest viewport
+correct on both caps is **17×16 = 544×512**, 1.24× stock. The map-dependence caveat still stands —
+nothing here has been exercised outside the attract-mode demo map (128×112 tiles).
+
+#### 10.4 The buffer, found: `draw_terrain`'s stack lightmap **(verified, watchpoint)**
+
+A hardware watchpoint on `[ebp+0x56]` named the writer in one run. It is **`draw_terrain` itself**,
+at the back-edge of its own first loop:
+
+```
+00453B01  lea eax,[ecx+ecx]              ; 2*ecx
+00453B04  lea esi,[eax+2]                ; 2*ecx + 2
+00453B07  lea eax,[esi*8]                ;  \
+00453B0E  add eax,esi                    ;   >  eax = 144 * (2*ecx + 2)
+00453B10  shl eax,4                      ;  /
+00453B13  lea esi,[edx*8]
+00453B1A  add eax,esi                    ; + 8*edx
+00453B1C  mov esi,[ebp+5Ah]              ; the light value
+00453B20  mov [eax+ebp-144Ah],esi        ; <-- the overflowing store
+00453B27  jmp 00453A5C
+```
+
+The capture: `ecx = 0x11` (17), `edx = 0x0D` after its `inc`, so `eax = 144*36 + 8*12 = 0x14A0`,
+and `ebp - 0x144A + 0x14A0` = **`ebp + 0x56`** — the corrupted local, to the byte. `[ebp+0x56]` read
+`0x0352CC12` at the top of the function and `0` at the fault, with the store at `0x00453B20` the
+only write in between.
+
+##### What the array is
+
+A **half-tile-resolution lightmap on the stack**: dwords, **4 bytes per half-tile column, 144 bytes
+per half-tile row**, based at `ebp-0x1456`. Loop 1 (`0x00453A40`) fills the even half-rows from the
+per-tile light values; loop 2 (`0x00453B32`) interpolates the odd half-rows from its two neighbours
+(`0x00453B7A`…`0x00453B91` sum four corners, `sar edi,2` averages, `0x00453BB3` stores). Later
+passes read it through the same four bases. Ten sites in all, at four displacements — `-0x1456`,
+`-0x1452`, `-0x144E`, `-0x144A` (the pairs are field and next-record) — and the ×144 row-stride
+idiom appears at **42** `shl reg,4` sites across the function.
+
+The frame is `sub esp,0x14CC` with `sub ebp,7Ah`, so `esp = ebp-0x1452` and the array runs
+**upward** from just above `esp` toward the locals, the lowest of which is `[ebp+0x2E]`. That gives
+`0x144A + 0x2E = 5240` bytes of room. Hence two independent caps:
+
+| Cap | Comes from | Limit | Symptom when exceeded |
+|---|---|---|---|
+| **Width** | the 144-byte row stride: `4*(2*ta+2) <= 144` | **`tiles_across <= 17`** | rows bleed into each other — **wrong lighting, silently, no crash** |
+| **Height** | total room: `144*(2*td+2) + 8*ta <= 5240` | **`tiles_down <= 16`** | the store walks past the array into the locals — **crash** |
+
+Stock 16×14 fits both with almost nothing to spare (`34 <= 36` half-columns), which is the
+signature of an array sized for exactly one screen size.
+
+The height cap reproduces the §10.3 bisection exactly, and is the whole explanation of it:
+
+| viewport | tiles | `144*(2*td+2) + 8*ta` | vs 5240 | observed |
+|---|---|---|---|---|
+| 544×480 | 17×15 | 4744 | fits | runs |
+| 640×512 | 20×16 | 5056 | fits | runs |
+| 768×608 | 24×19 | 5952 | **over** | crashes |
+| 896×736 | 28×23 | 7136 | **over** | crashes |
+
+##### Correction to §10.3 and to the README
+
+§10.3 offered 640×512 (20×16) as a clean "shippable middle". **That was wrong** — 20 tiles across
+exceeds the *width* cap of 17. It does not crash, which is why the bisection passed it, but its last
+6 half-columns per row overflow into the next row, so part of the view is lit from the wrong
+neighbours. I only checked that build for stability, never for lighting correctness.
+
+The largest viewport that is correct on **both** caps is **17×16 tiles = 544×512** — 1.24× the stock
+view area, not the 1.46× claimed. Anything beyond that needs the patch below.
+
+##### The fix, and its real cost
+
+Two independent edits, both mechanical, both length-preserving:
+
+1. **Height** — move the array base down and grow the frame: `sub esp,14CCh` → a larger `imm32`
+   (still 6 bytes), and subtract the same delta from all **10** disp32 array bases (each already a
+   7-byte `mov [reg+ebp+disp32]`). For 28×23 the store needs `144*48 + 224 = 7136` bytes, so the
+   delta is `0x780` and the frame becomes `0x1C4C` — about 7 KB on a 1 MB stack.
+2. **Width** — raise the row stride from 144 to 256 bytes, which turns the ×144 idiom into a single
+   `shl reg,8`. The three-instruction sequence is 12 bytes and `shl reg,8` is 3, so it fits with
+   `nop` padding and nothing moves. 256 B/row = 64 half-columns = **30 tiles across**. This is the
+   expensive half: **42 sites**, and each must be confirmed to be the row stride and not some other
+   ×16.
+
+With both applied the array is `144→256` × `(2*td+3)` rows; for 28×23 that is 12 544 bytes, so the
+frame goes to roughly `0x3200`. Worth doing as its own stage with its own bisection, since 42 hand-
+checked sites is exactly the kind of sweep §10.2 warns about.
+
+##### Method note
+
+The three earlier "prologue breakpoint" runs did nothing: **`bp dc16+0x5393d` makes cdb evaluate
+`dc16` as the hex number `0xDC16`**, so the breakpoint went to `0xDC16 + 0x5393D = 0x61553` and
+failed to insert with `Win32 error 0n998`, while `g` returned immediately. Their fault registers
+were still valid — the process simply ran unbroken to the crash. Use the absolute VA (`bp 0045393d`;
+the image loads at its preferred `0x00400000`, confirmed with `lm m dc16`). To keep the log readable,
+filter the legitimate writer inside the watchpoint command, remembering that a data breakpoint
+reports the instruction **after** the write:
+
+```
+bp 0045393d
+g
+bc 0
+ba w2 ebp+0x56 ".if (@eip != 0x0045393d) { .echo CULPRIT; r; kb }; gc"
+g
+```
 
 ### Stage 4 — cursors and movies
 
@@ -1082,7 +1186,7 @@ parse), which de-risks them completely.
 | Menu scripts drifting from the exe | Low: the `size` line is data and the parser accepts both forms (§6, verified). |
 | Multiplayer fairness | Stage 3 changes what a player can see. Not a desync (§10 stage 3), but a balance issue between patched and unpatched clients. Decide whether to gate it. |
 | Growing `.bss` | Not needed — nothing resolution-dependent lives there (§5). |
-| An undiscovered fixed-size render buffer | **Realised.** §10.3: above ~20×16 tiles a bounded write zeroes a `draw_terrain` local and the frame faults. The buffer is not yet identified, so the full-size viewport is blocked; 20×16 (1.46× stock area) is verified stable. |
+| A fixed-size render buffer | **Realised, and identified (§10.4).** `draw_terrain`'s stack lightmap caps the view at **17 tiles across** (silently wrong lighting beyond) and **16 tiles down** (crash beyond). Correct without patching: 17×16 = 544×512. The full-size viewport needs the frame grown (10 sites) and the 144-byte row stride raised (42 sites). |
 
 ---
 
@@ -1128,6 +1232,11 @@ parse), which de-risks them completely.
 | `0x00453770` | `lighting_init` — allocates the "lightplane" at the viewport size, sets `0x0049931C` (viewport width) and `0x005360B0` (viewport pixel count) |
 | `0x00453910` | `draw_terrain` (`lighting.c`); `>> 5` ⇒ 32-px tiles |
 | `0x00453AD4` | **§10.3 fault site** — `mov esi,[esi]` on the ground-layer row-pointer table; base is the local `[ebp+0x56]` |
+| `0x0045393A` | `draw_terrain`: the only write of `[ebp+0x56]` = `[view+0x14] + 0x804` |
+| `0x00453915` / `0x0045391B` | `draw_terrain` frame: `sub esp,14CCh` / `sub ebp,7Ah` |
+| `0x00453B20` | **§10.4 overflowing store** — stack lightmap, `[eax+ebp-144Ah]` |
+| `0x00453A40` / `0x00453B32` | stack-lightmap fill loop (even half-rows) / interpolate loop (odd half-rows) |
+| `0x00453BB3` | interpolated lightmap store, `[ebx+ebp-144Eh]` |
 | `0x0040AB1C` / `0x0040AB2B` | view origin from the camera (half-viewport y / x) |
 | `0x0040AF16` | camera clamp call site |
 | `0x0040B0BC` / `0x0040B0E0` | frame render: view origin (half-viewport y / x) |
@@ -1183,6 +1292,13 @@ folder), plus:
   package, `x86\cdb.exe`) driven by a `-cf` command file, whose register dump identified the one
   corrupted local from `esi = (index << 2) + [ebp+0x56]` in a single capture. Both are worth
   reaching for before sweeping the disassembly: the §10.2 lesson repeats itself here;
+
+* to find the §10.4 buffer: a `cdb` **hardware watchpoint** on the one corrupted local, with the
+  legitimate writer filtered out inside the breakpoint command — it named the store in a single
+  run, after three earlier runs had been silently armed at the wrong address because `bp dc16+...`
+  parses `dc16` as a hex *number*. Then the two caps were derived from the store's own index
+  arithmetic and checked against the four bisection builds, which is what turned one register dump
+  into a closed-form limit on both viewport dimensions;
 
 * to decode `.SPR` (§6.3): reading `juicel.c`'s parser and both blitters rather than pattern-matching
   the files, then validating by re-encoding all 15 088 compressed cells and by rendering cells to PNG

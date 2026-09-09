@@ -29,6 +29,7 @@ import os
 import shutil
 import struct
 import sys
+import textwrap
 
 # ------------------------------------------------------------------- builds
 #
@@ -67,6 +68,13 @@ MINIMAP_W, MINIMAP_H = 96, 84
 MINIMAP_RIGHT_GAP = 640 - 519
 TILE = 32
 
+# draw_terrain's stack lightmap (doc 10.4). Row stride is a hardcoded 144 bytes = 36 half-tile
+# columns, and the array grows upward from just above esp toward the function's own locals, the
+# lowest of which is [ebp+0x2E] - so 0x144A + 0x2E bytes are available.
+LIGHTMAP_ROOM = 0x144A + 0x2E
+LIGHTMAP_MAX_TILES_X = 17          # 4 * (2*tx + 2) <= 144
+LIGHTMAP_MAX_TILES_Y = 16          # 144 * (2*ty + 2) + 8*tx <= LIGHTMAP_ROOM
+
 
 class Geometry:
     def __init__(self, width, height, viewport=None):
@@ -104,6 +112,22 @@ class Geometry:
                 'visible tile rows comes out %d; clip_view_to_map encodes that count a second '
                 'time as a signed 8-bit lea displacement, so it has to fit in 1..127'
                 % self.tiles_y)
+        # draw_terrain 0x00453910 keeps a half-tile lightmap in its own stack frame (doc 10.4).
+        self.lightmap_bytes = 144 * (2 * self.tiles_y + 2) + 8 * self.tiles_x
+        self.warnings = []
+        if self.tiles_x > LIGHTMAP_MAX_TILES_X:
+            self.warnings.append(
+                '%d tiles across exceeds the %d the draw_terrain stack lightmap can hold: its row '
+                'stride is a hardcoded 144 bytes = 36 half-tile columns, so each row will bleed '
+                'into the next and part of the view will be lit from the wrong neighbours. This '
+                'does NOT crash, which is why it is easy to miss. See doc 10.4.'
+                % (self.tiles_x, LIGHTMAP_MAX_TILES_X))
+        if self.lightmap_bytes > LIGHTMAP_ROOM:
+            self.warnings.append(
+                '%d tiles down needs %d bytes of that lightmap but only %d fit below the '
+                'function locals, so the store at 0x00453B20 will walk into them and the game '
+                'WILL crash in draw_terrain (at most %d tiles down are safe). See doc 10.4.'
+                % (self.tiles_y, self.lightmap_bytes, LIGHTMAP_ROOM, LIGHTMAP_MAX_TILES_Y))
         self.mask_bytes = self.view_w * self.view_h // 8
         # Half the viewport in world units: the camera is the centre of the view, and world
         # coordinates run 256 per tile, so half a viewport is tiles * 128.
@@ -368,6 +392,8 @@ def report(path, geom, stage, edits, problems):
     print('%s\n' % path)
     for line in geom.describe():
         print('  %s' % line)
+    for w in geom.warnings:
+        print('\n  !! %s' % '\n     '.join(textwrap.wrap(w, 92)))
     print('\n  stages 1..%d, %d edits\n' % (stage, len(edits)))
     for off, old, new, what in edits:
         print('  0x%-7X %-42s %-22s -> %s' % (off, what, old.hex(' '), new.hex(' ')))

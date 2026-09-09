@@ -18,7 +18,8 @@ Repository contains:
 The purpose of this repository is to make this old game better by some assembly tweaks:
 1) (IN PROGRESS) increase screen resolution from 640x480 to 1024x768 - plan and code-site inventory in `docs/DC16_DISPLAY_AND_RESOLUTION.md` (going straight to 1024x768; 800x600 is not a power of two and would need real multiplies)
    - the 1024x768 display mode runs, and the menus letterbox correctly (`patch_resolution.py --stage 2` + `pad_background.py`)
-   - the enlarged battlefield works up to a 20x16-tile view (1.46x the stock area); above that a still-unidentified fixed-size buffer corrupts a `draw_terrain` local and the frame faults - see section 10.3 of the display doc
+   - the enlarged battlefield is capped by a stack lightmap inside `draw_terrain`: **17 tiles across** (beyond that the lighting is silently wrong) and **16 tiles down** (beyond that it crashes). Correct today without further patching: 17x16 tiles = 544x512, 1.24x the stock view area
+   - going bigger is understood but not done: grow the function's frame and move the array base (10 sites), then raise its 144-byte row stride (42 sites) - sections 10.3 and 10.4 of the display doc
    - the HUD frame still has to be repainted for the full-size view (`hud_layout.py` is the scaffolding)
 2) (DONE) remove the CD check to play campaign
 3) (TODO) increase quality of movies
