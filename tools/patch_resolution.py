@@ -16,7 +16,8 @@ CLI
 Stages are cumulative and mirror the plan in the doc:
     1  display mode, framebuffer stride, clip rect          (game in the top-left corner)
     2  + full-screen chrome, mouse, cursor, loading screens (640x480 content, centred by data)
-    3  + enlarged map viewport and relocated minimap; when the view no longer fits
+    3  + enlarged map viewport and relocated minimap, and the 31 hardcoded 512-byte row
+         advances of draw_terrain's lightplane fill; when the view no longer fits
          draw_terrain's stack lightmap (17x16 tiles), its frame is grown and the PE
          header's stack reserve/commit raised
     4  + movie back-buffer clear                            (default)
@@ -313,6 +314,29 @@ LIGHTMAP_SITES = [
     (3, 0x5303C, '8b942ab2ebffff', 3, _rebase(-0x144E), 'lightmap read, loop 3 (2i+1, 2j+3)'),
     (3, 0x5305D, '8b8428b2ebffff', 3, _rebase(-0x144E), 'lightmap read, loop 3 (2i+3, 2j+3)'),
 ]
+
+
+# The second half of draw_terrain fills the per-pixel lightplane (view+0x1C, one byte per
+# pixel, row stride = viewport width, kept in 0x0049931C) one 32x32 tile at a time: 32 rows of
+# 8 dwords each, and between one row and the next the destination advances by a hardcoded
+# 0x200 = 512 = the stock viewport width. Only the advance from one tile row to the next
+# (0x004542E8) multiplies by 0x0049931C. With a wider view, rows 1..31 of every tile land on
+# the wrong rows of the plane, so the battlefield is covered in a repeating pattern of unlit
+# (black) lines. 30 x `add eax,200h` plus the final `lea edi,[eax+200h]` (doc 10.6).
+AUTO_VA_TO_FILE = 0x400C00
+LIGHTPLANE_ROW_ADVANCE_VAS = [
+    0x453CCB, 0x453CF2, 0x453D15, 0x453D62, 0x453D8E, 0x453DC9, 0x453DFC, 0x453E26,
+    0x453E58, 0x453E93, 0x453EC6, 0x453EF9, 0x453F24, 0x453F61, 0x453F94, 0x453FC7,
+    0x453FFA, 0x45402D, 0x454057, 0x454092, 0x4540B4, 0x4540F6, 0x454129, 0x454145,
+    0x45418F, 0x4541C2, 0x4541F5, 0x454228, 0x45425B, 0x454276,
+]
+SITES += [
+    (3, va - AUTO_VA_TO_FILE, '0500020000', 1, lambda g: g.view_w,
+     'lightplane row advance %d/32 (add eax)' % (i + 1))
+    for i, va in enumerate(LIGHTPLANE_ROW_ADVANCE_VAS)
+]
+SITES.append((3, 0x4542BC - AUTO_VA_TO_FILE, '8db800020000', 2, lambda g: g.view_w,
+              'lightplane row advance 31/32 (lea edi)'))
 
 
 def sites_for(geom):

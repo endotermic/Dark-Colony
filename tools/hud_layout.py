@@ -62,7 +62,12 @@ REGIONS = [
          note='no period beyond ~49 px: this one needs new artwork'),
 ]
 
-KINDS = ('pushb', 'checkb', 'in_text', 'picture', 'list', 'scroll', 'gadget')
+# Every positioned widget kind MAINE uses. `count` is the build/troop/upgrade button with a
+# price counter (80 of them, the whole build panel) and `scount` the money counter; both were
+# missing from the first version of this list, so the first 1024x768 test build had every
+# build button left at x=518/577 -- under the map view, where the terrain paints over them.
+KINDS = ('pushb', 'checkb', 'in_text', 'picture', 'list', 'scroll', 'gadget', 'count', 'scount')
+PANEL_INSERT = 450                 # right-panel rows from here down travel with the bottom bar
 SIZE2 = re.compile(rb'^([ \t]*)size([ \t]+)(\d+)([ \t]+)(\d+)([ \t]*\r?)$', re.M)
 
 
@@ -277,9 +282,14 @@ def parse_widgets(data):
 
 
 def shift(x, y, dx, dy):
-    """Right-panel widgets move sideways; bottom furniture moves down. Never both."""
+    """Right-panel widgets move sideways; bottom furniture moves down.
+
+    The one widget that does both is the money counter (`scount 75` at 524,456): it sits on
+    the panel's bottom corner, which `build` splices below (right_panel insert=450), so it has
+    to follow the art down as well as right.
+    """
     if x >= PANEL_X:
-        return x + dx, y
+        return x + dx, y + dy if y >= PANEL_INSERT else y
     if y >= MSG_Y:
         return x, y + dy
     return x, y
@@ -391,7 +401,7 @@ def cmd_maine(args):
             if (nx, ny) != (x, y):
                 if nx != x:
                     panel += 1
-                else:
+                if ny != y:
                     bottom += 1
                 n = 0
                 for i, t in enumerate(toks):
@@ -421,7 +431,7 @@ def cmd_maine(args):
 
     print('  size %d %d -> size %d %d' % (SRC_W, SRC_H, args.width, args.height))
     print('  %d right-panel widget(s) x += %d' % (panel, dx))
-    print('  %d bottom-bar widget(s)  y += %d' % (bottom, dy))
+    print('  %d bottom-row widget(s)  y += %d  (the money counter is in both)' % (bottom, dy))
     print('  %d widget(s) left where they are (inside the map view)' % left)
     if args.action == 'plan':
         print('\nplan only, nothing written.')

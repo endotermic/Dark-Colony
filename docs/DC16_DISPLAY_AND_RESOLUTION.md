@@ -45,7 +45,7 @@ consistent with the code but were not traced to the end.
   set the display mode. There is no hardware 2-D acceleration path and no scaling anywhere.
 * **Every screen, the in-game HUD included, is a plain-text script** in `INTRFACE/` (§6). Only two
   things about the in-game screen are compiled in: where the map view is rendered and where the
-  minimap is plotted (§5). Everything else — the panel frame art, all 82 HUD widgets and their
+  minimap is plotted (§5). Everything else — the panel frame art, all 163 HUD widgets and their
   coordinates — is data.
 
 Modules involved (link order, boundaries from assert strings): `main.c`, `avi.c`, `proto.c`,
@@ -247,10 +247,12 @@ the viewport width and height back out of it (`[view+0x0A]>>16`, `[view+0x0C]>>1
 width in `0x0049931C` and the pixel count in `0x005360B0`, and allocates a 1-byte-per-pixel
 "lightplane" of exactly that size into `view+0x1C`. `0x0049931C` is then used as the light-plane
 row stride by the object renderer (`0x004542E8`, `0x00465051`, `0x00465401`, `0x004657B1`,
-`0x00465B61`, `0x00465E6A`). **This whole path follows the viewport size automatically** — changing
-the two immediates at `0x00435F46`/`0x00435F61` is enough for it. The occlusion mask
-(`0x00435F88`) is the one that was written as a literal `0x7000` instead, and therefore has to be
-patched by hand.
+`0x00465B61`, `0x00465E6A`). **The allocation and the tile-to-tile addressing follow the viewport
+size automatically** — changing the two immediates at `0x00435F46`/`0x00435F61` is enough for
+them. Two things do not follow: the occlusion mask (`0x00435F88`) was written as a literal
+`0x7000` and has to be patched by hand, and **`draw_terrain`'s fill of the lightplane advances
+from one pixel row of a tile to the next by a literal `0x200` = 512 bytes**, 31 times
+(`0x00453CCB…0x004542BC`), which is the stock viewport width in disguise — see §10.6.
 
 ### Buffers that are **not** resolution-dependent **(verified)**
 
@@ -339,11 +341,15 @@ opaque runs pin the frame down to the pixel:
 | `x 516…639` overall | 24.6 % opaque — the right panel, rest filled by `MAINBUT.SPR` widgets and the engine-drawn minimap |
 | `x 0…639, y 454…479` | 55.1 % opaque — the bottom bar |
 
-`MAINE` places **82 positioned widgets** (47 `pushb`, 13 `picture`, 13 `in_text`, 9 `checkb`) plus
-9 `group`s:
+`MAINE` places **163 positioned widgets** — 82 of the generic kinds (47 `pushb`, 13 `picture`,
+13 `in_text`, 9 `checkb`) plus **80 `count`** (a button with a price counter: every building,
+troop and upgrade in the build panel, at x = 518 / 577, y `112…358`) and **1 `scount`** (the money
+counter, `#75` at (524,456)) — and 9 `group`s. The first version of this paragraph missed the two
+`count` kinds, and so did `tools/hud_layout.py`; see §10.6 for what that looked like in the game.
 
-* **75 widgets at x ≥ 516**, spanning x `516…638`, y `92…449` — the right panel. Tabs at y = 92,
-  unit-order buttons from y = 153, Build button at (516, 422).
+* **156 widgets at x ≥ 516**, spanning x `516…638`, y `92…456` — the right panel. Tabs at y = 92,
+  unit-order buttons from y = 153, Build button at (516, 422), money counter at (524, 456) on the
+  panel's bottom corner.
 * **4 widgets in the bottom bar**: `pushb #147` (4,460) 20×19, `pushb #149` (24,460) 20×19,
   `in_text #148` (50,462) 61×1, `in_text #200` (480,463) 3×1.
 * **3 widgets over the map**: `picture #199` (200,160) 5×5, `in_text #203` (10,440) 72×1,
@@ -530,6 +536,11 @@ Council Wars `dc16.exe` is a different build; only the §3 anchor is given for i
 | DI clamp `set 639` | `0x00450F4D` | `0x5034D` | `C7 05 C0 27 53 00 7F 02 00 00` | `0x503AD` |
 | DI clamp `cmp 479` | `0x00450F6B` | `0x5036B` | `81 FE DF 01 00 00` | `0x503CB` |
 | DI clamp `set 479` | `0x00450F73` | `0x50373` | `C7 05 C4 27 53 00 DF 01 00 00` | `0x503D3` |
+| lightplane row advance 512 (×30, `add eax`) | `0x00453CCB … 0x00454276` | `0x530CB … 0x53676` | `05 00 02 00 00` | `+0x60` each |
+| lightplane row advance 512 (`lea edi`) | `0x004542BC` | `0x536BC` | `8D B8 00 02 00 00` | `0x5371C` |
+
+The last two rows are a *viewport* constant (512 = the stock map view width), not a screen one;
+they were found by symptom in the first visual test (§10.6), not by the sweep.
 
 ### 8.2 Hidden multiplies — the trap
 
@@ -818,8 +829,10 @@ lookup, where auditing the 80-odd map-dimension references would have cost an af
 * Render dest stride 640 → 1024.
 * `proto.c` map view rect 512 → 896, 448 → 736 (keep x=4, y=6).
 * Minimap origin `0x220E` → `0x370E`, both strides 640 → 1024.
+* `lighting.c` lightplane fill: the 31 per-row advances `0x200` → 896 (§10.6).
 
-The lightplane and its stride follow automatically (§5), so no edit is needed there.
+The lightplane *allocation* and its stride variable follow automatically (§5); the fill loop's
+row advance does not, and was the "repetitive black lines" of the first visual test (§10.6).
 
 Then re-derive, from the disassembly, everything the terrain and object renderers clamp against.
 `0x00435E24` (clip view to map) builds `make_rect(view_x>>5, map_h - (view_y>>5) - 14, 16, 14)`
@@ -1123,6 +1136,97 @@ crash test under `cdb`, and exclusive-mode DirectDraw gives no screenshot. The p
 tight, but a look at the right-hand third of the view during a night phase would close it. Also
 still only exercised on the attract-mode demo map (128×112 tiles).
 
+#### 10.6 First look at the picture: the lightplane's hidden 512, and the `count` widgets **(verified)**
+
+The first time a person looked at the 28×23-tile battlefield (9 Sep 2026, evening; stage 3 exe,
+`hud_layout.py build` frame, `hud_layout.py maine apply` script) the report was: the whole screen
+is used, nothing hangs, the unit-order icons are where they should be — but **the build buttons
+are not visible at all**, and **the screen is full of repetitive black lines**. Both had one-line
+causes, and both were found in the disassembly without another launch.
+
+##### The black lines: `draw_terrain` fills the lightplane with a hardcoded 512-byte row stride
+
+`draw_terrain` `0x00453910` does not draw terrain pixels at all. Its first half is the stack
+lightmap of §10.4/10.5; its second half (`0x00453BC4…0x004542E0`, the per-tile loop) **fills the
+lightplane** — the 1-byte-per-pixel buffer at `view+0x1C` that `lighting_init` allocates at the
+viewport size — one 32×32 tile at a time. Per tile it copies 32 rows of 8 dwords from the fade
+table `0x00533C90` (`rep movsd`, `ecx = 8`), and between one row and the next it does
+
+```
+00453CCB  05 00 02 00 00        add  eax,200h        ; next lightplane row = +512 bytes
+...                                                  ; 30 of these
+004542BC  8D B8 00 02 00 00     lea  edi,[eax+200h]  ; and the 32nd row
+```
+
+The advance from one **tile** to the next (`[ebp+0x52] = 0x20`, `0x004542D9`) and from one
+**tile row** to the next (`imul eax,[0x0049931C]`, `0x004542E8`) both use the real width; only the
+31 pixel-row steps inside a tile are the literal `0x200` = 512, i.e. the stock viewport width
+written as a constant. With an 896-wide plane, rows 1…31 of every tile land at byte offsets
+`k*512` instead of `k*896`: row `k` of the tile ends up on plane row `⌊k·4/7⌋` at a column offset
+of `(k·512) mod 896`, so four out of every seven plane rows get a 32-byte slice of *some* tile's
+light while the other three keep whatever the allocator left (zero; *inferred* that this reads as
+the darkest level — the tester saw black). Every tile repeats the same pattern relative to its own
+origin, hence a perfectly regular grid of unlit lines over the whole battlefield. The tile *pixels* underneath are correct:
+they are drawn by `0x0045011C` (`tile.c`/`juicel.c`, see below), which takes its destination
+stride from `view+0x10` and reads the light back through `0x004538C0` = `plane + y*[0x0049931C] +
+x`, the right formula — it was only ever fed a plane filled at the wrong stride.
+
+This is the §8.2 trap in a third form. Not a 640 and not a strength-reduced multiply, but a
+*viewport* constant, 512, encoded as a plain `imm32`; a search for `280h`/`500h` cannot see it,
+and the "sweep for `shl` after a ×5 idiom" cannot either. What found it was reading the function
+that owns the buffer end to end after the symptom was known. A grep for `,200h` over
+`AUTO 0x430000…0x46FFFF` afterwards shows the 31 sites and nothing else resolution-shaped: the
+other hits are the `sprite->xsize < 512` asserts at `0x0043623E`ff (`engmain.c` line 236), a
+`mov ebx,200h` buffer length at `0x00457A18`, and struct offsets.
+
+**Fix:** `patch_resolution.py` stage 3 now rewrites all 31 to the viewport width
+(`05 80 03 00 00` / `8D B8 80 03 00 00` for 896). Same length, no code motion; ENGEXP16 takes them
+at `+0x60`, byte-verified in the stock file. Stage 3 is now 52 sites, plus the 11 lightmap-frame
+sites and the 2 PE header fields when the frame is grown: **107 edits** in total for 1024×768
+(was 76).
+
+##### The tile drawer, for the record
+
+The function that does put terrain pixels on screen is `0x0045011C` (between `juicel.c` and
+`lighting.c` in link order, so `tile.c`/`mapit.c`). It takes the view struct in `eax` and:
+
+* reads the tile counts back out of the viewport size (`[view+0x0A]>>16>>5`, `[view+0x0C]>>16>>5`),
+  the destination stride from `[view+0x0E]>>16` (= the u16 at `+0x10`) and a **zoom shift** from
+  the u16 at `+0x12` (`edx = 5 - zoom`, tile pixel size `32 >> zoom`);
+* computes each tile's destination as `dest + ((row<<zoom)*stride + (col<<zoom))*2`
+  (`0x004501F0…0x00450218`, into `0x00499314`), so it is resolution-independent;
+* dispatches the actual 32×32 blit through two function tables indexed by zoom and by two tile
+  flags: `0x0048C14C` (`call [edx+eax*4+0048C14Ch]`, `0x004503E1`) and `0x0048C15C`
+  (`0x004502E7`) — another pair of `DGROUP → AUTO` pointer tables that no call graph shows;
+* builds the **occlusion mask** (`view+0x18`, "kev: maskbuffer") as it goes: for each tile it
+  writes `32 >> zoom` dwords, one per pixel row, each dword being the 32 pixels of that row of the
+  tile passed through the bit table at `0x005326A4` (built by `0x004500B0`); the mask row stride
+  is `tiles_across * 4` bytes (`0x00450384`, `0x004503AF`) and the tile-row advance
+  `tiles_across * (32>>zoom) * 4` (`0x004503FA`). So the mask is `tiles_across*4 × tiles_down*32`
+  bytes = `0x7000` at 16×14 and `0x14200` at 28×23 — the layout derives from the view struct and
+  only the allocation size (`0x00435F88`) is literal, as stage 3 already assumed.
+
+##### The build buttons: two widget kinds the HUD tool did not know
+
+`MAINE` has **80 `count` widgets** — every building, troop and upgrade button in the build panel,
+a `pushb` with a price counter — and one `scount`, the money counter. Neither kind was in
+`hud_layout.py`'s `KINDS`, so `maine apply` moved the 75 generic panel widgets to x ≥ 900 and left
+all 81 of these at x = 518 / 577 / 524, which at 1024×768 is the middle of the map view. The
+widget layer paints them, the terrain paints over them next frame: "not visible at all". The unit
+order buttons (`pushb`/`checkb`) had moved, which is why those looked right.
+
+Also visible in the same test data: §6.1 above previously counted "82 widgets" for the same
+reason. Corrected there. `hud_layout.py maine` now shifts 156 panel widgets right; the money
+counter additionally moves down with the panel's bottom corner (`build` splices the panel's new
+rows in at y = 450, above it), so `scount #75` goes (524,456) → (908,744). `plan` output for the
+corrected transform: 156 × `x += 384`, 7 × `y += 288` (4 bottom-bar widgets, the 2 message lines,
+and the money counter, which is in both sets), 1 left alone (`picture #199`).
+
+**Still unverified after this round:** the actual look of the lighting at the right-hand edge
+(§10.5's open question), the mechanically spliced bottom bar, and whether the `count` widgets'
+`bg erase` boxes and price text sit correctly on the spliced panel art. One launch answers all
+three.
+
 ### Stage 4 — cursors and movies
 
 * Cursors are `IDirectDrawSurface` blits at 1:1, so they simply look small. Redrawing
@@ -1258,6 +1362,7 @@ parse), which de-risks them completely.
 | No fallback if 1024×768×16 is refused | Real. `set_mode_16` / `create_surfaces` abort. Mitigate by keeping the unpatched exe alongside, and consider adding a mode-list walk later. |
 | `pitch != width * 2` on the offscreen surface | The code ignores `lPitch` everywhere. For a `SYSTEMMEMORY` surface DirectDraw has always returned a tight pitch; 1024 px = 2048 B is a friendlier alignment than 1280 B, so this is lower risk after the change than before. Verify once in stage 1. |
 | A missed hardcoded 640 | The §8.2 sweep was systematic but §8.3 lists three unresolved items. Symptom would be a skewed or torn band rather than a crash. |
+| A missed hardcoded **512 / 448** (viewport constants) | **Realised once (§10.6):** `draw_terrain` steps the lightplane by a literal 512 per row; symptom was a regular grid of black lines, not a crash. Fixed (31 sites). Any other buffer sized from the viewport and filled by a hand-unrolled loop is a candidate for the same. |
 | Menu scripts drifting from the exe | Low: the `size` line is data and the parser accepts both forms (§6, verified). |
 | Multiplayer fairness | Stage 3 changes what a player can see. Not a desync (§10 stage 3), but a balance issue between patched and unpatched clients. Decide whether to gate it. |
 | Growing `.bss` | Not needed — nothing resolution-dependent lives there (§5). |
@@ -1306,7 +1411,14 @@ parse), which de-risks them completely.
 | `0x0044FFC0` | `image.c` full-screen 8-bit page (`malloc(W*H)`) |
 | `0x00450E20` / `0x00450E80` | mouse absolute / DirectInput poll + clamp |
 | `0x00453770` | `lighting_init` — allocates the "lightplane" at the viewport size, sets `0x0049931C` (viewport width) and `0x005360B0` (viewport pixel count) |
-| `0x00453910` | `draw_terrain` (`lighting.c`); `>> 5` ⇒ 32-px tiles |
+| `0x00453910` | `draw_terrain` (`lighting.c`); `>> 5` ⇒ 32-px tiles. **Fills the lightplane**, does not draw pixels (§10.6) |
+| `0x00453CCB … 0x00454276`, `0x004542BC` | `draw_terrain`: the 31 lightplane row advances, literal `0x200` = 512 — **patched to the viewport width** (§10.6) |
+| `0x004542D9` / `0x004542E8` | `draw_terrain`: tile advance (`+0x20`) / tile-row advance (`32 * [0x0049931C]`) — the two that were already width-correct |
+| `0x0045011C` | **terrain tile drawer** (`tile.c`): dest from `view+0x10` stride, zoom shift from `view+0x12`, builds the occlusion mask (§10.6) |
+| `0x004538C0` | `light_at(view, x, y)` = `[view+0x1C] + y*[0x0049931C] + x` |
+| `0x0048C14C` / `0x0048C15C` | `DGROUP → AUTO` tile-blit dispatch tables, indexed by zoom and tile flags (`0x004503E1` / `0x004502E7`) |
+| `0x005326A4` | 256-byte pixel→mask-bit table, built by `0x004500B0` |
+| `0x0049931C` / `0x005360B0` | lightplane width / pixel count (set by `lighting_init`) |
 | `0x00453AD4` | **§10.3 fault site** — `mov esi,[esi]` on the ground-layer row-pointer table; base is the local `[ebp+0x56]` |
 | `0x0045393A` | `draw_terrain`: the only write of `[ebp+0x56]` = `[view+0x14] + 0x804` |
 | `0x00453915` / `0x0045391B` | `draw_terrain` frame: `sub esp,14CCh` / `sub ebp,7Ah` |
