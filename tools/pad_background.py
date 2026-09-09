@@ -29,6 +29,10 @@ This is a stop-gap for *menus*. It is deliberately NOT applied to MAINE, the in-
 that would keep the map viewport at its old 512x448, which is the opposite of the point. MAINE
 needs INTRFACE.GIF genuinely redrawn with a 896x736 hole.
 
+Council Wars: run it on INTRFACE first and then on `exp/intrface`, the expansion's override
+scripts (their GIFs are found in the base INTRFACE, already padded by the first run) and
+`exp/gamestat`'s two scene files.
+
 CLI
     python pad_background.py plan   INTRFACE_DIR [--width 1024 --height 768] [--only NAME]
     python pad_background.py apply  INTRFACE_DIR [--width 1024 --height 768] [--only NAME]
@@ -62,7 +66,15 @@ POSITIONED = {b'pushb', b'checkb', b'in_text', b'picture', b'list', b'scroll', b
 # whose position is data: the `frame x y` line of every mission block in these files
 # (scenario.c 0x00429B67ff, sscanf "%d %d %d" -> gs+0x14D4/0x14E0/0x14DC; main.c 0x00403732
 # then pic_create(x=gs+0x14E0, y=gs+0x14DC)). Doc 10.7. The x/y assignment is inferred.
-SCENE_FILES = ('HSCENE.TXT', 'GSCENE.TXT', 'HTSCENE.TXT', 'GTSCENE.TXT')
+SCENE_FILES = ('HSCENE.TXT', 'GSCENE.TXT', 'HTSCENE.TXT', 'GTSCENE.TXT',
+               # Council Wars: the Aerogen and Council campaigns, in exp/gamestat
+               'HXSCENE.TXT', 'GXSCENE.TXT')
+
+# Council Wars (ENGEXP16.EXE) resolves every data path through a wrapper that tries `exp/<path>`
+# before `<path>` (doc 10.10), so `exp/intrface` holds override *scripts* (bintroe, introe,
+# shumane with the expansion's button layout) whose `background` GIFs still live in the base
+# INTRFACE. When a script's GIF is not beside it, look in the game root's INTRFACE.
+OVERRIDE_PARENT = 'exp'
 FRAME_XY = re.compile(rb'^([ \t]*)(\d+)([ \t]+)(\d+)([ \t]+)(\d+)([ \t]*\r?)$')
 
 HUD_SCRIPT = 'maine'
@@ -110,14 +122,39 @@ def scan(intrface_dir, only=None, include_hud=False):
             continue
         if only and fn.lower() != only.lower():
             continue
-        gif = os.path.join(intrface_dir, bg.group(1).decode().upper() + '.GIF')
-        if not os.path.exists(gif):
+        gif = find_gif(intrface_dir, bg.group(1).decode())
+        if not gif:
             skipped.append((fn, 'background %s has no .GIF' % bg.group(1).decode()))
             continue
         with Image.open(gif + '.bak' if os.path.exists(gif + '.bak') else gif) as im:
             gw, gh = im.size
         jobs.append((fn, gif, gw, gh))
     return jobs, skipped
+
+
+def base_intrface_dir(intrface_dir):
+    """For an `exp/intrface` override folder, the game root's INTRFACE; else None."""
+    d = os.path.abspath(intrface_dir)
+    parent = os.path.dirname(d)
+    if os.path.basename(parent).lower() != OVERRIDE_PARENT:
+        return None
+    root = os.path.dirname(parent)
+    names = {fn.lower(): fn for fn in os.listdir(root)}
+    fn = names.get('intrface')
+    return os.path.join(root, fn) if fn else None
+
+
+def find_gif(intrface_dir, name):
+    """The background GIF `name` (as written in the script) beside the scripts, or in the base
+    INTRFACE when the scripts are `exp/` overrides. Case-insensitive; None if absent."""
+    want = name.upper() + '.GIF'
+    for d in (intrface_dir, base_intrface_dir(intrface_dir)):
+        if not d:
+            continue
+        names = {fn.upper(): fn for fn in os.listdir(d)}
+        if want in names:
+            return os.path.join(d, names[want])
+    return None
 
 
 def gamestat_dir(intrface_dir):
@@ -303,13 +340,15 @@ def cmd_plan(args, jobs, skipped):
         gifs.setdefault(gif, []).append((script, gw, gh))
     print('  %d script(s), %d distinct background GIF(s):\n' % (len(jobs), len(gifs)))
     for gif, entries in sorted(gifs.items()):
-        with Image.open(gif) as im:
+        with Image.open(gif + '.bak' if os.path.exists(gif + '.bak') else gif) as im:
             gw, gh = im.size
         dx, dy = (args.width - gw) // 2, (args.height - gh) // 2
         fits = gw <= args.width and gh <= args.height
-        print('  %-26s %4dx%-4d -> %dx%d, content at (%d,%d)%s'
+        elsewhere = os.path.dirname(os.path.abspath(gif)) != os.path.abspath(args.dir)
+        print('  %-26s %4dx%-4d -> %dx%d, content at (%d,%d)%s%s'
               % (os.path.basename(gif), gw, gh, args.width, args.height, dx, dy,
-                 '' if fits else '   TOO LARGE, would be skipped'))
+                 '' if fits else '   TOO LARGE, would be skipped',
+                 '   (in the base INTRFACE)' if elsewhere else ''))
         for script, _, _ in entries:
             _, _, moved, warns = edit_script(os.path.join(args.dir, script), dx, dy, gw, gh,
                                              dry_run=True)
@@ -328,7 +367,8 @@ def cmd_plan(args, jobs, skipped):
     scenes = scene_files(args.dir)
     if scenes:
         dx, dy = (args.width - 640) // 2, (args.height - 480) // 2
-        print('\n  mission globe markers (GAMESTAT/*SCENE.TXT `frame x y` lines):')
+        print('\n  mission globe markers (%s/*SCENE.TXT `frame x y` lines):'
+              % os.path.basename(os.path.dirname(scenes[0])))
         for path in scenes:
             src = path + '.bak' if os.path.exists(path + '.bak') else path
             print('  %-26s %d marker(s) +(%d,%d)'

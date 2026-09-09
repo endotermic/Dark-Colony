@@ -9,8 +9,9 @@ the movie player (§1–§7) — followed by the complete inventory of resolutio
 All addresses are virtual addresses in Classic `dc16.exe` (`VA = file_offset + 0x400C00` for the
 `AUTO` code section, `VA = file_offset + 0x402800` for `DGROUP`). Council Wars `ENGEXP16.EXE`
 (MD5 `50419d438427d31341057e9723724f66`) is the same code base; §8 lists its file offsets too, all
-byte-verified. Council Wars `dc16.exe` (MD5 `4180f6e9d01925b23eac0eb335e0b95e`) is a different
-build and is *not* covered except for the two globals in §3.
+byte-verified, and §10.10 has the three places where it is not a plain shift of Classic and how
+the patch was carried over. Council Wars `dc16.exe` (MD5 `4180f6e9d01925b23eac0eb335e0b95e`) is a
+different build and is *not* covered except for the two globals in §3.
 
 Calling convention is Watcom register-based: the first four arguments in `eax, edx, ebx, ecx`.
 Facts marked **(verified)** were read directly from the disassembly; facts marked *(inferred)* are
@@ -466,9 +467,14 @@ with a hardcoded 640×480 extent and a **1280-byte row pitch** (`add ecx, 0x500`
 ## 8. Complete inventory of resolution-dependent sites
 
 Verified by disassembly and byte-checked in the file. `ENGEXP16.EXE` offsets were located by
-relocation-tolerant byte matching and all resolve to a single uniform shift:
+relocation-tolerant byte matching and, for the sites of these tables, resolve to a single shift:
 **`ENGEXP16 = Classic + 0x60` in `AUTO` from `0x6000` onward, `+0` below it, `+0x228` in
-`DGROUP`** (98.3 % of `AUTO 0x7000…0x50000` is byte-identical at that shift).
+`DGROUP` *file* offsets** (98.3 % of `AUTO 0x7000…0x50000` is byte-identical at that shift).
+The rule is not exact everywhere: §10.10 has the complete delta map of the code section (a
+`−0x20` stretch in `main.c` that holds two menu-furniture sites), the distinction between the
+`+0x228` file shift and the `+0x28` *virtual-address* shift of the DGROUP data the code names, and
+the one site whose stock value differs. `tools/patch_resolution.py` carries all of that in its
+`BUILDS` table.
 
 Council Wars `dc16.exe` is a different build; only the §3 anchor is given for it.
 
@@ -621,9 +627,9 @@ screen and the panel art has 288 px of empty space below it. Fixing that is art 
 
 ## 10. Staged plan
 
-Each stage ends in a runnable binary, so a regression can be bisected to one stage. Mirror every
-stage in `ENGEXP16.EXE` using the `+0x60` / `+0x228` rule of §8 and re-verify the bytes before
-writing.
+Each stage ends in a runnable binary, so a regression can be bisected to one stage. Every stage
+is mirrored in `ENGEXP16.EXE` by `patch_resolution.py`'s `BUILDS` table (the `+0x60` rule of §8
+plus the fixups of §10.10), and the expected-byte check re-verifies every site before writing.
 
 ### Stage 0 — reproducible patching (done)
 
@@ -638,7 +644,8 @@ and **it, not §8, is now the authoritative copy of the site table**. It
   the full 12-byte sequence, because that contains the dimensions and so stops matching the moment
   the file is patched, which would break `verify`. The 4-byte prefix is unique in all three stock
   builds *and* in a patched one;
-* identifies the build by MD5, and derives `ENGEXP16` offsets with the `+0x60` rule;
+* identifies the build by MD5, and derives `ENGEXP16` offsets with the `+0x60` rule and the
+  per-build fixups of §10.10 (`BUILDS`);
 * applies each site as `(file_offset, expected_bytes, new_bytes)` and **refuses to write unless
   every selected site still holds its expected bytes** — that check is what makes relying on the
   shift rule safe rather than a guess, and it makes a double-apply or a wrong build fail loudly;
@@ -1342,7 +1349,7 @@ skipped).
 
 **ENGEXP16 note.** The two `netopt` sites sit at `−0x20`, not `+0x60`, and the credits' stock y
 differs (`0xE6` = 230, not 200): `main.c` is not a uniform shift there. The expected-byte check
-catches it; stage 6 must re-derive those three.
+caught it; §10.10 re-derived those three and the patcher carries them as build fixups.
 
 #### 10.8 Movies: the frame path, and why stretching needed a re-route **(verified in code; game test pending)**
 
@@ -1414,9 +1421,9 @@ The first draft of the `0x0040712E` rewrite used `je 4071F7; jmp rel8 4071EC` �
 is 178 bytes forward and does not fit a signed byte (it would have landed at `0x4070EC`); the
 `mov edx,eax; jmp rel32 4071E0` form above avoids a second jump entirely. The Blt block carries
 three absolute data addresses (`0x489718`, `0x488E00`, `0x4A5680`), so `patch_resolution.py` builds
-both its expected and its replacement bytes from the build's DGROUP shift; ENGEXP16 turns out to
-shift `0x488Exx` by `+0x28` and the `.bss` address not at all, so stage 6 must confirm that block
-by hand.
+both its expected and its replacement bytes from the build's DGROUP and `.bss` shifts; ENGEXP16
+shifts `0x488Exx`/`0x4897xx` by `+0x28` and the `.bss` address not at all (§10.10), and the block
+matched byte for byte at `0x7274` once the table said so.
 
 **Risks.** The movie surface is requested as `VIDEOMEMORY` (`0x4040`, from `[ebp-4]=1` in flip
 mode); if all 10 attempts fail, `avi_create_surfaces` returns 0 and `main.c` skips the movie
@@ -1444,6 +1451,77 @@ All four → the new minimap x (903), stage 3 of `patch_resolution.py`. ENGEXP16
 So the minimap's x is written **seven** times in three ways — two framebuffer byte offsets
 `(6·640+519)·2`, one rect built at init and reused, four bare immediates — and the y (6) twice
 as a rect argument, once as its bottom edge 90, and inside the two byte offsets.
+
+#### 10.10 Stage 6: the same patch on Council Wars `ENGEXP16.EXE` **(verified in the file; game test pending)**
+
+With the Classic build confirmed in five test passes, the whole patch was carried over to the
+expansion's executable. Running the patcher against stock `ENGEXP16.EXE` refused to write on
+exactly **five** of the 165 edits, all three of them kinds of deviation that the `+0x60`/`+0x228`
+rule of §8 does not describe:
+
+| Site(s) | Rule said | Found | Cause |
+|---|---|---|---|
+| `netopt` globe PIC x, y (`0x00405C71/60` Classic) | `+0x60` → `0x50D1/0x50C0` | at **`0x5051/0x5040`** (`−0x20`); the stock values 336/24 unchanged | `main.c` is `0x20` bytes shorter from just after the intro screens up to `avi.c` — the same stretch that put the CD-button patch at `0x507F` instead of `0x509F` (CLAUDE.md) |
+| `bintro` credits TTY y (`0x00404E99`) | `bb c8 00 00 00` (200) at `+0` | `bb e6 00 00 00` (**230**) at `+0`; the x (178) matches | a different stock layout for the expansion's own `exp/intrface/credits.txt`; the target is still stock + 144 |
+| flip-flag store `mov [0x488E0C],ebx` (`0x0663D`) | `+0x228` in DGROUP | `mov [0x488E34],ebx` (**`+0x28`**) | see below |
+| the 62-byte `BltFast` block (`0x07214`) | `0x489718`, `0x488E00`, `0x4A5680` `+0x228` | `0x489740`, `0x488E28` (**`+0x28`**), `0x4A5680` (**`+0`**) | see below |
+
+**Why `+0x228` and `+0x28` are both right.** ENGEXP16's `AUTO` section has a raw size of
+`0x7E400` against Classic's `0x7E200`, so the *file pointer* of every later section (`.idata`,
+`DGROUP`, `.reloc`, `.rsrc`) is `+0x200`, while the sections' *virtual addresses* are identical
+(`DGROUP` at `0x482000`, `.bss` at `0x49A000` in both). Inside `DGROUP` the data the patched code
+names has moved by `+0x28` (the dimension anchor: VA `0x488DB4` → `0x488DDC`, i.e. file `0x865B4`
+→ `0x867DC` = `+0x200 +0x28`; the movie surface, its flag and the primary likewise). The `.bss`
+variables the patch names — `yoff 0x4A5680` and the DirectInput mouse position `0x5327C0/C4` —
+sit at the same VA in both builds. So a site's *file offset* moves by the AUTO rule, a DGROUP
+*address in its bytes* by `+0x28`, and a `.bss` address by `+0`; the earlier `+0x228` was the
+anchor's file shift misread as a VA shift.
+
+**The code-section delta map.** Matching 32-byte windows of Classic at every `0x40` step against
+ENGEXP16 (±`0x200`) gives, ignoring one-window blips at jump tables: `+0` from `0x400` to about
+`0x4500`; `−0x20` from about `0x4800` to `0x5880` (`main.c`'s network screen and everything up to
+`avi.c`); `+0x60` from `0x5880` (VA `0x406480`) to the end. The patcher's threshold of `0x5000`
+therefore mis-derives only sites in `0x4800…0x5880`, of which the site table has exactly the two
+`netopt` ones. The 23 `TTY`/`PIC` call sites of §10.7 are one-to-one between the builds with the
+same 44 immediates except the two moved and the one changed above, so the expansion adds no
+code-positioned menu furniture of its own.
+
+**What the patcher does now.** `BUILDS` is a table per build of `(AUTO shift, DGROUP VA shift,
+.bss VA shift, fixups)`; a fixup overrides a site's file offset, its expected bytes and/or its
+value function, and everything else still goes through the same expected-byte check. The two
+sites that name a `.bss` address (`DirectInput clamp: X/Y maximum`) and the flip-flag store now
+build their expected bytes from the shifts too, so the table has no hidden absolute address left.
+Result: `plan` prints **165 edits** for both builds with no mismatch; the 24 bytes of code before
+every ENGEXP16 site differ from Classic in at most four bytes (relocated operands), so each match
+is the same instruction in the same function, not a coincidence. `verify` after `apply` reports
+18/66/67/10 patched per stage and the two PE stack fields patched, i.e. the same tallies as
+Classic.
+
+**What `exp/` is.** `ENGEXP16` opens every data file through a wrapper (`0x004063E4`, string
+`"exp/"` at `0x4826D0`) that first tries `exp/<path>` and, if that open fails, `<path>`. So the
+expansion overrides individual files without touching the base install: `exp/intrface/bintroe`,
+`introe`, `shumane` (the intro screens with the campaign buttons rearranged into one column at
+x = 228, and the briefing screen with one button commented out) — their `background` GIFs are the
+base `INTRFACE/INTRG.GIF`, `INTRO.GIF`, `SHUMAN.GIF` — and `exp/gamestat/hxscene.txt`,
+`gxscene.txt` (the Aerogen and Council campaigns, eight mission blocks each, with the same
+`frame x y` globe-marker line as §10.7). `pad_background.py` therefore learnt to look for a
+script's GIF in the game root's `INTRFACE` when the script lives in `exp/intrface`, and to treat
+`HXSCENE`/`GXSCENE` as scene files; the Council Wars data build is two runs, `INTRFACE` first
+and `exp/intrface` second.
+
+**Test build** `C:\Users\nika\Documents\Dark-Colony-CW-1024` (a copy of `DC - Council wars`):
+`patch_resolution.py apply` (165 edits, `.bak` kept), `pad_background.py apply` on `INTRFACE`
+(29 scripts, 18 GIFs, both loading bitmaps, four scene files) and on `exp/intrface` (3 scripts,
+2 scene files), `hud_layout.py build` + `maine apply`. Because the expansion ships the Classic
+`INTRFACE.GIF`, `MAINE`, `MAINBUT.SPR`, menu scripts and scene files unchanged, all 54 base data
+outputs are **byte-identical** to the confirmed Classic test build; only the three `exp/` scripts
+and the two `exp/` scene files are new. **Not yet run by the maintainer**; the things a first
+look should confirm are the expansion-only screens (the one-column intro menu, the Aerogen and
+Council briefing globes and their markers), the credits scroll, and that the movies play through
+the rerouted path — everything else is the Classic build's data on the same code.
+
+Still open under stage 6: Council Wars `dc16.exe` (a different build: only the §3 anchor
+transfers, so the whole site table would have to be re-derived in Ghidra), and the map editor.
 
 ### Stage 4 — cursors and movies
 
@@ -1563,7 +1641,9 @@ parse), which de-risks them completely.
 
 ### Stage 6 — parity and release
 
-* Apply every stage to `ENGEXP16.EXE` and diff-verify.
+* ~~Apply every stage to `ENGEXP16.EXE` and diff-verify.~~ **Done in §10.10** (165 edits, three
+  build fixups, `exp/` overrides handled by `pad_background.py`); game test by the maintainer
+  pending.
 * Council Wars `dc16.exe`: re-derive all offsets in Ghidra (only the §3 anchor transfers).
 * The map editor (`maped_by_ozy_ns_v1.2PL.exe`) is a separate binary with its own 640×480
   assumptions and is **not** covered here.
@@ -1698,7 +1778,12 @@ folder), plus:
   strides of §8.2, which a search for `280h` alone does not find;
 * relocation-tolerant byte matching of a window around each Classic site against `ENGEXP16.EXE`
   and Council Wars `dc16.exe` (masking any dword in `0x401000…0x542000`) to produce the
-  cross-binary offsets, then a byte-for-byte re-check of every match;
+  cross-binary offsets, then a byte-for-byte re-check of every match; for §10.10 the same idea
+  run as a sweep (a 32-byte window every `0x40` bytes, searched ±`0x200`) to get the delta *map*
+  of the whole code section rather than one offset per site, plus `dumpbin -HEADERS` of both
+  builds to separate file-pointer shifts from virtual-address shifts, and a `dumpbin -ALL -DISASM`
+  of `ENGEXP16.EXE` (`engexp16.asm` in the development folder) to compare the `TTY`/`PIC` call
+  sites and read the `exp/` opener;
 * reading `INTRFACE/MULTIE~1.TXT`, `LOPTE` and `MAINE` directly, which is how the interface
   scripts turned out to be editable text;
 * to identify the HUD: resolving every `intrface/*`, `sprites/*`, `animate/*`, `gamestat/*` string

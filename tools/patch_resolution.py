@@ -26,7 +26,9 @@ Stages are cumulative and mirror the plan in the doc:
          320x180 movie surface + a stretching IDirectDrawSurface::Blt (16:9 letterbox
          across the full width)                             (default)
 
-Stages 5 and 6 of the plan are data and art only; nothing here touches them.
+Stage 5 of the plan is data and art only; nothing here touches it. Stage 6 (parity) is the
+BUILDS table below: Council Wars ENGEXP16.EXE takes the same 165 edits through its own offset
+rule and three site fixups (doc 10.10).
 To revert, restore the .bak that `apply` writes.
 """
 
@@ -46,24 +48,46 @@ import textwrap
 # The full stock sequence is ANCHOR_PREFIX + "80 02 00 00" + "E0 01 00 00".
 ANCHOR_PREFIX = bytes.fromhex('4f016e01')
 
-# (name, AUTO shift, DGROUP shift). The DGROUP shift matters for the one site that carries
-# absolute data addresses in its bytes (the movie Blt block).
+# Per build: the AUTO file-offset shift relative to Classic, the shift of the absolute DGROUP
+# addresses that a few sites carry in their bytes (the movie surface flag and the Blt block),
+# the same for .bss, and site-level fixups where the build is not a uniform shift of Classic.
+#
+# ENGEXP16 (doc 10.10): AUTO is Classic +0 up to main.c's network screen, -0x20 from there
+# (0x5040..) and +0x60 from 0x6000 on; its code section is 0x200 file bytes longer, so every
+# later section's *file* offset is +0x200, while the DGROUP *virtual* addresses of the data the
+# code names move by only +0x28 (the section starts at the same VA 0x482000) and the .bss ones
+# used here not at all. That is why the dimension anchor sits at file +0x228 but the Blt block's
+# operands at +0x28.
+#
+# Council Wars dc16.exe (4180f6e9d01925b23eac0eb335e0b95e) is a different build: only the
+# DGROUP anchor transfers, so it is deliberately absent. Patching it needs the sites re-derived
+# in Ghidra first.
 BUILDS = {
-    'aa0a646b1234d1d9815a2b7480fd080b': ('Classic dc16.exe', 0, 0),
-    '50419d438427d31341057e9723724f66': ('Council Wars ENGEXP16.EXE', 0x60, 0x228),
-    # Council Wars dc16.exe (4180f6e9d01925b23eac0eb335e0b95e) is a different build: only the
-    # DGROUP anchor transfers, so its AUTO offsets are deliberately absent. Patching it needs
-    # the sites re-derived in Ghidra first.
+    'aa0a646b1234d1d9815a2b7480fd080b': dict(
+        name='Classic dc16.exe', auto=0, dgroup=0, bss=0, fixups={}),
+    '50419d438427d31341057e9723724f66': dict(
+        name='Council Wars ENGEXP16.EXE', auto=0x60, dgroup=0x28, bss=0, fixups={
+            # main.c netopt: the network screen's globe PIC sits 0x20 lower in this build
+            # (0x00405C51 / 0x00405C40), the only two of the 44 menu-furniture sites that do
+            0x5071: dict(off=0x5051),
+            0x5060: dict(off=0x5040),
+            # main.c bintro: the expansion has its own exp/intrface/credits.txt, and its TTY box
+            # starts at y = 230 instead of 200 (x = 178 is the same); it still moves by dy
+            0x4299: dict(expected='bbe6000000', value=lambda g: 230 + g.menu_dy),
+        }),
 }
 
-# ENGEXP16 is Classic shifted by +0x60 in AUTO from about 0x6000 onward, and +0 below it.
-# Verified for every site in the table; the mandatory expected-byte check is what makes
-# relying on the rule safe rather than a guess.
+# ENGEXP16 is Classic shifted by +0x60 in AUTO from about 0x6000 onward, and +0 below it, with
+# the exceptions listed in its fixups. The mandatory expected-byte check is what makes relying
+# on the rule safe rather than a guess.
 SHIFT_THRESHOLD = 0x5000
 
 
-def auto_offset(classic_off, shift):
-    return classic_off + (shift if classic_off >= SHIFT_THRESHOLD else 0)
+def auto_offset(classic_off, build):
+    fix = build['fixups'].get(classic_off, {})
+    if 'off' in fix:
+        return fix['off']
+    return classic_off + (build['auto'] if classic_off >= SHIFT_THRESHOLD else 0)
 
 
 # ------------------------------------------------------------------ geometry
@@ -168,8 +192,9 @@ class Geometry:
         # as the stock game did at 640x480 (640x358 in 480 rows) (doc 10.8).
         movie_h = min(height, width * 9 // 16)
         self.movie_rect = (0, (height - movie_h) // 2, width, (height + movie_h) // 2)
-        # set per build by resolve()/cmd_verify(); Classic is 0
+        # set per build by resolve()/cmd_verify(); Classic is 0 for both
         self.dgroup_shift = 0
+        self.bss_shift = 0
 
     def describe(self):
         return [
@@ -241,11 +266,12 @@ SITES = [
     (2, 0x5025C, '81ffe0010000', 2, lambda g: g.h, 'mouse clamp: compare Y against height'),
     (2, 0x50264, 'bfdf010000', 1, lambda g: g.h - 1, 'mouse clamp: Y maximum'),
     (2, 0x50346, '3d7f020000', 1, lambda g: g.w - 1, 'DirectInput clamp: compare X'),
-    (2, 0x5034D, 'c705c02753007f020000', 6, lambda g: g.w - 1,
-     'DirectInput clamp: X maximum'),
+    # the two stores name the .bss mouse position 0x5327C0/C4, which moves with the build
+    (2, 0x5034D, lambda g: b'\xC7\x05' + struct.pack('<I', 0x5327C0 + g.bss_shift)
+     + b'\x7F\x02\x00\x00', 6, lambda g: g.w - 1, 'DirectInput clamp: X maximum'),
     (2, 0x5036B, '81fedf010000', 2, lambda g: g.h - 1, 'DirectInput clamp: compare Y'),
-    (2, 0x50373, 'c705c4275300df010000', 6, lambda g: g.h - 1,
-     'DirectInput clamp: Y maximum'),
+    (2, 0x50373, lambda g: b'\xC7\x05' + struct.pack('<I', 0x5327C4 + g.bss_shift)
+     + b'\xDF\x01\x00\x00', 6, lambda g: g.h - 1, 'DirectInput clamp: Y maximum'),
     (2, 0x2E307, '68e0010000', 1, lambda g: g.h, 'load.bmp LoadImageA height'),
     (2, 0x2E30C, '6880020000', 1, lambda g: g.w, 'load.bmp LoadImageA width'),
     (2, 0x2E338, '68e0010000', 1, lambda g: g.h, 'load2.bmp LoadImageA height'),
@@ -333,7 +359,8 @@ SITES = [
      lambda g: bytes.fromhex('89c2' 'e9ab000000' '909090909090'),
      'avi_create_surfaces: after GetAttachedSurface, mov edx,eax; jmp 4071E0 '
      '(edx=0 -> create the 320x180 surface; else return 0)'),
-    (4, 0x0663D, '891d0c8e4800', None, lambda g: b'\x90' * 6,
+    (4, 0x0663D, lambda g: b'\x89\x1d' + struct.pack('<I', 0x488E0C + g.dgroup_shift), None,
+     lambda g: b'\x90' * 6,
      'avi_create_surfaces: keep the flip flag when creating the movie surface'),
     (4, 0x07F3E, '7507', None, lambda g: b'\xEB\x07',
      'display thread: always draw through the 320x180 movie surface'),
@@ -355,11 +382,12 @@ def movie_blt_block(g, stock):
     Stock: srcRect = (0,0,320,180) at [ebp+52h..], BltFast(primary, x=160, y=2*yoff, movie,
     &srcRect, DDBLTFAST_WAIT). New: destRect at [ebp+62h..] (dead temporaries of the finished
     copy loop), Blt(primary, &destRect, movie, NULL, DDBLT_WAIT, NULL) -- stretches. The two
-    absolute data addresses (primary 0x489718, movie surface 0x488E00) move with DGROUP.
+    absolute DGROUP addresses (primary 0x489718, movie surface 0x488E00) move with the build's
+    DGROUP shift, the .bss one (yoff 0x4A5680) with its .bss shift.
     """
     primary = struct.pack('<I', 0x489718 + g.dgroup_shift)
     movie = struct.pack('<I', 0x488E00 + g.dgroup_shift)
-    yoff = struct.pack('<I', 0x4A5680 + g.dgroup_shift)
+    yoff = struct.pack('<I', 0x4A5680 + g.bss_shift)
     if stock:
         return (bytes.fromhex('ba40010000b9b40000006a10a1') + primary
                 + bytes.fromhex('89555a8d55528b1d') + movie
@@ -508,8 +536,7 @@ def read_dimensions(data, path):
 def identify(data, path):
     md5 = hashlib.md5(data).hexdigest()
     if md5 in BUILDS:
-        name, shift, dshift = BUILDS[md5]
-        return name, shift, dshift
+        return BUILDS[md5]
     _, w, h = read_dimensions(data, path)
     if (w, h) != (640, 480):
         raise SystemExit('%s: already patched to %d x %d. Restore the .bak to get back to '
@@ -520,8 +547,11 @@ def identify(data, path):
                      % (path, md5))
 
 
-def expected_and_target(site, geom):
-    _, _, exp_hex, imm, fn, _ = site
+def expected_and_target(site, geom, build):
+    _, classic_off, exp_hex, imm, fn, _ = site
+    fix = build['fixups'].get(classic_off, {})
+    exp_hex = fix.get('expected', exp_hex)
+    fn = fix.get('value', fn)
     exp = exp_hex(geom) if callable(exp_hex) else bytes.fromhex(exp_hex)
     if imm is None:
         return exp, fn(geom)
@@ -530,10 +560,11 @@ def expected_and_target(site, geom):
     return exp, bytes(new)
 
 
-def resolve(data, path, shift, geom, stage, exclude=(), dshift=0):
+def resolve(data, path, build, geom, stage, exclude=()):
     """Return (edits, problems); edits are (offset, old, new, description)."""
     anchor = find_anchor(data, path)
-    geom.dgroup_shift = dshift
+    geom.dgroup_shift = build['dgroup']
+    geom.bss_shift = build['bss']
     edits, problems = [], []
 
     for off, val, what in ((anchor + 4, geom.w, 'screen width global'),
@@ -546,8 +577,8 @@ def resolve(data, path, shift, geom, stage, exclude=(), dshift=0):
             continue
         if any(x.lower() in what.lower() for x in exclude):
             continue
-        exp, new = expected_and_target(site, geom)
-        off = auto_offset(classic_off, shift)
+        exp, new = expected_and_target(site, geom, build)
+        off = auto_offset(classic_off, build)
         got = data[off:off + len(exp)]
         if got != exp:
             problems.append('0x%-7X %-42s expected %s, found %s'
@@ -573,10 +604,9 @@ def cmd_verify(path):
     data = open(path, 'rb').read()
     md5 = hashlib.md5(data).hexdigest()
     print('%s\n  %d bytes, md5 %s' % (path, len(data), md5))
-    known_shift = None
-    if md5 in BUILDS:
-        name, known_shift, _ = BUILDS[md5]
-        print('  build: %s (stock)' % name)
+    known = BUILDS.get(md5)
+    if known:
+        print('  build: %s (stock)' % known['name'])
     else:
         print('  build: not a known stock binary (patched, or one with no site table)')
 
@@ -593,16 +623,16 @@ def cmd_verify(path):
         print('     ' + str(e).replace('\n', '\n     '))
         return 1
 
-    # A patched binary has an unknown md5, so try each known shift and keep the best fit.
-    shifts = {s: d for _, s, d in BUILDS.values()}
-    candidates = [known_shift] if known_shift is not None else sorted(shifts)
+    # A patched binary has an unknown md5, so try each known build's layout and keep the best fit.
+    candidates = [known] if known else list(BUILDS.values())
     best = None
     for cand in candidates:
-        geom.dgroup_shift = shifts[cand]
+        geom.dgroup_shift = cand['dgroup']
+        geom.bss_shift = cand['bss']
         tally = {}
         for site in sites_for(geom):
             site_stage, classic_off = site[0], site[1]
-            exp, want = expected_and_target(site, geom)
+            exp, want = expected_and_target(site, geom, cand)
             got = data[auto_offset(classic_off, cand):][:len(exp)]
             state = 'patched' if got == want else 'stock' if got == exp else 'other'
             tally.setdefault(site_stage, []).append(state)
@@ -616,7 +646,8 @@ def cmd_verify(path):
         print('  %s: 0x%X (%s)' % (what, struct.unpack('<I', got)[0],
                                    'patched' if got == new else 'stock' if got == exp
                                    else 'unrecognised'))
-    print('  site table matched with AUTO shift +0x%X:' % cand)
+    print('  site table matched with the %s layout (AUTO shift +0x%X):'
+          % (cand['name'], cand['auto']))
     for st in sorted(tally):
         v = tally[st]
         print('    stage %d: %2d/%-2d patched, %d stock, %d unrecognised'
@@ -664,7 +695,7 @@ def main(argv=None):
     if args.command == 'verify':
         return cmd_verify(args.exe)
 
-    name, shift, dshift = identify(data, args.exe)
+    build = identify(data, args.exe)
     try:
         vp = None
         if args.viewport:
@@ -672,9 +703,11 @@ def main(argv=None):
         geom = Geometry(args.width, args.height, vp)
     except ValueError as e:
         raise SystemExit('bad target geometry: %s' % e)
-    print('build: %s  (AUTO shift +0x%X)\n' % (name, shift))
+    print('build: %s  (AUTO shift +0x%X, DGROUP +0x%X, .bss +0x%X, %d site fixup(s))\n'
+          % (build['name'], build['auto'], build['dgroup'], build['bss'],
+             len(build['fixups'])))
 
-    edits, problems = resolve(data, args.exe, shift, geom, args.stage, args.exclude, dshift)
+    edits, problems = resolve(data, args.exe, build, geom, args.stage, args.exclude)
     if args.exclude:
         print('excluding sites matching: %s'
               % ', '.join(repr(x) for x in args.exclude))
