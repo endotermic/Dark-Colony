@@ -1216,16 +1216,30 @@ widget layer paints them, the terrain paints over them next frame: "not visible 
 order buttons (`pushb`/`checkb`) had moved, which is why those looked right.
 
 Also visible in the same test data: §6.1 above previously counted "82 widgets" for the same
-reason. Corrected there. `hud_layout.py maine` now shifts 156 panel widgets right; the money
-counter additionally moves down with the panel's bottom corner (`build` splices the panel's new
-rows in at y = 450, above it), so `scount #75` goes (524,456) → (908,744). `plan` output for the
-corrected transform: 156 × `x += 384`, 7 × `y += 288` (4 bottom-bar widgets, the 2 message lines,
-and the money counter, which is in both sets), 1 left alone (`picture #199`).
+reason. Corrected there. `hud_layout.py maine` now shifts 156 panel widgets right.
 
-**Still unverified after this round:** the actual look of the lighting at the right-hand edge
-(§10.5's open question), the mechanically spliced bottom bar, and whether the `count` widgets'
-`bg erase` boxes and price text sit correctly on the spliced panel art. One launch answers all
-three.
+**Second visual test (same evening): both fixed** — no lines, build panel present.
+
+##### Where the panel's extra 288 rows go
+
+The maintainer's next note was that the Build button, its status box and the money counter must
+sit on the bottom edge of the screen as in the original. The first `build` had spliced the
+panel's new rows in at y = 450, *below* the Build button, which left the button mid-screen with
+blank rail under it. Measuring the panel column (`x 516…639`) row by row settles where the seam
+belongs: rows `94…398` carry only the 6-px side rail (the button grid is drawn entirely by the
+`count` widgets), and row **399** is the first full-width bar of the bottom cluster — status box
+`399…415`, BUILD `416…432`, DAYS `433…444`, money dial `445…472`, bottom frame `473…479`. So the
+splice is at **399**: minimap, tabs and grid stay at the top, everything from 399 down moves by
+288 to `687…767`, and the four widgets on it move with it — `in_text #79` (520,404) → (904,692),
+`pushb #19` BUILD (516,422) → (900,710), `in_text #234` DAYS (613,433) → (997,721), `scount #75`
+(524,456) → (908,744). `hud_layout.py` has `PANEL_INSERT = 399` for the script side and
+`insert=399` on the `right_panel` region for the art side; they must agree. `plan` output now:
+156 × `x += 384`, 10 × `y += 288` (4 bottom-bar widgets, 2 message lines, the 4-widget cluster),
+1 left alone (`picture #199`).
+
+**Still unverified:** the lighting at the right-hand edge during a night phase (§10.5's open
+question), and the mechanically spliced bottom bar. The seam at 399 has not been seen in the game
+yet.
 
 ### Stage 4 — cursors and movies
 

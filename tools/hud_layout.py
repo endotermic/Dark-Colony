@@ -42,8 +42,13 @@ MSG_Y = 420                        # widgets at or below this are bottom-bar fur
 #   anchor 'tl' stays at the top left, 'r' slides right by dx, 'b' slides down by dy
 # `insert` is where `build` splices the extra rows/columns in. Each was picked so that the art on
 # both sides of the splice stays aligned with the widgets that sit on it:
-#   right_panel  450 -- below the Build button (y 422..449), so every panel widget keeps its art
-#   left_border  450 -- level with the panel, so the corner still meets the bottom bar
+#   right_panel  399 -- the panel's bottom cluster (status box 399..415, BUILD 416..432, DAYS,
+#                       money dial 445..472) starts with a full-width bar at row 399; above it,
+#                       rows 94..398 are only the side rail. Splicing here keeps the minimap, the
+#                       tabs and the button grid at the top and the cluster on the bottom edge,
+#                       as in the original. (The first build spliced at 450, below BUILD, which
+#                       left the Build button mid-screen -- rejected in the second visual test.)
+#   left_border  450 -- so the corner detail still meets the bottom bar
 #   map_edge     400 -- inside the constant stretch y=94..399
 #   top_border   515 -- at the map's right edge, so the panel's top decoration stays on the right
 #   bottom_bar   520 -- right of in_text #200 at x=480, the rightmost bottom-bar widget
@@ -55,7 +60,7 @@ REGIONS = [
     dict(name='map_edge', box=(INSET_X + VIEW_W - 1, 0, 3, SRC_H), anchor='r', grows='height',
          insert=400, note='constant over y=94..399: tile a single column, free'),
     dict(name='right_panel', box=(PANEL_X, 0, SRC_W - PANEL_X, SRC_H), anchor='r',
-         grows='height', insert=450,
+         grows='height', insert=399,
          note='287 rows carry only 6 px of side rail: tile that row, free'),
     dict(name='bottom_bar', box=(0, BOTTOM_Y, SRC_W, SRC_H - BOTTOM_Y), anchor='b',
          grows='width', insert=520,
@@ -67,7 +72,7 @@ REGIONS = [
 # missing from the first version of this list, so the first 1024x768 test build had every
 # build button left at x=518/577 -- under the map view, where the terrain paints over them.
 KINDS = ('pushb', 'checkb', 'in_text', 'picture', 'list', 'scroll', 'gadget', 'count', 'scount')
-PANEL_INSERT = 450                 # right-panel rows from here down travel with the bottom bar
+PANEL_INSERT = 399                 # right-panel widgets from here down travel with the bottom bar
 SIZE2 = re.compile(rb'^([ \t]*)size([ \t]+)(\d+)([ \t]+)(\d+)([ \t]*\r?)$', re.M)
 
 
@@ -284,9 +289,10 @@ def parse_widgets(data):
 def shift(x, y, dx, dy):
     """Right-panel widgets move sideways; bottom furniture moves down.
 
-    The one widget that does both is the money counter (`scount 75` at 524,456): it sits on
-    the panel's bottom corner, which `build` splices below (right_panel insert=450), so it has
-    to follow the art down as well as right.
+    The panel's bottom cluster does both: the status text (`in_text 79` at y 404), the Build
+    button (`pushb 19`, 422), the days counter (`in_text 234`, 433) and the money counter
+    (`scount 75`, 456) sit on art that `build` splices above (right_panel insert=399), so they
+    follow it down as well as right and stay on the bottom edge of the screen.
     """
     if x >= PANEL_X:
         return x + dx, y + dy if y >= PANEL_INSERT else y
@@ -431,7 +437,8 @@ def cmd_maine(args):
 
     print('  size %d %d -> size %d %d' % (SRC_W, SRC_H, args.width, args.height))
     print('  %d right-panel widget(s) x += %d' % (panel, dx))
-    print('  %d bottom-row widget(s)  y += %d  (the money counter is in both)' % (bottom, dy))
+    print('  %d bottom-row widget(s)  y += %d  (the panel\'s bottom cluster is in both)'
+          % (bottom, dy))
     print('  %d widget(s) left where they are (inside the map view)' % left)
     if args.action == 'plan':
         print('\nplan only, nothing written.')
