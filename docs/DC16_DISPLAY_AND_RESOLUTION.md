@@ -773,6 +773,41 @@ At the end of stage 2 the game is a genuine 1024×768 application: under route A
 640×480 UI boxed in the middle, under route B a native 1024×768 one. Either is a usable state and
 a sensible place to stop if the rest stalls, bar the code-positioned elements noted in §10.1.
 
+#### 10.2 A tile count encoded twice, the second time as an `lea` displacement **(verified)**
+
+Stage 3 as first shipped crashed the moment a battle started: access violation, `0xC0000005`,
+fault RVA `0x39D5E` = VA **`0x00439D5E`**, in the per-tile vision scan in `engmain.c`. That
+instruction is `mov edx,[eax]`, dereferencing a ground-layer row pointer taken from
+`[map+0x804 + i*4]`.
+
+`clip_view_to_map` `0x00435E24` builds the scanned rect from the map's **bottom** edge:
+
+```
+00435E3F  mov  eax,[map+0x9A4B4]   ; map height in tiles
+00435E45  sub  eax,edx             ;   - view_tile_y
+00435E47  mov  ecx,0Eh             ; tiles_down = 14      <- patched to 23
+00435E4C  lea  edx,[eax-0Eh]       ; y origin, 14 AGAIN   <- MISSED
+00435E4F  mov  ebx,10h             ; tiles_across = 16    <- patched to 28
+00435E62  call make_rect(x, y, w, h)
+```
+
+The count appears **twice**: once as `mov r32, imm32` and once as a **signed 8-bit `lea`
+displacement**, `8D 50 F2`. Patching only the first left the rect 9 tiles too tall, so the scan
+walked past the 256-entry row-pointer table, picked up a word of path-grid data as a pointer, and
+faulted. Fix: `8D 50 F2` -> `8D 50 E9`, one byte, now site `0x3524C` in `patch_resolution.py`
+(58 edits, not 57).
+
+**The lesson generalises.** §8.2 records that Watcom hides `*640` in strength-reduced form; this is
+a second hiding place — *small* constants encoded as `imm8` or `disp8`, which no search for the
+`imm32` form can find. A targeted sweep of the render modules for 14 as an `imm8`/`disp8` afterwards
+turned up no other instance (the other `[ebp-0Eh]` hits are stack locals), and the width has no
+such partner because the x origin is not measured from the far edge. But the same check is owed to
+any future constant: **look for the small encodings too, and prefer a diagnostic over a sweep** —
+the Windows Error Reporting fault offset named the faulting instruction exactly and cost one
+lookup, where auditing the 80-odd map-dimension references would have cost an afternoon.
+
+`Geometry` now refuses a viewport taller than 127 tiles, since that displacement is a signed byte.
+
 ### Stage 3 — enlarge the map viewport
 
 * `engmain.c` viewport 512 → 896, 448 → 736; tiles 16 → 28, 14 → 23.

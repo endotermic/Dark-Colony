@@ -90,7 +90,16 @@ class Geometry:
                                  % (what, v, TILE))
         self.tiles_x = self.view_w // TILE
         self.tiles_y = self.view_h // TILE
+        if not 1 <= self.tiles_y <= 127:
+            raise ValueError(
+                'visible tile rows comes out %d; clip_view_to_map encodes that count a second '
+                'time as a signed 8-bit lea displacement, so it has to fit in 1..127'
+                % self.tiles_y)
         self.mask_bytes = self.view_w * self.view_h // 8
+        # Half the viewport in world units: the camera is the centre of the view, and world
+        # coordinates run 256 per tile, so half a viewport is tiles * 128.
+        self.half_x = self.tiles_x * 128
+        self.half_y = self.tiles_y * 128
         self.minimap_x = width - MINIMAP_RIGHT_GAP
         self.minimap_off = (INSET_Y * width + self.minimap_x) * 2
 
@@ -173,6 +182,41 @@ SITES = [
     (3, 0x35361, 'bbc0010000', 1, lambda g: g.view_h, 'viewport height'),
     (3, 0x3524F, 'bb10000000', 1, lambda g: g.tiles_x, 'visible tiles across'),
     (3, 0x35247, 'b90e000000', 1, lambda g: g.tiles_y, 'visible tiles down'),
+    # clip_view_to_map builds the rect from the map's bottom edge as
+    #   make_rect(view_tile_x, map_h - view_tile_y - tiles_down, tiles_across, tiles_down)
+    # and that second use of tiles_down is an 8-bit lea displacement, invisible to any search
+    # for the imm32 form. Leaving it at 14 while the height says 23 makes the rect overrun the
+    # map by 9 rows, and the vision scan at 0x00439D5E then dereferences a row pointer from past
+    # the end of the 256-entry table: access violation the moment a battle starts.
+    (3, 0x3524C, '8d50f2', None,
+     lambda g: bytes((0x8D, 0x50, (256 - g.tiles_y) & 0xFF)),
+     'clip_view_to_map: lea edx,[eax-tiles_down]'),
+
+    # The camera is expressed as the *centre* of the view, so half the viewport shows up in
+    # world units (256 per tile) as 0x800 = 8 tiles across and 0x700 = 7 tiles down. Three
+    # separate places use it, and the scroll clamp is one of them:
+    #   0x0041EE66/6F  proto.c  camera bounds = [half, map_size - half]  <- THE clamp
+    #   0x0040AB1C/2B  view origin = camera - half, for the fog/interface update
+    #   0x0040B0BC/E0  view origin = camera - half, for the frame render
+    # Leaving these at 8/7 while the viewport is 28x23 lets the camera travel 6 tiles too far
+    # right and 4.5 too far down, so draw_terrain reads past the map: access violation at
+    # 0x00453AD4/0x00453ADE the moment a battle starts.
+    (3, 0x09F0A, '6a0e', None, lambda g: bytes((0x6A, g.tiles_y)),
+     'interface update: push tiles_down (imm8)'),
+    (3, 0x09F0C, 'b910000000', 1, lambda g: g.tiles_x,
+     'interface update: tiles_across'),
+    (3, 0x09F1C, '81eb00070000', 2, lambda g: g.half_y,
+     'interface update: sub ebx,half_viewport_y'),
+    (3, 0x09F2B, '81ea00080000', 2, lambda g: g.half_x,
+     'interface update: sub edx,half_viewport_x'),
+    (3, 0x0A4BC, '81ea00070000', 2, lambda g: g.half_y,
+     'frame render: sub edx,half_viewport_y'),
+    (3, 0x0A4E0, '81ea00080000', 2, lambda g: g.half_x,
+     'frame render: sub edx,half_viewport_x'),
+    (3, 0x1E266, 'b900080000', 1, lambda g: g.half_x,
+     'scroll clamp: half_viewport_x'),
+    (3, 0x1E26F, 'bb00070000', 1, lambda g: g.half_y,
+     'scroll clamp: half_viewport_y'),
     (3, 0x35388, 'ba00700000', 1, lambda g: g.mask_bytes, 'occlusion mask size'),
     (3, 0x3539F, 'b880020000', 1, lambda g: g.w, 'render destination stride'),
     (3, 0x1E123, 'bb00020000', 1, lambda g: g.view_w, 'proto.c map view rect width'),
@@ -232,7 +276,7 @@ def expected_and_target(site, geom):
     return exp, bytes(new)
 
 
-def resolve(data, path, shift, geom, stage):
+def resolve(data, path, shift, geom, stage, exclude=()):
     """Return (edits, problems); edits are (offset, old, new, description)."""
     anchor = find_anchor(data, path)
     edits, problems = [], []
@@ -244,6 +288,8 @@ def resolve(data, path, shift, geom, stage):
     for site in SITES:
         site_stage, classic_off, _, _, _, what = site
         if site_stage > stage:
+            continue
+        if any(x.lower() in what.lower() for x in exclude):
             continue
         exp, new = expected_and_target(site, geom)
         off = auto_offset(classic_off, shift)
@@ -332,6 +378,9 @@ def main(argv=None):
     ap.add_argument('--height', type=int, default=768)
     ap.add_argument('--stage', type=int, default=4, choices=(1, 2, 3, 4),
                     help='highest cumulative stage to apply (default 4, everything)')
+    ap.add_argument('--exclude', action='append', default=[], metavar='SUBSTR',
+                    help='skip sites whose description contains SUBSTR (repeatable). For '
+                         'bisecting a misbehaving stage; not for normal use.')
     args = ap.parse_args(argv)
 
     if not os.path.isfile(args.exe):
@@ -348,7 +397,10 @@ def main(argv=None):
         raise SystemExit('bad target geometry: %s' % e)
     print('build: %s  (AUTO shift +0x%X)\n' % (name, shift))
 
-    edits, problems = resolve(data, args.exe, shift, geom, args.stage)
+    edits, problems = resolve(data, args.exe, shift, geom, args.stage, args.exclude)
+    if args.exclude:
+        print('excluding sites matching: %s'
+              % ', '.join(repr(x) for x in args.exclude))
     if report(args.exe, geom, args.stage, edits, problems):
         print('\nrefusing to write: fix the mismatches above first.')
         return 1

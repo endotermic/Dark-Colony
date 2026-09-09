@@ -21,6 +21,7 @@ a halo appears along the edge of the map (section 10 stage 5 step 1).
 """
 
 import argparse
+import collections
 import os
 import re
 import shutil
@@ -39,18 +40,25 @@ MSG_Y = 420                        # widgets at or below this are bottom-bar fur
 # Each region records where it is, what it is anchored to (so we know whether it slides when the
 # screen grows), which way it has to stretch, and what the tileability measurement showed.
 #   anchor 'tl' stays at the top left, 'r' slides right by dx, 'b' slides down by dy
+# `insert` is where `build` splices the extra rows/columns in. Each was picked so that the art on
+# both sides of the splice stays aligned with the widgets that sit on it:
+#   right_panel  450 -- below the Build button (y 422..449), so every panel widget keeps its art
+#   left_border  450 -- level with the panel, so the corner still meets the bottom bar
+#   map_edge     400 -- inside the constant stretch y=94..399
+#   top_border   515 -- at the map's right edge, so the panel's top decoration stays on the right
+#   bottom_bar   520 -- right of in_text #200 at x=480, the rightmost bottom-bar widget
 REGIONS = [
     dict(name='left_border', box=(0, 0, INSET_X, SRC_H), anchor='tl', grows='height',
-         note='detail, only ~78 px periodic: pick a repeat segment or draw'),
+         insert=450, note='detail, only ~78 px periodic: pick a repeat segment or draw'),
     dict(name='top_border', box=(0, 0, SRC_W, INSET_Y), anchor='tl', grows='width',
-         note='detail, only ~77 px periodic: pick a repeat segment or draw'),
+         insert=515, note='detail, only ~77 px periodic: pick a repeat segment or draw'),
     dict(name='map_edge', box=(INSET_X + VIEW_W - 1, 0, 3, SRC_H), anchor='r', grows='height',
-         note='constant over y=94..399: tile a single column, free'),
+         insert=400, note='constant over y=94..399: tile a single column, free'),
     dict(name='right_panel', box=(PANEL_X, 0, SRC_W - PANEL_X, SRC_H), anchor='r',
-         grows='height',
+         grows='height', insert=450,
          note='287 rows carry only 6 px of side rail: tile that row, free'),
     dict(name='bottom_bar', box=(0, BOTTOM_Y, SRC_W, SRC_H - BOTTOM_Y), anchor='b',
-         grows='width',
+         grows='width', insert=520,
          note='no period beyond ~49 px: this one needs new artwork'),
 ]
 
@@ -277,6 +285,80 @@ def shift(x, y, dx, dy):
     return x, y
 
 
+def _lines(px, w, h, vertical):
+    """Rows (or columns) of an index buffer, as a list of bytes."""
+    if vertical:
+        return [bytes(px[y * w:(y + 1) * w]) for y in range(h)]
+    return [bytes(px[y * w + x] for y in range(h)) for x in range(w)]
+
+
+def _extend(px, w, h, grows, add, insert):
+    """Splice `add` copies of the most common row/column in at `insert`."""
+    vertical = grows == 'height'
+    seq = _lines(px, w, h, vertical)
+    filler = collections.Counter(seq).most_common(1)[0][0]
+    insert = max(0, min(insert, len(seq)))
+    seq = seq[:insert] + [filler] * add + seq[insert:]
+    if vertical:
+        return b''.join(seq), w, h + add
+    nw, nh = w + add, h
+    out = bytearray(nw * nh)
+    for x, coldata in enumerate(seq):
+        for y in range(nh):
+            out[y * nw + x] = coldata[y]
+    return bytes(out), nw, nh
+
+
+def cmd_build(args):
+    """Composite a target-size frame from the source regions, tiling where it can.
+
+    This is a mechanical test build, not finished artwork. It gets a playable HUD on screen so the
+    bigger battlefield can actually be used; the bottom bar in particular will show a visible
+    repeat, because that region has no real period (see the `spec` output).
+    """
+    Image, _ = need_pil()
+    src_path = os.path.join(args.dir, 'INTRFACE.GIF')
+    im = Image.open(src_path)
+    if im.size != (SRC_W, SRC_H):
+        sys.exit('%s is %dx%d, expected %dx%d' % (src_path, im.size[0], im.size[1], SRC_W, SRC_H))
+    pal = im.getpalette()
+    src = im.tobytes()
+    regions, dx, dy = target(args.width, args.height)
+    by_name = {r['name']: r for r in regions}
+
+    canvas = bytearray([ERASE]) * (args.width * args.height)
+    for r in REGIONS:
+        x, y, w, h = r['box']
+        sub = bytearray()
+        for row in range(h):
+            sub += src[(y + row) * SRC_W + x:(y + row) * SRC_W + x + w]
+        t = by_name[r['name']]
+        data, nw, nh = _extend(sub, w, h, r['grows'], t['add'], r['insert'])
+        tx, ty, _, _ = t['dst']
+        for row in range(nh):
+            off = (ty + row) * args.width + tx
+            canvas[off:off + nw] = data[row * nw:(row + 1) * nw]
+        print('  %-12s %4dx%-4d -> %4dx%-4d  spliced %d at %s=%d'
+              % (r['name'], w, h, nw, nh, t['add'],
+                 'y' if r['grows'] == 'height' else 'x', r['insert']))
+
+    out = Image.frombytes('P', (args.width, args.height), bytes(canvas))
+    out.putpalette(pal)
+    dst = args.out or src_path
+    if dst == src_path and not os.path.exists(dst + '.bak'):
+        shutil.copy2(dst, dst + '.bak')
+    out.save(dst, format='GIF', version='GIF87a', interlace=False, optimize=False)
+
+    opaque = sum(1 for v in canvas if v != ERASE)
+    print('\nwrote %s  %dx%d, %d opaque px (%.1f%%)'
+          % (dst, args.width, args.height, opaque,
+             100.0 * opaque / (args.width * args.height)))
+    print('the map hole is everything left at index %d: (%d,%d) %dx%d'
+          % (ERASE, INSET_X, INSET_Y, VIEW_W + dx, VIEW_H + dy))
+    print('NOTE: mechanical splice, not finished art. The bottom bar will show a visible repeat.')
+    return 0
+
+
 def cmd_maine(args):
     path = os.path.join(args.dir, 'MAINE')
     if args.action == 'revert':
@@ -353,7 +435,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest='cmd', required=True)
-    for name in ('spec', 'extract', 'template', 'maine'):
+    for name in ('spec', 'extract', 'template', 'build', 'maine'):
         p = sub.add_parser(name)
         p.add_argument('dir', help='an INTRFACE directory')
         p.add_argument('--width', type=int, default=1024)
@@ -362,13 +444,16 @@ def main(argv=None):
             p.add_argument('--out', default='hud_layers')
         if name == 'template':
             p.add_argument('--out', default='hud_template.png')
+        if name == 'build':
+            p.add_argument('--out', default=None,
+                           help='output GIF (default: overwrite INTRFACE.GIF, keeping a .bak)')
         if name == 'maine':
             p.add_argument('action', choices=('plan', 'apply', 'revert'))
     args = ap.parse_args(argv)
     if not os.path.isdir(args.dir):
         raise SystemExit('%s: not a directory' % args.dir)
-    return {'spec': cmd_spec, 'extract': cmd_extract,
-            'template': cmd_template, 'maine': cmd_maine}[args.cmd](args) or 0
+    return {'spec': cmd_spec, 'extract': cmd_extract, 'template': cmd_template,
+            'build': cmd_build, 'maine': cmd_maine}[args.cmd](args) or 0
 
 
 if __name__ == '__main__':
