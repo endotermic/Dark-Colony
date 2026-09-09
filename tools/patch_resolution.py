@@ -301,6 +301,17 @@ SITES = [
     (3, 0x3985B, 'ba80020000', 1, lambda g: g.w, 'minimap stride (b)'),
     (3, 0x394AF, '81c20e220000', 2, lambda g: g.minimap_off, 'minimap origin (a)'),
     (3, 0x39884, '8145f00e220000', 3, lambda g: g.minimap_off, 'minimap origin (b)'),
+    # The minimap's *input* side and its view-box indicator carry the x origin (519) a third
+    # way, as plain immediates (doc 10.9). Its y (6, and the 90 = bottom edge used by the click
+    # conversion) does not move, since the minimap stays at the top of the panel.
+    (3, 0x1E243, 'b807020000', 1, lambda g: g.minimap_x,
+     'minimap hit rect x (proto.c make_rect -> ui+0x7B4)'),
+    (3, 0x09484, '2d07020000', 1, lambda g: g.minimap_x,
+     'minimap click: mouse x - minimap x'),
+    (3, 0x395E4, 'b807020000', 1, lambda g: g.minimap_x,
+     'minimap draw: clip rect x'),
+    (3, 0x3967A, '0507020000', 1, lambda g: g.minimap_x,
+     'minimap draw: view-box indicator x'),
 
     # -- stage 4: movies (doc 10.8) ----------------------------------------------------------
     # The back-buffer clear 0x004073C4 Locks the back buffer (DDSURFACEDESC at [ebp-6Ch]) and

@@ -536,6 +536,10 @@ Council Wars `dc16.exe` is a different build; only the §3 anchor is given for i
 | DI clamp `set 639` | `0x00450F4D` | `0x5034D` | `C7 05 C0 27 53 00 7F 02 00 00` | `0x503AD` |
 | DI clamp `cmp 479` | `0x00450F6B` | `0x5036B` | `81 FE DF 01 00 00` | `0x503CB` |
 | DI clamp `set 479` | `0x00450F73` | `0x50373` | `C7 05 C4 27 53 00 DF 01 00 00` | `0x503D3` |
+| minimap hit rect x 519 | `0x0041EE43` | `0x1E243` | `B8 07 02 00 00` | `0x1E2A3` |
+| minimap click `x − 519` | `0x0040A084` | `0x9484` | `2D 07 02 00 00` | `0x94E4` |
+| minimap plot clip rect x 519 | `0x0043A1E4` | `0x395E4` | `B8 07 02 00 00` | `0x39644` |
+| minimap view-box x `+519` | `0x0043A27A` | `0x3967A` | `05 07 02 00 00` | `0x396DA` |
 | lightplane row advance 512 (×30, `add eax`) | `0x00453CCB … 0x00454276` | `0x530CB … 0x53676` | `05 00 02 00 00` | `+0x60` each |
 | lightplane row advance 512 (`lea edi`) | `0x004542BC` | `0x536BC` | `8D B8 00 02 00 00` | `0x5371C` |
 
@@ -1422,6 +1426,25 @@ blitting to the back buffer and flipping needs 15 bytes more than the block has)
 alternatives are the four immediates in the block: `(0,0,1024,768)` full screen (distorts
 16:9→4:3), or 3× integer `(32,114,992,654)`.
 
+#### 10.9 The minimap's input side **(verified)**
+
+Fifth test pass: clicking the minimap to send troops did nothing. Stage 3 had moved the
+minimap's *rendering* (the two framebuffer origins and strides, §8.1) but not the three other
+places that know where it is, all of them the plain immediate **519** (`0x207`):
+
+| VA | Code | Role |
+|---|---|---|
+| `0x0041EE43` | `proto.c`: `make_rect(519, 6, 96, 84)` → `ui+0x7B4` (`0x004AB184`) at mission start | the **hit rectangle**. The click dispatcher `0x0040A484`ff tests the map view rect first (`[ui+8]`), then this one (`point_in_rect 0x0043658C` on `ui+0x7B4…0x7C0`, `0x0040A517`) before calling the minimap handler `0x0040A070` |
+| `0x0040A084` | minimap handler: `sub eax,207h` | mouse x → minimap column: `tile_x = ((x−519)·2+1)·map_w / 96 / 2`; the y side is `90 − y` (`0x0040A0B5`, the minimap's bottom edge, unchanged) |
+| `0x0043A1E4` | `engmain.c` minimap plot: `make_rect(519, 6, 96, 84)` | the clip rect for the plot |
+| `0x0043A27A` | `add eax,207h` | the **view-box indicator**: `view_x·96/map_w + 519` (y side `+6` at `0x0043A25F`) |
+
+All four → the new minimap x (903), stage 3 of `patch_resolution.py`. ENGEXP16 has them at
+`+0x60`. The other `0x207`/`0x208` hits in the binary are assert line numbers and buffer sizes.
+So the minimap's x is written **seven** times in three ways — two framebuffer byte offsets
+`(6·640+519)·2`, one rect built at init and reused, four bare immediates — and the y (6) twice
+as a rect argument, once as its bottom edge 90, and inside the two byte offsets.
+
 ### Stage 4 — cursors and movies
 
 * Cursors are `IDirectDrawSurface` blits at 1:1, so they simply look small. Redrawing
@@ -1606,6 +1629,9 @@ parse), which de-risks them completely.
 | `0x00436380`ff | main map render: lock, terrain, objects, unlock, minimap |
 | `0x004365BC` | `make_rect(x, y, w, h)` → `{x, y, x+w, y+h}` |
 | `0x0043A064` / `0x0043A43C` | minimap terrain plot / minimap object plot |
+| `0x0040A070` | minimap click handler (mouse → map tile, then order/scroll by event type); called from the dispatcher `0x0040A484`ff after `point_in_rect` on `ui+0x7B4` (§10.9) |
+| `0x0043658C` | `point_in_rect(x0, y0, x1, y1, px, py)` |
+| `0x004AB184` | `ui+0x7B4`: minimap hit rect, built by `proto.c 0x0041EE43` |
 | `0x0044EE30` | allocate the shade LUT at `0x0048C188` |
 | `0x0042532C` | `load_sprite_bank` (`animate.c`) — `"sprites/%s"` (§6.3) |
 | `0x0044F790` / `0x0044F818` | `.SPR` size helper / parser (`ctx+0x44` / `ctx+0x40`) (§6.3) |
