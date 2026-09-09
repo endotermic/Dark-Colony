@@ -16,11 +16,12 @@ Repository contains:
    - `DC16_DISPLAY_AND_RESOLUTION.md`: display pipeline (DirectDraw, software blitters, HUD geometry, mouse, movies), every resolution-dependent code site, and the staged plan for 1024x768
 
 The purpose of this repository is to make this old game better by some assembly tweaks:
-1) (IN PROGRESS) increase screen resolution from 640x480 to 1024x768 - plan and code-site inventory in `docs/DC16_DISPLAY_AND_RESOLUTION.md` (going straight to 1024x768; 800x600 is not a power of two and would need real multiplies)
-   - the 1024x768 display mode runs, and the menus letterbox correctly (`patch_resolution.py --stage 2` + `pad_background.py`)
-   - the full-size battlefield runs: **28x23 tiles = 896x736**, 2.9x the stock view area (`patch_resolution.py --stage 3`). The blocker was a lightmap that `draw_terrain` keeps on its own stack frame, sized for one screen; the patcher now grows that frame (11 code sites + the PE header's stack reserve/commit) - sections 10.4 and 10.5 of the display doc. Its 144-byte row stride turned out to need no change (overflowing columns only hit cells the algorithm never uses)
-   - verified as a crash test on the attract-mode demo map; lighting at the right edge of a wide view is argued, not yet eyeballed
-   - the HUD frame still has to be repainted for the full-size view (`hud_layout.py` is the scaffolding)
+1) (DONE) increase screen resolution from 640x480 to 1024x768 - both `DC - Classic/dc16.exe` and `DC - Council wars/ENGEXP16.EXE` in this repository are patched, together with their interface data; everything is in `docs/DC16_DISPLAY_AND_RESOLUTION.md` (going straight to 1024x768; 800x600 is not a power of two and would need real multiplies)
+   - the battlefield is **28x23 tiles = 896x736**, 2.9x the stock view area; the HUD keeps its native pixel size on the right and bottom edges (`INTRFACE.GIF` and `MAINE` rebuilt by `hud_layout.py`)
+   - the 30 menu screens, the loading screens and the briefing-globe markers are letterboxed by `pad_background.py`; the 44 code-positioned menu elements follow in the exe
+   - movies are stretched across the full width at 16:9 through a rerouted frame path, which also removes the stock player's skipped scanlines
+   - the exe patch is 165 byte-checked edits per binary (`patch_resolution.py`); the stock executables are in the git history (last stock commit `0307feb`) and `verify` tells the two apart
+   - not covered: Council Wars `dc16.exe` (a different build) and the map editor
 2) (DONE) remove the CD check to play campaign
 3) (TODO) increase quality of movies
 4) (DONE) tweak multiplayer to be modern and online: see project [Dark-Colony-Server](https://github.com/endotermic/Dark-Colony-Server)

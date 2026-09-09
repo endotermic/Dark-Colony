@@ -1452,7 +1452,7 @@ So the minimap's x is written **seven** times in three ways — two framebuffer 
 `(6·640+519)·2`, one rect built at init and reused, four bare immediates — and the y (6) twice
 as a rect argument, once as its bottom edge 90, and inside the two byte offsets.
 
-#### 10.10 Stage 6: the same patch on Council Wars `ENGEXP16.EXE` **(verified in the file; game test pending)**
+#### 10.10 Stage 6: the same patch on Council Wars `ENGEXP16.EXE` **(verified; confirmed in game)**
 
 With the Classic build confirmed in five test passes, the whole patch was carried over to the
 expansion's executable. Running the patcher against stock `ENGEXP16.EXE` refused to write on
@@ -1515,10 +1515,21 @@ and `exp/intrface` second.
 2 scene files), `hud_layout.py build` + `maine apply`. Because the expansion ships the Classic
 `INTRFACE.GIF`, `MAINE`, `MAINBUT.SPR`, menu scripts and scene files unchanged, all 54 base data
 outputs are **byte-identical** to the confirmed Classic test build; only the three `exp/` scripts
-and the two `exp/` scene files are new. **Not yet run by the maintainer**; the things a first
-look should confirm are the expansion-only screens (the one-column intro menu, the Aerogen and
-Council briefing globes and their markers), the credits scroll, and that the movies play through
-the rerouted path — everything else is the Classic build's data on the same code.
+and the two `exp/` scene files are new. **The maintainer played the build on 9 Sep 2026 and
+reported everything working.**
+
+##### Release: the repository binaries are patched
+
+With both test builds confirmed, the same three tools were run on the repository copies
+(`DC - Classic` and `DC - Council wars`) on 9 Sep 2026, and every changed file was checked
+byte for byte against the corresponding test build before committing: 165 exe edits per binary,
+the letterboxed menus, loading screens and scene files, the rebuilt `INTRFACE.GIF` and `MAINE`,
+and for Council Wars the `exp/` overrides. The `.bak` files the tools leave beside the originals
+are gitignored; the stock executables and data are the versions before that commit (last stock
+state: `0307feb`), and `patch_resolution.py verify` distinguishes a patched binary from a stock
+one by reading the dimension globals back. Because `pad_background.py` and `hud_layout.py maine`
+recognise an already-transformed script (a four-argument `size` line), re-running the tools on
+the repository is a no-op rather than a double shift.
 
 Still open under stage 6: Council Wars `dc16.exe` (a different build: only the §3 anchor
 transfers, so the whole site table would have to be re-derived in Ghidra), and the map editor.
