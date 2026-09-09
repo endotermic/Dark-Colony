@@ -5,3 +5,5 @@
 *.gbf
 *.dcg
 *.log
+__pycache__/
+*.pyc
