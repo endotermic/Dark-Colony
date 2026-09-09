@@ -50,10 +50,31 @@ SIZE4 = re.compile(rb'^[ \t]*size[ \t]+\d+[ \t]+\d+[ \t]+\d+[ \t]+\d+', re.M)
 BACKGROUND = re.compile(rb'^[ \t]*background[ \t]+(?:intrface/)?(\S+)', re.M | re.I)
 
 # Widget kinds whose 4th and 5th fields are x and y: <kind> <number> <desc> <x> <y> <w> <h> ...
-POSITIONED = {b'pushb', b'checkb', b'in_text', b'picture', b'list', b'scroll', b'gadget'}
-# `group` lists member numbers and `textmsg` carries text; neither has coordinates.
+# `label` (static text: "Choose race", "Type in a name for your leader", "Rank", "ENTER SESSION
+# NAME:") was missing from the first version, which left those four captions at their 640x480
+# places; `count`/`scount` only occur in MAINE, listed for completeness.
+POSITIONED = {b'pushb', b'checkb', b'in_text', b'picture', b'list', b'scroll', b'gadget',
+              b'label', b'count', b'scount'}
+# `group` lists member numbers, `textmsg` carries text, `banim` frame indices, `animation` and
+# `text` file names; none has coordinates.
+
+# The mission-selection screen marks the current mission on its globe with `intrface/epic`,
+# whose position is data: the `frame x y` line of every mission block in these files
+# (scenario.c 0x00429B67ff, sscanf "%d %d %d" -> gs+0x14D4/0x14E0/0x14DC; main.c 0x00403732
+# then pic_create(x=gs+0x14E0, y=gs+0x14DC)). Doc 10.7. The x/y assignment is inferred.
+SCENE_FILES = ('HSCENE.TXT', 'GSCENE.TXT', 'HTSCENE.TXT', 'GTSCENE.TXT')
+FRAME_XY = re.compile(rb'^([ \t]*)(\d+)([ \t]+)(\d+)([ \t]+)(\d+)([ \t]*\r?)$')
 
 HUD_SCRIPT = 'maine'
+
+# The two loading screens are not interface scripts: driver.c loads INTRFACE/load.bmp (first
+# start) or load2.bmp (later starts) with LoadImageA(..., W, H, LR_LOADFROMFILE |
+# LR_CREATEDIBSECTION) at 0x0042EF07/0x0042EF38 and BitBlts W x H to (0,0) at 0x0042EFED..
+# patch_resolution.py stage 2 sets W x H to the new screen size, so LoadImage would *stretch* the
+# 640x480 art (which is not the original image) -- unless the file itself is padded to W x H
+# with the picture centred, the same treatment as the GIF backgrounds. The BitBlt destination
+# cannot be moved instead: it is two `push 0` imm8 bytes and 192 does not fit in a signed byte.
+LOADING_BITMAPS = ('LOAD.BMP', 'LOAD2.BMP')
 
 
 def need_pil():
@@ -72,7 +93,10 @@ def scan(intrface_dir, only=None, include_hud=False):
         path = os.path.join(intrface_dir, fn)
         if not os.path.isfile(path) or fn.lower().endswith('.bak'):
             continue
-        data = open(path, 'rb').read()
+        # a script we padded earlier is judged by its pristine copy, so a re-run picks it up
+        # again (apply always transforms from the .bak)
+        src = path + '.bak' if os.path.exists(path + '.bak') else path
+        data = open(src, 'rb').read()
         if SIZE4.search(data):
             continue                              # already positioned (sub-window dialog)
         if not SIZE2.search(data):
@@ -90,10 +114,45 @@ def scan(intrface_dir, only=None, include_hud=False):
         if not os.path.exists(gif):
             skipped.append((fn, 'background %s has no .GIF' % bg.group(1).decode()))
             continue
-        with Image.open(gif) as im:
+        with Image.open(gif + '.bak' if os.path.exists(gif + '.bak') else gif) as im:
             gw, gh = im.size
         jobs.append((fn, gif, gw, gh))
     return jobs, skipped
+
+
+def gamestat_dir(intrface_dir):
+    """The sibling GAMESTAT folder, if this INTRFACE sits inside a game directory."""
+    parent = os.path.dirname(os.path.abspath(intrface_dir))
+    names = {fn.lower(): fn for fn in os.listdir(parent)}
+    fn = names.get('gamestat')
+    return os.path.join(parent, fn) if fn else None
+
+
+def scene_files(intrface_dir):
+    gs = gamestat_dir(intrface_dir)
+    if not gs:
+        return []
+    names = {fn.lower(): fn for fn in os.listdir(gs)}
+    return [os.path.join(gs, names[w.lower()]) for w in SCENE_FILES if w.lower() in names]
+
+
+def edit_scene(path, dx, dy, dry_run=False):
+    """Add (dx, dy) to the `frame x y` line of every mission block: the line of three integers
+    that follows the second .avi line. Returns the number of lines changed."""
+    data = open(path, 'rb').read()
+    out, changed, prev_avi = [], 0, False
+    for ln in data.split(b'\n'):
+        m = FRAME_XY.match(ln)
+        if m and prev_avi:
+            ln = b'%s%s%s%d%s%d%s' % (m.group(1), m.group(2), m.group(3),
+                                      int(m.group(4)) + dx, m.group(5),
+                                      int(m.group(6)) + dy, m.group(7))
+            changed += 1
+        prev_avi = ln.strip().lower().endswith(b'.avi')
+        out.append(ln)
+    if not dry_run:
+        open(path, 'wb').write(b'\n'.join(out))
+    return changed
 
 
 def check_gif_layout(path):
@@ -142,6 +201,39 @@ def pad_gif(src, dst, width, height):
         canvas.putpalette(palette)
         canvas.paste(im, ((width - sw) // 2, (height - sh) // 2))
         canvas.save(dst, format='GIF', version=version, interlace=False, optimize=False)
+    return sw, sh, pad
+
+
+def find_bitmaps(intrface_dir):
+    """(path, w, h) for each loading bitmap present, matched case-insensitively."""
+    Image = need_pil()
+    out = []
+    names = {fn.lower(): fn for fn in os.listdir(intrface_dir)}
+    for want in LOADING_BITMAPS:
+        fn = names.get(want.lower())
+        if fn and not fn.lower().endswith('.bak'):
+            path = os.path.join(intrface_dir, fn)
+            with Image.open(path) as im:
+                out.append((path, im.size[0], im.size[1]))
+    return out
+
+
+def pad_bmp(src, dst, width, height):
+    """Centre an 8-bit BMP on a width x height canvas, palette preserved, black border."""
+    Image = need_pil()
+    with Image.open(src) as im:
+        if im.mode != 'P':
+            raise ValueError('%s is mode %s, expected P (8-bit)' % (src, im.mode))
+        sw, sh = im.size
+        palette = im.getpalette()
+        pad = next((i for i in range(256)
+                    if tuple(palette[i * 3:i * 3 + 3]) == (0, 0, 0)), None)
+        if pad is None:
+            raise ValueError('%s has no black palette entry to pad with' % src)
+        canvas = Image.new('P', (width, height), pad)
+        canvas.putpalette(palette)
+        canvas.paste(im, ((width - sw) // 2, (height - sh) // 2))
+        canvas.save(dst, format='BMP')
     return sw, sh, pad
 
 
@@ -226,6 +318,21 @@ def cmd_plan(args, jobs, skipped):
                      '   %d WARNING(S)' % len(warns) if warns else ''))
             for wtext in warns:
                 print('            ! ' + wtext)
+    bitmaps = find_bitmaps(args.dir)
+    if bitmaps:
+        print('\n  loading screens (LoadImageA/BitBlt, not scripts):')
+        for path, bw, bh in bitmaps:
+            print('  %-26s %4dx%-4d -> %dx%d, content at (%d,%d)'
+                  % (os.path.basename(path), bw, bh, args.width, args.height,
+                     (args.width - bw) // 2, (args.height - bh) // 2))
+    scenes = scene_files(args.dir)
+    if scenes:
+        dx, dy = (args.width - 640) // 2, (args.height - 480) // 2
+        print('\n  mission globe markers (GAMESTAT/*SCENE.TXT `frame x y` lines):')
+        for path in scenes:
+            src = path + '.bak' if os.path.exists(path + '.bak') else path
+            print('  %-26s %d marker(s) +(%d,%d)'
+                  % (os.path.basename(path), edit_scene(src, dx, dy, dry_run=True), dx, dy))
     if skipped:
         print('\n  not touched:')
         for fn, why in skipped:
@@ -274,6 +381,29 @@ def cmd_apply(args, jobs, skipped):
               % (script, before, after, moved, dx, dy))
         for wtext in warns:
             print('        ! ' + wtext)
+    for path, bw, bh in find_bitmaps(args.dir):
+        if bw > args.width or bh > args.height:
+            problems.append('%s: %dx%d does not fit %dx%d'
+                            % (os.path.basename(path), bw, bh, args.width, args.height))
+            continue
+        if (bw, bh) == (args.width, args.height) and os.path.exists(path + '.bak'):
+            continue                                  # already padded on an earlier run
+        backup(path)
+        try:
+            sw, sh, pad = pad_bmp(path + '.bak', path, args.width, args.height)
+        except ValueError as e:
+            shutil.copy2(path + '.bak', path)
+            problems.append(str(e))
+            continue
+        print('padded  %-24s %dx%d -> %dx%d, border index %d'
+              % (os.path.basename(path), sw, sh, args.width, args.height, pad))
+    dx, dy = (args.width - 640) // 2, (args.height - 480) // 2
+    for path in scene_files(args.dir):
+        backup(path)
+        shutil.copy2(path + '.bak', path)             # transform the pristine copy
+        n = edit_scene(path, dx, dy)
+        print('markers %-24s %d `frame x y` line(s) +(%d,%d)'
+              % (os.path.basename(path), n, dx, dy))
     if problems:
         print('\nproblems:')
         for p in problems:
@@ -285,14 +415,18 @@ def cmd_apply(args, jobs, skipped):
 
 def cmd_revert(args):
     n = 0
-    for fn in sorted(os.listdir(args.dir)):
-        if not fn.endswith('.bak'):
-            continue
-        bak = os.path.join(args.dir, fn)
-        shutil.copy2(bak, bak[:-4])
-        os.remove(bak)
-        print('restored %s' % os.path.basename(bak[:-4]))
-        n += 1
+    dirs = [args.dir] + ([gamestat_dir(args.dir)] if gamestat_dir(args.dir) else [])
+    for d in dirs:
+        for fn in sorted(os.listdir(d)):
+            if not fn.endswith('.bak'):
+                continue
+            if d != args.dir and fn.upper()[:-4] not in SCENE_FILES:
+                continue                          # only our own files in GAMESTAT
+            bak = os.path.join(d, fn)
+            shutil.copy2(bak, bak[:-4])
+            os.remove(bak)
+            print('restored %s' % os.path.basename(bak[:-4]))
+            n += 1
     print('%d file(s) restored' % n)
     return 0
 
@@ -315,7 +449,7 @@ def main(argv=None):
         return cmd_revert(args)
 
     jobs, skipped = scan(args.dir, args.only, args.include_hud)
-    if not jobs:
+    if not jobs and not (find_bitmaps(args.dir) and not args.only):
         raise SystemExit('nothing to do in %s%s'
                          % (args.dir, ' for --only %s' % args.only if args.only else ''))
     return (cmd_plan if args.command == 'plan' else cmd_apply)(args, jobs, skipped)

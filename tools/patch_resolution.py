@@ -15,12 +15,16 @@ CLI
 
 Stages are cumulative and mirror the plan in the doc:
     1  display mode, framebuffer stride, clip rect          (game in the top-left corner)
-    2  + full-screen chrome, mouse, cursor, loading screens (640x480 content, centred by data)
+    2  + full-screen chrome, mouse, cursor, loading screens (640x480 content, centred by data),
+         and the 44 code-positioned menu elements (text boxes, globes, models, medal) moved by
+         the same (+192,+144) the letterboxed scripts use
     3  + enlarged map viewport and relocated minimap, and the 31 hardcoded 512-byte row
          advances of draw_terrain's lightplane fill; when the view no longer fits
          draw_terrain's stack lightmap (17x16 tiles), its frame is grown and the PE
          header's stack reserve/commit raised
-    4  + movie back-buffer clear                            (default)
+    4  + movies: pitch-aware back-buffer clear, and the frame path rerouted through the
+         320x180 movie surface + a stretching IDirectDrawSurface::Blt (16:9 letterbox
+         across the full width)                             (default)
 
 Stages 5 and 6 of the plan are data and art only; nothing here touches them.
 To revert, restore the .bak that `apply` writes.
@@ -42,9 +46,11 @@ import textwrap
 # The full stock sequence is ANCHOR_PREFIX + "80 02 00 00" + "E0 01 00 00".
 ANCHOR_PREFIX = bytes.fromhex('4f016e01')
 
+# (name, AUTO shift, DGROUP shift). The DGROUP shift matters for the one site that carries
+# absolute data addresses in its bytes (the movie Blt block).
 BUILDS = {
-    'aa0a646b1234d1d9815a2b7480fd080b': ('Classic dc16.exe', 0),
-    '50419d438427d31341057e9723724f66': ('Council Wars ENGEXP16.EXE', 0x60),
+    'aa0a646b1234d1d9815a2b7480fd080b': ('Classic dc16.exe', 0, 0),
+    '50419d438427d31341057e9723724f66': ('Council Wars ENGEXP16.EXE', 0x60, 0x228),
     # Council Wars dc16.exe (4180f6e9d01925b23eac0eb335e0b95e) is a different build: only the
     # DGROUP anchor transfers, so its AUTO offsets are deliberately absent. Patching it needs
     # the sites re-derived in Ghidra first.
@@ -67,6 +73,7 @@ def auto_offset(classic_off, shift):
 # 26 px bottom bar, with the minimap 121 px in from the right edge.
 INSET_X, INSET_Y = 4, 6
 PANEL_W, BOTTOM_H = 124, 26
+AUTO_VA_TO_FILE = 0x400C00         # Classic: VA = file offset + 0x400C00 in the AUTO section
 MINIMAP_W, MINIMAP_H = 96, 84
 MINIMAP_RIGHT_GAP = 640 - 519
 TILE = 32
@@ -153,6 +160,16 @@ class Geometry:
         self.half_y = self.tiles_y * 128
         self.minimap_x = width - MINIMAP_RIGHT_GAP
         self.minimap_off = (INSET_Y * width + self.minimap_x) * 2
+        # The menus stay 640x480 and are letterboxed by data (pad_background.py); the code
+        # that draws on top of them has to move by the same offset (doc 10.7).
+        self.menu_dx = (width - 640) // 2
+        self.menu_dy = (height - 480) // 2
+        # Movies: the 320x180 frames are stretched across the full width at 16:9 and centred,
+        # as the stock game did at 640x480 (640x358 in 480 rows) (doc 10.8).
+        movie_h = min(height, width * 9 // 16)
+        self.movie_rect = (0, (height - movie_h) // 2, width, (height + movie_h) // 2)
+        # set per build by resolve()/cmd_verify(); Classic is 0
+        self.dgroup_shift = 0
 
     def describe(self):
         return [
@@ -169,6 +186,9 @@ class Geometry:
                'frame grown 0x%X -> 0x%X (+0x%X)' % (LIGHTMAP_FRAME, self.lm_frame,
                                                        self.lm_delta)
                if self.lightmap_patch else 'fits the stock frame, untouched'),
+            'menu furniture   code-drawn text/animations shifted by (+%d, +%d)'
+            % (self.menu_dx, self.menu_dy),
+            'movies           320x180 frames stretched to (%d,%d)-(%d,%d)' % self.movie_rect,
         ]
 
 
@@ -282,11 +302,115 @@ SITES = [
     (3, 0x394AF, '81c20e220000', 2, lambda g: g.minimap_off, 'minimap origin (a)'),
     (3, 0x39884, '8145f00e220000', 3, lambda g: g.minimap_off, 'minimap origin (b)'),
 
-    # -- stage 4: movies ---------------------------------------------------------------------
-    (4, 0x067F4, '3d80020000', 1, lambda g: g.w, 'movie back-buffer clear width'),
-    (4, 0x0680B, '81fae0010000', 2, lambda g: g.h, 'movie back-buffer clear height'),
-    (4, 0x06805, '81c100050000', 2, lambda g: g.w * 2,
-     'movie back-buffer row pitch (bytes)'),
+    # -- stage 4: movies (doc 10.8) ----------------------------------------------------------
+    # The back-buffer clear 0x004073C4 Locks the back buffer (DDSURFACEDESC at [ebp-6Ch]) and
+    # then ignores the description: 640 pixels per row, a 1280-byte pitch and 480 rows are
+    # literals. Read them from the description instead: dwHeight +8, dwWidth +0xC, lPitch +0x10.
+    (4, 0x067F4, '3d80020000', None, lambda g: bytes.fromhex('3b45a09090'),
+     'movie clear: cmp eax,[ebp-60h] (dwWidth from the Lock)'),
+    (4, 0x06805, '81c100050000', None, lambda g: bytes.fromhex('034da4909090'),
+     'movie clear: add ecx,[ebp-5Ch] (lPitch from the Lock)'),
+    (4, 0x0680B, '81fae0010000', None, lambda g: bytes.fromhex('3b559c909090'),
+     'movie clear: cmp edx,[ebp-64h] (dwHeight from the Lock)'),
+    # The normal frame path (draw_flip 0x00407674) is a software 2x doubler anchored at (0, yoff)
+    # that writes one row and skips one: neither full-screen nor line-free at 1024x768, and not
+    # fixable by immediates. The fallback path already has everything needed: a 320x180 movie
+    # surface (0x488E00) filled 1:1 by draw_offscreen 0x00407898 and then BltFast'ed to the
+    # primary. Create that surface in flip mode too, always take the fallback drawer, and turn
+    # BltFast (no stretching) into a stretching IDirectDrawSurface::Blt with a dest rect.
+    (4, 0x0652E, '85c00f8455010000e971020000', None,
+     lambda g: bytes.fromhex('89c2' 'e9ab000000' '909090909090'),
+     'avi_create_surfaces: after GetAttachedSurface, mov edx,eax; jmp 4071E0 '
+     '(edx=0 -> create the 320x180 surface; else return 0)'),
+    (4, 0x0663D, '891d0c8e4800', None, lambda g: b'\x90' * 6,
+     'avi_create_surfaces: keep the flip flag when creating the movie surface'),
+    (4, 0x07F3E, '7507', None, lambda g: b'\xEB\x07',
+     'display thread: always draw through the 320x180 movie surface'),
+    (4, 0x07214, lambda g: movie_blt_block(g, stock=True), None,
+     lambda g: movie_blt_block(g, stock=False),
+     'draw_offscreen: BltFast -> stretching Blt(primary, dest rect, movie surface)'),
+    (4, 0x06879, 'e9d4000000', None, lambda g: b'\x90' * 5,
+     'clear_and_flip: also clear the movie surface in flip mode'),
+    (4, 0x06430, '7518', None, lambda g: b'\x90\x90',
+     'release_surfaces: release the movie surface whenever it exists'),
+    (4, 0x06D1B, '0f83', None, lambda g: b'\x0F\x87',
+     'draw_offscreen: draw all H rows, not H-1 (jae -> ja)'),
+]
+
+
+def movie_blt_block(g, stock):
+    """The 62 bytes at 0x00407E14..0x00407E51 of draw_offscreen (doc 10.8).
+
+    Stock: srcRect = (0,0,320,180) at [ebp+52h..], BltFast(primary, x=160, y=2*yoff, movie,
+    &srcRect, DDBLTFAST_WAIT). New: destRect at [ebp+62h..] (dead temporaries of the finished
+    copy loop), Blt(primary, &destRect, movie, NULL, DDBLT_WAIT, NULL) -- stretches. The two
+    absolute data addresses (primary 0x489718, movie surface 0x488E00) move with DGROUP.
+    """
+    primary = struct.pack('<I', 0x489718 + g.dgroup_shift)
+    movie = struct.pack('<I', 0x488E00 + g.dgroup_shift)
+    yoff = struct.pack('<I', 0x4A5680 + g.dgroup_shift)
+    if stock:
+        return (bytes.fromhex('ba40010000b9b40000006a10a1') + primary
+                + bytes.fromhex('89555a8d55528b1d') + movie
+                + bytes.fromhex('5231ff8b15') + yoff
+                + bytes.fromhex('5301d2897d5252897d56894d5e68a00000008b0850ff511c'))
+    left, top, right, bottom = g.movie_rect
+    return (bytes.fromhex('31ff897d62')                                  # xor edi,edi; [ebp+62h]=0
+            + b'\xC7\x45\x66' + struct.pack('<I', top)                   # dest.top
+            + b'\xC7\x45\x6A' + struct.pack('<I', right)                 # dest.right
+            + b'\xC7\x45\x6E' + struct.pack('<I', bottom)                # dest.bottom
+            + bytes.fromhex('6a00')                                      # lpDDBltFx = NULL
+            + bytes.fromhex('6800000001')                                # DDBLT_WAIT
+            + bytes.fromhex('6a00')                                      # lpSrcRect = NULL
+            + b'\xFF\x35' + movie                                        # push [movie surface]
+            + bytes.fromhex('8d556252')                                  # lea edx,[ebp+62h]; push
+            + b'\xA1' + primary + b'\x50'                                # mov eax,[primary]; push
+            + bytes.fromhex('8b08ff5114')                                # call [vtbl+14h] = Blt
+            + b'\x90' * 6) if left == 0 else _unsupported_left(left)
+
+
+def _unsupported_left(left):
+    raise ValueError('movie dest rect must start at x=0 (got %d): the block stores dest.left '
+                     'with xor edi,edi' % left)
+
+
+# -- stage 2: code-positioned menu furniture (doc 10.7) -------------------------------------
+# Every element a menu screen draws by code goes through two scenario.c primitives, both
+# taking x in edx and y in ebx as imm32 at the call site: the text-file box 0x00428448 and the
+# animated picture window 0x004289D0. The letterboxed scripts moved everything else by
+# (+192,+144); these must follow. (va, axis, stock value, element)
+MENU_FURNITURE = [
+    (0x40247B, 'x', 10, 'campaign overview text'), (0x402471, 'y', 13, 'campaign overview text'),
+    (0x402707, 'x', 20, 'encyclopedia text'), (0x40297C, 'x', 20, 'encyclopedia text'),
+    (0x402AC8, 'x', 20, 'encyclopedia text'), (0x402BE5, 'x', 20, 'encyclopedia text'),
+    (0x402D0D, 'x', 20, 'encyclopedia text'), (0x402E40, 'x', 20, 'encyclopedia text'),
+    (0x402702, 'y', 106, 'encyclopedia text'), (0x402976, 'y', 106, 'encyclopedia text'),
+    (0x402AC2, 'y', 106, 'encyclopedia text'), (0x402BE0, 'y', 106, 'encyclopedia text'),
+    (0x402D17, 'y', 106, 'encyclopedia text'), (0x402E4A, 'y', 106, 'encyclopedia text'),
+    (0x40272F, 'x', 303, 'encyclopedia model'), (0x4029CE, 'x', 303, 'encyclopedia model'),
+    (0x402B1A, 'x', 303, 'encyclopedia model'), (0x402C30, 'x', 303, 'encyclopedia model'),
+    (0x402D5D, 'x', 303, 'encyclopedia model'), (0x402E8B, 'x', 303, 'encyclopedia model'),
+    (0x402728, 'y', 13, 'encyclopedia model'), (0x4029C7, 'y', 13, 'encyclopedia model'),
+    (0x402B13, 'y', 13, 'encyclopedia model'), (0x402C29, 'y', 13, 'encyclopedia model'),
+    (0x402D56, 'y', 13, 'encyclopedia model'), (0x402E84, 'y', 13, 'encyclopedia model'),
+    (0x40320A, 'x', 310, 'mission description text'),
+    (0x403200, 'y', 212, 'mission description text'),
+    (0x40323F, 'x', 34, 'mission globe (human)'), (0x40327C, 'x', 34, 'mission globe (alien)'),
+    (0x40329F, 'x', 34, 'mission globe overlay'), (0x403249, 'y', 26, 'mission globe (human)'),
+    (0x403275, 'y', 26, 'mission globe (alien)'), (0x40329A, 'y', 26, 'mission globe overlay'),
+    (0x405C71, 'x', 336, 'network screen globe'), (0x405C60, 'y', 24, 'network screen globe'),
+    (0x404281, 'x', 29, 'victory debrief text'), (0x40427A, 'y', 190, 'victory debrief text'),
+    (0x404474, 'x', 541, 'victory medal'), (0x4047F3, 'x', 541, 'victory medal (re-create)'),
+    (0x40446D, 'y', 169, 'victory medal'), (0x4047EC, 'y', 169, 'victory medal (re-create)'),
+    (0x404EA0, 'x', 178, 'intro credits text'), (0x404E99, 'y', 200, 'intro credits text'),
+]
+SITES += [
+    (2, va - AUTO_VA_TO_FILE,
+     ('ba' if axis == 'x' else 'bb') + struct.pack('<I', stock).hex(), 1,
+     (lambda s: (lambda g: s + g.menu_dx))(stock) if axis == 'x'
+     else (lambda s: (lambda g: s + g.menu_dy))(stock),
+     'menu: %s %s %d' % (what, axis, stock))
+    for va, axis, stock, what in MENU_FURNITURE
 ]
 
 
@@ -323,7 +447,6 @@ LIGHTMAP_SITES = [
 # (0x004542E8) multiplies by 0x0049931C. With a wider view, rows 1..31 of every tile land on
 # the wrong rows of the plane, so the battlefield is covered in a repeating pattern of unlit
 # (black) lines. 30 x `add eax,200h` plus the final `lea edi,[eax+200h]` (doc 10.6).
-AUTO_VA_TO_FILE = 0x400C00
 LIGHTPLANE_ROW_ADVANCE_VAS = [
     0x453CCB, 0x453CF2, 0x453D15, 0x453D62, 0x453D8E, 0x453DC9, 0x453DFC, 0x453E26,
     0x453E58, 0x453E93, 0x453EC6, 0x453EF9, 0x453F24, 0x453F61, 0x453F94, 0x453FC7,
@@ -374,8 +497,8 @@ def read_dimensions(data, path):
 def identify(data, path):
     md5 = hashlib.md5(data).hexdigest()
     if md5 in BUILDS:
-        name, shift = BUILDS[md5]
-        return name, shift, md5
+        name, shift, dshift = BUILDS[md5]
+        return name, shift, dshift
     _, w, h = read_dimensions(data, path)
     if (w, h) != (640, 480):
         raise SystemExit('%s: already patched to %d x %d. Restore the .bak to get back to '
@@ -388,7 +511,7 @@ def identify(data, path):
 
 def expected_and_target(site, geom):
     _, _, exp_hex, imm, fn, _ = site
-    exp = bytes.fromhex(exp_hex)
+    exp = exp_hex(geom) if callable(exp_hex) else bytes.fromhex(exp_hex)
     if imm is None:
         return exp, fn(geom)
     new = bytearray(exp)
@@ -396,9 +519,10 @@ def expected_and_target(site, geom):
     return exp, bytes(new)
 
 
-def resolve(data, path, shift, geom, stage, exclude=()):
+def resolve(data, path, shift, geom, stage, exclude=(), dshift=0):
     """Return (edits, problems); edits are (offset, old, new, description)."""
     anchor = find_anchor(data, path)
+    geom.dgroup_shift = dshift
     edits, problems = [], []
 
     for off, val, what in ((anchor + 4, geom.w, 'screen width global'),
@@ -440,7 +564,7 @@ def cmd_verify(path):
     print('%s\n  %d bytes, md5 %s' % (path, len(data), md5))
     known_shift = None
     if md5 in BUILDS:
-        name, known_shift = BUILDS[md5]
+        name, known_shift, _ = BUILDS[md5]
         print('  build: %s (stock)' % name)
     else:
         print('  build: not a known stock binary (patched, or one with no site table)')
@@ -459,10 +583,11 @@ def cmd_verify(path):
         return 1
 
     # A patched binary has an unknown md5, so try each known shift and keep the best fit.
-    candidates = [known_shift] if known_shift is not None else sorted(
-        {s for _, s in BUILDS.values()})
+    shifts = {s: d for _, s, d in BUILDS.values()}
+    candidates = [known_shift] if known_shift is not None else sorted(shifts)
     best = None
     for cand in candidates:
+        geom.dgroup_shift = shifts[cand]
         tally = {}
         for site in sites_for(geom):
             site_stage, classic_off = site[0], site[1]
@@ -528,7 +653,7 @@ def main(argv=None):
     if args.command == 'verify':
         return cmd_verify(args.exe)
 
-    name, shift, _ = identify(data, args.exe)
+    name, shift, dshift = identify(data, args.exe)
     try:
         vp = None
         if args.viewport:
@@ -538,7 +663,7 @@ def main(argv=None):
         raise SystemExit('bad target geometry: %s' % e)
     print('build: %s  (AUTO shift +0x%X)\n' % (name, shift))
 
-    edits, problems = resolve(data, args.exe, shift, geom, args.stage, args.exclude)
+    edits, problems = resolve(data, args.exe, shift, geom, args.stage, args.exclude, dshift)
     if args.exclude:
         print('excluding sites matching: %s'
               % ', '.join(repr(x) for x in args.exclude))

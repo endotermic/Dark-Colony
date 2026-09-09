@@ -540,7 +540,10 @@ Council Wars `dc16.exe` is a different build; only the §3 anchor is given for i
 | lightplane row advance 512 (`lea edi`) | `0x004542BC` | `0x536BC` | `8D B8 00 02 00 00` | `0x5371C` |
 
 The last two rows are a *viewport* constant (512 = the stock map view width), not a screen one;
-they were found by symptom in the first visual test (§10.6), not by the sweep.
+they were found by symptom in the first visual test (§10.6), not by the sweep. Two further
+families are tabulated in their own sections: the 44 menu-furniture coordinates (`main.c`,
+§10.7 — 640×480 *positions*, moved with the letterboxed scripts) and the movie path (`avi.c`,
+§10.8 — ten sites, three of them code rewrites rather than constants).
 
 ### 8.2 Hidden multiplies — the trap
 
@@ -760,21 +763,26 @@ the file the right size, and the existing linear write is then correct as it sta
 ##### Caveat: code-positioned elements do not move
 
 Route A shifts widgets, but some screen furniture is placed by code and stays where it is. On the
-network screen the spinning globe (`intrface/globeg`/`globes`, loaded by `main.c` at `0x0040323A`
-and `0x0040325D`; `NETOPTE` never mentions it) keeps its hardcoded position, and once the buttons
-move +192 it overlaps them — its opaque bounding box blanks the right half of the `TCP/IP` and
-`IPX NETWORK` labels. The intro AVI is the same class of thing, still letterboxed at the top left
-until stage 4. Each such element needs its own small code patch, or acceptance. They were not
-enumerated.
+network screen the spinning globe (`intrface/blew`; `NETOPTE` never mentions it — the
+`globeg`/`globes` pair loaded at `0x0040323A`/`0x0040325D` is the *briefing* screen's globe)
+keeps its hardcoded position, and once the buttons move +192 it overlaps them — its opaque
+bounding box blanks the right half of the `TCP/IP` and `IPX NETWORK` labels. The intro AVI is the
+same class of thing, still letterboxed at the top left until stage 4. **Enumerated and fixed in
+§10.7 (44 immediates, two primitives) and §10.8 (movies).**
 
 ### Stage 2 — full-screen chrome, menus centred
 
 * Mouse clamps and centre → 1023/767, 512/384.
 * Cursor clip → 1024/768.
 * `main.c` full-screen rect → 1023/767.
-* Loading screens: either repaint `LOAD.BMP`/`LOAD2.BMP` at 1024×768 (the `LoadImageA` and
-  `BitBlt` calls just take the new numbers), or keep them 640×480 and centre them by changing the
-  `BitBlt` destination — the simpler edit is to repaint the art.
+* Loading screens: the `LoadImageA` and `BitBlt` calls take the new numbers (stage 2 sites), and
+  `INTRFACE/LOAD.BMP` / `LOAD2.BMP` are **padded** to 1024×768 with the picture centred
+  (`pad_background.py apply` does it alongside the GIFs). Two things ruled out the alternatives,
+  found when the tester reported the stretched result "must be the original image": `LoadImageA`
+  with a non-zero `cxDesired`/`cyDesired` *scales* a 640×480 file to 1024×768, so leaving the art
+  alone gives a blocky stretch; and the `BitBlt` destination at `0x0042EFF7`/`0x0042EFF9` is two
+  `push 0` **imm8** bytes (`6A 00`), so it cannot be moved to (192,144) with a same-length edit —
+  192 and 144 do not fit a signed byte, and neither do −192/−144 as a source offset.
 * Menus: edit one line per `INTRFACE/*E` script (§6) from `size 640 480` to
   `size 192 144 640 480`. This centres every menu, lobby and dialog with **no patching**. The
   in-game map view is positioned separately (`proto.c`, stage 3) and is unaffected.
@@ -1237,22 +1245,194 @@ splice is at **399**: minimap, tabs and grid stay at the top, everything from 39
 156 × `x += 384`, 10 × `y += 288` (4 bottom-bar widgets, 2 message lines, the 4-widget cluster),
 1 left alone (`picture #199`).
 
+**Third visual test:** the bottom cluster is in place. Remaining complaint: the bottom bar's
+message box had "an ugly break in the middle".
+
+##### The bottom bar: splice inside the message box, and repeat a stretch, not a line
+
+The first `build` spliced the bar's 384 new columns in at x = 520 — *after* the message box's
+right frame (`509…515`) and into the panel corner — and filled them with the single most common
+column, so the box was cut in two with a bar down the middle. Measured column by column, the bar
+is: arrow buttons `4…44`, the message box frame `46…52`, the **box interior `53…508` with only four
+distinct columns** — black between two bevel lines whose rows 457/461/474/478 alternate at random
+between two greys (`44/40`, `60/62`) — the right frame `509…515`, then the panel. The §5.1 note
+"no period beyond ~49 px, needs real artwork" was measuring that random dither and drawing the
+wrong conclusion: there is no period because it is noise, and noise repeats invisibly.
+
+So `build` now splices the bar at **x = 300**, inside the interior, and fills — for every
+region — by repeating the **128 lines just before the splice** rather than one line. The top and
+left borders are the same case (two lines in random alternation), the panel and the map edge are
+constant over their splice, so the 128-line filler is exact everywhere and the whole frame extends
+without new artwork. The one bottom-bar widget right of the splice, `in_text #200` at (480,463),
+the 3-character field at the box's right end, moves with the box's end: → (864,751)
+(`BOTTOM_INSERT = 300` in `hud_layout.py`). `plan`: 156 × `x += 384` in the panel plus that one,
+10 × `y += 288`, 1 left alone.
+
 **Still unverified:** the lighting at the right-hand edge during a night phase (§10.5's open
-question), and the mechanically spliced bottom bar. The seam at 399 has not been seen in the game
-yet.
+question), and the new bottom bar in the game.
+
+#### 10.7 The menu furniture that code draws: two primitives, 44 immediates, and two data omissions **(verified)**
+
+After the battlefield was right, a full pass through the menus at 1024×768 produced the list
+§10.1 had warned about: the campaign overview text, the mission-briefing globe and description,
+the network screen's globe, the encyclopedia's text and turning models, the victory screen's
+debrief text and medal — all still at 640×480 coordinates while the letterboxed scripts around
+them had moved by (+192,+144). Plus two captions on the main menu ("Choose race", "Type in a name
+for your leader") and the "Rank" caption on the briefing screen.
+
+##### Everything code-positioned goes through two `scenario.c` primitives
+
+Reading the seven screen functions in `main.c` (they are the ones containing the
+`load_interface` calls listed in §6) shows that they draw nothing themselves. Every
+code-positioned element is created by one of two calls, both taking **x in `edx` and y in `ebx`**
+as `mov reg, imm32` at the call site and storing them once:
+
+| Primitive | Args | Stores | Drawn by |
+|---|---|---|---|
+| `0x00428448` **text-file box** ("TTY", asserts "Too many TTYs" `0x48501C`) | `(app, x, y, w; [esp] h, filename, font, …)`, `ret 20h` | slot record, stride `0x3EE8`: x `0x4D61C8`, y `0x4D61CC`, w `0x4D61D0`, h `0x4D61D4` (`0x004284F0…0x00428517`) | `0x00428968`: glyph at `x + col·cellw + col`, `y + row·cellh + row`, `call [ctx+5Ch]` |
+| `0x004289D0` **animated picture window** ("PIC", asserts "Too many PIC Windows" `0x485078`) | `(app, x, y, spritename; [esp] period, …, erase_bg)`, `ret 1Ch` | slot record, stride `0x60`: x `0x4DE008`, y `0x4DE00C` (`0x00428A65/74`) | `0x00428B8C`: erase rect `call [ctx+60h]`, cell blit `call [ctx+58h]` with `edx=x, ebx=y` |
+
+So the whole fix is the 44 immediates at the call sites, all `imm32` (no `imm8` overflow
+anywhere), all `+192` / `+144`. Widths and heights stay. The `push 32h/21h/42h/2Dh` next to the
+PIC calls are frame periods, not coordinates. `patch_resolution.py` carries them as
+`MENU_FURNITURE` in **stage 2**, since they belong with the letterboxing they compensate for:
+
+| Screen (function) | Element | Sites | Stock (x, y) |
+|---|---|---|---|
+| campaign overview `story` (`0x004023F4`) | `hstory.txt`/`astory.txt` TTY 579×420 | `0x0040247B` / `0x00402471` | (10, 13) |
+| encyclopedia `encyclo` (`0x00402614`) | unit text TTY 238×356, six code paths | `0x00402707 …0x00402E40` (x), `0x00402702 … 0x00402E4A` (y) | (20, 106) |
+| | unit model PIC, six code paths | `0x0040272F … 0x00402E8B` (x), `0x00402728 … 0x00402E84` (y) | (303, 13) |
+| mission briefing `shuman` (`0x00402F90`) | description TTY 294×225 | `0x0040320A` / `0x00403200` | (310, 212) |
+| | globe PICs `globeg`+`globes` (human) / `earthg`+`earths` (alien), three call sites sharing a tail | `0x0040323F/7C/9F` (x), `0x00403249/75/9A` (y) | (34, 26) |
+| network `netopt` (`0x00405C40`) | globe PIC `intrface/blew` | `0x00405C71` / `0x00405C60` | (336, 24) |
+| victory `wingame` | debrief TTY 445×112 (`"%s.%3.3d"`) | `0x00404281` / `0x0040427A` | (29, 190) |
+| | medal PIC `intrface/mdl%c`, created and re-created on click | `0x00404474/0x004047F3` (x), `0x0040446D/0x004047EC` (y) | (541, 169) |
+| intro `bintro` (`0x00404DC8`) | scrolling `credits.txt` TTY 280×100 | `0x00404EA0` / `0x00404E99` | (178, 200) |
+
+§10.1's guess that the network screen shows `globeg/globes` was wrong: that pair (and
+`earthg/earths`) is the *briefing* globe; the network screen's is `blew`. The main menu draws
+nothing by code, and there is no separate "name your leader" screen: that prompt is `in_text 5`
+plus `label 18` on `NEWGAMEE`. `meta`, `multi`, `lost`, `loadg`, `dpblank`, `dplays`, `getsvr`,
+`ipxname` and the `interface.c` dialogs call neither primitive.
+
+##### Two things that were data after all
+
+1. **`label` was missing from `pad_background.py`'s widget-kind list.** The keyword table at
+   `0x004895F0` pairs `"label"` with handler `0x00424A40`, which parses `x y w h` through the
+   same field parser (`0x00422414`) as every other kind. So the 44 `label` lines across the
+   scripts — including the four the tester saw — had never moved. `POSITIONED` now has `label`
+   (and, for completeness, `count`/`scount`). A census of every keyword in the 30 scripts found
+   no other positioned kind: `banim` carries frame indices, `animation` and `text` file names.
+2. **The mission marker on the briefing globe is placed by `GAMESTAT/*SCENE.TXT`.** `main.c`
+   `0x00403732` creates `intrface/epic` at `(gs+0x14E0, gs+0x14DC)` when the globe reaches frame
+   `gs+0x14D4`; `scenario.c 0x00429B67`ff fills those three with `sscanf("%d %d %d")` from the
+   `frame x y` line of each mission block (the line after the two `.avi` lines, e.g. `25 110 30`).
+   `pad_background.py apply` now adds (192,144) to the second and third numbers in `HSCENE.TXT`,
+   `GSCENE.TXT` (15 blocks each), `HTSCENE.TXT`, `GTSCENE.TXT` (7 each), with `.bak`s, and
+   `revert` restores them. Which of the two numbers is x is *inferred* from the two `mov` at
+   `0x00403726/2C`; a wrong guess would show as a marker off the globe.
+
+`pad_background.py` also re-derives from `.bak` on a re-run now, so adding a kind and running
+`apply` again is enough (previously a padded script was mistaken for a sub-window dialog and
+skipped).
+
+**ENGEXP16 note.** The two `netopt` sites sit at `−0x20`, not `+0x60`, and the credits' stock y
+differs (`0xE6` = 230, not 200): `main.c` is not a uniform shift there. The expected-byte check
+catches it; stage 6 must re-derive those three.
+
+#### 10.8 Movies: the frame path, and why stretching needed a re-route **(verified in code; game test pending)**
+
+Same test pass: at 1024×768 the FMVs played letterboxed in the top-left instead of stretched
+across the screen, and with periodic black lines. All 59 `AVI/*.avi` are **320×180 Cinepak**
+(`strf`), so the source is 16:9, not 320×240.
+
+##### How a frame reaches the screen (`avi.c`)
+
+```
+main.c 0x00401137  avi_begin 0x00406FD0 → avi_create_surfaces 0x00407068
+main.c 0x00401149  [vtbl+3Ch] → 0x004073B8 → play_avi 0x00408CB8
+main.c 0x0040114E  avi_end   0x00406FF0 → clear_and_flip 0x00407440, release_surfaces 0x00407018, mode cycle
+
+play_avi: open_video 0x0040818C (AVIStream + ICLocate, BITMAPINFO forced to 24 bpp at 0x004083DA),
+          open_audio 0x00407E60, build_luts 0x0040755C (R/G/B 8→16 LUTs 0x4A49C0/4DC0/51C0, then the
+          geometry below), four threads (0x00408784 audio feed, 0x00408BB0 decode, 0x00408AC8 display,
+          0x00408558 sync)
+display thread 0x00408AC8: cmp [0x488E0C],1 ; jne → draw_offscreen 0x00407898
+                                            ;  else  draw_flip      0x00407674
+```
+
+`avi_create_surfaces` makes a primary + one back buffer (`DDSCAPS 0x4218`, `0x489718`/`0x48971C`,
+flag **`0x488E0C = 1`**, "flip mode"). Only if that fails does it fall back to a plain primary
+and create the **320×180 offscreen movie surface `0x488E00`** (`0x004071F7…`, `dwWidth` at
+`0x0040722B`, `dwHeight` at `0x00407230`, flag = 0).
+
+**Flip mode, `draw_flip 0x00407674`, is a software 2× doubler into the back buffer.** It Locks
+the back buffer and *does* take `lPitch` from the description (`0x004076C9`), converts each 24-bpp
+source pixel through the LUTs into a DWORD holding two identical 16-bit pixels
+(`mov [edx+ebx*4-4],edi`, `0x00407760` — the horizontal 2×), then per source row advances the
+destination by **two** rows (`0x0040776F/0x00407775`) having written **one**. So the stock game
+paints 640 × 2(H−1) = 640×358 at `(0, yoff)` with **every odd row untouched** — the "periodic
+black lines" are the design of the stock doubler, filled black by the clear at 640×480 and
+presumably invisible on a CRT. `yoff = 241 − H` (`0x0040762B`, `mov edx,0F0h; sub edx,H−1`)
+centres the doubled picture in 480 rows: rows 61…418, 61-px bars. The letterbox is the stock
+proportion.
+
+Two things break at 1024×768: the doubler is fixed 2× anchored at x = 0 (no x term anywhere in
+`0x004076F0…0x00407703`), so it fills 640×358 of the 1024×768 back buffer; and the clear
+`0x004073C4` Locks the back buffer but then **ignores the description** — 640 pixels per row, a
+1280-byte pitch and 480 rows are literals (`0x004073F4/05/0B`) — so with a 2048-byte pitch it
+clears exactly the top 300 rows and leaves the rest as stale VRAM, which is what shows through the
+skipped rows below row 300.
+
+**Fallback mode, `draw_offscreen 0x00407898`,** writes the frame **1:1** into the 320×180 surface
+(pitch from its own Lock, `0x004078ED`), then `BltFast`s it to the primary at `(160, 2·yoff)`
+(`0x00407E14…0x00407E4F`). `BltFast` cannot stretch, so nobody ever saw this path at its best.
+
+##### The fix: use the fallback surface in flip mode and stretch with `Blt`
+
+A same-length edit cannot make the doubler fill 1024×768 (3.2× is not integer, 3× needs three
+stores and three row writes — a loop rewrite). The 1:1 path plus a **stretching
+`IDirectDrawSurface::Blt`** does everything at once — full width, every row written, dest rect a
+tunable immediate — and every edit is in place. Stage 4 of `patch_resolution.py`:
+
+| Site | Stock | New | Effect |
+|---|---|---|---|
+| `0x004073F4` / `05` / `0B` | `cmp eax,280h` / `add ecx,500h` / `cmp edx,1E0h` | `cmp eax,[ebp-60h]` / `add ecx,[ebp-5Ch]` / `cmp edx,[ebp-64h]` (+ nops) | clear reads dwWidth / lPitch / dwHeight from its own Lock description (`DDSURFACEDESC` at `[ebp-6Ch]`: +8 height, +0xC width, +0x10 pitch, +0x24 `lpSurface` — the last was already read) |
+| `0x0040712E` (13 B) | `test eax,eax; je 40728B; jmp 4073AC` | `mov edx,eax; jmp 4071E0; nop×6` | after `GetAttachedSurface`: on success `edx=0` → `0x4071E0` `test edx,edx; je 4071F7` → create the 320×180 surface (the `memset(desc, edx, 6Ch)` at `0x00407204` takes its fill byte from `edx`, hence the `mov`); on failure (`eax≠0`) the same path returns 0 via `0x4071E4` |
+| `0x0040723D` | `mov [488E0C],ebx` (=0) | nops | keep the flip flag when the movie surface is created in flip mode |
+| `0x00408B3E` | `jne 408B47` | `jmp` | display thread always takes `draw_offscreen` |
+| `0x00407E14` (62 B) | `BltFast(primary, 160, 2·yoff, movie, &(0,0,320,180), WAIT)` | `Blt(primary, &(0,96,1024,672), movie, NULL, DDBLT_WAIT, NULL)` | the stretch. Dest rect built in `[ebp+62h…71h]` (loop temporaries, dead after the copy); 16:9 across the full width, centred — the stock proportion |
+| `0x00407479` | `jmp 407552` | nops | `clear_and_flip` falls through into the movie-surface clear (null-checked) in flip mode too |
+| `0x00407030` | `jne 40704A` | nops | `release_surfaces` releases the movie surface whenever it exists (else one surface leaks per movie) |
+| `0x0040791B` | `jae` | `ja` | `draw_offscreen` writes all H rows; stock wrote H−1 and left the bottom row stale (an off-by-one the doubler shares) |
+
+The first draft of the `0x0040712E` rewrite used `je 4071F7; jmp rel8 4071EC` — the `jmp rel8`
+is 178 bytes forward and does not fit a signed byte (it would have landed at `0x4070EC`); the
+`mov edx,eax; jmp rel32 4071E0` form above avoids a second jump entirely. The Blt block carries
+three absolute data addresses (`0x489718`, `0x488E00`, `0x4A5680`), so `patch_resolution.py` builds
+both its expected and its replacement bytes from the build's DGROUP shift; ENGEXP16 turns out to
+shift `0x488Exx` by `+0x28` and the `.bss` address not at all, so stage 6 must confirm that block
+by hand.
+
+**Risks.** The movie surface is requested as `VIDEOMEMORY` (`0x4040`, from `[ebp-4]=1` in flip
+mode); if all 10 attempts fail, `avi_create_surfaces` returns 0 and `main.c` skips the movie
+silently — the fallback edit is `0x0040721B` `C7 45 F4 40 40 00 00` → `… 40 08 …`
+(`SYSTEMMEMORY`). `Blt` to the primary without `Flip` can tear (the stock fallback did the same;
+blitting to the back buffer and flipping needs 15 bytes more than the block has). Dest-rect
+alternatives are the four immediates in the block: `(0,0,1024,768)` full screen (distorts
+16:9→4:3), or 3× integer `(32,114,992,654)`.
 
 ### Stage 4 — cursors and movies
 
 * Cursors are `IDirectDrawSurface` blits at 1:1, so they simply look small. Redrawing
   `CURSOR/cursor%d.bmp` at 1.6× is optional and independent.
-* Movies: the 320×240 source and its 320-pixel stride are independent of the screen size, but the
-  back-buffer clear at `0x004073C4` hardcodes 640×480 and a 1280-byte pitch and **must** be
-  updated or it will clear only the top-left corner of a 1024×768 back buffer (cosmetic, not a
-  crash). The clip is on the back buffer, not the offscreen surface, so `screen->width` does not
-  help here.
-* Where the movie is placed on screen was not traced; expect to find its destination rect near
-  `0x00407E14`. This ties into README goal 3 ("increase quality of movies") — a higher-resolution
-  re-encode would need this whole path reworked, which is a separate project.
+* Movies: **done in §10.8** — the source is 320×180, the stock path is a fixed 2× software
+  doubler that skips every other row, and the fix re-routes the frames through the existing
+  320×180 movie surface and a stretching `Blt` to `(0,96)-(1024,672)`; the back-buffer clear
+  now reads width/pitch/height from its own Lock. Ten sites. README goal 3 ("increase quality of
+  movies") becomes easier after this: a higher-resolution re-encode would only need the movie
+  surface size (`0x0040722B/30`) and the 1:1 writer's row length to follow `biWidth`/`biHeight`,
+  which `draw_offscreen` already reads from the `BITMAPINFO`.
 
 ### Stage 5 — HUD reflow (data only)
 
@@ -1277,7 +1457,7 @@ artwork, which was not obvious before measuring:
 | `top_border` | (0,0) 640×6 | (0,0) 1024×6 | +384 w | detail; only ~77 px periodic — same |
 | `map_edge` | (515,0) 3×480 | (899,0) 3×768 | +288 h | **constant** over y=94…399: tile one column, free |
 | `right_panel` | (516,0) 124×480 | (900,0) 124×768 | +288 h | **287 rows carry only 6 px** of side rail (x=516,517 and 636…639): tile that row, free |
-| `bottom_bar` | (0,454) 640×26 | (0,742) 1024×26 | +384 w | no period beyond ~49 px — **this one needs real artwork** |
+| `bottom_bar` | (0,454) 640×26 | (0,742) 1024×26 | +384 w | the message box interior (x 53…508) is 4 columns in random alternation: tile a stretch of it, free (§10.6 — the first reading, "needs real artwork", was wrong) |
 
 So the drawing work is the bottom bar's extra 384 px, plus a chosen repeat or hand-work for the two
 outer borders. The right panel's 288 px of new height and the map edge's come free — the panel
@@ -1392,7 +1572,17 @@ parse), which de-risks them completely.
 | `0x00488DB4` / `0x00488DB8` | **screen width / height globals (`DGROUP`)** |
 | `0x0040117F`ff | `main.c`; full-screen rect at `0x004010E5` |
 | `0x00406FD0` / `0x00406FF0` | `avi_begin` / `avi_end` (mode cycle) |
-| `0x004073C4` | clear back buffer for movie (640×480, pitch `0x500`) |
+| `0x004073C4` | clear back buffer for movie (stock: 640×480, pitch `0x500` literals; patched to read the Lock description, §10.8) |
+| `0x00407068` | `avi_create_surfaces`: flip chain (`0x489718`/`0x48971C`, flag `0x488E0C`=1) or plain primary + 320×180 movie surface `0x488E00` (`0x004071F7`ff) |
+| `0x00407440` / `0x00407018` / `0x0040764C` | `clear_and_flip` / `release_surfaces` / `restore_surfaces` |
+| `0x00407674` | `draw_flip`: stock 2× software doubler into the back buffer, writes one row of two (§10.8) |
+| `0x00407898` | `draw_offscreen`: 1:1 writer into the movie surface; `BltFast` at `0x00407E14` → stretching `Blt` (§10.8) |
+| `0x0040762B` | movie letterbox: `yoff = 241 − H` |
+| `0x00408CB8` / `0x00408AC8` | `play_avi` / display thread (`0x00408B37` picks the drawer by `0x488E0C`) |
+| `0x00428448` / `0x004289D0` | `scenario.c` **text-file box** (TTY) / **animated picture window** (PIC) — the two primitives behind every code-positioned menu element; x in `edx`, y in `ebx` (§10.7) |
+| `0x00428968` / `0x00428B8C` | TTY glyph placement / PIC per-frame draw |
+| `0x00424A40` | `widget.c` `label` keyword handler (keyword table `0x004895F0`) |
+| `0x00403732` | briefing screen: `intrface/epic` marker at `(gs+0x14E0, gs+0x14DC)` from `GAMESTAT/*SCENE.TXT` (`scenario.c 0x00429B67`) |
 | `0x0041EB34` / `0x0041EB63` | `proto.c`: `"intrface/main"` → `load_interface`, HUD handle to `0x004AB1C4` — same function as the map view rect below |
 | `0x0041ED1E`ff | `proto.c` initial camera + map view screen rect |
 | `0x004231E8` / `0x004231B0` | `load_interface(app, name, flags)` / free — 21 call sites, one per screen |

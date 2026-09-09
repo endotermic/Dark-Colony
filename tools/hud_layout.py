@@ -51,21 +51,31 @@ MSG_Y = 420                        # widgets at or below this are bottom-bar fur
 #   left_border  450 -- so the corner detail still meets the bottom bar
 #   map_edge     400 -- inside the constant stretch y=94..399
 #   top_border   515 -- at the map's right edge, so the panel's top decoration stays on the right
-#   bottom_bar   520 -- right of in_text #200 at x=480, the rightmost bottom-bar widget
+#   bottom_bar   300 -- inside the message box (interior x 53..508). The first build spliced at
+#                       520, i.e. after the box's right frame (509..515) and into the panel corner,
+#                       which cut the box in two with a bar down the middle -- rejected in the
+#                       third visual test. The box interior is only four distinct columns (a random
+#                       two-colour dither on its bevel rows 457/461/474/478, black between), so it
+#                       extends seamlessly by repeating a stretch of itself.
+# The filler is the SEGMENT lines just before `insert`, repeated: the borders and the message box
+# carry a random dither, so one repeated line reads as a flat band next to the textured original,
+# while a 128-line stretch of the same dither repeated is indistinguishable from it.
 REGIONS = [
     dict(name='left_border', box=(0, 0, INSET_X, SRC_H), anchor='tl', grows='height',
-         insert=450, note='detail, only ~78 px periodic: pick a repeat segment or draw'),
+         insert=450, note='two rows in random alternation over y 8..440: tile a stretch, free'),
     dict(name='top_border', box=(0, 0, SRC_W, INSET_Y), anchor='tl', grows='width',
-         insert=515, note='detail, only ~77 px periodic: pick a repeat segment or draw'),
+         insert=515, note='two columns in random alternation over x 8..500: tile a stretch, free'),
     dict(name='map_edge', box=(INSET_X + VIEW_W - 1, 0, 3, SRC_H), anchor='r', grows='height',
          insert=400, note='constant over y=94..399: tile a single column, free'),
     dict(name='right_panel', box=(PANEL_X, 0, SRC_W - PANEL_X, SRC_H), anchor='r',
          grows='height', insert=399,
-         note='287 rows carry only 6 px of side rail: tile that row, free'),
+         note='rows 94..398 carry only 6 px of side rail: tile that row, free'),
     dict(name='bottom_bar', box=(0, BOTTOM_Y, SRC_W, SRC_H - BOTTOM_Y), anchor='b',
-         grows='width', insert=520,
-         note='no period beyond ~49 px: this one needs new artwork'),
+         grows='width', insert=300,
+         note='message box interior x 53..508 is 4 dithered columns: tile a stretch, free'),
 ]
+SEGMENT = 128                      # lines of the original repeated as filler
+BOTTOM_INSERT = 300                # bottom-bar widgets from here right travel with the box's end
 
 # Every positioned widget kind MAINE uses. `count` is the build/troop/upgrade button with a
 # price counter (80 of them, the whole build panel) and `scount` the money counter; both were
@@ -292,12 +302,14 @@ def shift(x, y, dx, dy):
     The panel's bottom cluster does both: the status text (`in_text 79` at y 404), the Build
     button (`pushb 19`, 422), the days counter (`in_text 234`, 433) and the money counter
     (`scount 75`, 456) sit on art that `build` splices above (right_panel insert=399), so they
-    follow it down as well as right and stay on the bottom edge of the screen.
+    follow it down as well as right and stay on the bottom edge of the screen. Likewise the one
+    bottom-bar widget right of the message-box splice (`in_text 200` at x 480, the box's right
+    end) follows the box's end to the right.
     """
     if x >= PANEL_X:
         return x + dx, y + dy if y >= PANEL_INSERT else y
     if y >= MSG_Y:
-        return x, y + dy
+        return x + dx if x >= BOTTOM_INSERT else x, y + dy
     return x, y
 
 
@@ -308,13 +320,14 @@ def _lines(px, w, h, vertical):
     return [bytes(px[y * w + x] for y in range(h)) for x in range(w)]
 
 
-def _extend(px, w, h, grows, add, insert):
-    """Splice `add` copies of the most common row/column in at `insert`."""
+def _extend(px, w, h, grows, add, insert, segment=SEGMENT):
+    """Splice `add` rows/columns in at `insert`, repeating the `segment` lines before it."""
     vertical = grows == 'height'
     seq = _lines(px, w, h, vertical)
-    filler = collections.Counter(seq).most_common(1)[0][0]
-    insert = max(0, min(insert, len(seq)))
-    seq = seq[:insert] + [filler] * add + seq[insert:]
+    insert = max(1, min(insert, len(seq)))
+    src = seq[max(0, insert - segment):insert]
+    filler = [src[i % len(src)] for i in range(add)]
+    seq = seq[:insert] + filler + seq[insert:]
     if vertical:
         return b''.join(seq), w, h + add
     nw, nh = w + add, h
@@ -326,11 +339,13 @@ def _extend(px, w, h, grows, add, insert):
 
 
 def cmd_build(args):
-    """Composite a target-size frame from the source regions, tiling where it can.
+    """Composite a target-size frame from the source regions, extending each by repetition.
 
-    This is a mechanical test build, not finished artwork. It gets a playable HUD on screen so the
-    bigger battlefield can actually be used; the bottom bar in particular will show a visible
-    repeat, because that region has no real period (see the `spec` output).
+    Every region turned out to be extendable without new art: the panel and the map edge are
+    constant over the splice, and the two borders and the message box carry only a random
+    two-colour dither, which a repeated 128-line stretch reproduces indistinguishably (see the
+    `spec` output). The mechanical build is therefore also the shipped one, unless the frame is
+    redrawn from vector masters later.
     """
     Image, _ = need_pil()
     src_path = os.path.join(args.dir, 'INTRFACE.GIF')
@@ -371,7 +386,7 @@ def cmd_build(args):
              100.0 * opaque / (args.width * args.height)))
     print('the map hole is everything left at index %d: (%d,%d) %dx%d'
           % (ERASE, INSET_X, INSET_Y, VIEW_W + dx, VIEW_H + dy))
-    print('NOTE: mechanical splice, not finished art. The bottom bar will show a visible repeat.')
+    print('NOTE: mechanical splice -- every region extends by repeating a stretch of itself.')
     return 0
 
 
