@@ -674,7 +674,7 @@ Classic `dc16.exe` (20 edits), launched from `DC - Classic/`:
 
 One real defect surfaced, which is what the stage exists for — §10.1 below.
 
-#### 10.1 Full-screen `.GIF` backgrounds skew — repaint them, do not centre them **(verified)**
+#### 10.1 Full-screen `.GIF` backgrounds skew, and centring is three edits **(verified)**
 
 The main menu came up with its logo, title and buttons correct but its **background** wrecked: the
 Mars limb gone, replaced by diagonal red streaks, and the starfield smeared across the full
@@ -689,50 +689,69 @@ streams the whole image as one linear run, which is correct only while
 `image width == framebuffer stride`. Give a 640-wide GIF a 1024-stride framebuffer and every row
 lands 384 px early, so the picture shears left and compresses vertically by 640/1024.
 
-**There is no constant to patch here.** The stride is not wrong, it is absent. Two options:
+**There is no constant to patch here.** The stride is not wrong, it is absent. And the blit takes
+no destination origin either — `esi = screen->pixels` at `0x0044EB89`, nothing added — so a
+background always lands at framebuffer (0,0) whatever the script's `size` line says.
 
-1. **Repaint every full-screen background at the target resolution** (stage 5). Then width equals
-   stride again and the linear write is correct. This is the cheap route and the art work was
-   going to do it anyway — but it is now **required**, not optional, for any screen with a
-   `background` line.
-2. Inject a row advance into the decoder. There is no room in place, so that means a code cave and
-   a jump: a much bigger change than anything else in this plan.
+Those two facts together give one hard rule: **a full-screen background must be a file whose
+dimensions are exactly the framebuffer size.** Nothing else can be made to work without changing
+code.
 
-The background also ignores the script's rect entirely: the blit takes `esi = screen->pixels`
-(`0x0044EB89`) with **no origin added**, so it always lands at framebuffer (0,0) whatever the
-`size` line says.
+This matters for every screen, because all **26** full-screen scripts have a `background` line —
+checked, not sampled — drawing one of **19 distinct 640×480 `.GIF`s** (`choo`, `ency`, `gtsux`,
+`intrface`, `intrg`, `intro`, `loader`, `lost`, `multiwin`, `name`, `net`, `server`, `shuman`,
+`story`, `tcpwait`, `victorg`, `victory`, `wingame`, plus `general`, which has no `.GIF` and is
+drawn from sprites). The only scripts *without* a background are the four sub-window dialogs
+`LOBJE`, `LOPTE`, `LQCE`, `LSGE`, and those already use the `size X Y W H` form and are correctly
+placed as they stand.
 
-**This kills the "centre the menus with one line of data" idea.** Every one of the **26**
-full-screen scripts has a `background` line — checked, not sampled — drawing one of **19 distinct
-640×480 `.GIF`s** (`choo`, `ency`, `gtsux`, `intrface`, `intrg`, `intro`, `loader`, `lost`,
-`multiwin`, `name`, `net`, `server`, `shuman`, `story`, `tcpwait`, `victorg`, `victory`, `wingame`,
-plus `general`, which has no `.GIF` and is drawn from sprites). The only scripts *without* a
-background are the four sub-window dialogs `LOBJE`, `LOPTE`, `LQCE`, `LSGE`, and those already use
-the `size X Y W H` form and are correctly placed as they stand.
+##### `size X Y W H` does not move the widgets **(verified)**
 
-So `size 192 144 640 480` has **no useful target**: applied to a background-having script it
-centres the widgets while the background stays skewed at (0,0), which is strictly worse than
-leaving it — at `size 640 480` the widget layout at least stays consistent with where the
-background is *meant* to be, so nothing has to be undone later.
+A second fact, learned the hard way by padding one GIF and launching: the four-argument `size`
+form sets the window's **bounds rect only**. Widget `x`/`y` are **absolute screen coordinates** and
+are not offset by it. `NEWGAMEE`'s `checkb 0` sits at (193,23) in the script and renders at
+(193,23) whatever the `size` line says. The shipped four-argument scripts mislead on this point:
+`LOPTE` declares `size 112 128 308 240` and its first `picture` is at (112,128), which looks like
+rect-relative addressing but is simply a coordinate that already agrees with the rect.
 
-That leaves two real routes for stage 2, and they should be chosen between before any art or data
-work starts:
+So letterboxing a screen is **three coupled edits**, which is why they belong in one tool:
 
-**Route A — repaint.** Redraw all 19 backgrounds at 1024×768, set each script to `size 1024 768`,
-and reposition or rescale that script's widgets. Correct and needs no code patching, but it is 19
-repaints plus per-screen widget work, and it makes the UI genuinely 1024×768 rather than a boxed
-640×480.
+1. repack the background GIF onto a framebuffer-sized canvas with the original content centred;
+2. set the script's `size` to `X Y w h` so the bounds rect covers where the content now is;
+3. add the same `(X, Y)` to **every** positioned widget's `x` and `y`.
 
-**Route B — one code patch.** Give the GIF blit a row stride *and* a destination origin, so a
-640×480 background can be placed anywhere in a wider framebuffer. Then a single `size 192 144
-640 480` line per script centres background and widgets together, and **stage 2 completes with no
-art at all** — a letterboxed but pixel-correct 640×480 UI inside a 1024×768 screen, with the
-enlarged battle view of stage 3 as the actual gain. The output loop has no spare bytes, so this
-needs a code cave: the CD-check patches (`0x431F`, `0x509F`) already freed a little space, and
-Watcom leaves alignment padding between functions. Not attempted yet.
+`tools/pad_background.py` does all three (`plan` / `apply` / `revert`, `.bak` per file, idempotent,
+and it refuses to write a GIF whose byte layout would desynchronise the game's parser — no
+extension blocks, GIF87a and the 256-entry global colour table preserved). It deliberately skips
+`MAINE`: padding the HUD would keep the map viewport at 512×448, which is the opposite of the
+point.
 
-Route B is the better trade if the goal is a playable 1024×768 build soon; route A is the better
-trade if the goal is a native-looking 1024×768 UI. They are not exclusive — B now, A later.
+##### Two routes, neither needing a code patch
+
+**Route A — pad.** Letterbox the 17 menu backgrounds that have a `.GIF`, and shift their widgets.
+Pure data, no artwork, fully reversible. Gives a pixel-correct 640×480 UI inside a 1024×768
+screen. **Tested 9 Sep 2026**: applied to all 24 menu scripts, then launched a stage-2 build. The
+network-options screen (`NETOPTE`) rendered exactly as intended — background sharp, unskewed and
+centred at (192,144), every widget aligned with the artwork, clean black border, cursor tracking.
+
+**Route B — repaint.** Redraw the backgrounds at 1024×768 and set each script to `size 1024 768`
+with its widgets repositioned for the larger canvas. More work, and it is **required regardless**
+for `INTRFACE.GIF`, because only a genuinely redrawn HUD frame can carry the 896×736 hole that
+buys the bigger battlefield (stage 5).
+
+An earlier draft of this section proposed injecting a row stride and a destination origin into the
+decoder via a code cave. **That is not needed.** Both routes above satisfy the hard rule by making
+the file the right size, and the existing linear write is then correct as it stands.
+
+##### Caveat: code-positioned elements do not move
+
+Route A shifts widgets, but some screen furniture is placed by code and stays where it is. On the
+network screen the spinning globe (`intrface/globeg`/`globes`, loaded by `main.c` at `0x0040323A`
+and `0x0040325D`; `NETOPTE` never mentions it) keeps its hardcoded position, and once the buttons
+move +192 it overlaps them — its opaque bounding box blanks the right half of the `TCP/IP` and
+`IPX NETWORK` labels. The intro AVI is the same class of thing, still letterboxed at the top left
+until stage 4. Each such element needs its own small code patch, or acceptance. They were not
+enumerated.
 
 ### Stage 2 — full-screen chrome, menus centred
 
@@ -745,14 +764,14 @@ trade if the goal is a native-looking 1024×768 UI. They are not exclusive — B
 * Menus: edit one line per `INTRFACE/*E` script (§6) from `size 640 480` to
   `size 192 144 640 480`. This centres every menu, lobby and dialog with **no patching**. The
   in-game map view is positioned separately (`proto.c`, stage 3) and is unaffected.
-  **This is blocked as written** — all 26 full-screen scripts have a `background`, the background
-  always draws at framebuffer (0,0) ignoring the rect, and it skews. Pick route A or route B in
-  §10.1 first; under route B this bullet becomes a one-line edit per script, under route A it
-  becomes `size 1024 768` plus repositioned widgets.
+  **Not a one-line edit** — the rect does not move the widgets and the background ignores it
+  entirely (§10.1). Use `tools/pad_background.py`, which pads the GIF, sets the rect and shifts
+  every widget together; or repaint at 1024×768 and use `size 1024 768` with repositioned
+  widgets.
 
-At the end of stage 2 the game is a genuine 1024×768 application: under route B a pixel-correct
-640×480 UI boxed in the middle, under route A a native 1024×768 one. Either is a usable state and
-a sensible place to stop if the rest stalls.
+At the end of stage 2 the game is a genuine 1024×768 application: under route A a pixel-correct
+640×480 UI boxed in the middle, under route B a native 1024×768 one. Either is a usable state and
+a sensible place to stop if the rest stalls, bar the code-positioned elements noted in §10.1.
 
 ### Stage 3 — enlarge the map viewport
 

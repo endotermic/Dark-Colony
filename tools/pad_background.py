@@ -1,0 +1,325 @@
+#!/usr/bin/env python3
+"""Letterbox Dark Colony's full-screen interface screens into a larger framebuffer.
+
+Two facts from docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.1 make this necessary, and both
+were confirmed by running the patched game:
+
+1. The GIF blit in gifload.c writes W*H pixels *linearly* into the locked framebuffer with no
+   row-stride advance (decoder 0x0044EB7C, output loop 0x0044ECC5), and takes no destination
+   origin (esi = screen->pixels at 0x0044EB89). So a background is drawn correctly only when its
+   width equals the framebuffer stride, and it always lands at (0,0). After patching to 1024x768
+   a 640x480 background fills just the first 307200 pixels -- 300 rows of a 1024-wide screen --
+   skewed.
+2. `size X Y W H` declares the window's bounds rect, but widget x/y are **absolute screen
+   coordinates** and are not offset by it. Verified: NEWGAMEE's `checkb 0` at (193,23) renders at
+   (193,23) whatever the size line says, and the shipped four-argument scripts (LOPTE and friends)
+   simply place their widgets at coordinates that already agree with their rect.
+
+So letterboxing a screen is three coupled edits, which is why they live in one tool:
+
+    a. repack the background GIF onto a W x H canvas with the original content centred;
+    b. set the script's `size` to `X Y w h` so the bounds rect covers where the content now is;
+    c. add the same (X, Y) to every positioned widget's x and y.
+
+The result is a pixel-correct 640x480 screen letterboxed inside 1024x768, with no artwork and no
+code patching. Repainting properly at the target size (vector-first) can follow later and just
+replaces the padded file -- at which point the offsets in (b) and (c) go back to zero.
+
+This is a stop-gap for *menus*. It is deliberately NOT applied to MAINE, the in-game HUD: padding
+that would keep the map viewport at its old 512x448, which is the opposite of the point. MAINE
+needs INTRFACE.GIF genuinely redrawn with a 896x736 hole.
+
+CLI
+    python pad_background.py plan   INTRFACE_DIR [--width 1024 --height 768] [--only NAME]
+    python pad_background.py apply  INTRFACE_DIR [--width 1024 --height 768] [--only NAME]
+    python pad_background.py revert INTRFACE_DIR
+
+`apply` writes a .bak beside every file it touches and never overwrites an existing one, so
+`revert` always restores the pristine originals.
+"""
+
+import argparse
+import os
+import re
+import shutil
+import struct
+import sys
+
+SIZE2 = re.compile(rb'^([ \t]*)size([ \t]+)(\d+)([ \t]+)(\d+)([ \t]*\r?)$', re.M)
+SIZE4 = re.compile(rb'^[ \t]*size[ \t]+\d+[ \t]+\d+[ \t]+\d+[ \t]+\d+', re.M)
+BACKGROUND = re.compile(rb'^[ \t]*background[ \t]+(?:intrface/)?(\S+)', re.M | re.I)
+
+# Widget kinds whose 4th and 5th fields are x and y: <kind> <number> <desc> <x> <y> <w> <h> ...
+POSITIONED = {b'pushb', b'checkb', b'in_text', b'picture', b'list', b'scroll', b'gadget'}
+# `group` lists member numbers and `textmsg` carries text; neither has coordinates.
+
+HUD_SCRIPT = 'maine'
+
+
+def need_pil():
+    try:
+        from PIL import Image
+        return Image
+    except ImportError:
+        sys.exit('this tool needs Pillow: pip install Pillow')
+
+
+def scan(intrface_dir, only=None, include_hud=False):
+    """Full-screen scripts that have a background. Returns (jobs, skipped)."""
+    Image = need_pil()
+    jobs, skipped = [], []
+    for fn in sorted(os.listdir(intrface_dir), key=str.lower):
+        path = os.path.join(intrface_dir, fn)
+        if not os.path.isfile(path) or fn.lower().endswith('.bak'):
+            continue
+        data = open(path, 'rb').read()
+        if SIZE4.search(data):
+            continue                              # already positioned (sub-window dialog)
+        if not SIZE2.search(data):
+            continue
+        bg = BACKGROUND.search(data)
+        if not bg:
+            skipped.append((fn, 'no background line'))
+            continue
+        if fn.lower() == HUD_SCRIPT and not include_hud:
+            skipped.append((fn, 'in-game HUD, needs a real repaint (--include-hud to override)'))
+            continue
+        if only and fn.lower() != only.lower():
+            continue
+        gif = os.path.join(intrface_dir, bg.group(1).decode().upper() + '.GIF')
+        if not os.path.exists(gif):
+            skipped.append((fn, 'background %s has no .GIF' % bg.group(1).decode()))
+            continue
+        with Image.open(gif) as im:
+            gw, gh = im.size
+        jobs.append((fn, gif, gw, gh))
+    return jobs, skipped
+
+
+def check_gif_layout(path):
+    """The game's parser reads a 13-byte header, the global colour table, then expects an image
+    descriptor immediately. An extension block in between would desynchronise it, so verify."""
+    d = open(path, 'rb').read()
+    if d[:6] not in (b'GIF87a', b'GIF89a'):
+        return 'not a GIF'
+    w, h, flags = struct.unpack_from('<HHB', d, 6)
+    if not flags & 0x80:
+        return 'no global colour table'
+    if (2 << (flags & 7)) != 256:
+        return 'colour table is %d entries, not 256' % (2 << (flags & 7))
+    off = 13 + 768
+    if d[off] != 0x2C:
+        return ('byte after the colour table is 0x%02X, not an image descriptor (0x2C): an '
+                'extension block is present and would desynchronise the game parser' % d[off])
+    il, it, iw, ih, iflags = struct.unpack_from('<HHHHB', d, off + 1)
+    if (il, it) != (0, 0):
+        return 'image is at (%d,%d), not (0,0)' % (il, it)
+    if (iw, ih) != (w, h):
+        return 'image %dx%d does not fill the %dx%d logical screen' % (iw, ih, w, h)
+    if iflags & 0x40:
+        return 'image is interlaced'
+    if iflags & 0x80:
+        return 'image has a local colour table'
+    return None
+
+
+def pad_gif(src, dst, width, height):
+    """Centre src on a width x height canvas, preserving the palette exactly."""
+    Image = need_pil()
+    with Image.open(src) as im:
+        if im.mode != 'P':
+            raise ValueError('%s is mode %s, expected P' % (src, im.mode))
+        sw, sh = im.size
+        palette = im.getpalette()
+        version = im.info.get('version', b'GIF87a')
+        if isinstance(version, bytes):
+            version = version.decode()
+        pad = next((i for i in range(256)
+                    if tuple(palette[i * 3:i * 3 + 3]) == (0, 0, 0)), None)
+        if pad is None:
+            raise ValueError('%s has no black palette entry to pad with' % src)
+        canvas = Image.new('P', (width, height), pad)
+        canvas.putpalette(palette)
+        canvas.paste(im, ((width - sw) // 2, (height - sh) // 2))
+        canvas.save(dst, format='GIF', version=version, interlace=False, optimize=False)
+    return sw, sh, pad
+
+
+def edit_script(path, x, y, w, h, dry_run=False):
+    """Set `size x y w h` and add (x, y) to every positioned widget's coordinates.
+
+    Returns (size_before, size_after, widgets_moved, warnings).
+    """
+    data = open(path, 'rb').read()
+    warnings = []
+    out, moved = [], 0
+    lines = data.split(b'\n')
+    for ln in lines:
+        body, sep, comment = ln.partition(b'%')
+        toks = re.findall(rb'\S+|[ \t]+', body)
+        words = [t for t in toks if not t.isspace()]
+        if words and words[0].lower() in POSITIONED:
+            if len(words) < 5:
+                warnings.append('%r: positioned keyword with only %d fields, left alone'
+                                % (body.strip().decode(errors='replace'), len(words)))
+            else:
+                n = 0
+                for i, t in enumerate(toks):
+                    if t.isspace():
+                        continue
+                    n += 1
+                    if n in (4, 5) and re.fullmatch(rb'\d+', t):
+                        toks[i] = b'%d' % (int(t) + (x if n == 4 else y))
+                    elif n in (4, 5):
+                        warnings.append('%r: field %d is %r, not a plain number'
+                                        % (body.strip().decode(errors='replace'), n,
+                                           t.decode(errors='replace')))
+                    if n >= 5:
+                        break
+                moved += 1
+                body = b''.join(toks)
+        out.append(body + sep + comment)
+    data = b'\n'.join(out)
+
+    m = SIZE2.search(data)
+    before = m.group(0).rstrip(b'\r\n').decode() if m else None
+    after = None
+    if m:
+        new = b'%ssize%s%d %d %d %d%s' % (m.group(1), m.group(2), x, y, w, h, m.group(6))
+        data = data[:m.start()] + new + data[m.end():]
+        after = new.rstrip(b'\r\n').decode()
+    if not dry_run:
+        open(path, 'wb').write(data)
+    return before, after, moved, warnings
+
+
+def backup(path):
+    bak = path + '.bak'
+    if not os.path.exists(bak):
+        shutil.copy2(path, bak)
+
+
+def q(p):
+    return '"%s"' % p if ' ' in p else p
+
+
+def cmd_plan(args, jobs, skipped):
+    from PIL import Image
+    print('target framebuffer %d x %d\n' % (args.width, args.height))
+    gifs = {}
+    for script, gif, gw, gh in jobs:
+        gifs.setdefault(gif, []).append((script, gw, gh))
+    print('  %d script(s), %d distinct background GIF(s):\n' % (len(jobs), len(gifs)))
+    for gif, entries in sorted(gifs.items()):
+        with Image.open(gif) as im:
+            gw, gh = im.size
+        dx, dy = (args.width - gw) // 2, (args.height - gh) // 2
+        fits = gw <= args.width and gh <= args.height
+        print('  %-26s %4dx%-4d -> %dx%d, content at (%d,%d)%s'
+              % (os.path.basename(gif), gw, gh, args.width, args.height, dx, dy,
+                 '' if fits else '   TOO LARGE, would be skipped'))
+        for script, _, _ in entries:
+            _, _, moved, warns = edit_script(os.path.join(args.dir, script), dx, dy, gw, gh,
+                                             dry_run=True)
+            print('        %-14s size -> %d %d %d %d, %d widget(s) shifted by (+%d,+%d)%s'
+                  % (script, dx, dy, gw, gh, moved, dx, dy,
+                     '   %d WARNING(S)' % len(warns) if warns else ''))
+            for wtext in warns:
+                print('            ! ' + wtext)
+    if skipped:
+        print('\n  not touched:')
+        for fn, why in skipped:
+            print('    %-14s %s' % (fn, why))
+    print('\nplan only, nothing written.')
+    return 0
+
+
+def cmd_apply(args, jobs, skipped):
+    done, problems = {}, []
+    for script, gif, gw, gh in jobs:
+        if gw > args.width or gh > args.height:
+            problems.append('%s: %dx%d does not fit %dx%d'
+                            % (os.path.basename(gif), gw, gh, args.width, args.height))
+            continue
+        if gif not in done:
+            backup(gif)
+            try:
+                sw, sh, pad = pad_gif(gif + '.bak', gif, args.width, args.height)
+            except ValueError as e:
+                shutil.copy2(gif + '.bak', gif)
+                problems.append(str(e))
+                done[gif] = None
+                continue
+            bad = check_gif_layout(gif)
+            if bad:
+                shutil.copy2(gif + '.bak', gif)
+                problems.append('%s: rewritten file rejected (%s); original restored'
+                                % (os.path.basename(gif), bad))
+                done[gif] = None
+                continue
+            done[gif] = (sw, sh)
+            print('padded  %-24s %dx%d -> %dx%d, border index %d'
+                  % (os.path.basename(gif), sw, sh, args.width, args.height, pad))
+        if done[gif] is None:
+            continue
+        sw, sh = done[gif]
+        dx, dy = (args.width - sw) // 2, (args.height - sh) // 2
+        spath = os.path.join(args.dir, script)
+        backup(spath)
+        # always edit from the pristine copy, so re-running apply is idempotent rather than
+        # shifting every widget a second time
+        shutil.copy2(spath + '.bak', spath)
+        before, after, moved, warns = edit_script(spath, dx, dy, sw, sh)
+        print('script  %-24s %r -> %r, %d widget(s) +(%d,%d)'
+              % (script, before, after, moved, dx, dy))
+        for wtext in warns:
+            print('        ! ' + wtext)
+    if problems:
+        print('\nproblems:')
+        for p in problems:
+            print('  ' + p)
+        return 1
+    print('\nrevert with:  python pad_background.py revert %s' % q(args.dir))
+    return 0
+
+
+def cmd_revert(args):
+    n = 0
+    for fn in sorted(os.listdir(args.dir)):
+        if not fn.endswith('.bak'):
+            continue
+        bak = os.path.join(args.dir, fn)
+        shutil.copy2(bak, bak[:-4])
+        os.remove(bak)
+        print('restored %s' % os.path.basename(bak[:-4]))
+        n += 1
+    print('%d file(s) restored' % n)
+    return 0
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('command', choices=('plan', 'apply', 'revert'))
+    ap.add_argument('dir', help='an INTRFACE directory')
+    ap.add_argument('--width', type=int, default=1024)
+    ap.add_argument('--height', type=int, default=768)
+    ap.add_argument('--only', help='act on one script only, e.g. NEWGAMEE')
+    ap.add_argument('--include-hud', action='store_true',
+                    help='also pad MAINE (almost certainly wrong: see the docstring)')
+    args = ap.parse_args(argv)
+
+    if not os.path.isdir(args.dir):
+        raise SystemExit('%s: not a directory' % args.dir)
+    if args.command == 'revert':
+        return cmd_revert(args)
+
+    jobs, skipped = scan(args.dir, args.only, args.include_hud)
+    if not jobs:
+        raise SystemExit('nothing to do in %s%s'
+                         % (args.dir, ' for --only %s' % args.only if args.only else ''))
+    return (cmd_plan if args.command == 'plan' else cmd_apply)(args, jobs, skipped)
+
+
+if __name__ == '__main__':
+    sys.exit(main())
