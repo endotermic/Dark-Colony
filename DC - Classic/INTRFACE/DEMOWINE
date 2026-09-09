@@ -1,4 +1,4 @@
-size 640 480
+size 192 144 640 480
 text intrface/knob                          % Text Graphics   (10000+snum)
 pictures intrface/knobe                      % Text Graphics   (10000+snum)
 font 0 intrface/mfonto5                     % font
@@ -13,20 +13,20 @@ colour  1               0 0 0
 
 %       number  desc    xpos    ypos    pushed  normal  greyed  flags
 
-in_text 0       0       36      265     76      1       0 - read_only bg 1
-in_text 1       0       36      279     76      1       0 - read_only bg 1
-in_text 2       0       36      293     76      1       0 - read_only bg 1
-in_text 3       0       36      307     76      1       0 - read_only bg 1
-in_text 4       0       36      321     76      1       0 - read_only bg 1
-in_text 5       0       36      335     76      1       0 - read_only bg 1
-in_text 6       0       36      349     76      1       0 - read_only bg 1
-in_text 7       0       36      363     76      1       0 - read_only bg 1
+in_text 0       0       228      409     76      1       0 - read_only bg 1
+in_text 1       0       228      423     76      1       0 - read_only bg 1
+in_text 2       0       228      437     76      1       0 - read_only bg 1
+in_text 3       0       228      451     76      1       0 - read_only bg 1
+in_text 4       0       228      465     76      1       0 - read_only bg 1
+in_text 5       0       228      479     76      1       0 - read_only bg 1
+in_text 6       0       228      493     76      1       0 - read_only bg 1
+in_text 7       0       228      507     76      1       0 - read_only bg 1
 
-in_text 8       0       70      36      9      1       1 align centre mask - read_only bg 1
+in_text 8       0       262      180      9      1       1 align centre mask - read_only bg 1
 
-pushb   9       0       409     381     179     25      -11     0        label centre 1 0 - remap 0
+pushb   9       0       601     525     179     25      -11     0        label centre 1 0 - remap 0
 
-gadget  10      0       409     381     179     26      LARGEBUTTON    anim_oneoff
+gadget  10      0       601     525     179     26      LARGEBUTTON    anim_oneoff
 
 textmsg 1       CONTINUE
 

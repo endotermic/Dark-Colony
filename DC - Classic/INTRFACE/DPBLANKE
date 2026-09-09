@@ -1,4 +1,4 @@
-size 640 480
+size 192 144 640 480
 text intrface/knob                          % Text Graphics   (10000+snum)
 pictures intrface/knobe                      % Text Graphics   (10000+snum)
 font 0 intrface/mfonto5                     % font

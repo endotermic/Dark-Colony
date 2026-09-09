@@ -1,4 +1,4 @@
-size 640 480
+size 192 144 640 480
 pictures intrface/knobe
 font 0 intrface/mfonto5
 font_offset  0   31
@@ -10,8 +10,8 @@ colour erase  0 0 0
 
 %        # desc   x    y    w    h
 
-in_text  1   0  240  160   22    6  0  align left  -  read_only
-pushb    9   0  289  263   90   26  -11  2  label centre 1 0  -  remap 0
+in_text  1   0  432  304   22    6  0  align left  -  read_only
+pushb    9   0  481  407   90   26  -11  2  label centre 1 0  -  remap 0
 
 textmsg   1  CONTINUE
 
