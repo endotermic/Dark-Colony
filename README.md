@@ -8,6 +8,7 @@ Repository contains:
 4) decompilation project (Ghidra decompiler 11.4.2)
 5) tools in `tools/`
    - `patch_resolution.py`: raises the screen resolution of `dc16.exe` / `ENGEXP16.EXE` (verify / plan / apply, staged, byte-checked, keeps a `.bak`)
+   - `hud_layout.py`: scaffolding for redrawing the in-game HUD frame - region geometry, tracing layers, a target-resolution template, and the `MAINE` widget transform
    - `pad_background.py`: letterboxes the interface screens into a larger framebuffer - pads the background `.GIF`, sets the bounds rect and shifts every widget (plan / apply / revert)
    - `spr.py`: reader/writer for the `.SPR` sprite container - extract cells to PNG, rebuild, verify
 6) reverse-engineering notes in `docs/`

@@ -813,6 +813,30 @@ same game.
 No patching and no reverse engineering here: the HUD is `MAINE` + `INTRFACE.GIF` +
 `MAINBUT.SPR` (§6.1). `MAINBUT.SPR` needs no change at all — the buttons are the same buttons.
 
+`tools/hud_layout.py` is the scaffolding: `spec` prints the region geometry below, `extract` cuts
+the frame into per-region layers plus tracing masks, `template` renders a target-resolution guide
+to paint into, and `maine plan|apply|revert` does the script transform (75 right-panel widgets
+`x += 384`, 6 bottom-bar widgets `y += 288`, `size 1024 768`; the one mid-map widget,
+`picture #199` at (200,160), is reported and left alone). Verified idempotent, and `revert`
+restores `MAINE` byte-for-byte.
+
+#### 5.1 What actually has to be drawn **(verified by measurement)**
+
+The frame is 8.9 % opaque and splits into five regions. Four of the five extend with no new
+artwork, which was not obvious before measuring:
+
+| Region | Source | Target | Grows | Extends how |
+|---|---|---|---|---|
+| `left_border` | (0,0) 4×480 | (0,0) 4×768 | +288 h | detail; only ~78 px periodic — pick a repeat segment or draw |
+| `top_border` | (0,0) 640×6 | (0,0) 1024×6 | +384 w | detail; only ~77 px periodic — same |
+| `map_edge` | (515,0) 3×480 | (899,0) 3×768 | +288 h | **constant** over y=94…399: tile one column, free |
+| `right_panel` | (516,0) 124×480 | (900,0) 124×768 | +288 h | **287 rows carry only 6 px** of side rail (x=516,517 and 636…639): tile that row, free |
+| `bottom_bar` | (0,454) 640×26 | (0,742) 1024×26 | +384 w | no period beyond ~49 px — **this one needs real artwork** |
+
+So the drawing work is the bottom bar's extra 384 px, plus a chosen repeat or hand-work for the two
+outer borders. The right panel's 288 px of new height and the map edge's come free — the panel
+interior over that range is transparent, because the `MAINBUT.SPR` widgets are drawn over it.
+
 1. **Vectorise before repainting.** Do not resample the 640×480 art up to 1024×768. Trace each
    element to vector (SVG) first, keep the vector as the master, and render the raster from it at
    the target size. Rendering from geometry is what keeps edges sharp — a 1.6× resample can only

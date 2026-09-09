@@ -7,3 +7,5 @@
 *.log
 __pycache__/
 *.pyc
+hud_layers/
+hud_template.png
