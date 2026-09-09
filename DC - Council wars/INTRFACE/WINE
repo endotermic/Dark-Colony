@@ -1,4 +1,4 @@
-size 640 480
+size 192 144 640 480
 text intrface/knob                          % Text Graphics   (10000+snum)
 pictures intrface/knobe                      % Text Graphics   (10000+snum)
 font 0 intrface/mfonto5                     % font
@@ -11,9 +11,9 @@ bright_highlight 4
 
 %       number  desc    xpos    ypos    pushed  normal  greyed  flags
 
-pushb   0       0       480     400     90     25      -11     3        label centre 1 0 - remap 0
+pushb   0       0       672     544     90     25      -11     3        label centre 1 0 - remap 0
 
-gadget  1       0       480     400     90     26      MEDBUTTON    anim_oneoff
+gadget  1       0       672     544     90     26      MEDBUTTON    anim_oneoff
 
 banim   2  0  1 1  1  0
 

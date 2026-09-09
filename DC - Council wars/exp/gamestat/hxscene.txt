@@ -13,7 +13,7 @@ TERRAR JUNGLE
 scenario/aerogen/aero01
 avi/hvad2.avi
 avi/avhd4.avi
-25 110 30
+25 302 174
 0
 2 -1
 
@@ -23,7 +23,7 @@ TERRAR JUNGLE
 scenario/aerogen/aero02
 avi/hvad5.avi
 avi/lizards.avi
-70 70 70
+70 262 214
 0
 4 5 3 -1
 
@@ -33,7 +33,7 @@ KALDERIA DESERT
 scenario/aerogen/aero03
 avi/hvad6.avi
 avi/htran5.avi
-35 180 90
+35 372 234
 0
 2 3 -1
 
@@ -43,7 +43,7 @@ DELTTA HILLS
 scenario/aerogen/aero04
 avi/electric.avi
 avi/htran7.avi
-60 140 75
+60 332 219
 0
 5 2 -1
 
@@ -53,7 +53,7 @@ PENTAL JUNGLE
 scenario/aerogen/aero05
 avi/bodys.avi
 avi/avhd.avi
-1 115 90
+1 307 234
 0
 2 3 5 -1
 
@@ -63,7 +63,7 @@ FOX DESERT
 scenario/aerogen/aero06
 avi/hvad.avi
 avi/htran8.avi
-0 0 0
+0 192 144
 0
 4 5 -1
 
@@ -73,7 +73,7 @@ THE SWAMP
 scenario/aerogen/aero07
 avi/hvad5.avi
 avi/htran6.avi
-20 80 30
+20 272 174
 0
 4 3 2 -1
 
@@ -83,6 +83,6 @@ VALLEY OF THE HIGH COUNCIL
 scenario/aerogen/aero08
 avi/hending.avi
 avi/avhd5.avi
-30 130 85
+30 322 229
 0
 5 3 2 -1

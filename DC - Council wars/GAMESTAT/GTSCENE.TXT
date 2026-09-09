@@ -13,7 +13,7 @@ AREA 51
 scenario/test/atrain1
 avi/pp.avi
 avi/pp.avi
-1 80 43
+1 272 187
 1
 1 2 -1
 
@@ -23,7 +23,7 @@ AREA 51
 scenario/test/atrain2
 avi/pp.avi
 avi/pp.avi
-1 80 43
+1 272 187
 1
 1 2 -1
 
@@ -33,7 +33,7 @@ AREA 51
 scenario/test/atrain3
 avi/pp.avi
 avi/pp.avi
-1 80 43
+1 272 187
 1
 1 2 -1
 
@@ -43,7 +43,7 @@ AREA 51
 scenario/test/atrain4
 avi/pp.avi
 avi/pp.avi
-1 80 43
+1 272 187
 1
 1 2 -1
 
@@ -53,7 +53,7 @@ AREA 51
 scenario/test/atrain5
 avi/pp.avi
 avi/pp.avi
-1 80 43
+1 272 187
 1
 1 2 -1
 
@@ -63,7 +63,7 @@ AREA 51
 scenario/test/atrain6
 avi/pp.avi
 avi/pp.avi
-1 80 43
+1 272 187
 1
 1 2 -1
 
@@ -73,6 +73,6 @@ AREA 51
 scenario/test/atrain7
 avi/atrain.avi
 avi/pp.avi
-1 80 43
+1 272 187
 1
 1 2 -1
