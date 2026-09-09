@@ -607,20 +607,42 @@ Each stage ends in a runnable binary, so a regression can be bisected to one sta
 stage in `ENGEXP16.EXE` using the `+0x60` / `+0x228` rule of §8 and re-verify the bytes before
 writing.
 
-### Stage 0 — reproducible patching (no behaviour change)
+### Stage 0 — reproducible patching (done)
 
-The two CD patches so far were single-byte edits recorded in the commit history. Sixty-odd
-multi-byte edits across two binaries need a script. Write `tools/patch_resolution.py` in the
-`Dark-Colony` repo that
+The two CD patches so far were single-byte edits recorded only in the commit history. Sixty-odd
+multi-byte edits across two binaries need a script, so `tools/patch_resolution.py` is that script
+and **it, not §8, is now the authoritative copy of the site table**. It
 
-* takes `--width`/`--height` and the target exe,
-* locates the §3 anchor `4F 01 6E 01 80 02 00 00 E0 01 00 00` to identify the build and its
-  `DGROUP` shift,
-* applies each site as `(file_offset, expected_bytes, new_bytes)` and **refuses to write if the
-  expected bytes do not match** — this is what makes the `ENGEXP16` shift rule safe,
-* prints a summary and leaves a `.bak`.
+* takes `--width`/`--height` and a `--stage` (1…4, cumulative, matching the stages below);
+* locates the globals by the **4-byte** prefix `4F 01 6E 01` of the §3 anchor — deliberately not
+  the full 12-byte sequence, because that contains the dimensions and so stops matching the moment
+  the file is patched, which would break `verify`. The 4-byte prefix is unique in all three stock
+  builds *and* in a patched one;
+* identifies the build by MD5, and derives `ENGEXP16` offsets with the `+0x60` rule;
+* applies each site as `(file_offset, expected_bytes, new_bytes)` and **refuses to write unless
+  every selected site still holds its expected bytes** — that check is what makes relying on the
+  shift rule safe rather than a guess, and it makes a double-apply or a wrong build fail loudly;
+* keeps instruction lengths identical at every site, so no code moves and no jump target shifts;
+* writes a `.bak` (and never overwrites an existing one, which is assumed to be pristine).
 
-Keeping the site table in one file also means the table in §8 has exactly one authoritative copy.
+Three commands: `verify` reports a binary's state — for a patched file it reads the geometry back
+out of the globals and tallies, per stage, how many sites are patched / stock / unrecognised, which
+is what makes the staged bisection below usable. `plan` prints every edit and writes nothing.
+`apply` patches, then prints the data and art work that is left.
+
+Verified end to end: 57 edits on Classic and 57 on `ENGEXP16` (55 code sites plus the two
+globals); `--stage 1` applies 20 and `verify` then correctly reports stages 2–4 as untouched;
+re-applying is refused; the `.bak` is byte-identical to the original; and the three rewritten
+multiply sequences were re-disassembled out of the patched binary to confirm they read
+
+```
+0042C213: 89 D2   mov edx,edx        0042C218: C1 E2 08   shl edx,8     ; y*1024
+004363BD: 89 C0   mov eax,eax        004363C5: C1 E0 08   shl eax,8     ; y*1024
+004360B9: 89 C0   mov eax,eax        004360BE: C1 E0 09   shl eax,9     ; y*1024*2 bytes
+```
+
+with every following instruction still at its original address. The optional-header `CheckSum` of
+these binaries is `0`, so there is nothing to recompute after patching.
 
 ### Stage 1 — prove the display mode (letterbox)
 

@@ -6,7 +6,9 @@ Repository contains:
 2) working copy of standalone expansion pack
 3) working copy of map editor
 4) decompilation project (Ghidra decompiler 11.4.2)
-5) tools in `tools/` (`spr.py`: reader/writer for the `.SPR` sprite container - extract cells to PNG, rebuild, verify)
+5) tools in `tools/`
+   - `patch_resolution.py`: raises the screen resolution of `dc16.exe` / `ENGEXP16.EXE` (verify / plan / apply, staged, byte-checked, keeps a `.bak`)
+   - `spr.py`: reader/writer for the `.SPR` sprite container - extract cells to PNG, rebuild, verify
 6) reverse-engineering notes in `docs/`
    - `DC16_BATTLE_ENGINE.md`: combat core of `dc16.exe` - balance tables, targeting, firing, projectiles, damage, upgrades, day/night
    - `DC16_DISPLAY_AND_RESOLUTION.md`: display pipeline (DirectDraw, software blitters, HUD geometry, mouse, movies), every resolution-dependent code site, and the staged plan for 1024x768

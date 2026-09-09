@@ -1,0 +1,391 @@
+#!/usr/bin/env python3
+"""Raise the screen resolution of Dark Colony's dc16.exe / ENGEXP16.EXE.
+
+Every site in the table below was read out of the disassembly and byte-verified in the shipped
+binaries; see docs/DC16_DISPLAY_AND_RESOLUTION.md, which this table is the executable copy of
+(section 8 for the inventory, section 9 for the target geometry, section 10 for the stages).
+
+Nothing is written unless *every* site selected for the run still holds its expected bytes, so
+running this against an already-patched or unknown build fails loudly instead of corrupting it.
+
+CLI
+    python patch_resolution.py verify EXE
+    python patch_resolution.py plan   EXE --width 1024 --height 768 [--stage N]
+    python patch_resolution.py apply  EXE --width 1024 --height 768 [--stage N]
+
+Stages are cumulative and mirror the plan in the doc:
+    1  display mode, framebuffer stride, clip rect          (game in the top-left corner)
+    2  + full-screen chrome, mouse, cursor, loading screens (640x480 content, centred by data)
+    3  + enlarged map viewport and relocated minimap
+    4  + movie back-buffer clear                            (default)
+
+Stages 5 and 6 of the plan are data and art only; nothing here touches them.
+To revert, restore the .bak that `apply` writes.
+"""
+
+import argparse
+import hashlib
+import os
+import shutil
+import struct
+import sys
+
+# ------------------------------------------------------------------- builds
+#
+# The width and height globals are preceded in DGROUP by the dword pair (0x14F, 0x16E), whose
+# four bytes are a unique signature in every binary tested -- stock and already patched alike,
+# which is why the search must not include the dimension values themselves (doc section 3).
+# The full stock sequence is ANCHOR_PREFIX + "80 02 00 00" + "E0 01 00 00".
+ANCHOR_PREFIX = bytes.fromhex('4f016e01')
+
+BUILDS = {
+    'aa0a646b1234d1d9815a2b7480fd080b': ('Classic dc16.exe', 0),
+    '50419d438427d31341057e9723724f66': ('Council Wars ENGEXP16.EXE', 0x60),
+    # Council Wars dc16.exe (4180f6e9d01925b23eac0eb335e0b95e) is a different build: only the
+    # DGROUP anchor transfers, so its AUTO offsets are deliberately absent. Patching it needs
+    # the sites re-derived in Ghidra first.
+}
+
+# ENGEXP16 is Classic shifted by +0x60 in AUTO from about 0x6000 onward, and +0 below it.
+# Verified for every site in the table; the mandatory expected-byte check is what makes
+# relying on the rule safe rather than a guess.
+SHIFT_THRESHOLD = 0x5000
+
+
+def auto_offset(classic_off, shift):
+    return classic_off + (shift if classic_off >= SHIFT_THRESHOLD else 0)
+
+
+# ------------------------------------------------------------------ geometry
+#
+# The HUD chrome keeps its native pixel size, so all the new space goes to the map view.
+# At 640x480 the layout is a 4 px left inset, a 6 px top inset, a 124 px right panel and a
+# 26 px bottom bar, with the minimap 121 px in from the right edge.
+INSET_X, INSET_Y = 4, 6
+PANEL_W, BOTTOM_H = 124, 26
+MINIMAP_W, MINIMAP_H = 96, 84
+MINIMAP_RIGHT_GAP = 640 - 519
+TILE = 32
+
+
+class Geometry:
+    def __init__(self, width, height):
+        self.w, self.h = width, height
+        self.shift = width.bit_length() - 1
+        if 1 << self.shift != width:
+            raise ValueError(
+                'width must be a power of two. The three framebuffer strides are compiled as\n'
+                '    (y*4 + y) << 7      [= y*640]\n'
+                'and can only be rewritten without relocating code as\n'
+                '    (y*4) << (log2(width) - 2).\n'
+                'Use 1024, the documented target. 800 would need a real imul and code motion.')
+        self.view_w = width - INSET_X - PANEL_W
+        self.view_h = height - INSET_Y - BOTTOM_H
+        for what, v in (('viewport width', self.view_w), ('viewport height', self.view_h)):
+            if v <= 0:
+                raise ValueError('%s comes out %d: the screen is too small for the HUD'
+                                 % (what, v))
+            if v % TILE:
+                raise ValueError('%s comes out %d, not a multiple of the %d px tile size'
+                                 % (what, v, TILE))
+        self.tiles_x = self.view_w // TILE
+        self.tiles_y = self.view_h // TILE
+        self.mask_bytes = self.view_w * self.view_h // 8
+        self.minimap_x = width - MINIMAP_RIGHT_GAP
+        self.minimap_off = (INSET_Y * width + self.minimap_x) * 2
+
+    def describe(self):
+        return [
+            'screen           %d x %d' % (self.w, self.h),
+            'map viewport     %d x %d = %d x %d tiles, at (%d, %d)'
+            % (self.view_w, self.view_h, self.tiles_x, self.tiles_y, INSET_X, INSET_Y),
+            'occlusion mask   %d bytes (0x%X)' % (self.mask_bytes, self.mask_bytes),
+            'minimap          %d x %d at (%d, %d), framebuffer byte offset 0x%X'
+            % (MINIMAP_W, MINIMAP_H, self.minimap_x, INSET_Y, self.minimap_off),
+            'framebuffer      stride %d px, %d px total, %d bytes per row'
+            % (self.w, self.w * self.h, self.w * 2),
+        ]
+
+
+# --------------------------------------------------------------------- sites
+#
+# imm32 site: (stage, classic_off, expected_hex, imm_index, value_fn, description)
+#             the little-endian dword at expected[imm_index:imm_index+4] is replaced
+# raw site:   (stage, classic_off, expected_hex, None, bytes_fn, description)
+#             bytes_fn must return a replacement of identical length
+
+SITES = [
+    # -- stage 1: display mode, surfaces, framebuffer stride, clip rect ----------------------
+    (1, 0x2DC98, '68e0010000', 1, lambda g: g.h, 'SetDisplayMode 8-bit height'),
+    (1, 0x2DCA2, '6880020000', 1, lambda g: g.w, 'SetDisplayMode 8-bit width'),
+    (1, 0x2DD1C, '68e0010000', 1, lambda g: g.h, 'SetDisplayMode 16-bit height'),
+    (1, 0x2DD26, '6880020000', 1, lambda g: g.w, 'SetDisplayMode 16-bit width'),
+    (1, 0x2DE89, 'b880020000', 1, lambda g: g.w, 'offscreen surface width'),
+    (1, 0x2DE8E, 'bae0010000', 1, lambda g: g.h, 'offscreen surface height'),
+    (1, 0x2EBAD, '3d00b00400', 1, lambda g: g.w * g.h, 'clear_screen pixel count (a)'),
+    (1, 0x2EBE2, '3d00b00400', 1, lambda g: g.w * g.h, 'clear_screen pixel count (b)'),
+    (1, 0x2B747, 'bb80020000', 1, lambda g: g.w, 'driver.c clip rect width'),
+    (1, 0x2B763, 'b9e0010000', 1, lambda g: g.h, 'driver.c clip rect height'),
+    (1, 0x2B594, 'bb80020000', 1, lambda g: g.w, 'driver.c row advance (a)'),
+    (1, 0x2B661, 'ba80020000', 1, lambda g: g.w, 'driver.c row advance (b)'),
+    # the three strength-reduced strides: drop the "+ y", then shift one place further
+    (1, 0x2B613, '01ca', None, lambda g: b'\x89\xd2',
+     'driver.c y*640: neutralise add edx,ecx'),
+    (1, 0x2B618, 'c1e207', None, lambda g: bytes((0xC1, 0xE2, g.shift - 2)),
+     'driver.c y*640 -> y*W: shl edx'),
+    (1, 0x357BD, '01c8', None, lambda g: b'\x89\xc0',
+     'engmain.c y*640: neutralise add eax,ecx'),
+    (1, 0x357C5, 'c1e007', None, lambda g: bytes((0xC1, 0xE0, g.shift - 2)),
+     'engmain.c y*640 -> y*W: shl eax'),
+    (1, 0x354B9, '01f8', None, lambda g: b'\x89\xc0',
+     'engmain.c y*1280: neutralise add eax,edi'),
+    (1, 0x354BE, 'c1e008', None, lambda g: bytes((0xC1, 0xE0, g.shift - 1)),
+     'engmain.c y*1280 -> y*W*2: shl eax'),
+
+    # -- stage 2: chrome, mouse, cursor, loading screens -------------------------------------
+    (2, 0x004E5, 'bf7f020000', 1, lambda g: g.w - 1, 'main.c full-screen rect right'),
+    (2, 0x004EA, 'b8df010000', 1, lambda g: g.h - 1, 'main.c full-screen rect bottom'),
+    (2, 0x2DBC4, 'ba40010000', 1, lambda g: g.w // 2, 'initial mouse X (screen centre)'),
+    (2, 0x2DBC9, 'b9f0000000', 1, lambda g: g.h // 2, 'initial mouse Y (screen centre)'),
+    (2, 0x2D5D2, 'b880020000', 1, lambda g: g.w, 'cursor clip width (a)'),
+    (2, 0x2D5FF, 'b880020000', 1, lambda g: g.w, 'cursor clip width (b)'),
+    (2, 0x2D60E, 'b8e0010000', 1, lambda g: g.h, 'cursor clip height (a)'),
+    (2, 0x2D619, 'b8e0010000', 1, lambda g: g.h, 'cursor clip height (b)'),
+    (2, 0x50247, '81fe80020000', 2, lambda g: g.w, 'mouse clamp: compare X against width'),
+    (2, 0x5024F, 'be7f020000', 1, lambda g: g.w - 1, 'mouse clamp: X maximum'),
+    (2, 0x5025C, '81ffe0010000', 2, lambda g: g.h, 'mouse clamp: compare Y against height'),
+    (2, 0x50264, 'bfdf010000', 1, lambda g: g.h - 1, 'mouse clamp: Y maximum'),
+    (2, 0x50346, '3d7f020000', 1, lambda g: g.w - 1, 'DirectInput clamp: compare X'),
+    (2, 0x5034D, 'c705c02753007f020000', 6, lambda g: g.w - 1,
+     'DirectInput clamp: X maximum'),
+    (2, 0x5036B, '81fedf010000', 2, lambda g: g.h - 1, 'DirectInput clamp: compare Y'),
+    (2, 0x50373, 'c705c4275300df010000', 6, lambda g: g.h - 1,
+     'DirectInput clamp: Y maximum'),
+    (2, 0x2E307, '68e0010000', 1, lambda g: g.h, 'load.bmp LoadImageA height'),
+    (2, 0x2E30C, '6880020000', 1, lambda g: g.w, 'load.bmp LoadImageA width'),
+    (2, 0x2E338, '68e0010000', 1, lambda g: g.h, 'load2.bmp LoadImageA height'),
+    (2, 0x2E33D, '6880020000', 1, lambda g: g.w, 'load2.bmp LoadImageA width'),
+    (2, 0x2E3ED, '68e0010000', 1, lambda g: g.h, 'loading screen BitBlt height'),
+    (2, 0x2E3F2, '6880020000', 1, lambda g: g.w, 'loading screen BitBlt width'),
+
+    # -- stage 3: map viewport and minimap ---------------------------------------------------
+    (3, 0x35346, 'ba00020000', 1, lambda g: g.view_w, 'viewport width'),
+    (3, 0x35361, 'bbc0010000', 1, lambda g: g.view_h, 'viewport height'),
+    (3, 0x3524F, 'bb10000000', 1, lambda g: g.tiles_x, 'visible tiles across'),
+    (3, 0x35247, 'b90e000000', 1, lambda g: g.tiles_y, 'visible tiles down'),
+    (3, 0x35388, 'ba00700000', 1, lambda g: g.mask_bytes, 'occlusion mask size'),
+    (3, 0x3539F, 'b880020000', 1, lambda g: g.w, 'render destination stride'),
+    (3, 0x1E123, 'bb00020000', 1, lambda g: g.view_w, 'proto.c map view rect width'),
+    (3, 0x1E11E, 'b9c0010000', 1, lambda g: g.view_h, 'proto.c map view rect height'),
+    (3, 0x3949B, 'b880020000', 1, lambda g: g.w, 'minimap stride (a)'),
+    (3, 0x3985B, 'ba80020000', 1, lambda g: g.w, 'minimap stride (b)'),
+    (3, 0x394AF, '81c20e220000', 2, lambda g: g.minimap_off, 'minimap origin (a)'),
+    (3, 0x39884, '8145f00e220000', 3, lambda g: g.minimap_off, 'minimap origin (b)'),
+
+    # -- stage 4: movies ---------------------------------------------------------------------
+    (4, 0x067F4, '3d80020000', 1, lambda g: g.w, 'movie back-buffer clear width'),
+    (4, 0x0680B, '81fae0010000', 2, lambda g: g.h, 'movie back-buffer clear height'),
+    (4, 0x06805, '81c100050000', 2, lambda g: g.w * 2,
+     'movie back-buffer row pitch (bytes)'),
+]
+
+
+def find_anchor(data, path):
+    hits = [i for i in range(len(data) - len(ANCHOR_PREFIX) + 1)
+            if data[i:i + len(ANCHOR_PREFIX)] == ANCHOR_PREFIX]
+    if len(hits) != 1:
+        raise SystemExit('%s: expected exactly one dimension anchor, found %d. Not a Dark '
+                         'Colony executable, or too heavily modified to touch safely.'
+                         % (path, len(hits)))
+    return hits[0]
+
+
+def read_dimensions(data, path):
+    anchor = find_anchor(data, path)
+    w, = struct.unpack_from('<I', data, anchor + 4)
+    h, = struct.unpack_from('<I', data, anchor + 8)
+    return anchor, w, h
+
+
+def identify(data, path):
+    md5 = hashlib.md5(data).hexdigest()
+    if md5 in BUILDS:
+        name, shift = BUILDS[md5]
+        return name, shift, md5
+    _, w, h = read_dimensions(data, path)
+    if (w, h) != (640, 480):
+        raise SystemExit('%s: already patched to %d x %d. Restore the .bak to get back to '
+                         'stock before patching to a different size.' % (path, w, h))
+    raise SystemExit('%s: md5 %s is not a build I know, though it is stock 640 x 480. It is '
+                     'probably a build I have no AUTO offsets for (Council Wars dc16.exe is '
+                     'one such). Re-derive the sites in Ghidra before patching it.'
+                     % (path, md5))
+
+
+def expected_and_target(site, geom):
+    _, _, exp_hex, imm, fn, _ = site
+    exp = bytes.fromhex(exp_hex)
+    if imm is None:
+        return exp, fn(geom)
+    new = bytearray(exp)
+    new[imm:imm + 4] = struct.pack('<I', fn(geom))
+    return exp, bytes(new)
+
+
+def resolve(data, path, shift, geom, stage):
+    """Return (edits, problems); edits are (offset, old, new, description)."""
+    anchor = find_anchor(data, path)
+    edits, problems = [], []
+
+    for off, val, what in ((anchor + 4, geom.w, 'screen width global'),
+                           (anchor + 8, geom.h, 'screen height global')):
+        edits.append((off, data[off:off + 4], struct.pack('<I', val), what))
+
+    for site in SITES:
+        site_stage, classic_off, _, _, _, what = site
+        if site_stage > stage:
+            continue
+        exp, new = expected_and_target(site, geom)
+        off = auto_offset(classic_off, shift)
+        got = data[off:off + len(exp)]
+        if got != exp:
+            problems.append('0x%-7X %-42s expected %s, found %s'
+                            % (off, what, exp.hex(' '), got.hex(' ') or '<past end of file>'))
+        elif len(new) != len(exp):
+            problems.append('0x%-7X %-42s replacement changes instruction length'
+                            % (off, what))
+        else:
+            edits.append((off, exp, new, what))
+    return edits, problems
+
+
+def cmd_verify(path):
+    data = open(path, 'rb').read()
+    md5 = hashlib.md5(data).hexdigest()
+    print('%s\n  %d bytes, md5 %s' % (path, len(data), md5))
+    known_shift = None
+    if md5 in BUILDS:
+        name, known_shift = BUILDS[md5]
+        print('  build: %s (stock)' % name)
+    else:
+        print('  build: not a known stock binary (patched, or one with no site table)')
+
+    anchor, w, h = read_dimensions(data, path)
+    print('  dimension globals at 0x%X / 0x%X: %d x %d' % (anchor + 4, anchor + 8, w, h))
+    if (w, h) == (640, 480):
+        print('  -> stock resolution')
+        return 0
+
+    try:
+        geom = Geometry(w, h)
+    except ValueError as e:
+        print('  -> patched to a geometry this tool cannot reproduce:')
+        print('     ' + str(e).replace('\n', '\n     '))
+        return 1
+
+    # A patched binary has an unknown md5, so try each known shift and keep the best fit.
+    candidates = [known_shift] if known_shift is not None else sorted(
+        {s for _, s in BUILDS.values()})
+    best = None
+    for cand in candidates:
+        tally = {}
+        for site in SITES:
+            site_stage, classic_off = site[0], site[1]
+            exp, want = expected_and_target(site, geom)
+            got = data[auto_offset(classic_off, cand):][:len(exp)]
+            state = 'patched' if got == want else 'stock' if got == exp else 'other'
+            tally.setdefault(site_stage, []).append(state)
+        score = sum(v.count('patched') for v in tally.values())
+        if best is None or score > best[0]:
+            best = (score, cand, tally)
+
+    _, cand, tally = best
+    print('  site table matched with AUTO shift +0x%X:' % cand)
+    for st in sorted(tally):
+        v = tally[st]
+        print('    stage %d: %2d/%-2d patched, %d stock, %d unrecognised'
+              % (st, v.count('patched'), len(v), v.count('stock'), v.count('other')))
+    print('  -> restore the .bak to go back to stock')
+    return 0
+
+
+def report(path, geom, stage, edits, problems):
+    print('%s\n' % path)
+    for line in geom.describe():
+        print('  %s' % line)
+    print('\n  stages 1..%d, %d edits\n' % (stage, len(edits)))
+    for off, old, new, what in edits:
+        print('  0x%-7X %-42s %-22s -> %s' % (off, what, old.hex(' '), new.hex(' ')))
+    if problems:
+        print('\n  %d site(s) did NOT match the expected bytes:\n' % len(problems))
+        for p in problems:
+            print('  ' + p)
+    return len(problems)
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('command', choices=('verify', 'plan', 'apply'))
+    ap.add_argument('exe')
+    ap.add_argument('--width', type=int, default=1024)
+    ap.add_argument('--height', type=int, default=768)
+    ap.add_argument('--stage', type=int, default=4, choices=(1, 2, 3, 4),
+                    help='highest cumulative stage to apply (default 4, everything)')
+    args = ap.parse_args(argv)
+
+    if not os.path.isfile(args.exe):
+        raise SystemExit('%s: no such file' % args.exe)
+    data = open(args.exe, 'rb').read()
+
+    if args.command == 'verify':
+        return cmd_verify(args.exe)
+
+    name, shift, _ = identify(data, args.exe)
+    try:
+        geom = Geometry(args.width, args.height)
+    except ValueError as e:
+        raise SystemExit('bad target geometry: %s' % e)
+    print('build: %s  (AUTO shift +0x%X)\n' % (name, shift))
+
+    edits, problems = resolve(data, args.exe, shift, geom, args.stage)
+    if report(args.exe, geom, args.stage, edits, problems):
+        print('\nrefusing to write: fix the mismatches above first.')
+        return 1
+
+    if args.command == 'plan':
+        print('\nplan only, nothing written. Re-run with "apply" to patch.')
+        return 0
+
+    bak = args.exe + '.bak'
+    if os.path.exists(bak):
+        print('\nkeeping the existing %s, assumed to be the pristine original' % bak)
+    else:
+        shutil.copy2(args.exe, bak)
+        print('\nsaved the original to %s' % bak)
+
+    out = bytearray(data)
+    for off, old, new, _ in edits:
+        assert bytes(out[off:off + len(old)]) == old
+        out[off:off + len(new)] = new
+    open(args.exe, 'wb').write(bytes(out))
+    print('patched %s: %d edits, %d x %d' % (args.exe, len(edits), geom.w, geom.h))
+
+    print('\nStill to do by hand, data and art only (doc section 10):')
+    if args.stage >= 2:
+        print('  stage 2: set "size %d %d 640 480" in the INTRFACE/*E scripts to centre the'
+              % ((geom.w - 640) // 2, (geom.h - 480) // 2))
+        print('           30 existing 640x480 screens, or repaint them at %d x %d'
+              % (geom.w, geom.h))
+    if args.stage >= 3:
+        print('  stage 5: repaint INTRFACE/INTRFACE.GIF with the transparent hole at')
+        print('           (%d,%d) %dx%d, and shift the MAINE widgets: x += %d for the 75'
+              % (INSET_X, INSET_Y, geom.view_w, geom.view_h, geom.w - 640))
+        print('           right-panel ones, y += %d for the bottom bar and message lines'
+              % (geom.h - 480))
+        print('           (tools/spr.py handles MAINBUT.SPR and the fonts)')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
