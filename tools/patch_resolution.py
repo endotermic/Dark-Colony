@@ -16,7 +16,9 @@ CLI
 Stages are cumulative and mirror the plan in the doc:
     1  display mode, framebuffer stride, clip rect          (game in the top-left corner)
     2  + full-screen chrome, mouse, cursor, loading screens (640x480 content, centred by data)
-    3  + enlarged map viewport and relocated minimap
+    3  + enlarged map viewport and relocated minimap; when the view no longer fits
+         draw_terrain's stack lightmap (17x16 tiles), its frame is grown and the PE
+         header's stack reserve/commit raised
     4  + movie back-buffer clear                            (default)
 
 Stages 5 and 6 of the plan are data and art only; nothing here touches them.
@@ -68,12 +70,28 @@ MINIMAP_W, MINIMAP_H = 96, 84
 MINIMAP_RIGHT_GAP = 640 - 519
 TILE = 32
 
-# draw_terrain's stack lightmap (doc 10.4). Row stride is a hardcoded 144 bytes = 36 half-tile
-# columns, and the array grows upward from just above esp toward the function's own locals, the
-# lowest of which is [ebp+0x2E] - so 0x144A + 0x2E bytes are available.
-LIGHTMAP_ROOM = 0x144A + 0x2E
-LIGHTMAP_MAX_TILES_X = 17          # 4 * (2*tx + 2) <= 144
-LIGHTMAP_MAX_TILES_Y = 16          # 144 * (2*ty + 2) + 8*tx <= LIGHTMAP_ROOM
+# draw_terrain's stack lightmap (doc 10.4 / 10.5). A dword per half-tile, row stride a hardcoded
+# 144 bytes = 36 half-tile columns. The array base is [ebp-0x1452], which is exactly esp after
+# the prologue (mov ebp,esp; sub esp,0x14CC; sub ebp,0x7A), and it grows upward toward the
+# function's own locals, the lowest of which is [ebp+0x2E].
+#
+# Loop 1 writes (even row, even col) for rows 0..2*ty+2 and cols 0..2*tx+2; loop 2 writes
+# (odd row, odd col) from four loop-1 neighbours; loop 3 reads (odd row, odd col) only. Half the
+# cells are never touched, and a row's columns beyond 36 alias exactly those unused cells of the
+# next row (same byte, opposite parity) - so the 144-byte stride stays correct up to 34 tiles
+# across and the only real limit is the room below the locals. The last write is
+# (row 2*ty+2, col 2*tx+2), so the array needs 144*(2*ty+2) + 4*(2*tx+2) + 4 bytes; when that
+# exceeds the stock room the frame is grown by LIGHTMAP delta and the ten disp32 bases move down.
+LIGHTMAP_BASE = 0x1452
+LIGHTMAP_ROOM = LIGHTMAP_BASE + 0x2E
+LIGHTMAP_STRIDE = 144
+LIGHTMAP_FRAME = 0x14CC
+LIGHTMAP_MAX_TILES_X = 34          # 4 * (2*tx + 2) < 2 * 144: a double wrap would collide
+
+# Watcom emits no stack probe, so a frame that jumps by several pages must land on stack that is
+# already committed: the stock header commits only 64 KB and reserves 80000 bytes. Raise both.
+STACK_RESERVE = (0x13880, 0x100000)
+STACK_COMMIT = (0x10000, 0x40000)
 
 
 class Geometry:
@@ -113,21 +131,20 @@ class Geometry:
                 'time as a signed 8-bit lea displacement, so it has to fit in 1..127'
                 % self.tiles_y)
         # draw_terrain 0x00453910 keeps a half-tile lightmap in its own stack frame (doc 10.4).
-        self.lightmap_bytes = 144 * (2 * self.tiles_y + 2) + 8 * self.tiles_x
-        self.warnings = []
+        # If the view does not fit the stock room, grow the frame (doc 10.5).
         if self.tiles_x > LIGHTMAP_MAX_TILES_X:
-            self.warnings.append(
-                '%d tiles across exceeds the %d the draw_terrain stack lightmap can hold: its row '
-                'stride is a hardcoded 144 bytes = 36 half-tile columns, so each row will bleed '
-                'into the next and part of the view will be lit from the wrong neighbours. This '
-                'does NOT crash, which is why it is easy to miss. See doc 10.4.'
-                % (self.tiles_x, LIGHTMAP_MAX_TILES_X))
-        if self.lightmap_bytes > LIGHTMAP_ROOM:
-            self.warnings.append(
-                '%d tiles down needs %d bytes of that lightmap but only %d fit below the '
-                'function locals, so the store at 0x00453B20 will walk into them and the game '
-                'WILL crash in draw_terrain (at most %d tiles down are safe). See doc 10.4.'
-                % (self.tiles_y, self.lightmap_bytes, LIGHTMAP_ROOM, LIGHTMAP_MAX_TILES_Y))
+            raise ValueError(
+                '%d tiles across: the draw_terrain lightmap rows (144 bytes) would wrap twice '
+                'and collide; at most %d fit' % (self.tiles_x, LIGHTMAP_MAX_TILES_X))
+        self.lm_cols = 2 * self.tiles_x + 3
+        self.lm_rows = 2 * self.tiles_y + 3
+        self.lightmap_bytes = (LIGHTMAP_STRIDE * (self.lm_rows - 1)
+                               + 4 * (self.lm_cols - 1) + 4)
+        over = self.lightmap_bytes - LIGHTMAP_ROOM
+        self.lm_delta = -(-over // 16) * 16 if over > 0 else 0
+        self.lightmap_patch = self.lm_delta > 0
+        self.lm_frame = LIGHTMAP_FRAME + self.lm_delta
+        self.warnings = []
         self.mask_bytes = self.view_w * self.view_h // 8
         # Half the viewport in world units: the camera is the centre of the view, and world
         # coordinates run 256 per tile, so half a viewport is tiles * 128.
@@ -146,6 +163,11 @@ class Geometry:
             % (MINIMAP_W, MINIMAP_H, self.minimap_x, INSET_Y, self.minimap_off),
             'framebuffer      stride %d px, %d px total, %d bytes per row'
             % (self.w, self.w * self.h, self.w * 2),
+            'terrain lightmap %d x %d half-tiles, %d bytes of %d: %s'
+            % (self.lm_cols, self.lm_rows, self.lightmap_bytes, LIGHTMAP_ROOM,
+               'frame grown 0x%X -> 0x%X (+0x%X)' % (LIGHTMAP_FRAME, self.lm_frame,
+                                                       self.lm_delta)
+               if self.lightmap_patch else 'fits the stock frame, untouched'),
         ]
 
 
@@ -267,6 +289,47 @@ SITES = [
 ]
 
 
+def _rebase(disp):
+    """A lightmap disp32 moved down by the frame growth, as the unsigned dword to store."""
+    return lambda g: (disp - g.lm_delta) & 0xFFFFFFFF
+
+
+# Only applied when Geometry.lightmap_patch is set (the view does not fit the stock room).
+# draw_terrain 0x00453910: the frame and the ten disp32 accesses to the array, at four column
+# offsets from the base (-0x1456 = col-1, -0x1452 = col, -0x144E = col+1, -0x144A = col+2).
+# All of them lie between 0x00453915 and 0x00453C5D; nothing after that touches the array, and
+# no pointer to it ever leaves the frame. The epilogue is `lea esp,[ebp+7Ah]`, so it needs no
+# edit. The x144 row-stride idioms are left alone on purpose (see LIGHTMAP_MAX_TILES_X). Doc 10.5.
+LIGHTMAP_SITES = [
+    (3, 0x52D15, '81eccc140000', 2, lambda g: g.lm_frame, 'draw_terrain: sub esp,frame'),
+    (3, 0x52F20, '89b428b6ebffff', 3, _rebase(-0x144A), 'lightmap store, loop 1 (2r, 2c)'),
+    (3, 0x52F7A, '8b842eaeebffff', 3, _rebase(-0x1452), 'lightmap read, loop 2 (r, c)'),
+    (3, 0x52F81, '03842faeebffff', 3, _rebase(-0x1452), 'lightmap read, loop 2 (r+2, c)'),
+    (3, 0x52F88, '03842eb6ebffff', 3, _rebase(-0x144A), 'lightmap read, loop 2 (r, c+2)'),
+    (3, 0x52F91, '8b842fb6ebffff', 3, _rebase(-0x144A), 'lightmap read, loop 2 (r+2, c+2)'),
+    (3, 0x52FB3, '89bc2bb2ebffff', 3, _rebase(-0x144E), 'lightmap store, loop 2 (r+1, c+1)'),
+    (3, 0x53005, '8b8c2aaaebffff', 3, _rebase(-0x1456), 'lightmap read, loop 3 (2i+1, 2j+1)'),
+    (3, 0x5302D, '8b8428aaebffff', 3, _rebase(-0x1456), 'lightmap read, loop 3 (2i+3, 2j+1)'),
+    (3, 0x5303C, '8b942ab2ebffff', 3, _rebase(-0x144E), 'lightmap read, loop 3 (2i+1, 2j+3)'),
+    (3, 0x5305D, '8b8428b2ebffff', 3, _rebase(-0x144E), 'lightmap read, loop 3 (2i+3, 2j+3)'),
+]
+
+
+def sites_for(geom):
+    return SITES + (LIGHTMAP_SITES if geom.lightmap_patch else [])
+
+
+def stack_sites(data):
+    """(offset, expected, new, description) for the PE optional header's stack fields."""
+    pe, = struct.unpack_from('<I', data, 0x3C)
+    opt = pe + 4 + 20
+    out = []
+    for field, (old, new), what in ((0x48, STACK_RESERVE, 'PE header: SizeOfStackReserve'),
+                                    (0x4C, STACK_COMMIT, 'PE header: SizeOfStackCommit')):
+        out.append((opt + field, struct.pack('<I', old), struct.pack('<I', new), what))
+    return out
+
+
 def find_anchor(data, path):
     hits = [i for i in range(len(data) - len(ANCHOR_PREFIX) + 1)
             if data[i:i + len(ANCHOR_PREFIX)] == ANCHOR_PREFIX]
@@ -318,7 +381,7 @@ def resolve(data, path, shift, geom, stage, exclude=()):
                            (anchor + 8, geom.h, 'screen height global')):
         edits.append((off, data[off:off + 4], struct.pack('<I', val), what))
 
-    for site in SITES:
+    for site in sites_for(geom):
         site_stage, classic_off, _, _, _, what = site
         if site_stage > stage:
             continue
@@ -335,6 +398,15 @@ def resolve(data, path, shift, geom, stage, exclude=()):
                             % (off, what))
         else:
             edits.append((off, exp, new, what))
+
+    if geom.lightmap_patch and stage >= 3:
+        for off, exp, new, what in stack_sites(data):
+            got = data[off:off + 4]
+            if got != exp:
+                problems.append('0x%-7X %-42s expected %s, found %s'
+                                % (off, what, exp.hex(' '), got.hex(' ')))
+            else:
+                edits.append((off, exp, new, what))
     return edits, problems
 
 
@@ -368,7 +440,7 @@ def cmd_verify(path):
     best = None
     for cand in candidates:
         tally = {}
-        for site in SITES:
+        for site in sites_for(geom):
             site_stage, classic_off = site[0], site[1]
             exp, want = expected_and_target(site, geom)
             got = data[auto_offset(classic_off, cand):][:len(exp)]
@@ -379,6 +451,11 @@ def cmd_verify(path):
             best = (score, cand, tally)
 
     _, cand, tally = best
+    for off, exp, new, what in stack_sites(data):
+        got = data[off:off + 4]
+        print('  %s: 0x%X (%s)' % (what, struct.unpack('<I', got)[0],
+                                   'patched' if got == new else 'stock' if got == exp
+                                   else 'unrecognised'))
     print('  site table matched with AUTO shift +0x%X:' % cand)
     for st in sorted(tally):
         v = tally[st]

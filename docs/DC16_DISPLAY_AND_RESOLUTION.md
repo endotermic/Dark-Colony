@@ -811,7 +811,7 @@ lookup, where auditing the 80-odd map-dimension references would have cost an af
 
 `Geometry` now refuses a viewport taller than 127 tiles, since that displacement is a signed byte.
 
-### Stage 3 — enlarge the map viewport **(capped at 17×16 tiles — see §10.4)**
+### Stage 3 — enlarge the map viewport **(done — 28×23 tiles run; §10.5 grows the lightmap frame)**
 
 * `engmain.c` viewport 512 → 896, 448 → 736; tiles 16 → 28, 14 → 23.
 * Occlusion mask `0x7000` → `0x14200`.
@@ -978,8 +978,11 @@ per half-tile row**, based at `ebp-0x1456`. Loop 1 (`0x00453A40`) fills the even
 per-tile light values; loop 2 (`0x00453B32`) interpolates the odd half-rows from its two neighbours
 (`0x00453B7A`…`0x00453B91` sum four corners, `sar edi,2` averages, `0x00453BB3` stores). Later
 passes read it through the same four bases. Ten sites in all, at four displacements — `-0x1456`,
-`-0x1452`, `-0x144E`, `-0x144A` (the pairs are field and next-record) — and the ×144 row-stride
-idiom appears at **42** `shl reg,4` sites across the function.
+`-0x1452`, `-0x144E`, `-0x144A`, which are columns −1, 0, +1, +2 from the base `[ebp-0x1452]`
+(= `esp` after the prologue) — and the ×144 row-stride idiom (`lea r,[s*8]; add r,s; shl r,4`)
+appears at **6** sites, all between `0x00453B07` and `0x00453C25`. (~~42~~ — that earlier count
+took every `shl reg,4` in the function; the other 34 are the `shl 4; add; shl 5` = ×544
+lighting-palette index and never touch the array. Corrected in §10.5.)
 
 The frame is `sub esp,0x14CC` with `sub ebp,7Ah`, so `esp = ebp-0x1452` and the array runs
 **upward** from just above `esp` toward the locals, the lowest of which is `[ebp+0x2E]`. That gives
@@ -987,11 +990,12 @@ The frame is `sub esp,0x14CC` with `sub ebp,7Ah`, so `esp = ebp-0x1452` and the 
 
 | Cap | Comes from | Limit | Symptom when exceeded |
 |---|---|---|---|
-| **Width** | the 144-byte row stride: `4*(2*ta+2) <= 144` | **`tiles_across <= 17`** | rows bleed into each other — **wrong lighting, silently, no crash** |
+| ~~**Width**~~ | ~~the 144-byte row stride: `4*(2*ta+2) <= 144`~~ | ~~**`tiles_across <= 17`**~~ | ~~rows bleed into each other — wrong lighting, silently~~ **Retracted in §10.5: the overflow lands only on cells of the opposite parity, which nothing uses. The stride is correct up to 34 across.** |
 | **Height** | total room: `144*(2*td+2) + 8*ta <= 5240` | **`tiles_down <= 16`** | the store walks past the array into the locals — **crash** |
 
-Stock 16×14 fits both with almost nothing to spare (`34 <= 36` half-columns), which is the
-signature of an array sized for exactly one screen size.
+Stock 16×14 fits with almost nothing to spare (`34 <= 36` half-columns), which is the signature
+of an array sized for exactly one screen size. The "height" cap is really a *room* cap — it is
+the total footprint, `144*(2*td+2) + 4*(2*ta+2) + 4` bytes, that must stay below the locals.
 
 The height cap reproduces the §10.3 bisection exactly, and is the whole explanation of it:
 
@@ -1002,17 +1006,15 @@ The height cap reproduces the §10.3 bisection exactly, and is the whole explana
 | 768×608 | 24×19 | 5952 | **over** | crashes |
 | 896×736 | 28×23 | 7136 | **over** | crashes |
 
-##### Correction to §10.3 and to the README
+##### ~~Correction to §10.3 and to the README~~ — itself retracted, see §10.5
 
-§10.3 offered 640×512 (20×16) as a clean "shippable middle". **That was wrong** — 20 tiles across
-exceeds the *width* cap of 17. It does not crash, which is why the bisection passed it, but its last
-6 half-columns per row overflow into the next row, so part of the view is lit from the wrong
-neighbours. I only checked that build for stability, never for lighting correctness.
+§10.3 offered 640×512 (20×16) as a clean "shippable middle". This section then called that wrong
+because 20 across exceeds the supposed *width* cap of 17 and would light part of the view from the
+wrong neighbours. **§10.5 shows the width cap does not exist**: the overflowing columns alias cells
+that the algorithm never uses. 20×16 was fine after all, and so is anything up to 34 across whose
+total footprint fits. The 17×16 figure below is superseded.
 
-The largest viewport that is correct on **both** caps is **17×16 tiles = 544×512** — 1.24× the stock
-view area, not the 1.46× claimed. Anything beyond that needs the patch below.
-
-##### The fix, and its real cost
+##### The fix, and its real cost — **as first estimated; §10.5 has what was actually needed**
 
 Two independent edits, both mechanical, both length-preserving:
 
@@ -1047,6 +1049,79 @@ bc 0
 ba w2 ebp+0x56 ".if (@eip != 0x0045393d) { .echo CULPRIT; r; kb }; gc"
 g
 ```
+
+#### 10.5 The lightmap frame grown: 28×23 tiles run **(verified, breakpoint)**
+
+Applied and launched 9 Sep 2026. The full 896×736 viewport (28×23 tiles) renders terrain and the
+game runs until killed; the crash of §10.3 is gone. Two runs, 60 s and 77 s, on the attract-mode
+demo map, both clean. The second run carried a one-shot breakpoint at `0x004539DD` (just after
+the tile counts are stored) which logged:
+
+```
+esp=001adb6c ebp=001af72e        ebp-esp = 0x1BC2  (= 0x1C3C - 0x7A: the grown frame)
+[ebp+0x6A] = 0x17 (23 down)   [ebp+0x6E] = 0x1C (28 across)
+[ebp+0x56] = 03afcc12          (row-pointer table base — the local that used to read 0)
+```
+
+##### What the array actually is — and why there is no width cap
+
+Reading the three loops as index sets, rather than as byte ranges, changes the picture:
+
+| pass | writes | reads |
+|---|---|---|
+| loop 1 `0x00453A40` | (even row, even col): rows `0..2*td+2`, cols `0..2*ta+2` | the map |
+| loop 2 `0x00453B32` | (odd row, odd col): `(r+1, c+1)` for even `r, c` | the four loop-1 corners `(r|r+2, c|c+2)` |
+| loop 3 `0x00453BC4` | — | (odd row, odd col): `(2i+1|2i+3, 2j+1|2j+3)` — note **`2j+3`**, since `-0x144E` is column +1 |
+
+Half the cells — (even, odd) and (odd, even) — are never written or read. Now let a row spill past
+byte 144: cell `(r, c)` with `c >= 36` lands on `(r+1, c-36)`, the same byte with the **opposite row
+parity and the same column parity**, i.e. exactly one of the unused cells. A second wrap (`c >= 72`)
+would land on `(r+2, c-72)` with matching parity and collide. So the 144-byte stride is correct for
+`2*ta+2 < 72`, **34 tiles across**, and the only real limit is the room below the locals: the last
+write is `(2*td+2, 2*ta+2)`, so the array needs
+
+```
+144*(2*td+2) + 4*(2*ta+2) + 4  bytes   <=   0x1452 + 0x2E = 5248
+```
+
+which is `5044` for 17×16 (fits), `5068` for 20×16 (fits — the §10.4 retraction of 640×512 was
+unfounded), `5964` for 24×19 and `7148` for 28×23 (both over: the crashes). The same table as
+§10.4's, one column further right.
+
+##### What was patched — 13 sites, no stride change
+
+The ×144 idiom is left alone. `patch_resolution.py` grows the frame whenever the footprint above
+exceeds the stock room, by `delta = roundup16(footprint - 5248)`:
+
+| site | stock | 28×23 (`delta = 0x770`) |
+|---|---|---|
+| `0x00453915` `sub esp,imm32` | `0x14CC` | `0x1C3C` |
+| 10 × `[reg+ebp+disp32]` at `0x00453B20 B7A B81 B88 B91 BB3 C05 C2D C3C C5D` | `-0x1456/-0x1452/-0x144E/-0x144A` | each `- delta` |
+| PE optional header `+0x48` SizeOfStackReserve | `0x13880` (80 000) | `0x100000` |
+| PE optional header `+0x4C` SizeOfStackCommit | `0x10000` (64 KB) | `0x40000` |
+
+Nothing else moves: `ebp` is set *before* the `sub esp` (`mov ebp,esp; sub esp,14CCh; sub ebp,7Ah`),
+so every local `[ebp+0x2E…0x8E]` and the arguments stay put; the epilogue is `lea esp,[ebp+7Ah]`
+at `0x00454303`, independent of the frame size; and no pointer to the array ever leaves the frame
+(there is no `lea reg,[ebp-14xx]` in the function). The ten `disp32` fields are already 7-byte
+instructions, so the edit is a value change only.
+
+The header rows are there because **Watcom emits no stack probe**. A frame that grows by two pages
+in one `sub esp` is only safe if that stack is already committed; the stock header commits 64 KB,
+and touching past the guard page without touching the guard page is an access violation, not a
+stack growth. Raising the commit (and the 80 000-byte reserve, which was tight for a 1 MB-era
+default) costs nothing and removes the question. The checksum field is 0 in both builds, so the
+header edit needs no fix-up.
+
+Both builds take the patch at the same sites: ENGEXP16 is `+0x60` for all 11 code sites and the
+header offsets are identical (`0xE0`/`0xE4`).
+
+##### What this run does not show
+
+Correct *lighting* at 28 across is argued from the index sets above, not observed — the run was a
+crash test under `cdb`, and exclusive-mode DirectDraw gives no screenshot. The parity argument is
+tight, but a look at the right-hand third of the view during a night phase would close it. Also
+still only exercised on the attract-mode demo map (128×112 tiles).
 
 ### Stage 4 — cursors and movies
 
@@ -1186,7 +1261,8 @@ parse), which de-risks them completely.
 | Menu scripts drifting from the exe | Low: the `size` line is data and the parser accepts both forms (§6, verified). |
 | Multiplayer fairness | Stage 3 changes what a player can see. Not a desync (§10 stage 3), but a balance issue between patched and unpatched clients. Decide whether to gate it. |
 | Growing `.bss` | Not needed — nothing resolution-dependent lives there (§5). |
-| A fixed-size render buffer | **Realised, and identified (§10.4).** `draw_terrain`'s stack lightmap caps the view at **17 tiles across** (silently wrong lighting beyond) and **16 tiles down** (crash beyond). Correct without patching: 17×16 = 544×512. The full-size viewport needs the frame grown (10 sites) and the 144-byte row stride raised (42 sites). |
+| A fixed-size render buffer | **Realised, identified (§10.4) and fixed (§10.5).** `draw_terrain`'s stack lightmap holds 5248 bytes; the frame is now grown to fit (11 code sites + 2 PE header fields), and 28×23 tiles run. The 144-byte row stride is fine up to 34 across because the overflow only hits unused cells. Remaining unknown: lighting at the right edge was reasoned, not seen. |
+| Stack usage | The grown `draw_terrain` frame is 7 KB (28×23). Watcom has no stack probe, so the patch also raises the PE stack commit to 256 KB and the reserve to 1 MB. Any other function found to size a buffer from the view will need the same treatment. |
 
 ---
 
@@ -1235,8 +1311,13 @@ parse), which de-risks them completely.
 | `0x0045393A` | `draw_terrain`: the only write of `[ebp+0x56]` = `[view+0x14] + 0x804` |
 | `0x00453915` / `0x0045391B` | `draw_terrain` frame: `sub esp,14CCh` / `sub ebp,7Ah` |
 | `0x00453B20` | **§10.4 overflowing store** — stack lightmap, `[eax+ebp-144Ah]` |
-| `0x00453A40` / `0x00453B32` | stack-lightmap fill loop (even half-rows) / interpolate loop (odd half-rows) |
+| `0x00453A40` / `0x00453B32` / `0x00453BC4` | stack-lightmap fill loop (even,even) / interpolate loop (odd,odd) / per-tile draw loop, reads (odd,odd) |
 | `0x00453BB3` | interpolated lightmap store, `[ebx+ebp-144Eh]` |
+| `0x00453B7A/B81/B88/B91`, `0x00453C05/C2D/C3C/C5D` | the other eight lightmap accesses (§10.5); with `0x00453B20`/`BB3` the complete set of ten `disp32` bases the patcher moves |
+| `0x00453B07/B55/B6B/B9F/BF4/C1C` | the six ×144 row-stride idioms (`lea [s*8]; add; shl 4`) — **left unpatched**, see §10.5 |
+| `0x00454303` | `draw_terrain` epilogue `lea esp,[ebp+7Ah]` — frame-size independent |
+| `0x004539DD` | `draw_terrain`: first instruction after the tile counts are stored — breakpoint site for §10.5 |
+| file `0xE0` / `0xE4` | PE optional header `SizeOfStackReserve` / `SizeOfStackCommit` (`0x13880` / `0x10000` stock), same in ENGEXP16 |
 | `0x0040AB1C` / `0x0040AB2B` | view origin from the camera (half-viewport y / x) |
 | `0x0040AF16` | camera clamp call site |
 | `0x0040B0BC` / `0x0040B0E0` | frame render: view origin (half-viewport y / x) |
