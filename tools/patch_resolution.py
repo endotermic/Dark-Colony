@@ -69,7 +69,7 @@ TILE = 32
 
 
 class Geometry:
-    def __init__(self, width, height):
+    def __init__(self, width, height, viewport=None):
         self.w, self.h = width, height
         self.shift = width.bit_length() - 1
         if 1 << self.shift != width:
@@ -81,6 +81,15 @@ class Geometry:
                 'Use 1024, the documented target. 800 would need a real imul and code motion.')
         self.view_w = width - INSET_X - PANEL_W
         self.view_h = height - INSET_Y - BOTTOM_H
+        if viewport:
+            # Diagnostic override: shrink the map view below the maximum the screen allows, to
+            # test whether a failure scales with the viewport (a fixed-size buffer) rather than
+            # with the screen. The HUD frame will not match; that is fine for a crash test.
+            vw, vh = viewport
+            if vw > self.view_w or vh > self.view_h:
+                raise ValueError('viewport %dx%d exceeds the %dx%d the screen allows'
+                                 % (vw, vh, self.view_w, self.view_h))
+            self.view_w, self.view_h = vw, vh
         for what, v in (('viewport width', self.view_w), ('viewport height', self.view_h)):
             if v <= 0:
                 raise ValueError('%s comes out %d: the screen is too small for the HUD'
@@ -378,6 +387,8 @@ def main(argv=None):
     ap.add_argument('--height', type=int, default=768)
     ap.add_argument('--stage', type=int, default=4, choices=(1, 2, 3, 4),
                     help='highest cumulative stage to apply (default 4, everything)')
+    ap.add_argument('--viewport', metavar='WxH',
+                    help='diagnostic: force a smaller map viewport than the screen allows')
     ap.add_argument('--exclude', action='append', default=[], metavar='SUBSTR',
                     help='skip sites whose description contains SUBSTR (repeatable). For '
                          'bisecting a misbehaving stage; not for normal use.')
@@ -392,7 +403,10 @@ def main(argv=None):
 
     name, shift, _ = identify(data, args.exe)
     try:
-        geom = Geometry(args.width, args.height)
+        vp = None
+        if args.viewport:
+            vp = tuple(int(x) for x in args.viewport.lower().split('x'))
+        geom = Geometry(args.width, args.height, vp)
     except ValueError as e:
         raise SystemExit('bad target geometry: %s' % e)
     print('build: %s  (AUTO shift +0x%X)\n' % (name, shift))

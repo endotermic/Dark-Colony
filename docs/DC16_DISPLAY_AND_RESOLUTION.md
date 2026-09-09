@@ -613,7 +613,9 @@ The two CD patches so far were single-byte edits recorded only in the commit his
 multi-byte edits across two binaries need a script, so `tools/patch_resolution.py` is that script
 and **it, not §8, is now the authoritative copy of the site table**. It
 
-* takes `--width`/`--height` and a `--stage` (1…4, cumulative, matching the stages below);
+* takes `--width`/`--height` and a `--stage` (1…4, cumulative, matching the stages below), plus
+  `--viewport WxH` to force the map view smaller than the screen allows and `--exclude SUBSTR` to
+  drop individual sites — the two flags that made the §10.3 bisection possible;
 * locates the globals by the **4-byte** prefix `4F 01 6E 01` of the §3 anchor — deliberately not
   the full 12-byte sequence, because that contains the dimensions and so stops matching the moment
   the file is patched, which would break `verify`. The 4-byte prefix is unique in all three stock
@@ -630,8 +632,9 @@ out of the globals and tallies, per stage, how many sites are patched / stock / 
 is what makes the staged bisection below usable. `plan` prints every edit and writes nothing.
 `apply` patches, then prints the data and art work that is left.
 
-Verified end to end: 57 edits on Classic and 57 on `ENGEXP16` (55 code sites plus the two
-globals); `--stage 1` applies 20 and `verify` then correctly reports stages 2–4 as untouched;
+Verified end to end: **66** edits on Classic and 66 on `ENGEXP16` (64 code sites plus the two
+globals), cumulatively 20 / 42 / 63 / 66 at stages 1 / 2 / 3 / 4; `--stage 1` applies 20 and
+`verify` then correctly reports stages 2–4 as untouched;
 re-applying is refused; the `.bak` is byte-identical to the original; and the three rewritten
 multiply sequences were re-disassembled out of the patched binary to confirm they read
 
@@ -794,8 +797,8 @@ instruction is `mov edx,[eax]`, dereferencing a ground-layer row pointer taken f
 The count appears **twice**: once as `mov r32, imm32` and once as a **signed 8-bit `lea`
 displacement**, `8D 50 F2`. Patching only the first left the rect 9 tiles too tall, so the scan
 walked past the 256-entry row-pointer table, picked up a word of path-grid data as a pointer, and
-faulted. Fix: `8D 50 F2` -> `8D 50 E9`, one byte, now site `0x3524C` in `patch_resolution.py`
-(58 edits, not 57).
+faulted. Fix: `8D 50 F2` -> `8D 50 E9`, one byte, now site `0x3524C` in `patch_resolution.py`,
+the first of nine sites the crash hunt added (57 → 66).
 
 **The lesson generalises.** §8.2 records that Watcom hides `*640` in strength-reduced form; this is
 a second hiding place — *small* constants encoded as `imm8` or `disp8`, which no search for the
@@ -808,7 +811,7 @@ lookup, where auditing the 80-odd map-dimension references would have cost an af
 
 `Geometry` now refuses a viewport taller than 127 tiles, since that displacement is a signed byte.
 
-### Stage 3 — enlarge the map viewport
+### Stage 3 — enlarge the map viewport **(does not work at full size — see §10.3)**
 
 * `engmain.c` viewport 512 → 896, 448 → 736; tiles 16 → 28, 14 → 23.
 * Occlusion mask `0x7000` → `0x14200`.
@@ -829,6 +832,117 @@ render-side only — the lockstep checksum (`sync.c`, `DC16_BATTLE_ENGINE.md` §
 state and not the camera, and the relay server (`Dark-Colony-Server`) never sees viewport data — so
 it does not desync. It *is* a competitive change if a patched and an unpatched client meet in the
 same game.
+
+#### 10.3 Stage 3 does **not** work above ~20×16 tiles — open, cause narrowed to one local **(verified)**
+
+With the §10.2 `lea` fix in place, a full-size 896×736 viewport (28×23 tiles) still dies, now in a
+different place: access violation reading address 0, faulting instruction
+
+```
+00453ad4  8b36    mov esi,dword ptr [esi]
+```
+
+inside `draw_terrain` `0x00453910` (`lighting.c`). It reproduces **without entering a battle** —
+the attract-mode demo starts itself after ~20 s at the main menu and renders terrain — which is
+what made it cheap to bisect.
+
+##### It is a capacity threshold, not arithmetic
+
+`patch_resolution.py` grew a `--viewport WxH` flag for this: it forces the map view smaller than
+the screen allows, so the viewport can be swept independently of the 1024×768 framebuffer. (The
+HUD frame then does not match the hole, which is irrelevant to a crash test.) Sweeping it:
+
+| `--viewport` | tiles | occlusion mask | result |
+|---|---|---|---|
+| 544×480 | 17×15 | `0x7F80` | runs |
+| 640×512 | 20×16 | `0xA000` | runs |
+| 768×608 | 24×19 | `0xE400` | **crashes** |
+| 896×736 | 28×23 | `0x14200` | **crashes** |
+
+Every one of those builds computes its constants through the same `Geometry` code, so a wrong
+formula would fail at 17×15 too. Controls: stage 2 alone ran 45 s clean; stage 3 with the
+enlargement sites excluded ran 50 s clean. So the arithmetic is right and something has a fixed
+capacity that 20×16 fits and 24×19 does not.
+
+##### The register capture names a single corrupted local
+
+Three runs under `cdb` (`x86\cdb.exe` out of the WinDbg store package) at 896×736 gave consistent
+registers at the fault:
+
+* run 1: `eax = 0x11` (17), `esi = 0x44`
+* run 2: `eax = 0x49` (73), `esi = 0x124`
+
+The address being dereferenced is built as `esi = (index << 2) + [ebp+0x56]`, and `17 << 2 = 0x44`,
+`73 << 2 = 0x124`. **`[ebp+0x56]` reads 0 in both runs.** It should hold the ground-layer
+row-pointer table base, `[view+0x14] + 0x804` — the same table §10.2 was walking off the end of.
+
+Everything around it is intact, checked in the same runs:
+
+| Location | Value | Meaning |
+|---|---|---|
+| `[ebp+0x56]` | **`0`** | row-pointer table base — should be `0x0356CC12` |
+| `[ebp+0x5A]` | `0x10` | light level |
+| `[ebp+0x5E]` | `0` | view tile y |
+| `[ebp+0x62]` | `97` | view tile x |
+| `[ebp+0x6A]` | `23` | tiles down |
+| `[ebp+0x6E]` | `28` | tiles across |
+| `[ebp+0x72]` | `13` | — |
+| `0x005044B8` | `0x02E00380` | viewport `896×736` |
+| `0x005044BC` | `0x400` | dest stride 1024 |
+| `0x005044C0` | `0x0356C40E` | map pointer, valid; map is **128×112** tiles |
+
+So the tile rect is legal on this map — `97 + 28 = 125 ≤ 128`, `0 + 23 = 23 ≤ 112` — and the view
+struct §5 describes is correct in every field. `ebp = 0x000EF72E`, `esp = 0x000EE2DC`,
+`ebp - esp = 0x1452`, exactly the frame size the prologue reserves, so the stack pointer is not
+blown either. **Exactly one local is zeroed while its immediate neighbours survive**, which is the
+signature of a bounded write into a fixed-size buffer that happens to end at `ebp+0x56`.
+
+##### Buffers ruled out as the overflowing one
+
+Each of these was read out of the disassembly and either scales with the viewport or is indexed by
+something unrelated to it:
+
+* `draw_objects` `0x004543FC` sort array at `ebp-0xCB4` — 804 dwords, sized for the 800-object
+  pool, not for screen area;
+* the static render-item list at `0x004F6F2C` — capacity 800, and it is *guarded*:
+  `cmp dword ptr [0x005044E4],320h` at `0x0043613E` refuses to add beyond 800;
+* `tilememory` at `0x4260` — 1416 × 12 bytes, indexed by tile *type*;
+* the occlusion mask and the lightplane — both allocated from the viewport size (§5), and neither
+  has a hardcoded row stride to miss;
+* `draw_terrain`'s own frame — no viewport-indexed array found in it.
+
+The camera path was also verified end to end and is **not** the cause: bounds are written at
+`0x0041EE66` / `0x0041EE6F` into `ui+0x114…0x120` (`ui` base `0x004AA9D0`), enforced by the
+generic `clamp2d` `0x00436668(min_x, min_y, max_x, max_y, &x, &y)` called from `0x0040AF16`, and
+the view origin is derived with the same half-viewport constants the patcher already rewrites at
+`0x0040AB1C` / `0x0040AB2B` and `0x0040B0BC` / `0x0040B0E0`. An earlier draft called those camera
+globals dead stores; that was a bad grep (the pattern needed the trailing `h` of `[004AAAE4h]`) and
+is retracted — they are read.
+
+##### What is left
+
+One question: **what writes 0 to `[ebp+0x56]`, and why only above 20×16 tiles.** The step that
+answers it is a hardware watchpoint on that dword — under `cdb`, armed *from the breakpoint's own
+command list* so that it is set with the frame established:
+
+```
+bp dc16+0x5393d "r ebp;dd ebp+0x56 L1;ba w2 ebp+0x56;ba w2 ebp+0x58;bc 0;g"
+g
+```
+
+Two invocation details cost a run each and are worth recording: queued `-c` commands are mangled
+by shell quoting, so use `-cf <file>`; and `cdb` needs the full path to the target plus
+`-WorkingDirectory`, or it cannot find it. A third: `ba w4` is rejected with *"Data breakpoint
+must be aligned"* whenever the computed address is not 4-byte aligned, which `ebp+0x56` is not for
+every `ebp` — two `ba w2` breakpoints covering the dword avoid the problem entirely.
+
+##### Meanwhile: 640×512 is a shippable middle
+
+20×16 tiles is **1.46×** the stock 16×14 view area and is verified stable, so
+`--stage 3 --viewport 640x512` is a real, releasable improvement while the above is open. Caveat
+before shipping it: 20×16 has only been exercised on the attract-mode demo map (128×112 tiles).
+The threshold may be map-dependent, and it is not proven until actual missions are played on the
+largest shipped maps.
 
 ### Stage 4 — cursors and movies
 
@@ -968,6 +1082,7 @@ parse), which de-risks them completely.
 | Menu scripts drifting from the exe | Low: the `size` line is data and the parser accepts both forms (§6, verified). |
 | Multiplayer fairness | Stage 3 changes what a player can see. Not a desync (§10 stage 3), but a balance issue between patched and unpatched clients. Decide whether to gate it. |
 | Growing `.bss` | Not needed — nothing resolution-dependent lives there (§5). |
+| An undiscovered fixed-size render buffer | **Realised.** §10.3: above ~20×16 tiles a bounded write zeroes a `draw_terrain` local and the frame faults. The buffer is not yet identified, so the full-size viewport is blocked; 20×16 (1.46× stock area) is verified stable. |
 
 ---
 
@@ -1012,6 +1127,15 @@ parse), which de-risks them completely.
 | `0x00450E20` / `0x00450E80` | mouse absolute / DirectInput poll + clamp |
 | `0x00453770` | `lighting_init` — allocates the "lightplane" at the viewport size, sets `0x0049931C` (viewport width) and `0x005360B0` (viewport pixel count) |
 | `0x00453910` | `draw_terrain` (`lighting.c`); `>> 5` ⇒ 32-px tiles |
+| `0x00453AD4` | **§10.3 fault site** — `mov esi,[esi]` on the ground-layer row-pointer table; base is the local `[ebp+0x56]` |
+| `0x0040AB1C` / `0x0040AB2B` | view origin from the camera (half-viewport y / x) |
+| `0x0040AF16` | camera clamp call site |
+| `0x0040B0BC` / `0x0040B0E0` | frame render: view origin (half-viewport y / x) |
+| `0x0041EE66` / `0x0041EE6F` | write the camera bounds into `ui+0x114…0x120` |
+| `0x00436668` | generic `clamp2d(min_x, min_y, max_x, max_y, &x, &y)` |
+| `0x0043613E` | render-item list guard, `cmp [0x005044E4],320h` (capacity 800) |
+| `0x004AA9D0` | `ui` base; `+0x114…0x120` = camera bounds |
+| `0x004F6F2C` / `0x005044E4` | static render-item list / its live count |
 | `0x004537AD` | load `FADE.DAT` into `0x00533C90` (`0x2420` B) |
 | `0x004543FC` | `draw_objects` (`sprite.c`) |
 | `0x004DFF14` / `0x004DFF1C` | current mouse X / Y |
@@ -1052,6 +1176,13 @@ folder), plus:
 * decoding `INTRFACE.GIF` with PIL and histogramming the presumed map rect against the rest, then
   reducing per-column and per-row opacity to runs, to confirm the frame geometry independently of
   the disassembly.
+
+* to localise the §10.3 crash: a **viewport sweep** rather than a code audit — `--viewport`
+  separates the map-view size from the framebuffer size, so four builds bracket the failure
+  between 20×16 and 24×19 tiles and prove the arithmetic innocent; then `cdb` (WinDbg store
+  package, `x86\cdb.exe`) driven by a `-cf` command file, whose register dump identified the one
+  corrupted local from `esi = (index << 2) + [ebp+0x56]` in a single capture. Both are worth
+  reaching for before sweeping the disassembly: the §10.2 lesson repeats itself here;
 
 * to decode `.SPR` (§6.3): reading `juicel.c`'s parser and both blitters rather than pattern-matching
   the files, then validating by re-encoding all 15 088 compressed cells and by rendering cells to PNG
