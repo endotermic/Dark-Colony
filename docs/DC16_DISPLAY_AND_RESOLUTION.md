@@ -1318,7 +1318,7 @@ PIC calls are frame periods, not coordinates. `patch_resolution.py` carries them
 | network `netopt` (`0x00405C40`) | globe PIC `intrface/blew` | `0x00405C71` / `0x00405C60` | (336, 24) |
 | victory `wingame` | debrief TTY 445×112 (`"%s.%3.3d"`) | `0x00404281` / `0x0040427A` | (29, 190) |
 | | medal PIC `intrface/mdl%c`, created and re-created on click | `0x00404474/0x004047F3` (x), `0x0040446D/0x004047EC` (y) | (541, 169) |
-| intro `bintro` (`0x00404DC8`) | scrolling `credits.txt` TTY 280×100 | `0x00404EA0` / `0x00404E99` | (178, 200) |
+| intro `bintro` (`0x00404DC8`) | scrolling `credits.txt` TTY 280×100 | `0x00404EA0` / `0x00404E99` | (178, 200) | — since §10.11 not +192/+144 but the full-frame menu's cluster position (fixups) |
 
 §10.1's guess that the network screen shows `globeg/globes` was wrong: that pair (and
 `earthg/earths`) is the *briefing* globe; the network screen's is `blew`. The main menu draws
@@ -1533,6 +1533,145 @@ the repository is a no-op rather than a double shift.
 
 Still open under stage 6: Council Wars `dc16.exe` (a different build: only the §3 anchor
 transfers, so the whole site table would have to be re-derived in Ghidra), and the map editor.
+
+#### 10.11 The main menu repainted full-frame: a procedural backdrop and re-baked logos **(verified by measurement; game test pending)**
+
+The first screen after the intro movie (NEW CAMPAIGN, TRAINING, LOAD GAME, …) was the most
+visible letterboxed screen: a 640×480 picture with black borders in a 1024×768 frame. On
+10 Sep 2026 it became the first screen painted at the new size (Route B of §10.1). Four things
+about it were data that had to be measured before anything could be drawn — and one of them was
+learned from a failed game test.
+
+**Which script is the menu.** The retail exe names only `intrface/bintro` (`main.c` `bintro`
+`0x00404DC8`, the function that also creates the scrolling credits box of §10.7), so the live menu
+is **`bintroe`** with background **`INTRFACE/INTRG.GIF`**, the `DCUK` logo animation and the `DCUT`
+title. `introe` (background `INTRO.GIF`, `DCSS` logo) is the same menu in an older dress and is
+not reached; `BUTTONSE` and `DINTROE` are demo leftovers on `INTRO.GIF`. The first pass of this
+work repainted `INTRO.GIF` and `introe` only, and the maintainer saw no change in either game —
+that test is what pinned the screen down. Council Wars adds `exp/intrface/BINTROE` / `INTROE`
+overrides (one column of buttons, the same sprites at the same places). `INTRG.GIF` and
+`INTRO.GIF` are the same picture except for the bottom band (Take 2 logo and copyright in the one,
+SSI logo, red rule and copyright in the other); both now exist full-frame and all six scripts say
+`size 1024 768`.
+
+**The palette.** Both GIFs' colour table is **the game's master palette, byte-identical to
+`PALETTE.GIF`** (`CHOO`, `LOADER`, `LOST`, `STORY`, `NET` have their own). `INTRO.RGB` (32 768 B,
+the 15-bit inverse lookup) and `INTRO.RMP` (196 608 B) are derived from that table, so the repaint
+keeps all 256 entries as they are and only produces new indices — the constraint §5.1 states for
+the HUD frame. The sprites' embedded palettes differ from it in one or two entries and are not
+what the game draws with (viewing `DCUK` through its own table gives a green sky); always decode
+sprites through the screen palette.
+
+**Geometry of the stock picture, measured on the indices.** Fitting circles to the limb
+(outermost limb-coloured pixel per row, both sides, plus the top edge) gives the planet as a disc
+centred at **(320, 351) with radius 291** in the 640×480 frame (left edge alone fits with σ =
+0.95 px), i.e. centre (0.500 W, 0.731 H), radius 0.607 H. Outside the limb a **10 px glow**
+(luminance 7 → 50 over rows 48…60 at the centre column). Inside, a **lit crescent 45 px deep at
+the top**, whose brightness along the centre column falls as (1 − d/45)^1.3 (luminance 115, 95,
+57, 33, 9 at d = 0, 10, 20, 30, 40) and whose depth and peak fall with the angle θ from the top
+as ≈ 45·cos^2.2 θ and ≈ cos^1.6 θ — 30 px deep at 30°, 22 at 45°, 10 at 60°, nothing beyond
+±75°. The peak colour is index 204 (239, 95, 0); the whole crescent lives on the orange ramp
+201…251, and it already carries faint darker streaks (surface texture). The sky holds **1 244
+stars over 251 198 px** (4.95 × 10⁻³ per pixel): 55 % single pixels, 67 % with a peak below 40
+(indices 67/66/62), 6.5 % saturated white, mostly neutral with a few blue (107), violet (119) and
+pink (144…159) pixels — the violet/blue ones are the halos of the bright stars. Everything below
+row 421 is the band: in `INTRO.GIF` the SSI logo (rows 423…447, x 274…359), a full-width rule
+(rows 448…458, one solid colour per row: indices 56, 4, 1, 97, 84 ×4, 194, 1, 44) and the
+copyright line (rows 462…475, x 48…587); in `INTRG.GIF` the Take 2 logo and copyright (rows
+435…478, x 97…516), no rule.
+
+**The picture is not resampled; it is re-rendered from those numbers** (`tools/paint_intro.py`).
+Stars and planet are procedural — the master is the generator and its measured parameters, so
+any resolution is a re-render, which is the point of the vector-first rule of §5.1 for art that
+has no vector form. Stars keep their pixel size (a point of light does not grow with the canvas)
+and their density per pixel, with the stock brightness distribution (2/3 faint, ~5 % saturated),
+the nearest pixel always carrying the full brightness so single-pixel stars stay crisp, and the
+bright ones get the stock's cold blue-violet halo and a faint cross. The planet keeps its
+proportions (centre and radius scale with the height), the measured crescent profile, and gains
+what "more robust" was asked for: two scales of noise in a longitude/latitude parametrisation of
+the sphere (so features foreshorten towards the limb), 0.55…1.35 albedo, dark terrain leaning
+browner; the thin atmospheric rim at the edge is not modulated by terrain. The render is
+quantised to the nearest colour of the fixed palette, with ±2 random dither only inside the disc
+to break the ramp's 4-step banding; index 0 is never used (black is 254 as in the stock files).
+The bands are UI-scale pixel art like the buttons and are **copied 1:1** (a row that is non-black
+across the stock width is a rule and is extended to the full width; the band keeps its distance
+from the bottom edge and is centred). Statistics of the result: 259 star pixels per 10 k px
+against the stock's 324 at 640×480; 121 distinct indices against 135.
+
+**The logos have the stock backdrop baked into every frame — and live in `SPRITES/`.**
+`gadget 14 … DCUK anim_stopped unmask - bg erase` names an *animation*, not a sprite file: the
+screen's `INTRG.DAT` lists `knobe.fin`, `dcuk.fin`, `dcut.fin`, and `ANIMATE/DCUK.FIN` (2 276 B;
+header `1D 00 0C 00 01 00 02 00`, bank names `dcuk`/`dcut`, animation name `DCUK`, then 18-byte
+frame records `bank[8] cell:u16 flags:u16 duration:u32 …` for cells 2…13) is loaded through
+`"animate/%s"` (`animate.c` `0x00425613`) and opens its sprite banks through **`"sprites/%s"`**
+(`0x00425356`). So the frames the game draws come from **`SPRITES/DCUK.SPR`**, a **14-cell 310×120
+assembly animation** (cell 0 a solid flash, index 133); `INTRFACE/DCUK.SPR` is a byte-identical
+copy that nothing on this screen reads — the third game test, which still showed the stock stars
+after only the `INTRFACE` copy had been re-baked, is what proved it. (`SPRITES/DCSS.SPR`, 29 cells,
+is a longer cut of the `introe` logo than the 15-cell `INTRFACE` copy.) Each cell contains sky,
+stars and the top of the limb — the gadgets are `unmask` (keyword table `0x004849A8`, handler
+`0x00424BCB`), so the sprite carries its own background. `paint_intro.py apply` re-bakes every
+copy it finds in `INTRFACE/` and `SPRITES/`. Black in the
+sprites is index 0 (index 254 never occurs). That backdrop is *not* a byte copy of the GIF (only
+20 % of the arc pixels agree; it is another quantisation of the same scene using browns 184…186
+and red 101 the GIF does not), and the letters shimmer (consecutive frames are only 50–60 %
+identical; `DCSS`'s last five frames agree on just 24 pixels), so neither "equals the GIF" nor
+"static across frames" identifies it alone. With the planet 1.6× larger the baked arc showed as
+a second, smaller limb through the letters. `paint_intro.py apply` therefore **re-bakes** the
+cells (first against the new render, since the second game test with plain black — see Layout
+below): a pixel is backdrop if it agrees with the per-pixel mode over the frames where that mode
+has ≥ 5 supporters, or has a limb colour (r > g+8, r > b+8, g ≤ 0.6 r — 87 indices; the letters
+above the limb contain 0.5 % such pixels), or is a non-limb speck of ≤ 12 connected pixels (a
+star), or is black sky more than 1 px from a letter (the letters' black shadows stay 0). Those
+pixels take the new render at the logo's new position; the letters, their shadows and the flying
+pieces are untouched. **Fourth game test:** most stars gone, but light pixels still flickered on
+the logo animation. Measured on the re-baked frames: a 179-px streak of the limb's darkest glow
+colour, index 252 (7,0,0), which the colour family `r > g+8` had missed, with white and grey star
+pixels glued into it (frames 1…3), plus stars touching a flying piece and therefore merged into
+its component. Since the backdrop is now plain black anyway, the `black` mode is stricter than
+`full`: the colour family is `g, b ≤ 0.65 r` (87 → includes 252 and 251), a pixel equal to the
+*reference frame* (the frame with the least logo in it — the static baked backdrop, minus its own
+pieces) is backdrop, and afterwards **everything that is not part of a piece of ≥ 100 connected
+pixels is dropped**; a fragment between 12 and 100 px survives only if at least half its pixels
+have logo colours (colours present in the big pieces but absent from the reference backdrop),
+which keeps the tan sparks of frame 9 (three 13–14 px fragments) and removes star halos. Result:
+0…4 surviving stock-backdrop pixels per frame, all dark (`DCUK`: up to 35 502 of 37 200 pixels per
+cell replaced, 1 in the flash frame; `DCSS`: 22 311…45 563). `DCUT.SPR` (the 398×33 title, 5 cells: a solid flash, a
+dark-red fade-in, a **red-white glow** frame, and the tan text) sits over the black disc and has
+only 88 baked star pixels; its glow frame is all limb colours, so it gets the minimal rule —
+only pixels equal to a non-black stock pixel underneath are replaced. `spr.py check` passes on all
+three.
+
+**Layout — second game test.** The maintainer's second test (background right) asked for two
+things: the DC logo on **black**, and **right above the "DARK COLONY" title as in the original**,
+not pinned to the top edge over the limb. So the title, credits and buttons form one cluster that
+keeps its stock vertical centre as a fraction of the height and is centred horizontally (the
+button grid as a unit, the title on its own), and the logo moves by the same amount, centred, so
+the stock 39 px gap logo→title is preserved. The logo is an opaque 310×120 rectangle: its
+backdrop is now plain black (rebake mode `black`, same pixel classification, index 0 instead of
+the render), and because the proportional shift alone (+173) would have put its top rows over
+the last (27,7,0) pixels of the crescent's tail (rows 173…190), every screen with a logo shifts
+**20 px further** (`LOGO_CLEARANCE`), onto rows that are entirely black under the rectangle
+(measured: 0 non-black pixels under (357…667, 193…313)). In `bintroe` the cluster is rows
+159…417 (centre 288, i.e. 0.600 H), so everything moves by (+194, +193): logo at (357, 193),
+title at (313, 352), the credits box at **(372, 393)**, the button grid at x 332/512, rows
+507…610. In the Council Wars override (rows 159…443, centre 301) the shift is (+194, +201) and
+the credits, which start at y 230 there, land at **(372, 431)**. All positions are absolute screen
+coordinates (§10.1). The credits box is the one code-positioned element of this screen, so the
+two `intro credits text` sites of §10.7 (`0x00404EA0` x, `0x00404E99` y; file `0x42A0`/`0x4299`)
+no longer follow the (+192, +144) letterbox rule: `patch_resolution.py` carries them as per-build
+fixups computed from the same numbers (Classic 200 + round(288·(H/480 − 1)) + 20, ENGEXP16 230 +
+round(301·(H/480 − 1)) + 20, x = (W − 280)/2), and `paint_intro.py plan` prints where they must
+be. Both exes were re-patched from their `.bak` on 10 Sep 2026: still 165 edits, exactly two
+dwords different from the release build (x 370 → 372, y 344 → 393 / 374 → 431). `pad_background.py`
+now recognises a script that already says `size W H` for the target framebuffer and leaves it
+and its GIF alone, so re-running it on the repository is still a no-op, and its `revert` restores
+the stock 640×480 set. Applied to `DC - Classic`, `DC - Council wars` and both test builds
+(identical output, seed 7); `paint_intro.py preview` composites the settled logo frames, the
+button cells and the credits rectangle over the new background for checking without launching
+the game. **Not yet seen in the game.** The `unmask` blit path was inferred from the baked
+backdrop, not read; if the game masks index 0 after all, the rebaked sprites still work (their
+stars then coincide with the background's).
 
 ### Stage 4 — cursors and movies
 

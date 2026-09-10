@@ -97,13 +97,19 @@ def need_pil():
         sys.exit('this tool needs Pillow: pip install Pillow')
 
 
-def scan(intrface_dir, only=None, include_hud=False):
+def scan(intrface_dir, only=None, include_hud=False, width=1024, height=768):
     """Full-screen scripts that have a background. Returns (jobs, skipped)."""
     Image = need_pil()
     jobs, skipped = [], []
     for fn in sorted(os.listdir(intrface_dir), key=str.lower):
         path = os.path.join(intrface_dir, fn)
         if not os.path.isfile(path) or fn.lower().endswith('.bak'):
+            continue
+        # a screen repainted at the target size (paint_intro.py) already says `size W H` for
+        # the framebuffer; leave it and its GIF alone even though a .bak exists
+        cur = SIZE2.search(open(path, 'rb').read())
+        if cur and (int(cur.group(3)), int(cur.group(5))) == (width, height):
+            skipped.append((fn, 'already full-screen at %dx%d (repainted)' % (width, height)))
             continue
         # a script we padded earlier is judged by its pristine copy, so a re-run picks it up
         # again (apply always transforms from the .bak)
@@ -488,7 +494,7 @@ def main(argv=None):
     if args.command == 'revert':
         return cmd_revert(args)
 
-    jobs, skipped = scan(args.dir, args.only, args.include_hud)
+    jobs, skipped = scan(args.dir, args.only, args.include_hud, args.width, args.height)
     if not jobs and not (find_bitmaps(args.dir) and not args.only):
         raise SystemExit('nothing to do in %s%s'
                          % (args.dir, ' for --only %s' % args.only if args.only else ''))
