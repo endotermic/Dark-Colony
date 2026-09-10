@@ -1,0 +1,14 @@
+~1...INCOMING MESSAGE...
+
+~4Good day, Soldier...
+
+We have something special for you this time. Your task is to get the new unit's tests done. Of course ~0Osprey V~4's tests will be conducted in the the ~7Monori ~4region. We have data about this strange signal as well - ~0it seems that the communication we have decrypted was not about a trap, ~4but it was sent by ~2aliens ~4and it seems that we have broken right into their civil war. We made ~1Ternox ~4to carry about the case. Don't waste your mind on thinking about that.
+
+Good luck, Commander.
+
+~1Orders:
+~2-Protect Osprey V during the tests
+-Osprey V must not be destroyed
+-Commander must not be critically wounded
+
+~1...MESSAGE OUT...

@@ -1,0 +1,118 @@
+High Council                                        .
+Ternox                                              .
+Taar Council                                        .
+Globo Corporation                                   .
+Insurgents                                          .
+High Council                                        .
+Unknown                                             .
+Aerogen                                             .
+11
+council/tarr01.scn
+INTERROGATION
+THE UNDERGROUND
+scenario/council/tarr01
+avi/123.avi
+avi/123.avi
+5 352 204
+0
+2 -1
+
+council/tarr02.scn
+THE ROAD TO FREEDOM
+THE UNDERGROUND
+scenario/council/tarr02
+avi/avhd4.avi
+avi/atran3.avi
+10 342 174
+0
+5 3 2 -1
+
+council/tarr03.scn
+SECRET BASE
+ALVIN 5
+scenario/council/tarr03
+avi/avhd4.avi
+avi/atran4.avi
+75 292 204
+0
+5 3 2 -1
+
+council/tarr04.scn
+ANCIENT ARTIFACT
+FLUX 5 JUNGLE 
+scenario/council/tarr04
+avi/avhd4.avi
+avi/atran2.avi
+30 322 229
+0
+2 3 -1
+
+council/tarr05.scn
+ATTACK FOR RIVER
+RIVED RIVER
+scenario/council/tarr05
+avi/council1.avi
+avi/council2.avi
+30 342 204
+0
+5 2 -1
+
+council/tarr06.scn
+CRASH
+VEXTAAR JUNGLE
+scenario/council/tarr06
+avi/avhd4.avi
+avi/atran6.avi
+5 352 204
+0
+2 -1
+
+council/tarr07.scn
+ANCIENT ARTIFACT II
+CANDERA CANYON
+scenario/council/tarr07
+avi/avhd4.avi
+avi/atran5.avi
+20 272 174
+0
+4 2 -1
+
+council/tarr08.scn
+ANCIENT ARTIFACT III
+VEXTAAR
+scenario/council/tarr08
+avi/aending.avi
+avi/atran7.avi
+70 272 184
+0
+3 2 -1
+
+council/tarr09.scn
+GENERATOR
+MALTAAR BASIN
+scenario/council/tarr09
+avi/aending.avi
+avi/atran7.avi
+70 272 184
+0
+3 2 -1
+
+council/tarr10.scn
+DALGAR
+THE UNDERGROUND
+scenario/council/tarr10
+avi/123.avi
+avi/123.avi
+5 352 204
+0
+2 -1
+
+council/tarr11.scn
+FINAL ENCOUTER
+JUNGLE
+scenario/council/tarr11
+avi/aending.avi
+avi/council.avi
+15 312 210
+0
+5 2 3 -1

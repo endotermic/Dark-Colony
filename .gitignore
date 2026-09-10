@@ -9,3 +9,7 @@ __pycache__/
 *.pyc
 hud_layers/
 hud_template.png
+
+# local material, never game content: the ozi_ns mission pack source and the maintainer's install of it
+OZI_NS/
+DC Mission Pack by ozi_ns/

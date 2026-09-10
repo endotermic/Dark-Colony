@@ -1,0 +1,42 @@
+text 1
+Find the Dalgar!!!
+
+text 2
+Second artifact is on its way!!!
+
+text 3
+Third artifact has reached the destination!!! 
+
+text 4
+You will be beheaded!!
+
+text 5
+Dalgar's power is finally ours!!!
+
+text 6
+Captain is dead. Mission aborted
+
+text 7
+Dalgar is destroyed!!!
+
+text 8
+Our defeat is inevitable!!!
+
+text 9
+Mission completed!!! 
+
+text 10
+Mission completed!!! 
+
+text 11
+Artifact has been found!!! Destroy enemy bases!!!
+
+text 12
+Mission completed!!! 
+
+text 13
+Artifact is lost. You have failed!!!
+
+text 14
+Base destroyed!!!
+

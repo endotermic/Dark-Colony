@@ -1,0 +1,21 @@
+~1Mind link established...
+
+~4Welcome, brother.
+
+~4You did excellent in the last mission and another ~3artifact ~4is ours.
+
+Thanks to your quick action ~1Ternox ~4haven't finished its researches. From their documentation we have concluded that they were investigating ~3Vatox ~4defense system.
+
+~4We have found notes about the location of the last ~3artifact ~4in the ruins where ~3Vatox ~4was hidden.
+
+We have no time to lose. ~1Ternox ~4has been searching the ruins and he must be looking for the ~3artifact~4. You must act quickly!
+
+Find the ~3artifact~4 and destroy all enemy bases in the area.
+
+Good luck, brother.
+
+~1Orders:
+~2-Find the artifact
+-Destroy enemy bases
+
+~1Mind link broken...
