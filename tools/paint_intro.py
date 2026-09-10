@@ -121,7 +121,7 @@ STAR_MAX_PX = 12
 PIECE_MIN_PX = 100
 
 # main.c bintro creates the scrolling credits TTY (280x100) at an imm32 x/y (doc 10.7):
-# Classic (178, 200), ENGEXP16 (178, 230) with its own exp/intrface/credits.txt. It belongs to
+# Classic (178, 200), Council Wars DCEXP16 (178, 230) with its own exp/intrface/credits.txt. It belongs to
 # the cluster and moves with it; the numbers are patched by patch_resolution.py.
 CREDITS_W = 280
 CREDITS_STOCK_Y = {'classic': 200, 'council wars': 230}

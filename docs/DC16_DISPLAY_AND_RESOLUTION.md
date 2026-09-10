@@ -13,6 +13,12 @@ byte-verified, and §10.10 has the three places where it is not a plain shift of
 the patch was carried over. Council Wars `dc16.exe` (MD5 `4180f6e9d01925b23eac0eb335e0b95e`) is a
 different build and is *not* covered except for the two globals in §3.
 
+**Names, 10 Sep 2026:** the expansion executable was renamed `ENGEXP16.EXE` → **`DCEXP16.EXE`**
+(same bytes; the tools identify builds by MD5, not by name), the unrelated Council Wars `dc16.exe`
+was removed from the repository, and so was the Ghidra project (`DecompiledWithGhidra/`, whose
+databases were never tracked). The text below keeps the old names; both files are in the git
+history before that commit.
+
 Calling convention is Watcom register-based: the first four arguments in `eax, edx, ebx, ecx`.
 Facts marked **(verified)** were read directly from the disassembly; facts marked *(inferred)* are
 consistent with the code but were not traced to the end.

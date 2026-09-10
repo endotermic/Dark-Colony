@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Raise the screen resolution of Dark Colony's dc16.exe / ENGEXP16.EXE.
+"""Raise the screen resolution of Dark Colony's dc16.exe / DCEXP16.EXE (ex ENGEXP16.EXE).
 
 Every site in the table below was read out of the disassembly and byte-verified in the shipped
 binaries; see docs/DC16_DISPLAY_AND_RESOLUTION.md, which this table is the executable copy of
@@ -27,7 +27,8 @@ Stages are cumulative and mirror the plan in the doc:
          across the full width)                             (default)
 
 Stage 5 of the plan is data and art only; nothing here touches it. Stage 6 (parity) is the
-BUILDS table below: Council Wars ENGEXP16.EXE takes the same 165 edits through its own offset
+BUILDS table below: Council Wars DCEXP16.EXE (named ENGEXP16.EXE until 10 Sep 2026; builds are
+identified by MD5, so the file name does not matter) takes the same 165 edits through its own offset
 rule and three site fixups (doc 10.10).
 To revert, restore the .bak that `apply` writes.
 """
@@ -59,9 +60,9 @@ ANCHOR_PREFIX = bytes.fromhex('4f016e01')
 # used here not at all. That is why the dimension anchor sits at file +0x228 but the Blt block's
 # operands at +0x28.
 #
-# Council Wars dc16.exe (4180f6e9d01925b23eac0eb335e0b95e) is a different build: only the
-# DGROUP anchor transfers, so it is deliberately absent. Patching it needs the sites re-derived
-# in Ghidra first.
+# The dc16.exe that shipped in the Council Wars folder (4180f6e9d01925b23eac0eb335e0b95e) is a
+# different build: only the DGROUP anchor transfers, so it is deliberately absent. It was removed
+# from the repository on 10 Sep 2026 (still in the git history).
 
 # main.c bintro (0x00404DC8) draws the scrolling credits.txt TTY (280x100) on the main menu. That
 # screen is no longer letterboxed but painted full-frame by tools/paint_intro.py (doc 10.11), so
@@ -87,7 +88,7 @@ BUILDS = {
             0x4299: dict(value=credits_y(200, 288)),
         }),
     '50419d438427d31341057e9723724f66': dict(
-        name='Council Wars ENGEXP16.EXE', auto=0x60, dgroup=0x28, bss=0, fixups={
+        name='Council Wars DCEXP16.EXE (ex ENGEXP16.EXE)', auto=0x60, dgroup=0x28, bss=0, fixups={
             # main.c netopt: the network screen's globe PIC sits 0x20 lower in this build
             # (0x00405C51 / 0x00405C40), the only two of the 44 menu-furniture sites that do
             0x5071: dict(off=0x5051),

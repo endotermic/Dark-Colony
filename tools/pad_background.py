@@ -70,7 +70,7 @@ SCENE_FILES = ('HSCENE.TXT', 'GSCENE.TXT', 'HTSCENE.TXT', 'GTSCENE.TXT',
                # Council Wars: the Aerogen and Council campaigns, in exp/gamestat
                'HXSCENE.TXT', 'GXSCENE.TXT')
 
-# Council Wars (ENGEXP16.EXE) resolves every data path through a wrapper that tries `exp/<path>`
+# Council Wars (DCEXP16.EXE, ex ENGEXP16.EXE) resolves every data path through a wrapper that tries `exp/<path>`
 # before `<path>` (doc 10.10), so `exp/intrface` holds override *scripts* (bintroe, introe,
 # shumane with the expansion's button layout) whose `background` GIFs still live in the base
 # INTRFACE. When a script's GIF is not beside it, look in the game root's INTRFACE.

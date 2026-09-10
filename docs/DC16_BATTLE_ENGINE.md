@@ -9,7 +9,7 @@ machine that drives all of this is scheduled every tick (§1–§13), how units 
 and how the computer players work (§17).
 
 All addresses are virtual addresses in Classic `dc16.exe` (`VA = file_offset + 0x400C00` for
-code, `VA = file_offset + 0x402800` for `DGROUP`). The Council Wars `ENGEXP16.EXE` is the same
+code, `VA = file_offset + 0x402800` for `DGROUP`). The Council Wars `ENGEXP16.EXE` (renamed `DCEXP16.EXE` on 10 Sep 2026) is the same
 code base with slightly different addresses; nothing below was re-verified there. Source file
 names come from assert strings embedded in the binary (`loader.c`, `mobiles.c`, `missile.c`,
 `collide.c`, `ticker.c`, `results.c`, `krusty_*.c`).
