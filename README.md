@@ -5,20 +5,10 @@ Repository contains:
 1) working copy of the original game
 2) working copy of standalone expansion pack
 3) working copy of map editor
-4) tools in `tools/`
-   - `patch_resolution.py`: raises the screen resolution of `dc16.exe` / `DCEXP16.EXE` (verify / plan / apply, staged, byte-checked, keeps a `.bak`)
-   - `patch_cursor.py`: keeps the Windows mouse pointer hidden over the game window in `dc16.exe` / `DCEXP16.EXE` (the stock exe registers its window class with an uninitialised cursor handle and lets `DefWindowProc` restore it on every `WM_SETCURSOR`, so the system pointer flickered over the game's own cursor) - verify / plan / apply, byte-checked, keeps a `.cursor.bak`
-   - `hud_layout.py`: scaffolding for redrawing the in-game HUD frame - region geometry, tracing layers, a target-resolution template, and the `MAINE` widget transform
-   - `pad_background.py`: letterboxes the interface screens into a larger framebuffer - pads the background `.GIF`, sets the bounds rect and shifts every widget (plan / apply / revert)
-   - `spr.py`: reader/writer for the `.SPR` sprite container - extract cells to PNG, rebuild, verify
-   - `logo_art.py`: re-sets the main-menu DARK COLONY title (Impact, lit bevel, brushed surface, palette colours) and rebuilds `DCUT.SPR`; the DC mark stays the original art
-   - `paint_intro.py`: repaints the main-menu backdrops `INTRG.GIF` / `INTRO.GIF` at any framebuffer size from measured geometry (procedural stars and planet, fixed palette), re-bakes the backdrop into the logo animations `DCUK.SPR` / `DCSS.SPR` / `DCUT.SPR`, and lays the menu scripts out for the new canvas (render / plan / apply / preview)
-5) reverse-engineering notes in `docs/`
-   - `DC16_BATTLE_ENGINE.md`: combat core of `dc16.exe` - balance tables, targeting, firing, projectiles, damage, upgrades, day/night
-   - `DC16_DISPLAY_AND_RESOLUTION.md`: display pipeline (DirectDraw, software blitters, HUD geometry, mouse, movies), every resolution-dependent code site, and the staged plan for 1024x768
+4) the patch tools (`patch_resolution.py`, `patch_cursor.py`, `hud_layout.py`, `pad_background.py`, `spr.py`, `logo_art.py`, `paint_intro.py`) and the reverse-engineering notes (`DC16_BATTLE_ENGINE.md`, `DC16_DISPLAY_AND_RESOLUTION.md`) live in the sister repository [Dark-Colony-Server](https://github.com/endotermic/Dark-Colony-Server) since 10 Sep 2026: [`tools/`](https://github.com/endotermic/Dark-Colony-Server/tree/main/tools) and [`docs/`](https://github.com/endotermic/Dark-Colony-Server/tree/main/docs), next to the network-protocol notes and the relay server. This repository keeps only the game files. The tools take the game directory or executable as an argument, e.g. `python ../Dark-Colony-Server/tools/patch_cursor.py verify "DC - Classic/dc16.exe"`.
 
 The purpose of this repository is to make this old game better by some assembly tweaks:
-1) (DONE) increase screen resolution from 640x480 to 1024x768 - both `DC - Classic/dc16.exe` and `DC - Council wars/DCEXP16.EXE` (the expansion executable, renamed from `ENGEXP16.EXE` on 10 Sep 2026) in this repository are patched, together with their interface data; everything is in `docs/DC16_DISPLAY_AND_RESOLUTION.md` (going straight to 1024x768; 800x600 is not a power of two and would need real multiplies)
+1) (DONE) increase screen resolution from 640x480 to 1024x768 - both `DC - Classic/dc16.exe` and `DC - Council wars/DCEXP16.EXE` (the expansion executable, renamed from `ENGEXP16.EXE` on 10 Sep 2026) in this repository are patched, together with their interface data; everything is in Dark-Colony-Server `docs/DC16_DISPLAY_AND_RESOLUTION.md` (going straight to 1024x768; 800x600 is not a power of two and would need real multiplies)
    - the battlefield is **28x23 tiles = 896x736**, 2.9x the stock view area; the HUD keeps its native pixel size on the right and bottom edges (`INTRFACE.GIF` and `MAINE` rebuilt by `hud_layout.py`)
    - the 30 menu screens, the loading screens and the briefing-globe markers are letterboxed by `pad_background.py`; the 44 code-positioned menu elements follow in the exe
    - the main menu (`bintroe`) is painted full-frame at 1024x768 by `paint_intro.py` (starfield and Mars limb re-rendered from the stock picture's measured geometry, richer surface, same palette; the code-positioned credits box follows via two patcher fixups); the title is re-set with a bevelled, brushed surface by `logo_art.py`, the DC mark is the original art on black - doc section 10.11
