@@ -103,8 +103,11 @@ RULE_MIN_PX = 630
 #   'stars' - the sprite sits over the black disc (DCUT title, 5 frames incl. a solid flash and
 #             a red glow that the limb-colour rule must not touch): only pixels equal to a
 #             non-black stock-backdrop pixel underneath (a baked star) are replaced.
+#   'art'   - not re-baked here at all: the bank is re-set by tools/logo_art.py (the title of
+#             the live menu, 10 Sep 2026). The DC mark stays the original pixel art on black:
+#             two re-renders of it were rejected by the maintainer the same day.
 SCREENS = {
-    'bintroe':  dict(gif='INTRG.GIF', logos={b'DCUK': 'black', b'DCUT': 'stars'}),
+    'bintroe':  dict(gif='INTRG.GIF', logos={b'DCUK': 'black', b'DCUT': 'art'}),
     'introe':   dict(gif='INTRO.GIF', logos={b'DCSS': 'black'}),
     'buttonse': dict(gif='INTRO.GIF', logos={}),
     'dintroe':  dict(gif='INTRO.GIF', logos={}),
@@ -689,6 +692,8 @@ def logo_jobs(game_dir, width, height):
             mode = SCREENS[key]['logos'].get(name)
             if mode is None:
                 raise ValueError('%s: gadget %s is not in SCREENS' % (path, name.decode()))
+            if mode == 'art':
+                continue                        # logo_art.py owns this bank
             jobs[name] = (mode, SCREENS[key]['gif'], stock_xy, new_xy)
     return jobs
 

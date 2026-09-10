@@ -1648,6 +1648,31 @@ only 88 baked star pixels; its glow frame is all limb colours, so it gets the mi
 only pixels equal to a non-black stock pixel underneath are replaced. `spr.py check` passes on all
 three.
 
+**The title re-set, the mark kept (fifth to eighth game tests).** With the menu accepted, the
+maintainer asked for the DC mark and the "DARK COLONY" title themselves to be redone: clear,
+robust and appealing shape, colour and surface — the stock sprites are 1997 pixel art with a
+dithered fill and staircase edges. `tools/logo_art.py` re-sets the **title** from a typeface,
+Impact stretched to the 398×33 cell (the stock's face is an extended stencil; no stencil font
+exists on the machine, and a traced 33 px stencil came out lumpy): 8× supersampling, an erosion
+distance field for a 2 px bevel lit from the top left with a specular highlight, a tan gradient
+(232,170,112) → (172,112,60), horizontal brushed streaks and fine grain for the surface, a dark
+1 px rim so the letters read on black, and nearest-colour quantisation with ±3 dither into the
+palette indices with r ≥ g ≥ b (tans, browns, greys — no blue/green speckle); black is index 0;
+five 398×33 cells — flash, dark-red fade-in, red-white glow, final with a hot highlight, final;
+`DCUT.FIN` unchanged. **Approved in the sixth test.** For the **DC mark** two re-renders were
+tried and both rejected: first a parametric vector redesign (a stencil-cut D, a C from two
+ellipses with the slit and V-notches, a new seven-band sliding assembly) — "differs from the
+original too much"; then the stock frames themselves as masters, backdrop removed, silhouettes
+smoothed 0.8 px and re-lit with the same bevel, the frame colour following the stock's
+grey-steel-to-tan progression — closer, but after a frame-9 extraction bug (its reddish-brown
+pieces are limb-coloured and the colour rule ate a third of them) was fixed, still "not good".
+The maintainer's decision (eighth test): **leave the DC logo alone** — `DCUK.SPR` is the original
+1997 pixel art, re-baked onto black by `paint_intro.py` (mode `black`, the version approved in
+the fifth test), and `logo_art.py` touches the title only. Lesson recorded for future art work:
+the original shapes and animations are to be kept; only surface quality may change, and even
+that is judged frame by frame in the game. Both `SPRITES/` and `INTRFACE/` copies of `DCUT.SPR`
+are written; `paint_intro.py` marks that bank `art` and leaves it alone. `spr.py check` passes.
+
 **Layout — second game test.** The maintainer's second test (background right) asked for two
 things: the DC logo on **black**, and **right above the "DARK COLONY" title as in the original**,
 not pinned to the top edge over the limb. So the title, credits and buttons form one cluster that
