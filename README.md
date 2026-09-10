@@ -7,6 +7,7 @@ Repository contains:
 3) working copy of map editor
 4) tools in `tools/`
    - `patch_resolution.py`: raises the screen resolution of `dc16.exe` / `DCEXP16.EXE` (verify / plan / apply, staged, byte-checked, keeps a `.bak`)
+   - `patch_cursor.py`: keeps the Windows mouse pointer hidden over the game window in `dc16.exe` / `DCEXP16.EXE` (the stock exe registers its window class with an uninitialised cursor handle and lets `DefWindowProc` restore it on every `WM_SETCURSOR`, so the system pointer flickered over the game's own cursor) - verify / plan / apply, byte-checked, keeps a `.cursor.bak`
    - `hud_layout.py`: scaffolding for redrawing the in-game HUD frame - region geometry, tracing layers, a target-resolution template, and the `MAINE` widget transform
    - `pad_background.py`: letterboxes the interface screens into a larger framebuffer - pads the background `.GIF`, sets the bounds rect and shifts every widget (plan / apply / revert)
    - `spr.py`: reader/writer for the `.SPR` sprite container - extract cells to PNG, rebuild, verify
@@ -25,6 +26,7 @@ The purpose of this repository is to make this old game better by some assembly 
    - the exe patch is 165 byte-checked edits per binary (`patch_resolution.py`); the stock executables are in the git history (last stock commit `0307feb`) and `verify` tells the two apart
    - not covered: the map editor (the unrelated `dc16.exe` build that shipped in the Council Wars folder was removed from the repository on 10 Sep 2026, together with the Ghidra project; both are in the git history before that commit)
 2) (DONE) remove the CD check to play campaign
+   - (DONE 10 Sep 2026) the Windows pointer no longer flickers over the game cursor (arrow on the loading screen, block on the menu and in battle): `patch_cursor.py`, 4 code sites + 7 relocation entries per exe, both repository exes patched - doc section 10.12
 3) (TODO) increase quality of movies
 4) (DONE) tweak multiplayer to be modern and online: see project [Dark-Colony-Server](https://github.com/endotermic/Dark-Colony-Server)
 5) (DONE) fix original map editor

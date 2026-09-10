@@ -1704,10 +1704,71 @@ the game. **Not yet seen in the game.** The `unmask` blit path was inferred from
 backdrop, not read; if the game masks index 0 after all, the rebaked sprites still work (their
 stars then coincide with the background's).
 
+#### 10.12 The Windows pointer: an uninitialised class cursor and a `WM_SETCURSOR` that falls through **(verified in code; game test pending)**
+
+Symptom on a modern Windows: the system pointer shows over the game — a plain arrow on the first
+loading screen, and later, on the main menu and in battle, an icon-sized block that flickers
+against the game's own cursor. The game cursor itself is fine: it is a `BltFast` from one of the
+32 `cursor/cursor%d.bmp` surfaces (§7), positioned from `0x004DFF14/1C`. What flickers is the
+*Windows* pointer, which the stock code hides with `SetCursor(NULL)` (`0x00408CD0` once after
+the initial load, `0x0042F2B8` once per frame) but lets the system bring back through two holes:
+
+* **`create_window` (`0x0042E688`) never writes `WNDCLASSA.hCursor`.** The structure is built in
+  the stack frame at `[ebp-0x28]`; every field is stored except `[ebp-0x10]` (`hCursor`), so the
+  class is registered with whatever the previous callee left in that slot. Windows restores the
+  class cursor every time the mouse moves (the `SetCursor` contract: a self-drawn cursor needs a
+  NULL class cursor). A stray handle that happens to be a valid icon draws as a cursor — icons
+  and cursors are one object type — which is the "block".
+* **The window procedure (`0x0042E340`) answers `WM_SETCURSOR` and then calls `DefWindowProcA`
+  anyway.** `0x0042E36E: push 0 / call SetCursor / jmp 0x0042E3ED` — and `0x0042E3ED` is the
+  common `DefWindowProcA` tail, whose `WM_SETCURSOR` handling sets the class cursor straight
+  back. The handler has to return TRUE (halt processing) instead. For the record, the same
+  procedure only knows three messages: `WM_DESTROY` (2) → `0x0042E2B0` + `PostQuitMessage`,
+  `WM_SETCURSOR` (0x20), and `WM_SYSCOMMAND` (0x112) with `SC_SCREENSAVE` (0xF140) → the assert
+  path (`sysfile`, line 0x149, exit).
+
+The message pump at `0x0042F1C8` also peeks `WM_SETCURSOR` (`PeekMessageA(…, 0x20, 0x20,
+PM_REMOVE)`) and calls `SetCursor(NULL)` when it finds one, but `WM_SETCURSOR` is a *sent*
+message and never sits in the posted queue, so that branch is dead code.
+
+**The fix (`tools/patch_cursor.py`, 4 code sites + 7 `.reloc` entries per binary):**
+
+| Site | Classic VA (file) | Change |
+|---|---|---|
+| window proc `WM_SETCURSOR` | `0x0042E351` (`0x2D751`), 40 bytes | `SetCursor(NULL); mov eax,1; jmp` epilogue `0x0042E3FE` — no `DefWindowProcA` |
+| `create_window` class | `0x0042E6AF` (`0x2DAAF`), 52 bytes | `mov [ebp-10h],ebx` (ebx = 0) before `RegisterClassA` → `hCursor = NULL` |
+| `create_window` show | `0x0042E794` (`0x2DB94`), 7 bytes | `call cs:[UpdateWindow]` → `call stub` |
+| stub | `0x0047F1D0` (`0x7E5D0`), 12 bytes | `push 0; call SetCursor; jmp UpdateWindow` — hides the pointer before the loading screen, tail-calls the original |
+
+None of this moves other code. The room comes from rewriting Watcom's 7-byte
+`2E FF 15 imm32` (`call cs:[import]`) as 5-byte relative calls to the import thunks the linker
+already emitted at the end of `AUTO` (`jmp dword ptr [import]`: `SetCursor 0x0047EFF0`,
+`UpdateWindow 0x0047EF8A`, `RegisterClassA 0x0047EF9C`, `GetStockObject 0x0047EFA2`,
+`LoadIconA 0x0047EFA8`), which behave identically and carry no absolute pointer; `je rel32` →
+`je rel8` and `push 1 / pop eax` for `mov eax,1` save the rest. The stub sits in the zero tail of
+`AUTO` (raw data runs to `0x0047F1FF`, last real byte `0x0047F1C9`), inside the section's mapped
+size. The `.reloc` block for page `0x2E000` is kept exact: the two absolute operands that move
+(`hInstance` load, class-name immediate) get their new offsets, the five that vanished (four
+IAT operands and the `UpdateWindow` one) become `IMAGE_REL_BASED_ABSOLUTE` padding.
+
+Council Wars `DCEXP16.EXE`: identical bytes at +0x60 (`0x0042E3A0`, `0x0042E6E8`, `0x0042E7F4`,
+thunks `0x0047F050/0x0047EFEA/0x0047EFFC/0x0047F002/0x0047F008`, stub `0x0047F230`; its `AUTO`
+tail is 471 zero bytes), only the class-name pointer differs (`0x0048591C` vs `0x00485914`). All
+relative displacements are therefore the same in both builds. Applied to both repository exes on
+10 Sep 2026 on top of the 165 resolution edits; `patch_cursor.py verify` tells stock from patched
+by the window-procedure bytes, so it does not depend on MD5s. Both patched binaries were
+re-disassembled and the eight regions decode as intended. **Not yet seen in the game.** If the
+arrow still shows on the loading screen after this, the remaining suspect is window ghosting
+(the thread does not pump messages while loading; the ghost window Windows substitutes after
+~5 s has an arrow class cursor) — the remedy would be `DisableProcessWindowsGhosting` via
+`LoadLibraryA`/`GetProcAddress` at start-up, not another cursor call.
+
 ### Stage 4 — cursors and movies
 
 * Cursors are `IDirectDrawSurface` blits at 1:1, so they simply look small. Redrawing
   `CURSOR/cursor%d.bmp` at 1.6× is optional and independent.
+* The flickering *Windows* pointer over the game (uninitialised class cursor, `WM_SETCURSOR`
+  falling into `DefWindowProcA`) is fixed by `tools/patch_cursor.py` — §10.12.
 * Movies: **done in §10.8** — the source is 320×180, the stock path is a fixed 2× software
   doubler that skips every other row, and the fix re-routes the frames through the existing
   320×180 movie surface and a stretching `Blt` to `(0,96)-(1024,672)`; the back-buffer clear
@@ -1872,6 +1933,10 @@ parse), which de-risks them completely.
 | `0x004231E8` / `0x004231B0` | `load_interface(app, name, flags)` / free — 21 call sites, one per screen |
 | `0x0040B430` | `timeGetTime` thunk (**not** a loader — easy to misread next to the HUD load) |
 | `0x0042BD78` | `new_screen` (0x1A4 bytes) |
+| `0x0042E340` | **window procedure**: `WM_DESTROY`, `WM_SETCURSOR` (patched to return TRUE, §10.12), `WM_SYSCOMMAND`/`SC_SCREENSAVE`; `DefWindowProcA` tail `0x0042E3ED`, epilogue `0x0042E3FE` |
+| `0x0042E688` | `create_window`: `WNDCLASSA` at `[ebp-0x28]`, `hCursor` `[ebp-0x10]` uninitialised in stock (§10.12); `CreateWindowExA` `0x0042E710`, `ShowWindow`/`UpdateWindow` `0x0042E783`/`0x0042E794` |
+| `0x0042F1C8` / `0x0042F2B0` | message pump (`PeekMessageA` for `WM_SYSCOMMAND`, `WM_SETCURSOR`, `WM_DESTROY`) / per-frame `SetCursor(NULL)` + pump |
+| `0x0047EF8A`ff | import thunks (`jmp dword ptr [IAT]`), `SetCursor` `0x0047EFF0`; zero tail `0x0047F1CA`–`0x0047F1FF` holds the §10.12 stub at `0x0047F1D0` |
 | `0x0042C29C` | `driver_create` — builds `ctx` (0xEC) + `screen`, sets clip/bounds |
 | `0x0042C405`ff | copies `screen+0x100…` method slots into `ctx+0x30…` |
 | `0x0042E688` | `create_window` (reads the globals) |
