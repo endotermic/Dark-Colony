@@ -1,4 +1,4 @@
-size 192 144 640 480
+size 0 0 1024 768
 text	intrface/multi			% Text Graphics   (10000+snum)
 font	intrface/mfont			% Text Graphics   (10000+snum)
 background intrface/tcpwait
