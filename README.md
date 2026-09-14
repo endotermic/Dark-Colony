@@ -7,6 +7,28 @@ Repository contains:
 3) working copy of map editor
 4) the patch tools (`patch_resolution.py`, `patch_cursor.py`, `hud_layout.py`, `pad_background.py`, `spr.py`, `logo_art.py`, `paint_intro.py`) and the reverse-engineering notes (`DC16_BATTLE_ENGINE.md`, `DC16_DISPLAY_AND_RESOLUTION.md`) live in the sister repository [Dark-Colony-Server](https://github.com/endotermic/Dark-Colony-Server) since 10 Sep 2026: [`tools/`](https://github.com/endotermic/Dark-Colony-Server/tree/main/tools) and [`docs/`](https://github.com/endotermic/Dark-Colony-Server/tree/main/docs), next to the network-protocol notes and the relay server. This repository keeps only the game files. The tools take the game directory or executable as an argument, e.g. `python ../Dark-Colony-Server/tools/patch_cursor.py verify "DC - Classic/dc16.exe"`.
 
+5) the untouched original executables for reference: `DC - Classic/dc16original1998.exe` (the dc16.exe of the January 1998 update, the build every patch here is based on) and `DC - Council wars/engexp16original.exe` (from the Council Wars CD)
+6) `Apply-DarkColonyPatches.ps1` - see the next section
+
+## Are the patched executables safe? Build them yourself
+
+`dc16.exe` and `DCEXP16.EXE` in this repository are the original 1997/98 binaries with a handful of byte patches (no CD check, 1024x768, cursor fix, ...). A hand-modified exe cannot be signed and some antivirus heuristics dislike it, so the whole modification is made transparent and reproducible by one file, `Apply-DarkColonyPatches.ps1`, in the root of this repository:
+
+- it is a plain PowerShell script; open it in any text editor and read it. It needs nothing but Windows itself (Windows PowerShell 5.1 or PowerShell 7) - no Python, no downloads, no external tools, no network access
+- every fix is a list of byte edits written out as data: file offset, old bytes, new bytes and the reason for the change, with a paragraph explaining what the fix does and where it is documented
+- it never modifies the input file; it writes a new file. A byte is written only if the original still holds the documented old bytes at that offset
+- with every fix selected the result is **byte-identical** to the `dc16.exe` / `DCEXP16.EXE` committed here, and the script tells you so by comparing the SHA-256
+
+How to use it: right-click `Apply-DarkColonyPatches.ps1` -> *Run with PowerShell* (or run it from a PowerShell prompt). A window opens: *Browse* to `DC - Classic/dc16original1998.exe` or `DC - Council wars/engexp16original.exe`, tick the fixes you want (the first checkbox selects all of them), press *Apply selected fixes*. *Inspect an exe* tells you which fixes any executable carries. If Windows refuses to run scripts, start it once with
+
+```
+powershell -ExecutionPolicy Bypass -File .\Apply-DarkColonyPatches.ps1
+```
+
+Command line, for the record: `-Original <exe> -All`, `-Original <exe> -Patches cdcheck,resolution,pool`, `-List -Detail` (every single byte edit), `-Verify <exe>`.
+
+The fixes, in the order the script applies them: no CD required (2025), 1024x768 display (9 Sep 2026), Windows pointer stays hidden (10 Sep), local memory pool 32 MiB (10 Sep), default game speed 150 % (10 Sep), day/night clock hand re-anchored (13 Sep), two-monitor start-up hang fixed (13 Sep), and for Council Wars only the OZI MISSIONS menu mode (10 Sep). The 1024x768 fix needs the rebuilt interface data that ships in this repository next to the exe. The script itself is generated from the Python patch tools in Dark-Colony-Server (`tools/gen_apply_script.py`), so it always matches the committed executables.
+
 The purpose of this repository is to make this old game better by some assembly tweaks:
 1) (DONE) increase screen resolution from 640x480 to 1024x768 - both `DC - Classic/dc16.exe` and `DC - Council wars/DCEXP16.EXE` (the expansion executable, renamed from `ENGEXP16.EXE` on 10 Sep 2026) in this repository are patched, together with their interface data; everything is in Dark-Colony-Server `docs/DC16_DISPLAY_AND_RESOLUTION.md` (going straight to 1024x768; 800x600 is not a power of two and would need real multiplies)
    - the battlefield is **28x23 tiles = 896x736**, 2.9x the stock view area; the HUD keeps its native pixel size on the right and bottom edges (`INTRFACE.GIF` and `MAINE` rebuilt by `hud_layout.py`)
