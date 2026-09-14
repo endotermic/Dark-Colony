@@ -2,7 +2,7 @@ size 1024 768
 pictures         intrface/knobe                      % Text Graphics   (10000+snum)
 font         0   intrface/mfonto5                     % font
 font_offset  0   31
-background       intrface/intrg
+background       intrf_hd/intrg
 bright_pushed    8
 bright_highlight 4
 colour  erase       0 0 0

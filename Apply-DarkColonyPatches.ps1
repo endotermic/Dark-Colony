@@ -56,7 +56,7 @@
     .\Apply-DarkColonyPatches.ps1 -List -Detail                 # every single byte edit
     .\Apply-DarkColonyPatches.ps1 -Original "DC - Classic\dc16original1998.exe" -All
         (run from the root of the Dark-Colony repository, where this file lives)
-    .\Apply-DarkColonyPatches.ps1 -Original "DC - Classic\dc16original1998.exe" -Patches cdcheck,resolution,pool
+    .\Apply-DarkColonyPatches.ps1 -Original "DC - Classic\dc16original1998.exe" -Patches cdcheck,resolution,hdpaths,pool
     .\Apply-DarkColonyPatches.ps1 -Verify "DC - Classic\dc16.exe"
 
 .NOTES
@@ -102,7 +102,7 @@ $Builds = @(
         OutputName     = 'dc16.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = 'a0c19ae03d5b4d678fe52c14cd94349ee315579fae0366712829392c9c92cf04'   # every patch applied = the exe in the repository (14 Sep 2026)
+        PatchedSha256  = '0e9297c236996976a1796e4a73d242ea7056b3a8ae8e5b3f70558cb1d477b735'   # every patch applied = the exe in the repository (14 Sep 2026)
         Patches        = @(
 
             # ---- cdcheck: No CD required ---------------------------------------------------------
@@ -162,9 +162,9 @@ Nothing else changes: no code is added, no file access is redirected, one byte p
             #  instruction; no code is added and no instruction moves.  Council Wars is the same code at
             #  +0x60 (AUTO) / +0x28 (DGROUP) with three site fixups, hence the slightly different offsets.
             #
-            #  REQUIRES the rebuilt 1024x768 interface data (INTRFACE/, SPRITES/, the padded menu scripts)
-            #  that ships in the repository next to the exe; with stock 640x480 data the menus draw in the
-            #  top-left corner.
+            #  REQUIRES the rebuilt 1024x768 interface data that ships in the repository next to the exe -
+            #  since 14 Sep 2026 in the INTRF_HD/ folder, read through the "Interface data from INTRF_HD"
+            #  patch below (select both); with stock 640x480 data the menus draw in the top-left corner.
             @{
                 Id = 'resolution'; Name = '1024x768 display'; Date = '9 Sep 2026'
                 Tool = 'tools/patch_resolution.py (Dark-Colony-Server)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10'
@@ -187,9 +187,9 @@ Every edit swaps one immediate constant or one arithmetic opcode inside an exist
 instruction; no code is added and no instruction moves.  Council Wars is the same code at
 +0x60 (AUTO) / +0x28 (DGROUP) with three site fixups, hence the slightly different offsets.
 
-REQUIRES the rebuilt 1024x768 interface data (INTRFACE/, SPRITES/, the padded menu scripts)
-that ships in the repository next to the exe; with stock 640x480 data the menus draw in the
-top-left corner.
+REQUIRES the rebuilt 1024x768 interface data that ships in the repository next to the exe -
+since 14 Sep 2026 in the INTRF_HD/ folder, read through the "Interface data from INTRF_HD"
+patch below (select both); with stock 640x480 data the menus draw in the top-left corner.
 '@
                 Edits = @(
                     # PE header: SizeOfStackReserve
@@ -525,6 +525,108 @@ top-left corner.
                 )
             }
 
+            # ---- hdpaths: Interface data from INTRF_HD (1024x768 files renamed) ---------------------------------------------------------
+            #  Added      : 14 Sep 2026
+            #  Made with  : tools/patch_hd_paths.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.17
+            #  Changes    : 120 bytes in 30 edits
+            #  The 1024x768 menus, HUD frame, loading screens, briefing-marker lists and re-baked logo sprites
+            #  used to replace the stock files under their stock names, so the untouched original exe could no
+            #  longer run from the same folder.  They now live under their stock names in INTRF_HD/ (Council Wars
+            #  also exp/intrf_hd/ and ozi_ns/intrf_hd/), the stock 640x480 files are back in INTRFACE/ and
+            #  GAMESTAT/, and the re-baked logo animations are SPRITES/DCSS_HD.SPR, DCUK_HD.SPR, DCUT_HD.SPR with
+            #  matching ANIMATE/*_HD.FIN.  The game opens each of those files through a literal path in the data
+            #  section ("intrface/bintro" plus the language letter, "gamestat/hscene" plus ".txt", ...), so this
+            #  patch rewrites the 8-byte directory part of exactly the 30 strings whose files were rebuilt:
+            #  "intrface" / "gamestat" -> "intrf_hd", same length, in place.  Fonts, text files, per-screen
+            #  sprite lists without logo banks and every other file keep their stock path and single copy; the two
+            #  lists that do name logo banks (INTRG.DAT, INTRO.DAT) are redirected to INTRF_HD copies that say
+            #  dcuk_hd.fin etc.  No code changes.  With this patch dc16original1998.exe / engexp16original.exe
+            #  (stock data) and the patched exe (INTRF_HD data) run side by side from one folder.  Only
+            #  meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder from the repository.
+            @{
+                Id = 'hdpaths'; Name = 'Interface data from INTRF_HD (1024x768 files renamed)'; Date = '14 Sep 2026'
+                Tool = 'tools/patch_hd_paths.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.17'
+                Description = @'
+The 1024x768 menus, HUD frame, loading screens, briefing-marker lists and re-baked logo sprites
+used to replace the stock files under their stock names, so the untouched original exe could no
+longer run from the same folder.  They now live under their stock names in INTRF_HD/ (Council Wars
+also exp/intrf_hd/ and ozi_ns/intrf_hd/), the stock 640x480 files are back in INTRFACE/ and
+GAMESTAT/, and the re-baked logo animations are SPRITES/DCSS_HD.SPR, DCUK_HD.SPR, DCUT_HD.SPR with
+matching ANIMATE/*_HD.FIN.  The game opens each of those files through a literal path in the data
+section ("intrface/bintro" plus the language letter, "gamestat/hscene" plus ".txt", ...), so this
+patch rewrites the 8-byte directory part of exactly the 30 strings whose files were rebuilt:
+"intrface" / "gamestat" -> "intrf_hd", same length, in place.  Fonts, text files, per-screen
+sprite lists without logo banks and every other file keep their stock path and single copy; the two
+lists that do name logo banks (INTRG.DAT, INTRO.DAT) are redirected to INTRF_HD copies that say
+dcuk_hd.fin etc.  No code changes.  With this patch dc16original1998.exe / engexp16original.exe
+(stock data) and the patched exe (INTRF_HD data) run side by side from one folder.  Only
+meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder from the repository.
+'@
+                Edits = @(
+                    # DGROUP string "intrface/newgame" -> "intrf_hd/newgame": new-game / mission-selection script NEWGAMEE
+                    @{ Offset = 0x7F930; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/story" -> "intrf_hd/story": story screen script STORYE
+                    @{ Offset = 0x7F94C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/encyclo" -> "intrf_hd/encyclo": encyclopedia screen script ENCYCLOE
+                    @{ Offset = 0x7F9AC; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/hscene" -> "intrf_hd/hscene": human campaign briefing list HSCENE.TXT (letterboxed globe markers)
+                    @{ Offset = 0x7FA10; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/gscene" -> "intrf_hd/gscene": alien campaign briefing list GSCENE.TXT
+                    @{ Offset = 0x7FA20; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/htscene" -> "intrf_hd/htscene": human training briefing list HTSCENE.TXT
+                    @{ Offset = 0x7FA30; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/gtscene" -> "intrf_hd/gtscene": alien training briefing list GTSCENE.TXT
+                    @{ Offset = 0x7FA44; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/hxscene" -> "intrf_hd/hxscene": Council Wars human campaign briefing list HXSCENE.TXT (exp/ overlay)
+                    @{ Offset = 0x7FA58; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/gxscene" -> "intrf_hd/gxscene": Council Wars alien campaign briefing list GXSCENE.TXT (exp/ overlay)
+                    @{ Offset = 0x7FA6C; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/shuman" -> "intrf_hd/shuman": campaign map script SHUMANE
+                    @{ Offset = 0x7FB08; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/loadg" -> "intrf_hd/loadg": load-game screen script LOADGE
+                    @{ Offset = 0x7FB4C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/wingame" -> "intrf_hd/wingame": end-of-game statistics script WINGAMEE
+                    @{ Offset = 0x7FB84; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/multiwn" -> "intrf_hd/multiwn": multiplayer results script MULTIWNE
+                    @{ Offset = 0x7FC1C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/intrg.dat" -> "intrf_hd/intrg.dat": main menu FIN list INTRG.DAT (INTRF_HD copy names dcuk_hd.fin, dcut_hd.fin)
+                    @{ Offset = 0x7FC84; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/bintro" -> "intrf_hd/bintro": main menu script BINTROE (+ language letter e)
+                    @{ Offset = 0x7FC98; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/dpblank" -> "intrf_hd/dpblank": direct-play blank screen script DPBLANKE
+                    @{ Offset = 0x7FD38; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/ipxname" -> "intrf_hd/ipxname": player-name screen script IPXNAMEE
+                    @{ Offset = 0x7FD4C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/dplays" -> "intrf_hd/dplays": direct-play session screen script DPLAYSE
+                    @{ Offset = 0x7FD60; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/getsvr" -> "intrf_hd/getsvr": server-address screen script GETSVRE
+                    @{ Offset = 0x7FD9C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/netopt" -> "intrf_hd/netopt": network options screen script NETOPTE
+                    @{ Offset = 0x7FDD0; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/meta" -> "intrf_hd/meta": lobby meta screen script METAE
+                    @{ Offset = 0x80830; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/lost" -> "intrf_hd/lost": defeat screen script LOSTE
+                    @{ Offset = 0x80940; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/multi" -> "intrf_hd/multi": multiplayer lobby script MULTIE
+                    @{ Offset = 0x809E0; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/main" -> "intrf_hd/main": in-game HUD script MAINE (background intrf_hd/intrface = the rebuilt frame)
+                    @{ Offset = 0x814FC; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/load.bmp" -> "intrf_hd/load.bmp": first loading screen LOAD.BMP (opened by driver.c directly)
+                    @{ Offset = 0x831CC; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/load2.bmp" -> "intrf_hd/load2.bmp": second loading screen LOAD2.BMP
+                    @{ Offset = 0x83274; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/lsg" -> "intrf_hd/lsg": in-game save/load dialog script LSGE
+                    @{ Offset = 0x83678; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/lobj" -> "intrf_hd/lobj": in-game objectives dialog script LOBJE
+                    @{ Offset = 0x836E8; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/lqc" -> "intrf_hd/lqc": in-game quit dialog script LQCE
+                    @{ Offset = 0x836F8; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/lopt" -> "intrf_hd/lopt": in-game options dialog script LOPTE
+                    @{ Offset = 0x83734; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                )
+            }
+
             # ---- cursor: Windows pointer stays hidden ---------------------------------------------------------
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_cursor.py
@@ -730,7 +832,7 @@ absolute pointers, so their .reloc entries become type 0 ABSOLUTE padding.
         OutputName     = 'DCEXP16.EXE'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '97f23b4d77093146eaa5a9e9724505bbf526b3a17c587d47a3625200358facb9'   # every patch applied = the exe in the repository (14 Sep 2026)
+        PatchedSha256  = '5e4f12fd9812976f362116ab269107aa3354bfb4d927c316b7d1485e7963dbe2'   # every patch applied = the exe in the repository (14 Sep 2026)
         Patches        = @(
 
             # ---- cdcheck: No CD required ---------------------------------------------------------
@@ -792,9 +894,9 @@ Nothing else changes: no code is added, no file access is redirected, one byte p
             #  instruction; no code is added and no instruction moves.  Council Wars is the same code at
             #  +0x60 (AUTO) / +0x28 (DGROUP) with three site fixups, hence the slightly different offsets.
             #
-            #  REQUIRES the rebuilt 1024x768 interface data (INTRFACE/, SPRITES/, the padded menu scripts)
-            #  that ships in the repository next to the exe; with stock 640x480 data the menus draw in the
-            #  top-left corner.
+            #  REQUIRES the rebuilt 1024x768 interface data that ships in the repository next to the exe -
+            #  since 14 Sep 2026 in the INTRF_HD/ folder, read through the "Interface data from INTRF_HD"
+            #  patch below (select both); with stock 640x480 data the menus draw in the top-left corner.
             @{
                 Id = 'resolution'; Name = '1024x768 display'; Date = '9 Sep 2026'
                 Tool = 'tools/patch_resolution.py (Dark-Colony-Server)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10'
@@ -817,9 +919,9 @@ Every edit swaps one immediate constant or one arithmetic opcode inside an exist
 instruction; no code is added and no instruction moves.  Council Wars is the same code at
 +0x60 (AUTO) / +0x28 (DGROUP) with three site fixups, hence the slightly different offsets.
 
-REQUIRES the rebuilt 1024x768 interface data (INTRFACE/, SPRITES/, the padded menu scripts)
-that ships in the repository next to the exe; with stock 640x480 data the menus draw in the
-top-left corner.
+REQUIRES the rebuilt 1024x768 interface data that ships in the repository next to the exe -
+since 14 Sep 2026 in the INTRF_HD/ folder, read through the "Interface data from INTRF_HD"
+patch below (select both); with stock 640x480 data the menus draw in the top-left corner.
 '@
                 Edits = @(
                     # PE header: SizeOfStackReserve
@@ -1155,6 +1257,108 @@ top-left corner.
                 )
             }
 
+            # ---- hdpaths: Interface data from INTRF_HD (1024x768 files renamed) ---------------------------------------------------------
+            #  Added      : 14 Sep 2026
+            #  Made with  : tools/patch_hd_paths.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.17
+            #  Changes    : 120 bytes in 30 edits
+            #  The 1024x768 menus, HUD frame, loading screens, briefing-marker lists and re-baked logo sprites
+            #  used to replace the stock files under their stock names, so the untouched original exe could no
+            #  longer run from the same folder.  They now live under their stock names in INTRF_HD/ (Council Wars
+            #  also exp/intrf_hd/ and ozi_ns/intrf_hd/), the stock 640x480 files are back in INTRFACE/ and
+            #  GAMESTAT/, and the re-baked logo animations are SPRITES/DCSS_HD.SPR, DCUK_HD.SPR, DCUT_HD.SPR with
+            #  matching ANIMATE/*_HD.FIN.  The game opens each of those files through a literal path in the data
+            #  section ("intrface/bintro" plus the language letter, "gamestat/hscene" plus ".txt", ...), so this
+            #  patch rewrites the 8-byte directory part of exactly the 30 strings whose files were rebuilt:
+            #  "intrface" / "gamestat" -> "intrf_hd", same length, in place.  Fonts, text files, per-screen
+            #  sprite lists without logo banks and every other file keep their stock path and single copy; the two
+            #  lists that do name logo banks (INTRG.DAT, INTRO.DAT) are redirected to INTRF_HD copies that say
+            #  dcuk_hd.fin etc.  No code changes.  With this patch dc16original1998.exe / engexp16original.exe
+            #  (stock data) and the patched exe (INTRF_HD data) run side by side from one folder.  Only
+            #  meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder from the repository.
+            @{
+                Id = 'hdpaths'; Name = 'Interface data from INTRF_HD (1024x768 files renamed)'; Date = '14 Sep 2026'
+                Tool = 'tools/patch_hd_paths.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.17'
+                Description = @'
+The 1024x768 menus, HUD frame, loading screens, briefing-marker lists and re-baked logo sprites
+used to replace the stock files under their stock names, so the untouched original exe could no
+longer run from the same folder.  They now live under their stock names in INTRF_HD/ (Council Wars
+also exp/intrf_hd/ and ozi_ns/intrf_hd/), the stock 640x480 files are back in INTRFACE/ and
+GAMESTAT/, and the re-baked logo animations are SPRITES/DCSS_HD.SPR, DCUK_HD.SPR, DCUT_HD.SPR with
+matching ANIMATE/*_HD.FIN.  The game opens each of those files through a literal path in the data
+section ("intrface/bintro" plus the language letter, "gamestat/hscene" plus ".txt", ...), so this
+patch rewrites the 8-byte directory part of exactly the 30 strings whose files were rebuilt:
+"intrface" / "gamestat" -> "intrf_hd", same length, in place.  Fonts, text files, per-screen
+sprite lists without logo banks and every other file keep their stock path and single copy; the two
+lists that do name logo banks (INTRG.DAT, INTRO.DAT) are redirected to INTRF_HD copies that say
+dcuk_hd.fin etc.  No code changes.  With this patch dc16original1998.exe / engexp16original.exe
+(stock data) and the patched exe (INTRF_HD data) run side by side from one folder.  Only
+meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder from the repository.
+'@
+                Edits = @(
+                    # DGROUP string "intrface/newgame" -> "intrf_hd/newgame": new-game / mission-selection script NEWGAMEE
+                    @{ Offset = 0x7FB30; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/story" -> "intrf_hd/story": story screen script STORYE
+                    @{ Offset = 0x7FB4C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/encyclo" -> "intrf_hd/encyclo": encyclopedia screen script ENCYCLOE
+                    @{ Offset = 0x7FBAC; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/hscene" -> "intrf_hd/hscene": human campaign briefing list HSCENE.TXT (letterboxed globe markers)
+                    @{ Offset = 0x7FC10; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/gscene" -> "intrf_hd/gscene": alien campaign briefing list GSCENE.TXT
+                    @{ Offset = 0x7FC20; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/htscene" -> "intrf_hd/htscene": human training briefing list HTSCENE.TXT
+                    @{ Offset = 0x7FC30; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/gtscene" -> "intrf_hd/gtscene": alien training briefing list GTSCENE.TXT
+                    @{ Offset = 0x7FC44; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/hxscene" -> "intrf_hd/hxscene": Council Wars human campaign briefing list HXSCENE.TXT (exp/ overlay)
+                    @{ Offset = 0x7FC58; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "gamestat/gxscene" -> "intrf_hd/gxscene": Council Wars alien campaign briefing list GXSCENE.TXT (exp/ overlay)
+                    @{ Offset = 0x7FC6C; Old = '67 61 6D 65 73 74 61 74'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/shuman" -> "intrf_hd/shuman": campaign map script SHUMANE
+                    @{ Offset = 0x7FD08; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/loadg" -> "intrf_hd/loadg": load-game screen script LOADGE
+                    @{ Offset = 0x7FD4C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/wingame" -> "intrf_hd/wingame": end-of-game statistics script WINGAMEE
+                    @{ Offset = 0x7FD84; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/multiwn" -> "intrf_hd/multiwn": multiplayer results script MULTIWNE
+                    @{ Offset = 0x7FE1C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/intrg.dat" -> "intrf_hd/intrg.dat": main menu FIN list INTRG.DAT (INTRF_HD copy names dcuk_hd.fin, dcut_hd.fin)
+                    @{ Offset = 0x7FE84; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/bintro" -> "intrf_hd/bintro": main menu script BINTROE (+ language letter e)
+                    @{ Offset = 0x7FE98; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/dpblank" -> "intrf_hd/dpblank": direct-play blank screen script DPBLANKE
+                    @{ Offset = 0x7FF38; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/ipxname" -> "intrf_hd/ipxname": player-name screen script IPXNAMEE
+                    @{ Offset = 0x7FF4C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/dplays" -> "intrf_hd/dplays": direct-play session screen script DPLAYSE
+                    @{ Offset = 0x7FF60; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/getsvr" -> "intrf_hd/getsvr": server-address screen script GETSVRE
+                    @{ Offset = 0x7FF9C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/netopt" -> "intrf_hd/netopt": network options screen script NETOPTE
+                    @{ Offset = 0x7FFD0; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/meta" -> "intrf_hd/meta": lobby meta screen script METAE
+                    @{ Offset = 0x80A38; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/lost" -> "intrf_hd/lost": defeat screen script LOSTE
+                    @{ Offset = 0x80B48; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/multi" -> "intrf_hd/multi": multiplayer lobby script MULTIE
+                    @{ Offset = 0x80BE8; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/main" -> "intrf_hd/main": in-game HUD script MAINE (background intrf_hd/intrface = the rebuilt frame)
+                    @{ Offset = 0x81704; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/load.bmp" -> "intrf_hd/load.bmp": first loading screen LOAD.BMP (opened by driver.c directly)
+                    @{ Offset = 0x833D4; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/load2.bmp" -> "intrf_hd/load2.bmp": second loading screen LOAD2.BMP
+                    @{ Offset = 0x8347C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/lsg" -> "intrf_hd/lsg": in-game save/load dialog script LSGE
+                    @{ Offset = 0x83880; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/lobj" -> "intrf_hd/lobj": in-game objectives dialog script LOBJE
+                    @{ Offset = 0x838F0; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/lqc" -> "intrf_hd/lqc": in-game quit dialog script LQCE
+                    @{ Offset = 0x83900; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                    # DGROUP string "intrface/lopt" -> "intrf_hd/lopt": in-game options dialog script LOPTE
+                    @{ Offset = 0x8393C; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
+                )
+            }
+
             # ---- cursor: Windows pointer stays hidden ---------------------------------------------------------
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_cursor.py
@@ -1353,7 +1557,7 @@ absolute pointers, so their .reloc entries become type 0 ABSOLUTE padding.
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.13
-            #  Changes    : 3285 bytes in 14 edits
+            #  Changes    : 3292 bytes in 15 edits
             #  Council Wars opens every data file through one helper that prefixes the name with the
             #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
             #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
@@ -1372,9 +1576,14 @@ absolute pointers, so their .reloc entries become type 0 ABSOLUTE padding.
             #      size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
             #      slack at the end of the .reloc section are dropped so the file size stays the same.  The
             #      two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
-            #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder and the rewritten main-menu script
-            #  (exp/intrface/bintroe) from the repository.  Because the .reloc insert shifts every later
-            #  relocation entry, this patch is always applied last.
+            #    * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+            #      string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+            #      units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+            #      the original exe reads stay untouched.
+            #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+            #  exp/sprites/tranozi.spr and the rewritten main-menu script (exp/intrf_hd/bintroe) from the
+            #  repository.  Because the .reloc insert shifts every later relocation entry, this patch is always
+            #  applied last.
             @{
                 Id = 'ozi'; Name = 'OZI MISSIONS menu mode (Council Wars only)'; Date = '10 Sep 2026'
                 Tool = 'tools/patch_ozi_menu.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.13'
@@ -1397,9 +1606,14 @@ the main menu:
     size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
     slack at the end of the .reloc section are dropped so the file size stays the same.  The
     two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
-REQUIRES the "DC - Council wars/ozi_ns/" overlay folder and the rewritten main-menu script
-(exp/intrface/bintroe) from the repository.  Because the .reloc insert shifts every later
-relocation entry, this patch is always applied last.
+  * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+    string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+    units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+    the original exe reads stay untouched.
+REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+exp/sprites/tranozi.spr and the rewritten main-menu script (exp/intrf_hd/bintroe) from the
+repository.  Because the .reloc insert shifts every later relocation entry, this patch is always
+applied last.
 '@
                 Edits = @(
                     # PE optional header: base-relocation directory size 0x93CC -> 0x93DC (+16)
@@ -1424,6 +1638,8 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x7E6F0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 AA 47 F8 FF' }
                     # tramp_pack_load (stub_pack; jmp 403AA4)
                     @{ Offset = 0x7E700; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 3B FF FF FF E9 9A 47 F8 FF' }
+                    # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
+                    @{ Offset = 0x7FEB8; Old = '61 6E 69 6D 2E 64 61 74 00 00 00 00'; New = '61 6E 69 6D 6F 7A 69 2E 64 61 74 00' }
                     # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the absolute operands of the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
                     @{ Offset = 0x97BE0; Old = 'DE 30 03 31'; New = '00 00 00 00' }
                     # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xD0
