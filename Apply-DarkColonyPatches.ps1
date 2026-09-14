@@ -47,6 +47,13 @@
     canonical order.  Use -All for every patch of the build.  With neither, the window opens
     (with the original preloaded when -Original was given).
 
+.PARAMETER IgnoreMissingData
+    Write the exe even though data files a chosen fix needs (the INTRF_HD folder, the ozi_ns
+    overlay, ...) are missing next to the output, or a fix the chosen ones depend on is not
+    selected.  Without it the script refuses, because such an exe fails at start-up or draws
+    garbage and the failure would look like a bug of the patch.  Each fix's Requires / Data
+    lists say what it needs; -List prints them.
+
 .PARAMETER Verify
     Instead of patching, inspect an existing exe: which build it is and which patches it carries.
 
@@ -75,6 +82,7 @@ param(
     [Parameter(ParameterSetName = 'Apply')] [switch] $All,
     [Parameter(ParameterSetName = 'Apply')] [switch] $Overwrite,
     [Parameter(ParameterSetName = 'Apply')] [switch] $Force,
+    [Parameter(ParameterSetName = 'Apply')] [switch] $IgnoreMissingData,
     [Parameter(ParameterSetName = 'List')] [switch] $List,
     [Parameter(ParameterSetName = 'List')] [switch] $Detail,
     [Parameter(ParameterSetName = 'Verify')] [string] $Verify
@@ -131,6 +139,12 @@ to the menu; that one is inverted (75 -> 74, jne -> je).
 
 Nothing else changes: no code is added, no file access is redirected, one byte per site.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # jne -> jmp right after "call 0x405E8C ; test al,al" (the CD-presence check returning a bool in al): always take the "CD present" path
                     @{ Offset = 0x431F; Old = '75'; New = 'EB' }
@@ -191,6 +205,72 @@ REQUIRES the rebuilt 1024x768 interface data that ships in the repository next t
 since 14 Sep 2026 in the INTRF_HD/ folder, read through the "Interface data from INTRF_HD"
 patch below (select both); with stock 640x480 data the menus draw in the top-left corner.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('hdpaths')
+                # data files this fix needs next to the exe (60; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'INTRF_HD\bintroe'
+                    'INTRF_HD\BUTTONSE'
+                    'INTRF_HD\CHOO.GIF'
+                    'INTRF_HD\DEMOWINE'
+                    'INTRF_HD\DINTROE'
+                    'INTRF_HD\DPBLANKE'
+                    'INTRF_HD\DPLAYSE'
+                    'INTRF_HD\ENCY.GIF'
+                    'INTRF_HD\ENCYCLOE'
+                    'INTRF_HD\GETSVRE'
+                    'INTRF_HD\GSCENE.TXT'
+                    'INTRF_HD\GTSCENE.TXT'
+                    'INTRF_HD\GTSUX.GIF'
+                    'INTRF_HD\HSCENE.TXT'
+                    'INTRF_HD\HTSCENE.TXT'
+                    'INTRF_HD\INTRFACE.GIF'
+                    'INTRF_HD\INTRG.DAT'
+                    'INTRF_HD\INTRG.GIF'
+                    'INTRF_HD\INTRO.DAT'
+                    'INTRF_HD\INTRO.GIF'
+                    'INTRF_HD\introe'
+                    'INTRF_HD\IPXNAMEE'
+                    'INTRF_HD\LOAD.BMP'
+                    'INTRF_HD\LOAD2.BMP'
+                    'INTRF_HD\LOADER.GIF'
+                    'INTRF_HD\LOADGE'
+                    'INTRF_HD\LOBJE'
+                    'INTRF_HD\LOGOE'
+                    'INTRF_HD\LOPTE'
+                    'INTRF_HD\LOST.GIF'
+                    'INTRF_HD\LOSTE'
+                    'INTRF_HD\LQCE'
+                    'INTRF_HD\LSGE'
+                    'INTRF_HD\MAINE'
+                    'INTRF_HD\METAE'
+                    'INTRF_HD\MULTIE'
+                    'INTRF_HD\MULTIWIN.GIF'
+                    'INTRF_HD\MULTIWNE'
+                    'INTRF_HD\NAME.GIF'
+                    'INTRF_HD\NET.GIF'
+                    'INTRF_HD\NETOPTE'
+                    'INTRF_HD\NEWGAMEE'
+                    'INTRF_HD\SERVER.GIF'
+                    'INTRF_HD\SHUMAN.GIF'
+                    'INTRF_HD\shumane'
+                    'INTRF_HD\STORY.GIF'
+                    'INTRF_HD\STORYE'
+                    'INTRF_HD\TCPWAIT.GIF'
+                    'INTRF_HD\VICTORG.GIF'
+                    'INTRF_HD\VICTORY.GIF'
+                    'INTRF_HD\WINE'
+                    'INTRF_HD\WINGAME.GIF'
+                    'INTRF_HD\WINGAMEE'
+                    'INTRF_HD\WINUKE'
+                    'SPRITES\DCSS_HD.SPR'
+                    'SPRITES\DCUK_HD.SPR'
+                    'SPRITES\DCUT_HD.SPR'
+                    'ANIMATE\DCSS_HD.FIN'
+                    'ANIMATE\DCUK_HD.FIN'
+                    'ANIMATE\DCUT_HD.FIN'
+                )
                 Edits = @(
                     # PE header: SizeOfStackReserve
                     @{ Offset = 0xE0; Old = '80 38 01 00'; New = '00 00 10 00' }
@@ -563,6 +643,72 @@ dcuk_hd.fin etc.  No code changes.  With this patch dc16original1998.exe / engex
 (stock data) and the patched exe (INTRF_HD data) run side by side from one folder.  Only
 meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder from the repository.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('resolution')
+                # data files this fix needs next to the exe (60; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'INTRF_HD\bintroe'
+                    'INTRF_HD\BUTTONSE'
+                    'INTRF_HD\CHOO.GIF'
+                    'INTRF_HD\DEMOWINE'
+                    'INTRF_HD\DINTROE'
+                    'INTRF_HD\DPBLANKE'
+                    'INTRF_HD\DPLAYSE'
+                    'INTRF_HD\ENCY.GIF'
+                    'INTRF_HD\ENCYCLOE'
+                    'INTRF_HD\GETSVRE'
+                    'INTRF_HD\GSCENE.TXT'
+                    'INTRF_HD\GTSCENE.TXT'
+                    'INTRF_HD\GTSUX.GIF'
+                    'INTRF_HD\HSCENE.TXT'
+                    'INTRF_HD\HTSCENE.TXT'
+                    'INTRF_HD\INTRFACE.GIF'
+                    'INTRF_HD\INTRG.DAT'
+                    'INTRF_HD\INTRG.GIF'
+                    'INTRF_HD\INTRO.DAT'
+                    'INTRF_HD\INTRO.GIF'
+                    'INTRF_HD\introe'
+                    'INTRF_HD\IPXNAMEE'
+                    'INTRF_HD\LOAD.BMP'
+                    'INTRF_HD\LOAD2.BMP'
+                    'INTRF_HD\LOADER.GIF'
+                    'INTRF_HD\LOADGE'
+                    'INTRF_HD\LOBJE'
+                    'INTRF_HD\LOGOE'
+                    'INTRF_HD\LOPTE'
+                    'INTRF_HD\LOST.GIF'
+                    'INTRF_HD\LOSTE'
+                    'INTRF_HD\LQCE'
+                    'INTRF_HD\LSGE'
+                    'INTRF_HD\MAINE'
+                    'INTRF_HD\METAE'
+                    'INTRF_HD\MULTIE'
+                    'INTRF_HD\MULTIWIN.GIF'
+                    'INTRF_HD\MULTIWNE'
+                    'INTRF_HD\NAME.GIF'
+                    'INTRF_HD\NET.GIF'
+                    'INTRF_HD\NETOPTE'
+                    'INTRF_HD\NEWGAMEE'
+                    'INTRF_HD\SERVER.GIF'
+                    'INTRF_HD\SHUMAN.GIF'
+                    'INTRF_HD\shumane'
+                    'INTRF_HD\STORY.GIF'
+                    'INTRF_HD\STORYE'
+                    'INTRF_HD\TCPWAIT.GIF'
+                    'INTRF_HD\VICTORG.GIF'
+                    'INTRF_HD\VICTORY.GIF'
+                    'INTRF_HD\WINE'
+                    'INTRF_HD\WINGAME.GIF'
+                    'INTRF_HD\WINGAMEE'
+                    'INTRF_HD\WINUKE'
+                    'SPRITES\DCSS_HD.SPR'
+                    'SPRITES\DCUK_HD.SPR'
+                    'SPRITES\DCUT_HD.SPR'
+                    'ANIMATE\DCSS_HD.FIN'
+                    'ANIMATE\DCUK_HD.FIN'
+                    'ANIMATE\DCUT_HD.FIN'
+                )
                 Edits = @(
                     # DGROUP string "intrface/newgame" -> "intrf_hd/newgame": new-game / mission-selection script NEWGAMEE
                     @{ Offset = 0x7F930; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
@@ -665,6 +811,12 @@ are updated (moved operand -> new page offset; vanished operand -> type 0 ABSOLU
 so the relocation table still describes the image exactly.  The stub lives in bytes that were
 zero and inside the section's raw size, so the file layout is unchanged.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # wndproc WM_SETCURSOR returns TRUE
                     @{ Offset = 0x2D751; Old = '76 1B 81 FE 12 01 00 00 74 1E E9 8D 00 00 00 83 FE 02 0F 84 76 00 00 00 E9 7F 00 00 00 6A 00 2E FF 15 E0 03 48 00 EB 74'; New = '76 17 81 FE 12 01 00 00 74 1E E9 8D 00 00 00 83 FE 02 74 7A E9 83 00 00 00 6A 00 E8 7F 0C 05 00 6A 01 58 E9 85 00 00 00' }
@@ -713,6 +865,12 @@ info, game state, AI, widgets) is carved from one arena created at start-up with
 pool" in error.log).  The fix is the constant: 0x00AF79E0 -> 0x02000000 (32 MiB).  Block
 headers are 32-bit and the size check unsigned, so nothing else changes.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # mov eax,imm32 before call SMalloc_Pool: pool size 11 500 000 (0x00AF79E0) -> 33 554 432 bytes (0x02000000, 32 MiB)
                     @{ Offset = 0x4734; Old = 'B8 E0 79 AF 00'; New = 'B8 00 00 00 02' }
@@ -741,6 +899,12 @@ options screen and the speed negotiation read.  66 ms = 100 %, 44 ms = 150 % (th
 6600 / tick_ms).  Multiplayer speed comes from the server, saved games keep their own speed.
 Cosmetic; pick it if you like the faster default.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # game-state initialiser: imm32 of mov dword ptr [esi+970h],imm32 (gs->tick_ms) 66 ms -> 44 ms
                     @{ Offset = 0x1B002; Old = '42 00 00 00'; New = '2C 00 00 00' }
@@ -769,6 +933,12 @@ sweep did not touch them.  At 1024x768 that point lies inside the enlarged map v
 terrain paints over the hand every frame.  The anchor moves to (992,738), where the rebuilt
 HUD frame has the clock face.  Only meaningful together with the 1024x768 patch.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('resolution')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # clock_draw: imm32 of mov edx,ANCHOR_Y - bottom-right anchor y 450 (0x1C2) -> 738 (0x2E2)
                     @{ Offset = 0x3A0A3; Old = 'C2 01 00 00'; New = 'E2 02 00 00' }
@@ -803,6 +973,12 @@ turn into "jmp next-palette-index", and the Flip check's je becomes jmp.  The ga
 per-frame restore path repairs the surfaces at the first frame.  The three push operands were
 absolute pointers, so their .reloc entries become type 0 ABSOLUTE padding.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # loading screen: Flip failure -> continue
                     @{ Offset = 0x2E433; Old = '74 5B'; New = 'EB 5B' }
@@ -861,6 +1037,12 @@ to the menu; that one is inverted (75 -> 74, jne -> je).
 
 Nothing else changes: no code is added, no file access is redirected, one byte per site.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # jne -> jmp right after "call 0x405E8C ; test al,al" (the CD-presence check returning a bool in al): always take the "CD present" path
                     @{ Offset = 0x431F; Old = '75'; New = 'EB' }
@@ -923,6 +1105,77 @@ REQUIRES the rebuilt 1024x768 interface data that ships in the repository next t
 since 14 Sep 2026 in the INTRF_HD/ folder, read through the "Interface data from INTRF_HD"
 patch below (select both); with stock 640x480 data the menus draw in the top-left corner.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('hdpaths')
+                # data files this fix needs next to the exe (65; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'INTRF_HD\BINTROE'
+                    'INTRF_HD\BUTTONSE'
+                    'INTRF_HD\CHOO.GIF'
+                    'INTRF_HD\DEMOWINE'
+                    'INTRF_HD\DINTROE'
+                    'INTRF_HD\DPBLANKE'
+                    'INTRF_HD\DPLAYSE'
+                    'INTRF_HD\ENCY.GIF'
+                    'INTRF_HD\ENCYCLOE'
+                    'INTRF_HD\GETSVRE'
+                    'INTRF_HD\GSCENE.TXT'
+                    'INTRF_HD\GTSCENE.TXT'
+                    'INTRF_HD\GTSUX.GIF'
+                    'INTRF_HD\HSCENE.TXT'
+                    'INTRF_HD\HTSCENE.TXT'
+                    'INTRF_HD\INTRFACE.GIF'
+                    'INTRF_HD\INTRG.DAT'
+                    'INTRF_HD\INTRG.GIF'
+                    'INTRF_HD\INTRO.DAT'
+                    'INTRF_HD\INTRO.GIF'
+                    'INTRF_HD\INTROE'
+                    'INTRF_HD\IPXNAMEE'
+                    'INTRF_HD\LOAD.BMP'
+                    'INTRF_HD\LOAD2.BMP'
+                    'INTRF_HD\LOADER.GIF'
+                    'INTRF_HD\LOADGE'
+                    'INTRF_HD\LOBJE'
+                    'INTRF_HD\LOGOE'
+                    'INTRF_HD\LOPTE'
+                    'INTRF_HD\LOST.GIF'
+                    'INTRF_HD\LOSTE'
+                    'INTRF_HD\LQCE'
+                    'INTRF_HD\LSGE'
+                    'INTRF_HD\MAINE'
+                    'INTRF_HD\METAE'
+                    'INTRF_HD\MULTIE'
+                    'INTRF_HD\MULTIWIN.GIF'
+                    'INTRF_HD\MULTIWNE'
+                    'INTRF_HD\NAME.GIF'
+                    'INTRF_HD\NET.GIF'
+                    'INTRF_HD\NETOPTE'
+                    'INTRF_HD\NEWGAMEE'
+                    'INTRF_HD\SERVER.GIF'
+                    'INTRF_HD\SHUMAN.GIF'
+                    'INTRF_HD\SHUMANE'
+                    'INTRF_HD\STORY.GIF'
+                    'INTRF_HD\STORYE'
+                    'INTRF_HD\TCPWAIT.GIF'
+                    'INTRF_HD\VICTORG.GIF'
+                    'INTRF_HD\VICTORY.GIF'
+                    'INTRF_HD\WINE'
+                    'INTRF_HD\WINGAME.GIF'
+                    'INTRF_HD\WINGAMEE'
+                    'INTRF_HD\WINUKE'
+                    'SPRITES\DCSS_HD.SPR'
+                    'SPRITES\DCUK_HD.SPR'
+                    'SPRITES\DCUT_HD.SPR'
+                    'ANIMATE\DCSS_HD.FIN'
+                    'ANIMATE\DCUK_HD.FIN'
+                    'ANIMATE\DCUT_HD.FIN'
+                    'exp\intrf_hd\bintroe'
+                    'exp\intrf_hd\gxscene.txt'
+                    'exp\intrf_hd\hxscene.txt'
+                    'exp\intrf_hd\introe'
+                    'exp\intrf_hd\shumane'
+                )
                 Edits = @(
                     # PE header: SizeOfStackReserve
                     @{ Offset = 0xE0; Old = '80 38 01 00'; New = '00 00 10 00' }
@@ -1295,6 +1548,77 @@ dcuk_hd.fin etc.  No code changes.  With this patch dc16original1998.exe / engex
 (stock data) and the patched exe (INTRF_HD data) run side by side from one folder.  Only
 meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder from the repository.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('resolution')
+                # data files this fix needs next to the exe (65; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'INTRF_HD\BINTROE'
+                    'INTRF_HD\BUTTONSE'
+                    'INTRF_HD\CHOO.GIF'
+                    'INTRF_HD\DEMOWINE'
+                    'INTRF_HD\DINTROE'
+                    'INTRF_HD\DPBLANKE'
+                    'INTRF_HD\DPLAYSE'
+                    'INTRF_HD\ENCY.GIF'
+                    'INTRF_HD\ENCYCLOE'
+                    'INTRF_HD\GETSVRE'
+                    'INTRF_HD\GSCENE.TXT'
+                    'INTRF_HD\GTSCENE.TXT'
+                    'INTRF_HD\GTSUX.GIF'
+                    'INTRF_HD\HSCENE.TXT'
+                    'INTRF_HD\HTSCENE.TXT'
+                    'INTRF_HD\INTRFACE.GIF'
+                    'INTRF_HD\INTRG.DAT'
+                    'INTRF_HD\INTRG.GIF'
+                    'INTRF_HD\INTRO.DAT'
+                    'INTRF_HD\INTRO.GIF'
+                    'INTRF_HD\INTROE'
+                    'INTRF_HD\IPXNAMEE'
+                    'INTRF_HD\LOAD.BMP'
+                    'INTRF_HD\LOAD2.BMP'
+                    'INTRF_HD\LOADER.GIF'
+                    'INTRF_HD\LOADGE'
+                    'INTRF_HD\LOBJE'
+                    'INTRF_HD\LOGOE'
+                    'INTRF_HD\LOPTE'
+                    'INTRF_HD\LOST.GIF'
+                    'INTRF_HD\LOSTE'
+                    'INTRF_HD\LQCE'
+                    'INTRF_HD\LSGE'
+                    'INTRF_HD\MAINE'
+                    'INTRF_HD\METAE'
+                    'INTRF_HD\MULTIE'
+                    'INTRF_HD\MULTIWIN.GIF'
+                    'INTRF_HD\MULTIWNE'
+                    'INTRF_HD\NAME.GIF'
+                    'INTRF_HD\NET.GIF'
+                    'INTRF_HD\NETOPTE'
+                    'INTRF_HD\NEWGAMEE'
+                    'INTRF_HD\SERVER.GIF'
+                    'INTRF_HD\SHUMAN.GIF'
+                    'INTRF_HD\SHUMANE'
+                    'INTRF_HD\STORY.GIF'
+                    'INTRF_HD\STORYE'
+                    'INTRF_HD\TCPWAIT.GIF'
+                    'INTRF_HD\VICTORG.GIF'
+                    'INTRF_HD\VICTORY.GIF'
+                    'INTRF_HD\WINE'
+                    'INTRF_HD\WINGAME.GIF'
+                    'INTRF_HD\WINGAMEE'
+                    'INTRF_HD\WINUKE'
+                    'SPRITES\DCSS_HD.SPR'
+                    'SPRITES\DCUK_HD.SPR'
+                    'SPRITES\DCUT_HD.SPR'
+                    'ANIMATE\DCSS_HD.FIN'
+                    'ANIMATE\DCUK_HD.FIN'
+                    'ANIMATE\DCUT_HD.FIN'
+                    'exp\intrf_hd\bintroe'
+                    'exp\intrf_hd\gxscene.txt'
+                    'exp\intrf_hd\hxscene.txt'
+                    'exp\intrf_hd\introe'
+                    'exp\intrf_hd\shumane'
+                )
                 Edits = @(
                     # DGROUP string "intrface/newgame" -> "intrf_hd/newgame": new-game / mission-selection script NEWGAMEE
                     @{ Offset = 0x7FB30; Old = '69 6E 74 72 66 61 63 65'; New = '69 6E 74 72 66 5F 68 64' }
@@ -1397,6 +1721,12 @@ are updated (moved operand -> new page offset; vanished operand -> type 0 ABSOLU
 so the relocation table still describes the image exactly.  The stub lives in bytes that were
 zero and inside the section's raw size, so the file layout is unchanged.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # wndproc WM_SETCURSOR returns TRUE
                     @{ Offset = 0x2D7B1; Old = '76 1B 81 FE 12 01 00 00 74 1E E9 8D 00 00 00 83 FE 02 0F 84 76 00 00 00 E9 7F 00 00 00 6A 00 2E FF 15 E0 03 48 00 EB 74'; New = '76 17 81 FE 12 01 00 00 74 1E E9 8D 00 00 00 83 FE 02 74 7A E9 83 00 00 00 6A 00 E8 7F 0C 05 00 6A 01 58 E9 85 00 00 00' }
@@ -1445,6 +1775,12 @@ info, game state, AI, widgets) is carved from one arena created at start-up with
 pool" in error.log).  The fix is the constant: 0x00AF79E0 -> 0x02000000 (32 MiB).  Block
 headers are 32-bit and the size check unsigned, so nothing else changes.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # mov eax,imm32 before call SMalloc_Pool: pool size 11 500 000 (0x00AF79E0) -> 33 554 432 bytes (0x02000000, 32 MiB)
                     @{ Offset = 0x4719; Old = 'B8 E0 79 AF 00'; New = 'B8 00 00 00 02' }
@@ -1473,6 +1809,12 @@ options screen and the speed negotiation read.  66 ms = 100 %, 44 ms = 150 % (th
 6600 / tick_ms).  Multiplayer speed comes from the server, saved games keep their own speed.
 Cosmetic; pick it if you like the faster default.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # game-state initialiser: imm32 of mov dword ptr [esi+970h],imm32 (gs->tick_ms) 66 ms -> 44 ms
                     @{ Offset = 0x1B062; Old = '42 00 00 00'; New = '2C 00 00 00' }
@@ -1501,6 +1843,12 @@ sweep did not touch them.  At 1024x768 that point lies inside the enlarged map v
 terrain paints over the hand every frame.  The anchor moves to (992,738), where the rebuilt
 HUD frame has the clock face.  Only meaningful together with the 1024x768 patch.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('resolution')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # clock_draw: imm32 of mov edx,ANCHOR_Y - bottom-right anchor y 450 (0x1C2) -> 738 (0x2E2)
                     @{ Offset = 0x3A103; Old = 'C2 01 00 00'; New = 'E2 02 00 00' }
@@ -1535,6 +1883,12 @@ turn into "jmp next-palette-index", and the Flip check's je becomes jmp.  The ga
 per-frame restore path repairs the surfaces at the first frame.  The three push operands were
 absolute pointers, so their .reloc entries become type 0 ABSOLUTE padding.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
                 Edits = @(
                     # loading screen: Flip failure -> continue
                     @{ Offset = 0x2E493; Old = '74 5B'; New = 'EB 5B' }
@@ -1615,6 +1969,406 @@ exp/sprites/tranozi.spr and the rewritten main-menu script (exp/intrf_hd/bintroe
 repository.  Because the .reloc insert shifts every later relocation entry, this patch is always
 applied last.
 '@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('hdpaths')
+                # data files this fix needs next to the exe (394; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'ozi_ns\alta.gif'
+                    'ozi_ns\alta.rgb'
+                    'ozi_ns\alta.rmp'
+                    'ozi_ns\area52.gif'
+                    'ozi_ns\area52.rgb'
+                    'ozi_ns\area52.rmp'
+                    'ozi_ns\earth.gif'
+                    'ozi_ns\gamestat\BOOMSTAT.TXT'
+                    'ozi_ns\gamestat\gamestat.txt'
+                    'ozi_ns\gamestat\MBULLET.TXT'
+                    'ozi_ns\gamestat\UNITID.TXT'
+                    'ozi_ns\gamestat\WEAPSTAT.TXT'
+                    'ozi_ns\gatlan.GIF'
+                    'ozi_ns\gatlan.NCY'
+                    'ozi_ns\gatlan.RGB'
+                    'ozi_ns\gatlan.RMP'
+                    'ozi_ns\gjungle.gif'
+                    'ozi_ns\gjungle.rgb'
+                    'ozi_ns\gJUNGLE.RMP'
+                    'ozi_ns\intrface\astory.txt'
+                    'ozi_ns\intrface\credits.txt'
+                    'ozi_ns\intrface\hstory.txt'
+                    'ozi_ns\jubjub.gif'
+                    'ozi_ns\jubjub.rgb'
+                    'ozi_ns\jubjub.rmp'
+                    'ozi_ns\mission\g1.wav'
+                    'ozi_ns\mission\g10.wav'
+                    'ozi_ns\mission\g11.wav'
+                    'ozi_ns\mission\g2.wav'
+                    'ozi_ns\mission\g3.wav'
+                    'ozi_ns\mission\g4.wav'
+                    'ozi_ns\mission\g5.wav'
+                    'ozi_ns\mission\g6.wav'
+                    'ozi_ns\mission\g7.wav'
+                    'ozi_ns\mission\g8.wav'
+                    'ozi_ns\mission\g9.wav'
+                    'ozi_ns\mission\h1.wav'
+                    'ozi_ns\mission\h10.wav'
+                    'ozi_ns\mission\h11.wav'
+                    'ozi_ns\mission\h2.wav'
+                    'ozi_ns\mission\h3.wav'
+                    'ozi_ns\mission\h4.wav'
+                    'ozi_ns\mission\h5.wav'
+                    'ozi_ns\mission\h6.wav'
+                    'ozi_ns\mission\h7.wav'
+                    'ozi_ns\mission\h8.wav'
+                    'ozi_ns\mission\h80.wav'
+                    'ozi_ns\mission\h9.wav'
+                    'ozi_ns\scenario\all.jus'
+                    'ozi_ns\scenario\alta.bts'
+                    'ozi_ns\scenario\area52.bts'
+                    'ozi_ns\scenario\atlantis.bts'
+                    'ozi_ns\scenario\council\scene.txt'
+                    'ozi_ns\scenario\council\tarr01.001'
+                    'ozi_ns\scenario\council\tarr01.002'
+                    'ozi_ns\scenario\council\tarr01.003'
+                    'ozi_ns\scenario\council\tarr01.004'
+                    'ozi_ns\scenario\council\tarr01.map'
+                    'ozi_ns\scenario\council\tarr01.msg'
+                    'ozi_ns\scenario\council\tarr01.mtg'
+                    'ozi_ns\scenario\council\tarr01.o16'
+                    'ozi_ns\scenario\council\tarr01.ovh'
+                    'ozi_ns\scenario\council\tarr01.pop'
+                    'ozi_ns\scenario\council\tarr01.pth'
+                    'ozi_ns\scenario\council\tarr01.scn'
+                    'ozi_ns\scenario\council\tarr01.tro'
+                    'ozi_ns\scenario\council\tarr01.txt'
+                    'ozi_ns\scenario\council\tarr02.001'
+                    'ozi_ns\scenario\council\tarr02.002'
+                    'ozi_ns\scenario\council\tarr02.map'
+                    'ozi_ns\scenario\council\tarr02.msg'
+                    'ozi_ns\scenario\council\tarr02.mtg'
+                    'ozi_ns\scenario\council\tarr02.o16'
+                    'ozi_ns\scenario\council\tarr02.ovh'
+                    'ozi_ns\scenario\council\tarr02.pop'
+                    'ozi_ns\scenario\council\tarr02.pth'
+                    'ozi_ns\scenario\council\tarr02.scn'
+                    'ozi_ns\scenario\council\tarr02.tro'
+                    'ozi_ns\scenario\council\tarr02.txt'
+                    'ozi_ns\scenario\council\tarr03.001'
+                    'ozi_ns\scenario\council\tarr03.002'
+                    'ozi_ns\scenario\council\tarr03.map'
+                    'ozi_ns\scenario\council\tarr03.msg'
+                    'ozi_ns\scenario\council\tarr03.mtg'
+                    'ozi_ns\scenario\council\tarr03.o16'
+                    'ozi_ns\scenario\council\tarr03.ovh'
+                    'ozi_ns\scenario\council\tarr03.pop'
+                    'ozi_ns\scenario\council\tarr03.pth'
+                    'ozi_ns\scenario\council\tarr03.scn'
+                    'ozi_ns\scenario\council\tarr03.tro'
+                    'ozi_ns\scenario\council\tarr03.txt'
+                    'ozi_ns\scenario\council\tarr04.001'
+                    'ozi_ns\scenario\council\tarr04.002'
+                    'ozi_ns\scenario\council\tarr04.map'
+                    'ozi_ns\scenario\council\tarr04.msg'
+                    'ozi_ns\scenario\council\tarr04.mtg'
+                    'ozi_ns\scenario\council\tarr04.o16'
+                    'ozi_ns\scenario\council\tarr04.ovh'
+                    'ozi_ns\scenario\council\tarr04.pop'
+                    'ozi_ns\scenario\council\tarr04.pth'
+                    'ozi_ns\scenario\council\tarr04.scn'
+                    'ozi_ns\scenario\council\tarr04.tro'
+                    'ozi_ns\scenario\council\tarr04.txt'
+                    'ozi_ns\scenario\council\tarr05.001'
+                    'ozi_ns\scenario\council\tarr05.002'
+                    'ozi_ns\scenario\council\tarr05.map'
+                    'ozi_ns\scenario\council\tarr05.msg'
+                    'ozi_ns\scenario\council\tarr05.mtg'
+                    'ozi_ns\scenario\council\tarr05.ovh'
+                    'ozi_ns\scenario\council\tarr05.pop'
+                    'ozi_ns\scenario\council\tarr05.pth'
+                    'ozi_ns\scenario\council\tarr05.scn'
+                    'ozi_ns\scenario\council\tarr05.tro'
+                    'ozi_ns\scenario\council\tarr05.txt'
+                    'ozi_ns\scenario\council\tarr06.001'
+                    'ozi_ns\scenario\council\tarr06.002'
+                    'ozi_ns\scenario\council\tarr06.003'
+                    'ozi_ns\scenario\council\tarr06.map'
+                    'ozi_ns\scenario\council\tarr06.msg'
+                    'ozi_ns\scenario\council\tarr06.mtg'
+                    'ozi_ns\scenario\council\tarr06.o16'
+                    'ozi_ns\scenario\council\tarr06.ovh'
+                    'ozi_ns\scenario\council\tarr06.pop'
+                    'ozi_ns\scenario\council\tarr06.pth'
+                    'ozi_ns\scenario\council\tarr06.scn'
+                    'ozi_ns\scenario\council\tarr06.tro'
+                    'ozi_ns\scenario\council\tarr06.txt'
+                    'ozi_ns\scenario\council\tarr07.001'
+                    'ozi_ns\scenario\council\tarr07.002'
+                    'ozi_ns\scenario\council\tarr07.003'
+                    'ozi_ns\scenario\council\tarr07.004'
+                    'ozi_ns\scenario\council\tarr07.map'
+                    'ozi_ns\scenario\council\tarr07.msg'
+                    'ozi_ns\scenario\council\tarr07.mtg'
+                    'ozi_ns\scenario\council\tarr07.o16'
+                    'ozi_ns\scenario\council\tarr07.ovh'
+                    'ozi_ns\scenario\council\tarr07.pop'
+                    'ozi_ns\scenario\council\tarr07.pth'
+                    'ozi_ns\scenario\council\tarr07.scn'
+                    'ozi_ns\scenario\council\tarr07.tro'
+                    'ozi_ns\scenario\council\tarr07.txt'
+                    'ozi_ns\scenario\council\tarr08.001'
+                    'ozi_ns\scenario\council\tarr08.002'
+                    'ozi_ns\scenario\council\tarr08.003'
+                    'ozi_ns\scenario\council\tarr08.004'
+                    'ozi_ns\scenario\council\tarr08.map'
+                    'ozi_ns\scenario\council\tarr08.msg'
+                    'ozi_ns\scenario\council\tarr08.mtg'
+                    'ozi_ns\scenario\council\tarr08.o16'
+                    'ozi_ns\scenario\council\tarr08.ovh'
+                    'ozi_ns\scenario\council\tarr08.pop'
+                    'ozi_ns\scenario\council\tarr08.pth'
+                    'ozi_ns\scenario\council\tarr08.scn'
+                    'ozi_ns\scenario\council\tarr08.tro'
+                    'ozi_ns\scenario\council\tarr08.txt'
+                    'ozi_ns\scenario\council\tarr09.001'
+                    'ozi_ns\scenario\council\tarr09.002'
+                    'ozi_ns\scenario\council\tarr09.003'
+                    'ozi_ns\scenario\council\tarr09.map'
+                    'ozi_ns\scenario\council\tarr09.msg'
+                    'ozi_ns\scenario\council\tarr09.mtg'
+                    'ozi_ns\scenario\council\tarr09.ovh'
+                    'ozi_ns\scenario\council\tarr09.pop'
+                    'ozi_ns\scenario\council\tarr09.pth'
+                    'ozi_ns\scenario\council\tarr09.scn'
+                    'ozi_ns\scenario\council\tarr09.tro'
+                    'ozi_ns\scenario\council\tarr09.txt'
+                    'ozi_ns\scenario\council\tarr10.001'
+                    'ozi_ns\scenario\council\tarr10.002'
+                    'ozi_ns\scenario\council\tarr10.003'
+                    'ozi_ns\scenario\council\tarr10.004'
+                    'ozi_ns\scenario\council\tarr10.map'
+                    'ozi_ns\scenario\council\tarr10.MSG'
+                    'ozi_ns\scenario\council\tarr10.mtg'
+                    'ozi_ns\scenario\council\tarr10.o16'
+                    'ozi_ns\scenario\council\tarr10.ovh'
+                    'ozi_ns\scenario\council\tarr10.pop'
+                    'ozi_ns\scenario\council\tarr10.pth'
+                    'ozi_ns\scenario\council\tarr10.scn'
+                    'ozi_ns\scenario\council\tarr10.tro'
+                    'ozi_ns\scenario\council\tarr10.TXT'
+                    'ozi_ns\scenario\council\tarr11.001'
+                    'ozi_ns\scenario\council\tarr11.002'
+                    'ozi_ns\scenario\council\tarr11.map'
+                    'ozi_ns\scenario\council\tarr11.msg'
+                    'ozi_ns\scenario\council\tarr11.mtg'
+                    'ozi_ns\scenario\council\tarr11.ovh'
+                    'ozi_ns\scenario\council\tarr11.pop'
+                    'ozi_ns\scenario\council\tarr11.pth'
+                    'ozi_ns\scenario\council\tarr11.scn'
+                    'ozi_ns\scenario\council\tarr11.tro'
+                    'ozi_ns\scenario\council\tarr11.txt'
+                    'ozi_ns\scenario\DESERT.BTS'
+                    'ozi_ns\scenario\earth.bts'
+                    'ozi_ns\scenario\gatlan.bts'
+                    'ozi_ns\scenario\GJUNGLE.BTS'
+                    'ozi_ns\scenario\globo\globo01.001'
+                    'ozi_ns\scenario\globo\globo01.002'
+                    'ozi_ns\scenario\globo\globo01.003'
+                    'ozi_ns\scenario\globo\globo01.map'
+                    'ozi_ns\scenario\globo\globo01.msg'
+                    'ozi_ns\scenario\globo\globo01.mtg'
+                    'ozi_ns\scenario\globo\globo01.o16'
+                    'ozi_ns\scenario\globo\globo01.ovh'
+                    'ozi_ns\scenario\globo\globo01.pop'
+                    'ozi_ns\scenario\globo\globo01.pth'
+                    'ozi_ns\scenario\globo\globo01.scn'
+                    'ozi_ns\scenario\globo\globo01.tro'
+                    'ozi_ns\scenario\globo\globo01.txt'
+                    'ozi_ns\scenario\globo\globo02.001'
+                    'ozi_ns\scenario\globo\globo02.002'
+                    'ozi_ns\scenario\globo\globo02.003'
+                    'ozi_ns\scenario\globo\globo02.map'
+                    'ozi_ns\scenario\globo\globo02.msg'
+                    'ozi_ns\scenario\globo\globo02.mtg'
+                    'ozi_ns\scenario\globo\globo02.o16'
+                    'ozi_ns\scenario\globo\globo02.ovh'
+                    'ozi_ns\scenario\globo\globo02.pop'
+                    'ozi_ns\scenario\globo\globo02.pth'
+                    'ozi_ns\scenario\globo\globo02.scn'
+                    'ozi_ns\scenario\globo\globo02.tro'
+                    'ozi_ns\scenario\globo\globo02.txt'
+                    'ozi_ns\scenario\globo\globo03.001'
+                    'ozi_ns\scenario\globo\globo03.002'
+                    'ozi_ns\scenario\globo\globo03.003'
+                    'ozi_ns\scenario\globo\globo03.map'
+                    'ozi_ns\scenario\globo\globo03.msg'
+                    'ozi_ns\scenario\globo\globo03.mtg'
+                    'ozi_ns\scenario\globo\globo03.o16'
+                    'ozi_ns\scenario\globo\globo03.ovh'
+                    'ozi_ns\scenario\globo\globo03.pop'
+                    'ozi_ns\scenario\globo\globo03.pth'
+                    'ozi_ns\scenario\globo\globo03.scn'
+                    'ozi_ns\scenario\globo\globo03.tro'
+                    'ozi_ns\scenario\globo\globo03.txt'
+                    'ozi_ns\scenario\globo\globo04.001'
+                    'ozi_ns\scenario\globo\globo04.002'
+                    'ozi_ns\scenario\globo\globo04.003'
+                    'ozi_ns\scenario\globo\globo04.map'
+                    'ozi_ns\scenario\globo\globo04.msg'
+                    'ozi_ns\scenario\globo\globo04.mtg'
+                    'ozi_ns\scenario\globo\globo04.o16'
+                    'ozi_ns\scenario\globo\globo04.ovh'
+                    'ozi_ns\scenario\globo\globo04.pop'
+                    'ozi_ns\scenario\globo\globo04.pth'
+                    'ozi_ns\scenario\globo\globo04.scn'
+                    'ozi_ns\scenario\globo\globo04.tro'
+                    'ozi_ns\scenario\globo\globo04.txt'
+                    'ozi_ns\scenario\globo\globo05.001'
+                    'ozi_ns\scenario\globo\globo05.002'
+                    'ozi_ns\scenario\globo\globo05.map'
+                    'ozi_ns\scenario\globo\globo05.msg'
+                    'ozi_ns\scenario\globo\globo05.mtg'
+                    'ozi_ns\scenario\globo\globo05.o16'
+                    'ozi_ns\scenario\globo\globo05.ovh'
+                    'ozi_ns\scenario\globo\globo05.pop'
+                    'ozi_ns\scenario\globo\globo05.pth'
+                    'ozi_ns\scenario\globo\globo05.scn'
+                    'ozi_ns\scenario\globo\globo05.tro'
+                    'ozi_ns\scenario\globo\globo05.txt'
+                    'ozi_ns\scenario\globo\globo06.001'
+                    'ozi_ns\scenario\globo\globo06.002'
+                    'ozi_ns\scenario\globo\globo06.003'
+                    'ozi_ns\scenario\globo\globo06.map'
+                    'ozi_ns\scenario\globo\globo06.msg'
+                    'ozi_ns\scenario\globo\globo06.mtg'
+                    'ozi_ns\scenario\globo\globo06.o16'
+                    'ozi_ns\scenario\globo\globo06.ovh'
+                    'ozi_ns\scenario\globo\globo06.pop'
+                    'ozi_ns\scenario\globo\globo06.pth'
+                    'ozi_ns\scenario\globo\globo06.scn'
+                    'ozi_ns\scenario\globo\globo06.tro'
+                    'ozi_ns\scenario\globo\globo06.txt'
+                    'ozi_ns\scenario\globo\globo07.001'
+                    'ozi_ns\scenario\globo\globo07.002'
+                    'ozi_ns\scenario\globo\globo07.003'
+                    'ozi_ns\scenario\globo\globo07.004'
+                    'ozi_ns\scenario\globo\globo07.map'
+                    'ozi_ns\scenario\globo\globo07.msg'
+                    'ozi_ns\scenario\globo\globo07.mtg'
+                    'ozi_ns\scenario\globo\globo07.o16'
+                    'ozi_ns\scenario\globo\globo07.ovh'
+                    'ozi_ns\scenario\globo\globo07.pop'
+                    'ozi_ns\scenario\globo\globo07.pth'
+                    'ozi_ns\scenario\globo\globo07.scn'
+                    'ozi_ns\scenario\globo\globo07.tro'
+                    'ozi_ns\scenario\globo\globo07.txt'
+                    'ozi_ns\scenario\globo\globo08.001'
+                    'ozi_ns\scenario\globo\globo08.002'
+                    'ozi_ns\scenario\globo\globo08.003'
+                    'ozi_ns\scenario\globo\globo08.map'
+                    'ozi_ns\scenario\globo\globo08.msg'
+                    'ozi_ns\scenario\globo\globo08.mtg'
+                    'ozi_ns\scenario\globo\globo08.o16'
+                    'ozi_ns\scenario\globo\globo08.ovh'
+                    'ozi_ns\scenario\globo\globo08.pop'
+                    'ozi_ns\scenario\globo\globo08.pth'
+                    'ozi_ns\scenario\globo\globo08.scn'
+                    'ozi_ns\scenario\globo\globo08.tro'
+                    'ozi_ns\scenario\globo\globo08.txt'
+                    'ozi_ns\scenario\globo\globo09.001'
+                    'ozi_ns\scenario\globo\globo09.002'
+                    'ozi_ns\scenario\globo\globo09.003'
+                    'ozi_ns\scenario\globo\globo09.map'
+                    'ozi_ns\scenario\globo\globo09.msg'
+                    'ozi_ns\scenario\globo\globo09.mtg'
+                    'ozi_ns\scenario\globo\globo09.o16'
+                    'ozi_ns\scenario\globo\globo09.ovh'
+                    'ozi_ns\scenario\globo\globo09.pop'
+                    'ozi_ns\scenario\globo\globo09.pth'
+                    'ozi_ns\scenario\globo\globo09.scn'
+                    'ozi_ns\scenario\globo\globo09.tro'
+                    'ozi_ns\scenario\globo\globo09.txt'
+                    'ozi_ns\scenario\globo\globo10.001'
+                    'ozi_ns\scenario\globo\globo10.002'
+                    'ozi_ns\scenario\globo\globo10.003'
+                    'ozi_ns\scenario\globo\globo10.004'
+                    'ozi_ns\scenario\globo\globo10.map'
+                    'ozi_ns\scenario\globo\globo10.msg'
+                    'ozi_ns\scenario\globo\globo10.mtg'
+                    'ozi_ns\scenario\globo\globo10.o16'
+                    'ozi_ns\scenario\globo\globo10.ovh'
+                    'ozi_ns\scenario\globo\globo10.pop'
+                    'ozi_ns\scenario\globo\globo10.pth'
+                    'ozi_ns\scenario\globo\globo10.scn'
+                    'ozi_ns\scenario\globo\globo10.tro'
+                    'ozi_ns\scenario\globo\globo10.txt'
+                    'ozi_ns\scenario\globo\globo11.001'
+                    'ozi_ns\scenario\globo\globo11.002'
+                    'ozi_ns\scenario\globo\globo11.003'
+                    'ozi_ns\scenario\globo\globo11.map'
+                    'ozi_ns\scenario\globo\globo11.msg'
+                    'ozi_ns\scenario\globo\globo11.mtg'
+                    'ozi_ns\scenario\globo\globo11.o16'
+                    'ozi_ns\scenario\globo\globo11.ovh'
+                    'ozi_ns\scenario\globo\globo11.pop'
+                    'ozi_ns\scenario\globo\globo11.pth'
+                    'ozi_ns\scenario\globo\globo11.scn'
+                    'ozi_ns\scenario\globo\globo11.tro'
+                    'ozi_ns\scenario\globo\globo11.txt'
+                    'ozi_ns\scenario\globo\scene.txt'
+                    'ozi_ns\scenario\HTRAIN.BTS'
+                    'ozi_ns\scenario\jubjub.bts'
+                    'ozi_ns\scenario\JUNGLE.BTS'
+                    'ozi_ns\scenario\special.bts'
+                    'ozi_ns\scenario\trainh.bts'
+                    'ozi_ns\scenario\vent.jus'
+                    'ozi_ns\sound\ALIST.DAT'
+                    'ozi_ns\sound\alta.amb'
+                    'ozi_ns\sound\area52.amb'
+                    'ozi_ns\sound\ATLANTIS.AMB'
+                    'ozi_ns\sound\ATLANTIS.DAT'
+                    'ozi_ns\sound\ATRAIN.DAT'
+                    'ozi_ns\sound\birds.wav'
+                    'ozi_ns\sound\cobra.wav'
+                    'ozi_ns\sound\cow.wav'
+                    'ozi_ns\sound\cricket.wav'
+                    'ozi_ns\sound\DALG1DEA.wav'
+                    'ozi_ns\sound\DALG1SEL.wav'
+                    'ozi_ns\sound\DALG2ACK.wav'
+                    'ozi_ns\sound\DALG2SEL.wav'
+                    'ozi_ns\sound\dog.wav'
+                    'ozi_ns\sound\dog2.wav'
+                    'ozi_ns\sound\earth.amb'
+                    'ozi_ns\sound\frog.wav'
+                    'ozi_ns\sound\frogs.wav'
+                    'ozi_ns\sound\gatlan.AMB'
+                    'ozi_ns\sound\gease.wav'
+                    'ozi_ns\sound\GJUNGLE.AMB'
+                    'ozi_ns\sound\GJUNGLE.DAT'
+                    'ozi_ns\sound\jubjub.amb'
+                    'ozi_ns\sound\KOMANDWE.wav'
+                    'ozi_ns\sound\KOMANWEA.wav'
+                    'ozi_ns\sound\mosq.wav'
+                    'ozi_ns\sound\r2bird.wav'
+                    'ozi_ns\sound\SCENESND.DAT'
+                    'ozi_ns\sound\seagull.wav'
+                    'ozi_ns\sound\slist.dat'
+                    'ozi_ns\sound\turkey.wav'
+                    'ozi_ns\sound\water.wav'
+                    'ozi_ns\sound\wolf.wav'
+                    'ozi_ns\special.gif'
+                    'ozi_ns\special.rgb'
+                    'ozi_ns\special.rmp'
+                    'ozisave\ozisave.txt'
+                    'exp\animozi.dat'
+                    'exp\animate\dalg.fin'
+                    'exp\animate\reae.fin'
+                    'exp\animate\spyo.fin'
+                    'exp\animate\tranozi.fin'
+                    'exp\sprites\dalg.spr'
+                    'exp\sprites\reae.spr'
+                    'exp\sprites\spyo.spr'
+                    'exp\sprites\tranozi.spr'
+                )
                 Edits = @(
                     # PE optional header: base-relocation directory size 0x93CC -> 0x93DC (+16)
                     @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'DC 93 00 00' }
@@ -1785,6 +2539,48 @@ function Invoke-PatchRun([string] $OriginalPath, $Build, [object[]] $Chosen, [st
     }
 }
 
+# The safeguard: before anything is written, every chosen fix must have (a) the fixes it depends on
+# chosen as well and (b) every data file it needs present under $GameDir (the folder the patched
+# exe will run from = where it is written).  Returns text lines describing the problems; empty = ok.
+# Without this an exe patched for 1024x768 in a folder without INTRF_HD/ fails at start-up or draws
+# the menus into the top-left corner, and the player would blame the patch.
+function Get-DataProblems($Build, [object[]] $Chosen, [string] $GameDir) {
+    $problems = @()
+    $chosenIds = @($Chosen | ForEach-Object { $_.Id })
+    foreach ($p in $Chosen) {
+        foreach ($need in @($p.Requires)) {
+            if ($chosenIds -notcontains $need) {
+                $other = $Build.Patches | Where-Object { $_.Id -eq $need }
+                $problems += ("fix '{0}' ({1}) only works together with fix '{2}' ({3}) - select both or neither" -f $p.Id, $p.Name, $need, $other.Name)
+            }
+        }
+        $missing = @()
+        foreach ($rel in @($p.Data)) { if (-not (Test-Path -LiteralPath (Join-Path $GameDir $rel))) { $missing += $rel } }
+        if ($missing.Count -gt 0) {
+            $total = 0; foreach ($d in @($p.Data)) { $total++ }
+            $shown = @($missing | Select-Object -First 8) -join ', '
+            if ($missing.Count -gt 8) { $shown += (', ... ({0} more)' -f ($missing.Count - 8)) }
+            $problems += ("fix '{0}' ({1}) needs {2} data files under '{3}', {4} are missing: {5}. Copy the game folder from the repository " +
+                          "(https://github.com/endotermic/Dark-Colony) or write the exe into the game folder there.") -f $p.Id, $p.Name, $total, $GameDir, $missing.Count, $shown
+        }
+    }
+    return $problems
+}
+
+# One-line summary of what a fix needs, for -List and the window.
+function Get-RequirementLines($Build, $Patch) {
+    $lines = @()
+    $req = @($Patch.Requires)
+    if ($req.Count -gt 0) { $lines += ('needs fix(es) ' + ($req -join ', ') + ' selected as well') }
+    $n = 0; $tops = @{}
+    foreach ($d in @($Patch.Data)) { $n++; $top = ($d -split '\\')[0]; if ($tops.ContainsKey($top)) { $tops[$top]++ } else { $tops[$top] = 1 } }
+    if ($n -gt 0) {
+        $parts = @($tops.Keys | Sort-Object | ForEach-Object { '{0}\ ({1})' -f $_, $tops[$_] })
+        $lines += ('needs {0} data files next to the exe: {1} - checked before writing' -f $n, ($parts -join ', '))
+    }
+    return $lines
+}
+
 function Write-PatchList([switch] $WithEdits) {
     foreach ($b in $Builds) {
         Write-Host ''
@@ -1797,7 +2593,11 @@ function Write-PatchList([switch] $WithEdits) {
             Write-Host ''
             Write-Host ("  {0}. [{1}] {2}  ({3}, {4} edits)" -f $n, $p.Id, $p.Name, $p.Date, (Get-EditCount $p)) -ForegroundColor Yellow
             foreach ($line in ($p.Description -split "`r?`n")) { Write-Host ("       " + $line) }
-            if ($WithEdits) { foreach ($line in (Get-EditLines $p)) { Write-Host ("       " + $line) -ForegroundColor DarkGray } }
+            foreach ($line in (Get-RequirementLines $b $p)) { Write-Host ("       * " + $line) -ForegroundColor Magenta }
+            if ($WithEdits) {
+                foreach ($line in (Get-EditLines $p)) { Write-Host ("       " + $line) -ForegroundColor DarkGray }
+                foreach ($d in @($p.Data)) { Write-Host ("       data  " + $d) -ForegroundColor DarkGray }
+            }
         }
     }
     Write-Host ''
@@ -1985,6 +2785,11 @@ function Show-PatcherWindow([string] $PreloadPath) {
             else { $para = if ($para) { "$para $l" } else { $l } }
         }
         if ($para) { $lines += $para }
+        $reqLines = @(Get-RequirementLines $g.Build $p)
+        if ($reqLines.Count -gt 0) {
+            $lines += @('', 'Prerequisites (checked before anything is written):')
+            foreach ($l in $reqLines) { $lines += ('  * ' + $l) }
+        }
         $lines += @('', 'Byte edits (file offset: old bytes -> new bytes):', '') + (Get-EditLines $p)
         $c.Info.Text = $lines -join "`r`n"
         $c.Info.SelectionStart = 0; $c.Info.SelectionLength = 0; $c.Info.ScrollToCaret()
@@ -2006,6 +2811,15 @@ function Show-PatcherWindow([string] $PreloadPath) {
         if ((Test-Path $outPath) -and $confirmOverwrite) {
             $answer = [System.Windows.Forms.MessageBox]::Show($c.Form, "$outPath exists.`r`nReplace it?", 'Replace file?', 'YesNo', 'Question')
             if ($answer -ne 'Yes') { return $null }
+        }
+        $problems = @(Get-DataProblems $g.Build $chosen (Split-Path -Parent ([System.IO.Path]::GetFullPath($outPath))))
+        if ($problems.Count -gt 0) {
+            $c.Log.ForeColor = 'Firebrick'; $c.Log.Text = 'Nothing written: data files or dependent fixes are missing (see the message).'
+            [System.Windows.Forms.MessageBox]::Show($c.Form, (($problems | ForEach-Object { '* ' + $_ }) -join "`r`n`r`n") +
+                "`r`n`r`nAn exe written without them fails at start-up or draws garbage, which would look like a bug of the fix. " +
+                "Write the exe into the game folder from the repository, or run the script from the command line with -IgnoreMissingData.",
+                'Prerequisites missing - nothing written', 'OK', 'Warning') | Out-Null
+            return $null
         }
         try {
             $r = Invoke-PatchRun $g.Path $g.Build $chosen $outPath
@@ -2094,6 +2908,17 @@ if (-not $Output) { $Output = Join-Path (Split-Path $origPath) $build.OutputName
 if ((Test-Path $Output) -and -not $Overwrite) { throw "output '$Output' exists; pass -Overwrite to replace it" }
 if ((Test-Path $Output) -and ((Resolve-Path $Output).Path -eq $origPath)) { throw 'refusing to overwrite the original' }
 
+$gameDir = Split-Path -Parent ([System.IO.Path]::GetFullPath($Output))
+$problems = @(Get-DataProblems $build $chosen $gameDir)
+if ($problems.Count -gt 0) {
+    foreach ($pr in $problems) { Write-Warning $pr }
+    if (-not $IgnoreMissingData) {
+        throw ("nothing written: the chosen fixes need data files or other fixes that are not there (see the warnings above). " +
+               "An exe written anyway fails at start-up or draws garbage. Write it into the game folder from the repository, " +
+               "or pass -IgnoreMissingData if you know what you are doing.")
+    }
+    Write-Warning 'continuing because -IgnoreMissingData was given.'
+}
 Write-Host ''
 foreach ($p in @($available | Where-Object { $p = $_; ($chosen | Where-Object { $_.Id -eq $p.Id }) })) {
     Write-Host ("applying [{0,-10}] {1,-45} {2,3} edits" -f $p.Id, $p.Name, (Get-EditCount $p))

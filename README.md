@@ -18,6 +18,7 @@ Repository contains:
 - every fix is a list of byte edits written out as data: file offset, old bytes, new bytes and the reason for the change, with a paragraph explaining what the fix does and where it is documented
 - it never modifies the input file; it writes a new file. A byte is written only if the original still holds the documented old bytes at that offset
 - with every fix selected the result is **byte-identical** to the `dc16.exe` / `DCEXP16.EXE` committed here, and the script tells you so by comparing the SHA-256
+- before it writes anything it checks that the data files the chosen fixes need are next to the output (`INTRF_HD/` and the `_HD` sprites for 1024x768, the `ozi_ns/` overlay and `exp/animozi.dat` for OZI MISSIONS) and that fixes which only work together are selected together; if not, nothing is written and it says what is missing. An exe patched into a folder without those files would fail at start-up or draw the menus into a corner, which would look like a bug of the patch. Every fix lists its files (`-List -Detail`); `-IgnoreMissingData` overrides the check from the command line
 
 How to use it: right-click `Apply-DarkColonyPatches.ps1` -> *Run with PowerShell* (or run it from a PowerShell prompt). A window opens: *Browse* to `DC - Classic/dc16original1998.exe` or `DC - Council wars/engexp16original.exe`, tick the fixes you want (the first checkbox selects all of them), press *Apply selected fixes*. *Inspect an exe* tells you which fixes any executable carries. If Windows refuses to run scripts, start it once with
 
