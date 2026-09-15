@@ -27,7 +27,10 @@
     run from): "dc16.exe" (the untouched Dark Colony exe of the January 1998 update, 6 sections, entry
     point 0x4528DE; its patched build is written as "dc16new.exe") and "ENGEXP16.EXE"
     (ENGEXP16.EXE from the Council Wars CD; patched build "engexp16new.exe").  Both are committed untouched
-    in the repository.
+    in the repository.  The third build is the map editor "Dark Colony - Map editor\maped.exe" (the
+    original from the Dark Colony CD): its fixes clear the "disabled" flag on dialog controls the
+    original greyed out - the functional part of the ozi_ns editor, without the Polish translation -
+    and write "maped_ozi_ns_v1.2.exe".
 
     The script is complete in itself: it uses nothing but the .NET classes that ship with Windows
     PowerShell 5.1 / PowerShell 7 (System.IO.File, System.Security.Cryptography.SHA256, Windows Forms).
@@ -42,10 +45,11 @@
     patch in the fixed order below), and the sum of all patches is exactly the shipped exe.
 
 .PARAMETER Original
-    Path of the untouched original executable (dc16.exe or ENGEXP16.EXE).
+    Path of the untouched original executable (dc16.exe, ENGEXP16.EXE or the map editor's maped.exe).
 
 .PARAMETER Output
-    Where to write the patched copy.  Default: dc16new.exe / engexp16new.exe next to the original.
+    Where to write the patched copy.  Default: dc16new.exe / engexp16new.exe / maped_ozi_ns_v1.2.exe
+    next to the original.
     An existing file is not overwritten unless -Overwrite is given.
 
 .PARAMETER Patches
@@ -72,6 +76,7 @@
         (run from the root of the Dark-Colony repository, where this file lives; writes dc16new.exe)
     .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\dc16.exe" -Patches cdcheck,resolution,hdpaths,pool
     .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\ENGEXP16.EXE" -All
+    .\Apply-DarkColonyPatches.ps1 -Original "Dark Colony - Map editor\maped.exe" -All     (-> maped_ozi_ns_v1.2.exe)
     .\Apply-DarkColonyPatches.ps1 -Verify "DC - Council wars\dc16new.exe"
 
 .NOTES
@@ -2463,6 +2468,192 @@ applied last.
             }
         )
     }
+    # ---------------------------------------------------------------------------------------------
+    #  Dark Colony map editor maped.exe (Aug 1997, Borland C++), 336424 bytes (unlocked build: maped_ozi_ns_v1.2.exe)
+    # ---------------------------------------------------------------------------------------------
+    @{
+        Id             = 'MapEditor'
+        Title          = 'Dark Colony map editor maped.exe (Aug 1997, Borland C++), 336424 bytes (unlocked build: maped_ozi_ns_v1.2.exe)'
+        OriginalName   = 'maped.exe'
+        OutputName     = 'maped_ozi_ns_v1.2.exe'
+        Size           = 336424
+        OriginalSha256 = 'e8471a0adcade0d0562f0e38ddbc85ebbd0776f50cc7429628dee435fa6a8f7e'   # untouched original
+        PatchedSha256  = '1edc261af23a88c78a0ef784b75d52e0e3f85831b7e36f336f1ee9949d5ac767'   # every patch applied = the exe in the repository (14 Sep 2026)
+        Patches        = @(
+
+            # ---- blocksets: New Map: Atlantis, Training and Special block sets selectable ---------------------------------------------------------
+            #  Added      : 15 Sep 2026
+            #  Made with  : tools/patch_maped.py --fix blocksets
+            #  Documented : CLAUDE.md "Map editor notes" (Dark-Colony-development)
+            #  Changes    : 3 bytes in 3 edits
+            #  The original editor greys out three of the five block-set buttons of the New Map dialog: Atlantis,
+            #  Training Set and Special Set (the WS_DISABLED style bit, 0x08000000, is set in the dialog template).
+            #  The code behind them is complete - the dialog's command table routes the three buttons to block sets
+            #  2, 3 and 4 (atlantis.bts, htrain.bts, special.bts) exactly like Desert and Jungle - so this fix only
+            #  clears that bit: one byte per button, in the DIALOG resource, no code changes.  This is what the
+            #  "ozi_ns" editor did (together with a Polish translation and a renamed title, which stay out here).
+            #
+            #  The editor loads the block set's palette window from scenario\<set>.set and its tiles from
+            #  <set>.bts.  The game itself ships only desert and jungle; atlantis.set, trainh.set, special.set and
+            #  special.bts come with the ozi_ns mission pack.  Without them the editor answers "Can't open file" when
+            #  one of the three buttons is pressed - nothing worse.
+            @{
+                Id = 'blocksets'; Name = 'New Map: Atlantis, Training and Special block sets selectable'; Date = '15 Sep 2026'
+                Tool = 'tools/patch_maped.py --fix blocksets'; Doc = 'CLAUDE.md "Map editor notes" (Dark-Colony-development)'
+                Description = @'
+The original editor greys out three of the five block-set buttons of the New Map dialog: Atlantis,
+Training Set and Special Set (the WS_DISABLED style bit, 0x08000000, is set in the dialog template).
+The code behind them is complete - the dialog's command table routes the three buttons to block sets
+2, 3 and 4 (atlantis.bts, htrain.bts, special.bts) exactly like Desert and Jungle - so this fix only
+clears that bit: one byte per button, in the DIALOG resource, no code changes.  This is what the
+"ozi_ns" editor did (together with a Polish translation and a renamed title, which stay out here).
+
+The editor loads the block set's palette window from scenario\<set>.set and its tiles from
+<set>.bts.  The game itself ships only desert and jungle; atlantis.set, trainh.set, special.set and
+special.bts come with the ozi_ns mission pack.  Without them the editor answers "Can't open file" when
+one of the three buttons is pressed - nothing worse.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # DIALOG MAPSIZE control id 16 "Atlantis": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3131F; Old = '58'; New = '50' }
+                    # DIALOG MAPSIZE control id 21 "Training Set": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x313F7; Old = '58'; New = '50' }
+                    # DIALOG MAPSIZE control id 22 "Special Set": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3142B; Old = '58'; New = '50' }
+                )
+            }
+
+            # ---- teams: Team Attributes: Team Colour and Allies selectable ---------------------------------------------------------
+            #  Added      : 15 Sep 2026
+            #  Made with  : tools/patch_maped.py --fix teams
+            #  Documented : CLAUDE.md "Map editor notes" (Dark-Colony-development)
+            #  Changes    : 18 bytes in 18 edits
+            #  The Team Attributes dialog ships with its Team Colour group (eight radio buttons) and its Allies group
+            #  (eight radio buttons) greyed out.  The dialog procedure reads both groups and writes them to the
+            #  scenario (%TeamColour, %TeamAllies) - the code was always there.  This fix clears WS_DISABLED on the
+            #  sixteen radio buttons and the two group boxes: 18 single-byte edits in the DIALOG resource.  The
+            #  AI Slots group of the same dialog stays disabled, as in every version of the editor.
+            @{
+                Id = 'teams'; Name = 'Team Attributes: Team Colour and Allies selectable'; Date = '15 Sep 2026'
+                Tool = 'tools/patch_maped.py --fix teams'; Doc = 'CLAUDE.md "Map editor notes" (Dark-Colony-development)'
+                Description = @'
+The Team Attributes dialog ships with its Team Colour group (eight radio buttons) and its Allies group
+(eight radio buttons) greyed out.  The dialog procedure reads both groups and writes them to the
+scenario (%TeamColour, %TeamAllies) - the code was always there.  This fix clears WS_DISABLED on the
+sixteen radio buttons and the two group boxes: 18 single-byte edits in the DIALOG resource.  The
+AI Slots group of the same dialog stays disabled, as in every version of the editor.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # DIALOG RACE control id 108 "0 Red": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x315A3; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 109 "1 Blue": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x315C7; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 110 "2 Yellow": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x315EF; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 111 "3 Purple": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3161B; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 112 "4 Green": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31647; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 113 "5 Orange": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3166F; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 114 "6 Flesh": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3169B; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 115 "7 Teal": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x316C3; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 116 "Team Colour": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x316EB; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 117 "0 Red": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3171B; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 118 "1 Blue": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3173F; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 119 "2 Yellow": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31767; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 120 "3 Purple": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31793; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 121 "4 Green": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x317BF; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 122 "5 Orange": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x317E7; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 123 "6 Flesh": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31813; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 124 "7 Teal": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3183B; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 125 "Allies": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31863; Old = '58'; New = '50' }
+                )
+            }
+
+            # ---- healer: Troop Attributes: Healer row usable ---------------------------------------------------------
+            #  Added      : 15 Sep 2026
+            #  Made with  : tools/patch_maped.py --fix healer
+            #  Documented : CLAUDE.md "Map editor notes" (Dark-Colony-development)
+            #  Changes    : 2 bytes in 2 edits
+            #  In the Troop Attributes dialog the Healer row - its select radio button and its hit-points edit - is
+            #  greyed out, although the dialog procedure reads the edit like those of the other units and the game
+            #  knows the healing units (GAMESTAT.TXT rows 49 and 50).  Two single-byte edits clear WS_DISABLED.
+            @{
+                Id = 'healer'; Name = 'Troop Attributes: Healer row usable'; Date = '15 Sep 2026'
+                Tool = 'tools/patch_maped.py --fix healer'; Doc = 'CLAUDE.md "Map editor notes" (Dark-Colony-development)'
+                Description = @'
+In the Troop Attributes dialog the Healer row - its select radio button and its hit-points edit - is
+greyed out, although the dialog procedure reads the edit like those of the other units and the game
+knows the healing units (GAMESTAT.TXT rows 49 and 50).  Two single-byte edits clear WS_DISABLED.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # DIALOG TROOPS control id 678 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3323B; Old = '58'; New = '50' }
+                    # DIALOG TROOPS control id 508 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x33257; Old = '58'; New = '50' }
+                )
+            }
+
+            # ---- troopsframe: Troop Attributes: close box instead of sizing border ---------------------------------------------------------
+            #  Added      : 15 Sep 2026
+            #  Made with  : tools/patch_maped.py --fix troopsframe
+            #  Documented : CLAUDE.md "Map editor notes" (Dark-Colony-development)
+            #  Changes    : 1 bytes in 1 edits
+            #  Cosmetic, taken over from the ozi_ns editor: the Troop Attributes dialog's frame style changes from
+            #  WS_THICKFRAME (a sizing border, useless for a fixed layout) to WS_SYSMENU (a title-bar close box).
+            #  One byte in the DIALOG template's style dword.
+            @{
+                Id = 'troopsframe'; Name = 'Troop Attributes: close box instead of sizing border'; Date = '15 Sep 2026'
+                Tool = 'tools/patch_maped.py --fix troopsframe'; Doc = 'CLAUDE.md "Map editor notes" (Dark-Colony-development)'
+                Description = @'
+Cosmetic, taken over from the ozi_ns editor: the Troop Attributes dialog's frame style changes from
+WS_THICKFRAME (a sizing border, useless for a fixed layout) to WS_SYSMENU (a title-bar close box).
+One byte in the DIALOG template's style dword.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # DIALOG TROOPS template style byte 2: WS_THICKFRAME (0x00040000) -> WS_SYSMENU (0x00080000), sizing border -> close box
+                    @{ Offset = 0x3290A; Old = 'C4'; New = 'C8' }
+                )
+            }
+        )
+    }
 )
 
 # =================================================================================================
@@ -2719,7 +2910,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
 
     $lblStatus = New-Object System.Windows.Forms.Label
     $lblStatus.Location = '110,40'; $lblStatus.Size = '860,36'; $lblStatus.Anchor = 'Top,Left,Right'
-    $lblStatus.Text = 'Pick dc16.exe (Dark Colony) or ENGEXP16.EXE (Council Wars) from the "DC - Council wars" folder - both are in the repository, untouched.'
+    $lblStatus.Text = 'Pick dc16.exe (Dark Colony) or ENGEXP16.EXE (Council Wars) from the "DC - Council wars" folder, or maped.exe from "Dark Colony - Map editor" - all three are in the repository, untouched.'
 
     # --- left: the fixes
     $grpFix = New-Object System.Windows.Forms.GroupBox
@@ -2798,7 +2989,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $c.In.Text = $path
         if (-not $build) {
             $c.Status.ForeColor = 'Firebrick'
-            $c.Status.Text = "Not a build this script knows ($($data.Length) bytes). Use dc16.exe or ENGEXP16.EXE from the repository's DC - Council wars folder."
+            $c.Status.Text = "Not a build this script knows ($($data.Length) bytes). Use dc16.exe or ENGEXP16.EXE from the repository's DC - Council wars folder, or maped.exe from Dark Colony - Map editor."
             $c.List.Enabled = $false; $c.All.Enabled = $false; $c.Apply.Enabled = $false
             return
         }
@@ -3018,7 +3209,7 @@ Write-Host ("        {0} bytes, SHA-256 {1}" -f $data.Length, $sha)
 $build = Find-BuildBySha $sha
 if (-not $build) {
     $build = Find-BuildByContent $data
-    if (-not $build) { throw "This is not one of the two known original executables (size / layout mismatch)." }
+    if (-not $build) { throw "This is not one of the three known original executables (size / layout mismatch)." }
     if (-not $Force) {
         throw ("The SHA-256 is not that of the untouched {0} original. Start from {1} (in the repository), " +
                "or pass -Force to rely on the per-byte checks alone.") -f $build.Id, $build.OriginalName

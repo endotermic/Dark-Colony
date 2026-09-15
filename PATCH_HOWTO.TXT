@@ -12,6 +12,13 @@ This repository ships two kinds of game executables:
   * the PATCHED ones that you normally play
         DC - Council wars\dc16new.exe
         DC - Council wars\engexp16new.exe
+
+  * and the map editor: the original
+        Dark Colony - Map editor\maped.exe
+    and its unlocked build (the greyed-out dialog controls of the
+    original enabled - what the Polish ozi_ns editor did, minus the
+    translation)
+        Dark Colony - Map editor\maped_ozi_ns_v1.2.exe
     (no CD needed, 1024x768, hidden Windows pointer, 32 MiB memory
     pool, 150 % default speed, two-monitor fix, ... and for Council
     Wars the OZI MISSIONS menu)
@@ -95,6 +102,7 @@ What makes it trustworthy:
 
           DC - Council wars\dc16.exe               for Dark Colony
           DC - Council wars\ENGEXP16.EXE  for Council Wars
+          Dark Colony - Map editor\maped.exe  for the map editor
 
       The status line tells you which game it is and confirms
       "SHA-256 ... = the untouched original."
@@ -152,7 +160,8 @@ What makes it trustworthy:
 
    Patch ids: cdcheck, resolution, hdpaths, cursor, pool, speed, clock,
    ddraw, for Dark Colony only movies (the Classic intro and endings
-   under their DC* names) and, for Council Wars only, ozi.  -Output sets the target
+   under their DC* names) and, for Council Wars only, ozi.  Map editor:
+   blocksets, teams, healer, troopsframe.  -Output sets the target
    file, -Overwrite allows replacing an existing one.
 
 
