@@ -151,7 +151,7 @@ human/human15.scn
 FINEST HOUR
 DROMOS THREE
 scenario/human/human15
-avi/hending.avi
+avi/dchending.avi
 avi/afield.avi
 40 282 274
 0

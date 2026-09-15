@@ -151,7 +151,7 @@ alien/alien15.scn
 FINAL EVACUATION
 DESTINY ONE
 scenario/alien/alien15
-avi/aending.avi
+avi/dcaending.avi
 avi/council.avi
 15 312 210
 0

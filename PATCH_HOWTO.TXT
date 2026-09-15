@@ -4,13 +4,14 @@
 
 This repository ships two kinds of game executables:
 
-  * the UNTOUCHED ORIGINALS from 1997/98
-        DC - Classic\dc16original1998.exe
-        DC - Council wars\engexp16original.exe
+  * the UNTOUCHED ORIGINALS from 1997/98 (both games run from the
+    "DC - Council wars" folder since 15 Sep 2026)
+        DC - Council wars\dc16.exe
+        DC - Council wars\ENGEXP16.EXE
 
   * the PATCHED ones that you normally play
-        DC - Classic\dc16.exe
-        DC - Council wars\DCEXP16.EXE
+        DC - Council wars\dc16new.exe
+        DC - Council wars\engexp16new.exe
     (no CD needed, 1024x768, hidden Windows pointer, 32 MiB memory
     pool, 150 % default speed, two-monitor fix, ... and for Council
     Wars the OZI MISSIONS menu)
@@ -62,9 +63,10 @@ What makes it trustworthy:
    (green "Code" button -> "Download ZIP", then unpack; or
    "git clone").  You need the whole thing, not just the script:
    the fixes need the game data files that ship next to the exe
-   (for example the 1024x768 menus in INTRF_HD\).  The script checks
-   for them and refuses to write an exe into a folder where they are
-   missing.
+   (for example the 1024x768 menus in INTRF_HD\, the Classic movies
+   AVI\DCINTRO.AVI etc.).  The script checks for them: a fix whose
+   files are not in the target folder is shown as "RESOURCES NOT
+   FOUND", cannot be ticked and is left out.
 
 2) Locate the patcher script in the root of the unpacked folder:
 
@@ -91,8 +93,8 @@ What makes it trustworthy:
 
    a) "Original exe:"  -> press "Browse..." and pick
 
-          DC - Classic\dc16original1998.exe       for Dark Colony
-          DC - Council wars\engexp16original.exe  for Council Wars
+          DC - Council wars\dc16.exe               for Dark Colony
+          DC - Council wars\ENGEXP16.EXE  for Council Wars
 
       The status line tells you which game it is and confirms
       "SHA-256 ... = the untouched original."
@@ -107,11 +109,19 @@ What makes it trustworthy:
       "Interface data from INTRF_HD"); the script refuses to write
       if you select one without the other.
 
+      A fix labelled "[RESOURCES NOT FOUND]" needs data files that
+      are not in the folder you write to (the 1024x768 menus in
+      INTRF_HD\, the Classic movies AVI\DCINTRO.AVI, DCAENDING.AVI,
+      DCHENDING.AVI, the OZI mission pack in ozi_ns\).  It cannot be
+      ticked, "Select all fixes" skips it, and the panel says which
+      files are missing.  Write the exe into the game folder from the
+      repository and the label disappears.
+
       To get the ORIGINAL 640x480 game that just does not ask for the
       CD, tick only "No CD required".
 
    c) "Write to:"  -> where the patched exe is written.  The default
-      is dc16.exe / DCEXP16.EXE next to the original, i.e. inside the
+      is dc16new.exe / engexp16new.exe next to the original, i.e. inside the
       game folder - keep it there, the game needs its data files.  If
       the file already exists the script asks before replacing it.
       It never writes over the original.
@@ -127,7 +137,7 @@ What makes it trustworthy:
 
    "Inspect an exe..." checks any Dark Colony executable and tells you
    which build it is and which fixes it already carries - use it on the
-   downloaded dc16.exe / DCEXP16.EXE if you want to know what is in it.
+   downloaded dc16new.exe / engexp16new.exe if you want to know what is in it.
 
 
 ---------------------------------------------------------------------
@@ -136,12 +146,13 @@ What makes it trustworthy:
 
    .\Apply-DarkColonyPatches.ps1 -List                 list the fixes
    .\Apply-DarkColonyPatches.ps1 -List -Detail         ... with every byte edit
-   .\Apply-DarkColonyPatches.ps1 -Original "DC - Classic\dc16original1998.exe" -All
-   .\Apply-DarkColonyPatches.ps1 -Original "DC - Classic\dc16original1998.exe" -Patches cdcheck
-   .\Apply-DarkColonyPatches.ps1 -Verify "DC - Classic\dc16.exe"
+   .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\dc16.exe" -All
+   .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\dc16.exe" -Patches cdcheck
+   .\Apply-DarkColonyPatches.ps1 -Verify "DC - Council wars\dc16new.exe"
 
    Patch ids: cdcheck, resolution, hdpaths, cursor, pool, speed, clock,
-   ddraw and, for Council Wars only, ozi.  -Output sets the target
+   ddraw, for Dark Colony only movies (the Classic intro and endings
+   under their DC* names) and, for Council Wars only, ozi.  -Output sets the target
    file, -Overwrite allows replacing an existing one.
 
 

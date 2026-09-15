@@ -18,10 +18,16 @@
         per-byte checks stay on)
       * after writing it prints the SHA-256 of the result; with every patch selected the result
         is byte-identical to the executable published in the repository and the script says so
+      * a fix whose resources (data files it needs next to the exe: the INTRF_HD interface files,
+        the DC*.AVI movies, the ozi_ns overlay) are not in the target folder is marked
+        "RESOURCES NOT FOUND", its checkbox cannot be ticked and -All skips it; a fix that depends
+        on such a fix is marked the same way
 
-    The originals: "DC - Classic\dc16original1998.exe" (the dc16.exe of the January 1998 update,
-    6 sections, entry point 0x4528DE) and "DC - Council wars\engexp16original.exe" (ENGEXP16.EXE
-    from the Council Wars CD).  Both are committed untouched in the repository (commit 9b1b286).
+    The originals, both in the "DC - Council wars" folder (since 15 Sep 2026 the one folder both games
+    run from): "dc16.exe" (the untouched Dark Colony exe of the January 1998 update, 6 sections, entry
+    point 0x4528DE; its patched build is written as "dc16new.exe") and "ENGEXP16.EXE"
+    (ENGEXP16.EXE from the Council Wars CD; patched build "engexp16new.exe").  Both are committed untouched
+    in the repository.
 
     The script is complete in itself: it uses nothing but the .NET classes that ship with Windows
     PowerShell 5.1 / PowerShell 7 (System.IO.File, System.Security.Cryptography.SHA256, Windows Forms).
@@ -36,10 +42,10 @@
     patch in the fixed order below), and the sum of all patches is exactly the shipped exe.
 
 .PARAMETER Original
-    Path of the untouched original executable (dc16original1998.exe or engexp16original.exe).
+    Path of the untouched original executable (dc16.exe or ENGEXP16.EXE).
 
 .PARAMETER Output
-    Where to write the patched copy.  Default: dc16.exe / DCEXP16.EXE next to the original.
+    Where to write the patched copy.  Default: dc16new.exe / engexp16new.exe next to the original.
     An existing file is not overwritten unless -Overwrite is given.
 
 .PARAMETER Patches
@@ -48,11 +54,12 @@
     (with the original preloaded when -Original was given).
 
 .PARAMETER IgnoreMissingData
-    Write the exe even though data files a chosen fix needs (the INTRF_HD folder, the ozi_ns
-    overlay, ...) are missing next to the output, or a fix the chosen ones depend on is not
-    selected.  Without it the script refuses, because such an exe fails at start-up or draws
-    garbage and the failure would look like a bug of the patch.  Each fix's Requires / Data
-    lists say what it needs; -List prints them.
+    Apply fixes whose resources (the INTRF_HD interface files, the DC*.AVI movies, the ozi_ns
+    overlay, ...) are missing next to the output, or whose prerequisite fixes are not selected.
+    Without it -All skips such fixes (reported as "resources not found") and an explicit -Patches
+    list naming one is refused, because such an exe fails at start-up or draws garbage and the
+    failure would look like a bug of the patch.  Each fix's Requires / Data lists say what it
+    needs; -List prints them.
 
 .PARAMETER Verify
     Instead of patching, inspect an existing exe: which build it is and which patches it carries.
@@ -61,10 +68,11 @@
     .\Apply-DarkColonyPatches.ps1                               # the window
     .\Apply-DarkColonyPatches.ps1 -List
     .\Apply-DarkColonyPatches.ps1 -List -Detail                 # every single byte edit
-    .\Apply-DarkColonyPatches.ps1 -Original "DC - Classic\dc16original1998.exe" -All
-        (run from the root of the Dark-Colony repository, where this file lives)
-    .\Apply-DarkColonyPatches.ps1 -Original "DC - Classic\dc16original1998.exe" -Patches cdcheck,resolution,hdpaths,pool
-    .\Apply-DarkColonyPatches.ps1 -Verify "DC - Classic\dc16.exe"
+    .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\dc16.exe" -All
+        (run from the root of the Dark-Colony repository, where this file lives; writes dc16new.exe)
+    .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\dc16.exe" -Patches cdcheck,resolution,hdpaths,pool
+    .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\ENGEXP16.EXE" -All
+    .\Apply-DarkColonyPatches.ps1 -Verify "DC - Council wars\dc16new.exe"
 
 .NOTES
     If Windows refuses to run the script ("running scripts is disabled"), start it once with
@@ -101,16 +109,16 @@ $ErrorActionPreference = 'Stop'
 $Builds = @(
 
     # ---------------------------------------------------------------------------------------------
-    #  Dark Colony (Classic) dc16.exe, build linked 7 Jan 1998, 659456 bytes
+    #  Dark Colony (Classic) dc16.exe, build linked 7 Jan 1998, 659456 bytes (patched build: dc16new.exe)
     # ---------------------------------------------------------------------------------------------
     @{
         Id             = 'Classic'
-        Title          = 'Dark Colony (Classic) dc16.exe, build linked 7 Jan 1998, 659456 bytes'
-        OriginalName   = 'dc16original1998.exe'
-        OutputName     = 'dc16.exe'
+        Title          = 'Dark Colony (Classic) dc16.exe, build linked 7 Jan 1998, 659456 bytes (patched build: dc16new.exe)'
+        OriginalName   = 'dc16.exe'
+        OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '0e9297c236996976a1796e4a73d242ea7056b3a8ae8e5b3f70558cb1d477b735'   # every patch applied = the exe in the repository (14 Sep 2026)
+        PatchedSha256  = '572646e4c09d805d56e9d5b6a2497d9d30340328343ccb192a144eab2e748efc'   # every patch applied = the exe in the repository (14 Sep 2026)
         Patches        = @(
 
             # ---- cdcheck: No CD required ---------------------------------------------------------
@@ -210,7 +218,7 @@ patch below (select both); with stock 640x480 data the menus draw in the top-lef
                 # data files this fix needs next to the exe (60; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
-                    'INTRF_HD\bintroe'
+                    'INTRF_HD\BINTROE'
                     'INTRF_HD\BUTTONSE'
                     'INTRF_HD\CHOO.GIF'
                     'INTRF_HD\DEMOWINE'
@@ -230,7 +238,7 @@ patch below (select both); with stock 640x480 data the menus draw in the top-lef
                     'INTRF_HD\INTRG.GIF'
                     'INTRF_HD\INTRO.DAT'
                     'INTRF_HD\INTRO.GIF'
-                    'INTRF_HD\introe'
+                    'INTRF_HD\INTROE'
                     'INTRF_HD\IPXNAMEE'
                     'INTRF_HD\LOAD.BMP'
                     'INTRF_HD\LOAD2.BMP'
@@ -254,7 +262,7 @@ patch below (select both); with stock 640x480 data the menus draw in the top-lef
                     'INTRF_HD\NEWGAMEE'
                     'INTRF_HD\SERVER.GIF'
                     'INTRF_HD\SHUMAN.GIF'
-                    'INTRF_HD\shumane'
+                    'INTRF_HD\SHUMANE'
                     'INTRF_HD\STORY.GIF'
                     'INTRF_HD\STORYE'
                     'INTRF_HD\TCPWAIT.GIF'
@@ -621,7 +629,7 @@ patch below (select both); with stock 640x480 data the menus draw in the top-lef
             #  "intrface" / "gamestat" -> "intrf_hd", same length, in place.  Fonts, text files, per-screen
             #  sprite lists without logo banks and every other file keep their stock path and single copy; the two
             #  lists that do name logo banks (INTRG.DAT, INTRO.DAT) are redirected to INTRF_HD copies that say
-            #  dcuk_hd.fin etc.  No code changes.  With this patch dc16original1998.exe / engexp16original.exe
+            #  dcuk_hd.fin etc.  No code changes.  With this patch the untouched dc16.exe / ENGEXP16.EXE
             #  (stock data) and the patched exe (INTRF_HD data) run side by side from one folder.  Only
             #  meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder from the repository.
             @{
@@ -639,7 +647,7 @@ patch rewrites the 8-byte directory part of exactly the 30 strings whose files w
 "intrface" / "gamestat" -> "intrf_hd", same length, in place.  Fonts, text files, per-screen
 sprite lists without logo banks and every other file keep their stock path and single copy; the two
 lists that do name logo banks (INTRG.DAT, INTRO.DAT) are redirected to INTRF_HD copies that say
-dcuk_hd.fin etc.  No code changes.  With this patch dc16original1998.exe / engexp16original.exe
+dcuk_hd.fin etc.  No code changes.  With this patch the untouched dc16.exe / ENGEXP16.EXE
 (stock data) and the patched exe (INTRF_HD data) run side by side from one folder.  Only
 meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder from the repository.
 '@
@@ -648,7 +656,7 @@ meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder f
                 # data files this fix needs next to the exe (60; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
-                    'INTRF_HD\bintroe'
+                    'INTRF_HD\BINTROE'
                     'INTRF_HD\BUTTONSE'
                     'INTRF_HD\CHOO.GIF'
                     'INTRF_HD\DEMOWINE'
@@ -668,7 +676,7 @@ meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder f
                     'INTRF_HD\INTRG.GIF'
                     'INTRF_HD\INTRO.DAT'
                     'INTRF_HD\INTRO.GIF'
-                    'INTRF_HD\introe'
+                    'INTRF_HD\INTROE'
                     'INTRF_HD\IPXNAMEE'
                     'INTRF_HD\LOAD.BMP'
                     'INTRF_HD\LOAD2.BMP'
@@ -692,7 +700,7 @@ meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder f
                     'INTRF_HD\NEWGAMEE'
                     'INTRF_HD\SERVER.GIF'
                     'INTRF_HD\SHUMAN.GIF'
-                    'INTRF_HD\shumane'
+                    'INTRF_HD\SHUMANE'
                     'INTRF_HD\STORY.GIF'
                     'INTRF_HD\STORYE'
                     'INTRF_HD\TCPWAIT.GIF'
@@ -996,16 +1004,67 @@ absolute pointers, so their .reloc entries become type 0 ABSOLUTE padding.
                     @{ Offset = 0x9A014; Old = '3F 34'; New = '3F 04' }
                 )
             }
+
+            # ---- movies: Classic movies under their own names: DCINTRO / DCAENDING / DCHENDING (Dark Colony only) ---------------------------------------------------------
+            #  Added      : 15 Sep 2026
+            #  Made with  : tools/patch_movies.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.18
+            #  Changes    : 11 bytes in 1 edits
+            #  Since 15 Sep 2026 both games run from the "DC - Council wars" folder.  Council Wars has its own
+            #  INTRO.AVI, AENDING.AVI and HENDING.AVI, so the Classic movies live beside them as AVI/DCINTRO.AVI,
+            #  DCAENDING.AVI and DCHENDING.AVI.  Without this fix the Classic exe in that folder plays the Council
+            #  Wars intro and endings.  The intro name is one data-section string, "intro.avi", appended to "avi/"
+            #  at start-up and by the PLAY INTRO button; the linker aligned the next string to 4 bytes, so
+            #  "intro.avi" plus its two padding zeros is exactly the 12 bytes of "dcintro.avi" - rewritten in
+            #  place, same address, no code and no relocation entry changes.  The two campaign endings are not in
+            #  the exe at all: line 154 of the campaign lists HSCENE.TXT / GSCENE.TXT names them, and the patched exe
+            #  reads those lists from INTRF_HD/ (fix "Interface data from INTRF_HD"), where they say
+            #  "avi/dchending.avi" / "avi/dcaending.avi" in the repository.  The stock GAMESTAT/ lists that the
+            #  untouched exe reads keep the stock names.  REQUIRES the three AVI files DCINTRO.AVI, DCAENDING.AVI,
+            #  DCHENDING.AVI in the AVI folder next to the exe (the two INTRF_HD lists come with the "Interface
+            #  data from INTRF_HD" fix).  Dark Colony only: the Council Wars exe's intro.avi is its own intro.
+            @{
+                Id = 'movies'; Name = 'Classic movies under their own names: DCINTRO / DCAENDING / DCHENDING (Dark Colony only)'; Date = '15 Sep 2026'
+                Tool = 'tools/patch_movies.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.18'
+                Description = @'
+Since 15 Sep 2026 both games run from the "DC - Council wars" folder.  Council Wars has its own
+INTRO.AVI, AENDING.AVI and HENDING.AVI, so the Classic movies live beside them as AVI/DCINTRO.AVI,
+DCAENDING.AVI and DCHENDING.AVI.  Without this fix the Classic exe in that folder plays the Council
+Wars intro and endings.  The intro name is one data-section string, "intro.avi", appended to "avi/"
+at start-up and by the PLAY INTRO button; the linker aligned the next string to 4 bytes, so
+"intro.avi" plus its two padding zeros is exactly the 12 bytes of "dcintro.avi" - rewritten in
+place, same address, no code and no relocation entry changes.  The two campaign endings are not in
+the exe at all: line 154 of the campaign lists HSCENE.TXT / GSCENE.TXT names them, and the patched exe
+reads those lists from INTRF_HD/ (fix "Interface data from INTRF_HD"), where they say
+"avi/dchending.avi" / "avi/dcaending.avi" in the repository.  The stock GAMESTAT/ lists that the
+untouched exe reads keep the stock names.  REQUIRES the three AVI files DCINTRO.AVI, DCAENDING.AVI,
+DCHENDING.AVI in the AVI folder next to the exe (the two INTRF_HD lists come with the "Interface
+data from INTRF_HD" fix).  Dark Colony only: the Council Wars exe's intro.avi is its own intro.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('hdpaths')
+                # data files this fix needs next to the exe (3; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'AVI\DCINTRO.AVI'
+                    'AVI\DCAENDING.AVI'
+                    'AVI\DCHENDING.AVI'
+                )
+                Edits = @(
+                    # DGROUP string "intro.avi" -> "dcintro.avi": 69 6e 74 72 6f 2e 61 76 69 00 00 00 -> 64 63 69 6e 74 72 6f 2e 61 76 69 00; the movie name appended to "avi/" at start-up (0x004053A7) and by PLAY INTRO (0x004050FE); "intro.avi\0" plus its two alignment padding zeros is exactly 12 bytes, so the string grows in place, its address and the .reloc table are unchanged
+                    @{ Offset = 0x7FCA8; Old = '69 6E 74 72 6F 2E 61 76 69 00 00 00'; New = '64 63 69 6E 74 72 6F 2E 61 76 69 00' }
+                )
+            }
         )
     }
     # ---------------------------------------------------------------------------------------------
-    #  Dark Colony - The Council Wars ENGEXP16.EXE (shipped as DCEXP16.EXE), 659968 bytes
+    #  Dark Colony - The Council Wars ENGEXP16.EXE, 659968 bytes (patched build: engexp16new.exe; called DCEXP16.EXE 10-15 Sep 2026)
     # ---------------------------------------------------------------------------------------------
     @{
         Id             = 'CouncilWars'
-        Title          = 'Dark Colony - The Council Wars ENGEXP16.EXE (shipped as DCEXP16.EXE), 659968 bytes'
-        OriginalName   = 'engexp16original.exe'
-        OutputName     = 'DCEXP16.EXE'
+        Title          = 'Dark Colony - The Council Wars ENGEXP16.EXE, 659968 bytes (patched build: engexp16new.exe; called DCEXP16.EXE 10-15 Sep 2026)'
+        OriginalName   = 'ENGEXP16.EXE'
+        OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
         PatchedSha256  = '5e4f12fd9812976f362116ab269107aa3354bfb4d927c316b7d1485e7963dbe2'   # every patch applied = the exe in the repository (14 Sep 2026)
@@ -1526,7 +1585,7 @@ patch below (select both); with stock 640x480 data the menus draw in the top-lef
             #  "intrface" / "gamestat" -> "intrf_hd", same length, in place.  Fonts, text files, per-screen
             #  sprite lists without logo banks and every other file keep their stock path and single copy; the two
             #  lists that do name logo banks (INTRG.DAT, INTRO.DAT) are redirected to INTRF_HD copies that say
-            #  dcuk_hd.fin etc.  No code changes.  With this patch dc16original1998.exe / engexp16original.exe
+            #  dcuk_hd.fin etc.  No code changes.  With this patch the untouched dc16.exe / ENGEXP16.EXE
             #  (stock data) and the patched exe (INTRF_HD data) run side by side from one folder.  Only
             #  meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder from the repository.
             @{
@@ -1544,7 +1603,7 @@ patch rewrites the 8-byte directory part of exactly the 30 strings whose files w
 "intrface" / "gamestat" -> "intrf_hd", same length, in place.  Fonts, text files, per-screen
 sprite lists without logo banks and every other file keep their stock path and single copy; the two
 lists that do name logo banks (INTRG.DAT, INTRO.DAT) are redirected to INTRF_HD copies that say
-dcuk_hd.fin etc.  No code changes.  With this patch dc16original1998.exe / engexp16original.exe
+dcuk_hd.fin etc.  No code changes.  With this patch the untouched dc16.exe / ENGEXP16.EXE
 (stock data) and the patched exe (INTRF_HD data) run side by side from one folder.  Only
 meaningful together with the 1024x768 patch, and REQUIRES the INTRF_HD/ folder from the repository.
 '@
@@ -2567,6 +2626,35 @@ function Get-DataProblems($Build, [object[]] $Chosen, [string] $GameDir) {
     return $problems
 }
 
+# Which fixes of a build cannot be applied into $GameDir: their resources (Data files) are not there,
+# or a fix they require is itself unavailable.  Returns a hashtable id -> one-line reason (empty = all
+# available).  The window greys these out as "RESOURCES NOT FOUND", -All skips them.
+function Get-UnavailableFixes($Build, [string] $GameDir) {
+    $out = @{}
+    if (-not $GameDir) { return $out }
+    foreach ($p in $Build.Patches) {
+        $missing = @(); $total = 0
+        foreach ($rel in @($p.Data)) { $total++; if (-not (Test-Path -LiteralPath (Join-Path $GameDir $rel))) { $missing += $rel } }
+        if ($missing.Count -gt 0) {
+            $tops = @{}
+            foreach ($m in $missing) { $top = ($m -split '\\')[0]; if ($tops.ContainsKey($top)) { $tops[$top]++ } else { $tops[$top] = 1 } }
+            $where = @($tops.Keys | Sort-Object | ForEach-Object { '{0}\ ({1})' -f $_, $tops[$_] }) -join ', '
+            $out[$p.Id] = ('{0} of {1} resource files missing: {2}' -f $missing.Count, $total, $where)
+        }
+    }
+    # a fix that needs an unavailable fix is unavailable too (repeat until nothing changes: resolution <-> hdpaths are mutual)
+    do {
+        $changed = $false
+        foreach ($p in $Build.Patches) {
+            if ($out.ContainsKey($p.Id)) { continue }
+            foreach ($need in @($p.Requires)) {
+                if ($out.ContainsKey($need)) { $out[$p.Id] = ("needs fix '{0}', which is unavailable here" -f $need); $changed = $true; break }
+            }
+        }
+    } while ($changed)
+    return $out
+}
+
 # One-line summary of what a fix needs, for -List and the window.
 function Get-RequirementLines($Build, $Patch) {
     $lines = @()
@@ -2611,7 +2699,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
     Add-Type -AssemblyName System.Drawing
     [System.Windows.Forms.Application]::EnableVisualStyles()
 
-    $script:gui = @{ Path = $null; Data = $null; Build = $null; IsOriginal = $false; Syncing = $false }
+    $script:gui = @{ Path = $null; Data = $null; Build = $null; IsOriginal = $false; Syncing = $false; Unavailable = @{} }
     $mono = New-Object System.Drawing.Font('Consolas', 9)
 
     $form = New-Object System.Windows.Forms.Form
@@ -2631,7 +2719,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
 
     $lblStatus = New-Object System.Windows.Forms.Label
     $lblStatus.Location = '110,40'; $lblStatus.Size = '860,36'; $lblStatus.Anchor = 'Top,Left,Right'
-    $lblStatus.Text = 'Pick dc16original1998.exe (Classic) or engexp16original.exe (Council Wars) - both are in the repository, untouched.'
+    $lblStatus.Text = 'Pick dc16.exe (Dark Colony) or ENGEXP16.EXE (Council Wars) from the "DC - Council wars" folder - both are in the repository, untouched.'
 
     # --- left: the fixes
     $grpFix = New-Object System.Windows.Forms.GroupBox
@@ -2710,7 +2798,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $c.In.Text = $path
         if (-not $build) {
             $c.Status.ForeColor = 'Firebrick'
-            $c.Status.Text = "Not a build this script knows ($($data.Length) bytes). Use dc16original1998.exe or engexp16original.exe from the repository."
+            $c.Status.Text = "Not a build this script knows ($($data.Length) bytes). Use dc16.exe or ENGEXP16.EXE from the repository's DC - Council wars folder."
             $c.List.Enabled = $false; $c.All.Enabled = $false; $c.Apply.Enabled = $false
             return
         }
@@ -2724,11 +2812,40 @@ function Show-PatcherWindow([string] $PreloadPath) {
         }
         foreach ($p in $build.Patches) { [void] $c.List.Items.Add(('{0}   ({1})' -f $p.Name, $p.Date), $false) }
         $c.List.Enabled = $true; $c.All.Enabled = $true; $c.Apply.Enabled = $true
-        $c.Out.Text = Join-Path (Split-Path $path) $build.OutputName
+        $c.Out.Text = Join-Path (Split-Path $path) $build.OutputName   # TextChanged -> Refresh
+        & $script:gui.Refresh
         if ($c.List.Items.Count -gt 0) { $c.List.SelectedIndex = 0 }
         $c.Log.Text = ''
     }
     $script:gui.Load = $loadOriginal
+
+    # Re-checks the resources of every fix against the folder the exe will be written to: fixes whose
+    # files are missing (or which need such a fix) get "RESOURCES NOT FOUND" in their label, are
+    # unticked and cannot be ticked.  Runs at load and whenever the output path changes.
+    $script:gui.Refresh = {
+        $c = $script:gui.Controls
+        $g = $script:gui
+        if (-not $g.Build) { return }
+        $dir = $null
+        try { $t = $c.Out.Text.Trim(); if ($t) { $dir = Split-Path -Parent ([System.IO.Path]::GetFullPath($t)) } } catch { $dir = $null }
+        $g.Unavailable = Get-UnavailableFixes $g.Build $dir
+        $g.Syncing = $true
+        for ($i = 0; $i -lt $c.List.Items.Count; $i++) {
+            $p = $g.Build.Patches[$i]
+            $was = $c.List.GetItemChecked($i)
+            $text = '{0}   ({1})' -f $p.Name, $p.Date
+            if ($g.Unavailable.ContainsKey($p.Id)) { $text = '[RESOURCES NOT FOUND]  ' + $text; $was = $false }
+            $c.List.Items[$i] = $text
+            $c.List.SetItemChecked($i, $was)
+        }
+        $g.Syncing = $false
+        $n = 0; foreach ($k in $g.Unavailable.Keys) { $n++ }
+        if ($n -gt 0) {
+            $c.Log.ForeColor = 'DarkOrange'
+            $c.Log.Text = "$n fix(es) cannot be applied into this folder - resources not found (see the label; click the fix for details)."
+        }
+    }
+    $c.Out.Add_TextChanged({ & $script:gui.Refresh })
 
     $c.Browse.Add_Click({
         $c = $script:gui.Controls
@@ -2748,24 +2865,37 @@ function Show-PatcherWindow([string] $PreloadPath) {
         if ($dlg.ShowDialog($c.Form) -eq 'OK') { $c.Out.Text = $dlg.FileName }
     })
 
-    # "Select all" <-> individual boxes, without the two events feeding each other
+    # "Select all" <-> individual boxes, without the two events feeding each other; fixes whose
+    # resources are not found stay unticked in both directions
     $c.All.Add_CheckedChanged({
         $c = $script:gui.Controls
-        if ($script:gui.Syncing) { return }
-        $script:gui.Syncing = $true
-        for ($i = 0; $i -lt $c.List.Items.Count; $i++) { $c.List.SetItemChecked($i, $c.All.Checked) }
-        $script:gui.Syncing = $false
+        $g = $script:gui
+        if ($g.Syncing) { return }
+        $g.Syncing = $true
+        for ($i = 0; $i -lt $c.List.Items.Count; $i++) {
+            $avail = -not $g.Unavailable.ContainsKey($g.Build.Patches[$i].Id)
+            $c.List.SetItemChecked($i, ($c.All.Checked -and $avail))
+        }
+        $g.Syncing = $false
     })
     $c.List.Add_ItemCheck({
         param($sender, $e)
         $c = $script:gui.Controls
-        if ($script:gui.Syncing) { return }
+        $g = $script:gui
+        if ($g.Syncing) { return }
+        if ($e.NewValue -eq 'Checked' -and $g.Unavailable.ContainsKey($g.Build.Patches[$e.Index].Id)) {
+            $e.NewValue = 'Unchecked'   # cannot be ticked: resources not found
+            $c.Log.ForeColor = 'Firebrick'
+            $c.Log.Text = 'Resources not found for this fix in the output folder: ' + $g.Unavailable[$g.Build.Patches[$e.Index].Id]
+        }
+        # "Select all" mirrors "every available fix is ticked"
         $all = $true
         for ($i = 0; $i -lt $c.List.Items.Count; $i++) {
+            if ($g.Unavailable.ContainsKey($g.Build.Patches[$i].Id)) { continue }
             $checked = if ($i -eq $e.Index) { $e.NewValue -eq 'Checked' } else { $c.List.GetItemChecked($i) }
             if (-not $checked) { $all = $false }
         }
-        $script:gui.Syncing = $true; $c.All.Checked = $all; $script:gui.Syncing = $false
+        $g.Syncing = $true; $c.All.Checked = $all; $g.Syncing = $false
     })
 
     $c.List.Add_SelectedIndexChanged({
@@ -2773,7 +2903,12 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $g = $script:gui
         if (-not $g.Build -or $c.List.SelectedIndex -lt 0) { return }
         $p = $g.Build.Patches[$c.List.SelectedIndex]
-        $lines = @(
+        $lines = @()
+        if ($g.Unavailable.ContainsKey($p.Id)) {
+            $lines += @('RESOURCES NOT FOUND - this fix cannot be applied into the output folder:', ('  ' + $g.Unavailable[$p.Id]),
+                        '  Copy the game folder from the repository (https://github.com/endotermic/Dark-Colony), or write', '  the exe into it.', '')
+        }
+        $lines += @(
             $p.Name, ('=' * $p.Name.Length),
             ('id {0}   added {1}   {2} byte edits' -f $p.Id, $p.Date, (Get-EditCount $p)),
             ('made with {0}' -f $p.Tool), ('documented in {0}' -f $p.Doc), ''
@@ -2893,8 +3028,20 @@ if (-not $build) {
 Write-Host ("build : {0}" -f $build.Title)
 
 $available = @($build.Patches)
+if (-not $Output) { $Output = Join-Path (Split-Path $origPath) $build.OutputName }
+$gameDir = Split-Path -Parent ([System.IO.Path]::GetFullPath($Output))
+$unavailable = Get-UnavailableFixes $build $gameDir
 if ($All) {
-    $chosen = $available
+    # every fix whose resources are in the target folder; the others are skipped and reported
+    $chosen = @()
+    foreach ($p in $available) {
+        if ($unavailable.ContainsKey($p.Id) -and -not $IgnoreMissingData) {
+            Write-Host ("skipping [{0,-10}] {1,-45} RESOURCES NOT FOUND: {2}" -f $p.Id, $p.Name, $unavailable[$p.Id]) -ForegroundColor DarkYellow
+        } else {
+            $chosen += $p
+        }
+    }
+    if ($chosen.Count -eq 0) { throw 'nothing to apply: no fix has its resources in the target folder' }
 } else {
     # accept -Patches a,b,c from a PowerShell prompt (array) as well as "a,b,c" / "a b c" from cmd / -File (one string)
     $chosen = @()
@@ -2904,11 +3051,9 @@ if ($All) {
         $chosen += $p
     }
 }
-if (-not $Output) { $Output = Join-Path (Split-Path $origPath) $build.OutputName }
 if ((Test-Path $Output) -and -not $Overwrite) { throw "output '$Output' exists; pass -Overwrite to replace it" }
 if ((Test-Path $Output) -and ((Resolve-Path $Output).Path -eq $origPath)) { throw 'refusing to overwrite the original' }
 
-$gameDir = Split-Path -Parent ([System.IO.Path]::GetFullPath($Output))
 $problems = @(Get-DataProblems $build $chosen $gameDir)
 if ($problems.Count -gt 0) {
     foreach ($pr in $problems) { Write-Warning $pr }
@@ -2932,4 +3077,6 @@ if ($r.Complete) {
     else { Write-Warning 'all patches applied but the SHA-256 differs from the published executable - report this.' }
 } else {
     Write-Host ("        {0} of {1} patches applied ({2}); a partial build has no published reference hash." -f $r.Applied.Count, $available.Count, (($r.Applied | ForEach-Object { $_.Id }) -join ', '))
+    $skipped = @($available | Where-Object { $p = $_; -not ($r.Applied | Where-Object { $_.Id -eq $p.Id }) -and $unavailable.ContainsKey($p.Id) } | ForEach-Object { $_.Id })
+    if ($skipped.Count -gt 0) { Write-Host ("        not applied, resources not found: {0}" -f ($skipped -join ', ')) -ForegroundColor DarkYellow }
 }
