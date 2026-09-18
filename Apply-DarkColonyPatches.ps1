@@ -123,7 +123,7 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '572646e4c09d805d56e9d5b6a2497d9d30340328343ccb192a144eab2e748efc'   # every patch applied = the exe in the repository (14 Sep 2026)
+        PatchedSha256  = '49d2430ebe576bc5b3b893bfe401e8440b37104ea4a9f641f47bf89e8d5df6b2'   # every patch applied = the exe in the repository (14 Sep 2026)
         Patches        = @(
 
             # ---- cdcheck: No CD required ---------------------------------------------------------
@@ -618,6 +618,70 @@ patch below (select both); with stock 640x480 data the menus draw in the top-lef
                 )
             }
 
+            # ---- cddrive: No CD-drive access (a not-ready drive D: no longer hangs the game) ---------------------------------------------------------
+            #  Added      : 18 Sep 2026
+            #  Made with  : tools/patch_nocd.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19
+            #  Changes    : 2 bytes in 2 edits
+            #  "No CD required" only ignores the ANSWER of the CD test.  The test itself still runs, and it
+            #  runs often: at start-up the game reads the drive letter its installer recorded in HBNFUFL.A01 /
+            #  HBNFUFL.A02 ("D:" in the repository), builds the path "D:\dc\" and probes it - it opens
+            #  D:\dc\anim.dat and, if that exists, tries to create a file there to see whether the medium
+            #  refuses writes.  The same probe is repeated every time a menu screen opens and periodically
+            #  while a battle runs, and two loaders fall back to "D:\dc\<name>" when a file is missing locally.
+            #
+            #  The game never tells Windows to fail such accesses quietly (no SetErrorMode call), so when the
+            #  letter D: belongs to a drive that is not ready - a card reader or a USB/optical drive without a
+            #  medium, a removable disk that was unplugged, a second hard disk that has spun down - Windows
+            #  either shows its "No Disk / Please insert a disk into drive ..." box behind the full-screen game
+            #  (a black screen that looks like a hang and reads like a CD request) or stalls the game for the
+            #  seconds the disk needs to wake up, at start-up and at every menu.  Reported by players with more
+            #  than one drive (18 Sep 2026).
+            #
+            #  Two single-byte edits per exe make the game drive-letter free: the probe function returns at
+            #  once (its first instruction becomes "ret"; the "CD present" flag stays 0, which the "No CD
+            #  required" bypasses assume anyway), and the path format string "%c:\dc\" loses its first
+            #  character, so the CD path is the empty string and the fallbacks for a missing file retry the
+            #  local name instead of opening a path on another drive.  No code moves, no relocation changes.
+            @{
+                Id = 'cddrive'; Name = 'No CD-drive access (a not-ready drive D: no longer hangs the game)'; Date = '18 Sep 2026'
+                Tool = 'tools/patch_nocd.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19'
+                Description = @'
+"No CD required" only ignores the ANSWER of the CD test.  The test itself still runs, and it
+runs often: at start-up the game reads the drive letter its installer recorded in HBNFUFL.A01 /
+HBNFUFL.A02 ("D:" in the repository), builds the path "D:\dc\" and probes it - it opens
+D:\dc\anim.dat and, if that exists, tries to create a file there to see whether the medium
+refuses writes.  The same probe is repeated every time a menu screen opens and periodically
+while a battle runs, and two loaders fall back to "D:\dc\<name>" when a file is missing locally.
+
+The game never tells Windows to fail such accesses quietly (no SetErrorMode call), so when the
+letter D: belongs to a drive that is not ready - a card reader or a USB/optical drive without a
+medium, a removable disk that was unplugged, a second hard disk that has spun down - Windows
+either shows its "No Disk / Please insert a disk into drive ..." box behind the full-screen game
+(a black screen that looks like a hang and reads like a CD request) or stalls the game for the
+seconds the disk needs to wake up, at start-up and at every menu.  Reported by players with more
+than one drive (18 Sep 2026).
+
+Two single-byte edits per exe make the game drive-letter free: the probe function returns at
+once (its first instruction becomes "ret"; the "CD present" flag stays 0, which the "No CD
+required" bypasses assume anyway), and the path format string "%c:\dc\" loses its first
+character, so the CD path is the empty string and the fallbacks for a missing file retry the
+local name instead of opening a path on another drive.  No code moves, no relocation changes.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # cd_probe (safefunc.c) entry: push ebx -> ret, the probe that opens <drive>:\dc\anim.dat at start-up, at every menu screen and in game returns at once, the "CD present" flag stays 0
+                    @{ Offset = 0x52AC; Old = '53'; New = 'C3' }
+                    # DGROUP format string "%c:\dc\" -> "" (first byte NUL): the CD path built from HBNFUFL.A0x becomes empty, so the fallbacks for a missing file retry the local name instead of a path on another drive
+                    @{ Offset = 0x7FE54; Old = '25'; New = '00' }
+                )
+            }
+
             # ---- hdpaths: Interface data from INTRF_HD (1024x768 files renamed) ---------------------------------------------------------
             #  Added      : 14 Sep 2026
             #  Made with  : tools/patch_hd_paths.py
@@ -1072,7 +1136,7 @@ data from INTRF_HD" fix).  Dark Colony only: the Council Wars exe's intro.avi is
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '5e4f12fd9812976f362116ab269107aa3354bfb4d927c316b7d1485e7963dbe2'   # every patch applied = the exe in the repository (14 Sep 2026)
+        PatchedSha256  = 'b4fcee801ae827a16ec2d524e0dabba1855d1174ec11c6e4b89be4ee1ff2c9f9'   # every patch applied = the exe in the repository (14 Sep 2026)
         Patches        = @(
 
             # ---- cdcheck: No CD required ---------------------------------------------------------
@@ -1571,6 +1635,70 @@ patch below (select both); with stock 640x480 data the menus draw in the top-lef
                     @{ Offset = 0x867DC; Old = '80 02 00 00'; New = '00 04 00 00' }
                     # screen height global
                     @{ Offset = 0x867E0; Old = 'E0 01 00 00'; New = '00 03 00 00' }
+                )
+            }
+
+            # ---- cddrive: No CD-drive access (a not-ready drive D: no longer hangs the game) ---------------------------------------------------------
+            #  Added      : 18 Sep 2026
+            #  Made with  : tools/patch_nocd.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19
+            #  Changes    : 2 bytes in 2 edits
+            #  "No CD required" only ignores the ANSWER of the CD test.  The test itself still runs, and it
+            #  runs often: at start-up the game reads the drive letter its installer recorded in HBNFUFL.A01 /
+            #  HBNFUFL.A02 ("D:" in the repository), builds the path "D:\dc\" and probes it - it opens
+            #  D:\dc\anim.dat and, if that exists, tries to create a file there to see whether the medium
+            #  refuses writes.  The same probe is repeated every time a menu screen opens and periodically
+            #  while a battle runs, and two loaders fall back to "D:\dc\<name>" when a file is missing locally.
+            #
+            #  The game never tells Windows to fail such accesses quietly (no SetErrorMode call), so when the
+            #  letter D: belongs to a drive that is not ready - a card reader or a USB/optical drive without a
+            #  medium, a removable disk that was unplugged, a second hard disk that has spun down - Windows
+            #  either shows its "No Disk / Please insert a disk into drive ..." box behind the full-screen game
+            #  (a black screen that looks like a hang and reads like a CD request) or stalls the game for the
+            #  seconds the disk needs to wake up, at start-up and at every menu.  Reported by players with more
+            #  than one drive (18 Sep 2026).
+            #
+            #  Two single-byte edits per exe make the game drive-letter free: the probe function returns at
+            #  once (its first instruction becomes "ret"; the "CD present" flag stays 0, which the "No CD
+            #  required" bypasses assume anyway), and the path format string "%c:\dc\" loses its first
+            #  character, so the CD path is the empty string and the fallbacks for a missing file retry the
+            #  local name instead of opening a path on another drive.  No code moves, no relocation changes.
+            @{
+                Id = 'cddrive'; Name = 'No CD-drive access (a not-ready drive D: no longer hangs the game)'; Date = '18 Sep 2026'
+                Tool = 'tools/patch_nocd.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19'
+                Description = @'
+"No CD required" only ignores the ANSWER of the CD test.  The test itself still runs, and it
+runs often: at start-up the game reads the drive letter its installer recorded in HBNFUFL.A01 /
+HBNFUFL.A02 ("D:" in the repository), builds the path "D:\dc\" and probes it - it opens
+D:\dc\anim.dat and, if that exists, tries to create a file there to see whether the medium
+refuses writes.  The same probe is repeated every time a menu screen opens and periodically
+while a battle runs, and two loaders fall back to "D:\dc\<name>" when a file is missing locally.
+
+The game never tells Windows to fail such accesses quietly (no SetErrorMode call), so when the
+letter D: belongs to a drive that is not ready - a card reader or a USB/optical drive without a
+medium, a removable disk that was unplugged, a second hard disk that has spun down - Windows
+either shows its "No Disk / Please insert a disk into drive ..." box behind the full-screen game
+(a black screen that looks like a hang and reads like a CD request) or stalls the game for the
+seconds the disk needs to wake up, at start-up and at every menu.  Reported by players with more
+than one drive (18 Sep 2026).
+
+Two single-byte edits per exe make the game drive-letter free: the probe function returns at
+once (its first instruction becomes "ret"; the "CD present" flag stays 0, which the "No CD
+required" bypasses assume anyway), and the path format string "%c:\dc\" loses its first
+character, so the CD path is the empty string and the fallbacks for a missing file retry the
+local name instead of opening a path on another drive.  No code moves, no relocation changes.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # cd_probe (safefunc.c) entry: push ebx -> ret, the probe that opens <drive>:\dc\anim.dat at start-up, at every menu screen and in game returns at once, the "CD present" flag stays 0
+                    @{ Offset = 0x528C; Old = '53'; New = 'C3' }
+                    # DGROUP format string "%c:\dc\" -> "" (first byte NUL): the CD path built from HBNFUFL.A0x becomes empty, so the fallbacks for a missing file retry the local name instead of a path on another drive
+                    @{ Offset = 0x80054; Old = '25'; New = '00' }
                 )
             }
 
