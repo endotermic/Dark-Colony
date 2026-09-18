@@ -19,7 +19,7 @@ This repository ships two kinds of game executables:
     original enabled - what the Polish ozi_ns editor did, minus the
     translation)
         Dark Colony - Map editor\maped_ozi_ns_v1.2.exe
-    (no CD needed, no CD-drive access, 1024x768, hidden Windows
+    (no CD needed, no CD path at all, 1024x768, hidden Windows
     pointer, 32 MiB memory pool, 150 % default speed, two-monitor
     fix, ... and for Council Wars the OZI MISSIONS menu)
 
@@ -126,7 +126,7 @@ What makes it trustworthy:
       repository and the label disappears.
 
       To get the ORIGINAL 640x480 game that just does not ask for the
-      CD, tick only "No CD required" - plus "No CD-drive access" if
+      CD, tick only "No CD required" - plus "No CD path at all" if
       your PC has a card reader, an empty DVD drive or a second hard
       disk as drive D: (otherwise the game still probes that drive at
       every menu and can hang behind a "No Disk" box or stall).

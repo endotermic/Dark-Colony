@@ -123,7 +123,7 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '49d2430ebe576bc5b3b893bfe401e8440b37104ea4a9f641f47bf89e8d5df6b2'   # every patch applied = the exe in the repository (14 Sep 2026)
+        PatchedSha256  = 'c54f434f19b2cf56a613c1a87b7ef368cbc5f3aca3bb6446d0ea68e4f8a25be6'   # every patch applied = the exe in the repository (14 Sep 2026)
         Patches        = @(
 
             # ---- cdcheck: No CD required ---------------------------------------------------------
@@ -618,17 +618,19 @@ patch below (select both); with stock 640x480 data the menus draw in the top-lef
                 )
             }
 
-            # ---- cddrive: No CD-drive access (a not-ready drive D: no longer hangs the game) ---------------------------------------------------------
+            # ---- cddrive: No CD path at all (no HBNFUFL, no drive probe, no CD fallback, no "insert the CD") ---------------------------------------------------------
             #  Added      : 18 Sep 2026
             #  Made with  : tools/patch_nocd.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19
-            #  Changes    : 2 bytes in 2 edits
-            #  "No CD required" only ignores the ANSWER of the CD test.  The test itself still runs, and it
-            #  runs often: at start-up the game reads the drive letter its installer recorded in HBNFUFL.A01 /
-            #  HBNFUFL.A02 ("D:" in the repository), builds the path "D:\dc\" and probes it - it opens
-            #  D:\dc\anim.dat and, if that exists, tries to create a file there to see whether the medium
-            #  refuses writes.  The same probe is repeated every time a menu screen opens and periodically
-            #  while a battle runs, and two loaders fall back to "D:\dc\<name>" when a file is missing locally.
+            #  Changes    : 92 bytes in 11 edits
+            #  "No CD required" only ignores the ANSWER of the CD test.  All the CD machinery stays in the
+            #  exe and runs: at start-up the game opens HBNFUFL.A01 / HBNFUFL.A02 (the drive letter its
+            #  installer recorded, "D:" in the repository; a missing file is a silent exit), builds the path
+            #  "D:\dc\" and probes it - it opens D:\dc\anim.dat and, if that exists, tries to create a file
+            #  there to see whether the medium refuses writes.  The same probe runs again every time a menu
+            #  screen opens and periodically during a battle, two loaders fall back to "D:\dc\<name>" when a
+            #  file is missing locally, the sound loader then asks to "insert The Dark Colony CD and Restart",
+            #  and the movie opener falls back to the CD when the flag says the disc is in.
             #
             #  The game never tells Windows to fail such accesses quietly (no SetErrorMode call), so when the
             #  letter D: belongs to a drive that is not ready - a card reader or a USB/optical drive without a
@@ -636,23 +638,32 @@ patch below (select both); with stock 640x480 data the menus draw in the top-lef
             #  either shows its "No Disk / Please insert a disk into drive ..." box behind the full-screen game
             #  (a black screen that looks like a hang and reads like a CD request) or stalls the game for the
             #  seconds the disk needs to wake up, at start-up and at every menu.  Reported by players with more
-            #  than one drive (18 Sep 2026).
+            #  than one drive (18 Sep 2026); maintainer decision the same day: the game must not touch the CD
+            #  path at all.
             #
-            #  Two single-byte edits per exe make the game drive-letter free: the probe function returns at
-            #  once (its first instruction becomes "ret"; the "CD present" flag stays 0, which the "No CD
-            #  required" bypasses assume anyway), and the path format string "%c:\dc\" loses its first
-            #  character, so the CD path is the empty string and the fallbacks for a missing file retry the
-            #  local name instead of opening a path on another drive.  No code moves, no relocation changes.
+            #  Nine edits per exe, all inside existing instructions and strings, plus two relocation entries:
+            #    * start-up: the two instructions that load the HBNFUFL name become a jump over the whole
+            #      block - HBNFUFL is never opened, no drive letter is read, no CD path is built; the two
+            #      absolute operands that vanish had .reloc entries, which become type-0 padding
+            #    * start-up: the "call cd_probe" becomes five NOPs; cd_probe itself starts with "ret" for the
+            #      two remaining callers (menu screens, in-game check)
+            #    * the generic file-open helper and the sound loader jump to their ordinary "file missing"
+            #      exits instead of trying "<CD path><name>"; the movie opener never takes its CD branch
+            #    * the dead "%c:\dc\" format string is zeroed; the sound loader's box now says
+            #      "FILE NOT FOUND / A sound file is missing - see error.log" instead of asking for the disc
+            #  The patched exe no longer needs HBNFUFL.A01 / .A02 (the originals still do).  Nothing moves.
             @{
-                Id = 'cddrive'; Name = 'No CD-drive access (a not-ready drive D: no longer hangs the game)'; Date = '18 Sep 2026'
+                Id = 'cddrive'; Name = 'No CD path at all (no HBNFUFL, no drive probe, no CD fallback, no "insert the CD")'; Date = '18 Sep 2026'
                 Tool = 'tools/patch_nocd.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19'
                 Description = @'
-"No CD required" only ignores the ANSWER of the CD test.  The test itself still runs, and it
-runs often: at start-up the game reads the drive letter its installer recorded in HBNFUFL.A01 /
-HBNFUFL.A02 ("D:" in the repository), builds the path "D:\dc\" and probes it - it opens
-D:\dc\anim.dat and, if that exists, tries to create a file there to see whether the medium
-refuses writes.  The same probe is repeated every time a menu screen opens and periodically
-while a battle runs, and two loaders fall back to "D:\dc\<name>" when a file is missing locally.
+"No CD required" only ignores the ANSWER of the CD test.  All the CD machinery stays in the
+exe and runs: at start-up the game opens HBNFUFL.A01 / HBNFUFL.A02 (the drive letter its
+installer recorded, "D:" in the repository; a missing file is a silent exit), builds the path
+"D:\dc\" and probes it - it opens D:\dc\anim.dat and, if that exists, tries to create a file
+there to see whether the medium refuses writes.  The same probe runs again every time a menu
+screen opens and periodically during a battle, two loaders fall back to "D:\dc\<name>" when a
+file is missing locally, the sound loader then asks to "insert The Dark Colony CD and Restart",
+and the movie opener falls back to the CD when the flag says the disc is in.
 
 The game never tells Windows to fail such accesses quietly (no SetErrorMode call), so when the
 letter D: belongs to a drive that is not ready - a card reader or a USB/optical drive without a
@@ -660,13 +671,20 @@ medium, a removable disk that was unplugged, a second hard disk that has spun do
 either shows its "No Disk / Please insert a disk into drive ..." box behind the full-screen game
 (a black screen that looks like a hang and reads like a CD request) or stalls the game for the
 seconds the disk needs to wake up, at start-up and at every menu.  Reported by players with more
-than one drive (18 Sep 2026).
+than one drive (18 Sep 2026); maintainer decision the same day: the game must not touch the CD
+path at all.
 
-Two single-byte edits per exe make the game drive-letter free: the probe function returns at
-once (its first instruction becomes "ret"; the "CD present" flag stays 0, which the "No CD
-required" bypasses assume anyway), and the path format string "%c:\dc\" loses its first
-character, so the CD path is the empty string and the fallbacks for a missing file retry the
-local name instead of opening a path on another drive.  No code moves, no relocation changes.
+Nine edits per exe, all inside existing instructions and strings, plus two relocation entries:
+  * start-up: the two instructions that load the HBNFUFL name become a jump over the whole
+    block - HBNFUFL is never opened, no drive letter is read, no CD path is built; the two
+    absolute operands that vanish had .reloc entries, which become type-0 padding
+  * start-up: the "call cd_probe" becomes five NOPs; cd_probe itself starts with "ret" for the
+    two remaining callers (menu screens, in-game check)
+  * the generic file-open helper and the sound loader jump to their ordinary "file missing"
+    exits instead of trying "<CD path><name>"; the movie opener never takes its CD branch
+  * the dead "%c:\dc\" format string is zeroed; the sound loader's box now says
+    "FILE NOT FOUND / A sound file is missing - see error.log" instead of asking for the disc
+The patched exe no longer needs HBNFUFL.A01 / .A02 (the originals still do).  Nothing moves.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
@@ -675,10 +693,28 @@ local name instead of opening a path on another drive.  No code moves, no reloca
                 Data = @(
                 )
                 Edits = @(
-                    # cd_probe (safefunc.c) entry: push ebx -> ret, the probe that opens <drive>:\dc\anim.dat at start-up, at every menu screen and in game returns at once, the "CD present" flag stays 0
+                    # movie opener: je <no CD> -> jmp (never the CD path, whatever the flag says)
+                    @{ Offset = 0x478; Old = '74 63'; New = 'EB 63' }
+                    # cd_probe entry: push ebx -> ret (the two remaining callers, load_interface and the in-game check, get nothing)
                     @{ Offset = 0x52AC; Old = '53'; New = 'C3' }
-                    # DGROUP format string "%c:\dc\" -> "" (first byte NUL): the CD path built from HBNFUFL.A0x becomes empty, so the fallbacks for a missing file retry the local name instead of a path on another drive
-                    @{ Offset = 0x7FE54; Old = '25'; New = '00' }
+                    # start-up: mov edx,"r" / mov eax,"hbnfufl.a0x" -> jmp to the "full" marker check (HBNFUFL is not opened, no drive letter, no CD path, no probe)
+                    @{ Offset = 0x53B3; Old = 'BA 30 26 48 00 B8 44 26 48 00'; New = 'E9 9C 00 00 00 90 90 90 90 90' }
+                    # start-up: call cd_probe -> 5 NOPs
+                    @{ Offset = 0x5474; Old = 'E8 33 FE FF FF'; New = '90 90 90 90 90' }
+                    # open helper: je <try "<CD path><name>"> -> jmp <fail as for any missing file>
+                    @{ Offset = 0x57DF; Old = '0F 84 6E FE FF FF'; New = 'E9 F9 FE FF FF 90' }
+                    # wave loader: jne <found> -> jmp: after the two local names the loader takes its error exit instead of the two CD-path attempts
+                    @{ Offset = 0x51EE9; Old = '0F 85 D7 00 00 00'; New = 'E9 D8 00 00 00 90' }
+                    # DGROUP "%c:\dc\" (the CD-path format, now dead) -> 8 zero bytes
+                    @{ Offset = 0x7FE54; Old = '25 63 3A 5C 64 63 5C 00'; New = '00 00 00 00 00 00 00 00' }
+                    # DGROUP "CDROM NOT FOUND" -> "FILE NOT FOUND" (title of the wave loader's box for a missing WAV)
+                    @{ Offset = 0x855E0; Old = '43 44 52 4F 4D 20 4E 4F 54 20 46 4F 55 4E 44 00'; New = '46 49 4C 45 20 4E 4F 54 20 46 4F 55 4E 44 00 00' }
+                    # DGROUP "Please insert The Dark Colony ... CD and Restart" -> "A sound file is missing - see error.log" (NUL-padded to the old length)
+                    @{ Offset = 0x855F0; Old = '50 6C 65 61 73 65 20 69 6E 73 65 72 74 20 54 68 65 20 44 61 72 6B 20 43 6F 6C 6F 6E 79 20 43 44 20 61 6E 64 20 52 65 73 74 61 72 74 00'; New = '41 20 73 6F 75 6E 64 20 66 69 6C 65 20 69 73 20 6D 69 73 73 69 6E 67 20 2D 20 73 65 65 20 65 72 72 6F 72 2E 6C 6F 67 00 00 00 00 00 00' }
+                    # .reloc table: entry 3FB4 (type 3 HIGHLOW, page offset 0xFB4) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97A8A; Old = 'B4 3F'; New = 'B4 0F' }
+                    # .reloc table: entry 3FB9 (type 3 HIGHLOW, page offset 0xFB9) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97A8C; Old = 'B9 3F'; New = 'B9 0F' }
                 )
             }
 
@@ -1136,7 +1172,7 @@ data from INTRF_HD" fix).  Dark Colony only: the Council Wars exe's intro.avi is
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'b4fcee801ae827a16ec2d524e0dabba1855d1174ec11c6e4b89be4ee1ff2c9f9'   # every patch applied = the exe in the repository (14 Sep 2026)
+        PatchedSha256  = '13c9548990b2bc1cbf2c01fa35a48fa8bd726a59592cafd01a62fb828b4c9436'   # every patch applied = the exe in the repository (14 Sep 2026)
         Patches        = @(
 
             # ---- cdcheck: No CD required ---------------------------------------------------------
@@ -1638,17 +1674,19 @@ patch below (select both); with stock 640x480 data the menus draw in the top-lef
                 )
             }
 
-            # ---- cddrive: No CD-drive access (a not-ready drive D: no longer hangs the game) ---------------------------------------------------------
+            # ---- cddrive: No CD path at all (no HBNFUFL, no drive probe, no CD fallback, no "insert the CD") ---------------------------------------------------------
             #  Added      : 18 Sep 2026
             #  Made with  : tools/patch_nocd.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19
-            #  Changes    : 2 bytes in 2 edits
-            #  "No CD required" only ignores the ANSWER of the CD test.  The test itself still runs, and it
-            #  runs often: at start-up the game reads the drive letter its installer recorded in HBNFUFL.A01 /
-            #  HBNFUFL.A02 ("D:" in the repository), builds the path "D:\dc\" and probes it - it opens
-            #  D:\dc\anim.dat and, if that exists, tries to create a file there to see whether the medium
-            #  refuses writes.  The same probe is repeated every time a menu screen opens and periodically
-            #  while a battle runs, and two loaders fall back to "D:\dc\<name>" when a file is missing locally.
+            #  Changes    : 124 bytes in 11 edits
+            #  "No CD required" only ignores the ANSWER of the CD test.  All the CD machinery stays in the
+            #  exe and runs: at start-up the game opens HBNFUFL.A01 / HBNFUFL.A02 (the drive letter its
+            #  installer recorded, "D:" in the repository; a missing file is a silent exit), builds the path
+            #  "D:\dc\" and probes it - it opens D:\dc\anim.dat and, if that exists, tries to create a file
+            #  there to see whether the medium refuses writes.  The same probe runs again every time a menu
+            #  screen opens and periodically during a battle, two loaders fall back to "D:\dc\<name>" when a
+            #  file is missing locally, the sound loader then asks to "insert The Dark Colony CD and Restart",
+            #  and the movie opener falls back to the CD when the flag says the disc is in.
             #
             #  The game never tells Windows to fail such accesses quietly (no SetErrorMode call), so when the
             #  letter D: belongs to a drive that is not ready - a card reader or a USB/optical drive without a
@@ -1656,23 +1694,32 @@ patch below (select both); with stock 640x480 data the menus draw in the top-lef
             #  either shows its "No Disk / Please insert a disk into drive ..." box behind the full-screen game
             #  (a black screen that looks like a hang and reads like a CD request) or stalls the game for the
             #  seconds the disk needs to wake up, at start-up and at every menu.  Reported by players with more
-            #  than one drive (18 Sep 2026).
+            #  than one drive (18 Sep 2026); maintainer decision the same day: the game must not touch the CD
+            #  path at all.
             #
-            #  Two single-byte edits per exe make the game drive-letter free: the probe function returns at
-            #  once (its first instruction becomes "ret"; the "CD present" flag stays 0, which the "No CD
-            #  required" bypasses assume anyway), and the path format string "%c:\dc\" loses its first
-            #  character, so the CD path is the empty string and the fallbacks for a missing file retry the
-            #  local name instead of opening a path on another drive.  No code moves, no relocation changes.
+            #  Nine edits per exe, all inside existing instructions and strings, plus two relocation entries:
+            #    * start-up: the two instructions that load the HBNFUFL name become a jump over the whole
+            #      block - HBNFUFL is never opened, no drive letter is read, no CD path is built; the two
+            #      absolute operands that vanish had .reloc entries, which become type-0 padding
+            #    * start-up: the "call cd_probe" becomes five NOPs; cd_probe itself starts with "ret" for the
+            #      two remaining callers (menu screens, in-game check)
+            #    * the generic file-open helper and the sound loader jump to their ordinary "file missing"
+            #      exits instead of trying "<CD path><name>"; the movie opener never takes its CD branch
+            #    * the dead "%c:\dc\" format string is zeroed; the sound loader's box now says
+            #      "FILE NOT FOUND / A sound file is missing - see error.log" instead of asking for the disc
+            #  The patched exe no longer needs HBNFUFL.A01 / .A02 (the originals still do).  Nothing moves.
             @{
-                Id = 'cddrive'; Name = 'No CD-drive access (a not-ready drive D: no longer hangs the game)'; Date = '18 Sep 2026'
+                Id = 'cddrive'; Name = 'No CD path at all (no HBNFUFL, no drive probe, no CD fallback, no "insert the CD")'; Date = '18 Sep 2026'
                 Tool = 'tools/patch_nocd.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19'
                 Description = @'
-"No CD required" only ignores the ANSWER of the CD test.  The test itself still runs, and it
-runs often: at start-up the game reads the drive letter its installer recorded in HBNFUFL.A01 /
-HBNFUFL.A02 ("D:" in the repository), builds the path "D:\dc\" and probes it - it opens
-D:\dc\anim.dat and, if that exists, tries to create a file there to see whether the medium
-refuses writes.  The same probe is repeated every time a menu screen opens and periodically
-while a battle runs, and two loaders fall back to "D:\dc\<name>" when a file is missing locally.
+"No CD required" only ignores the ANSWER of the CD test.  All the CD machinery stays in the
+exe and runs: at start-up the game opens HBNFUFL.A01 / HBNFUFL.A02 (the drive letter its
+installer recorded, "D:" in the repository; a missing file is a silent exit), builds the path
+"D:\dc\" and probes it - it opens D:\dc\anim.dat and, if that exists, tries to create a file
+there to see whether the medium refuses writes.  The same probe runs again every time a menu
+screen opens and periodically during a battle, two loaders fall back to "D:\dc\<name>" when a
+file is missing locally, the sound loader then asks to "insert The Dark Colony CD and Restart",
+and the movie opener falls back to the CD when the flag says the disc is in.
 
 The game never tells Windows to fail such accesses quietly (no SetErrorMode call), so when the
 letter D: belongs to a drive that is not ready - a card reader or a USB/optical drive without a
@@ -1680,13 +1727,20 @@ medium, a removable disk that was unplugged, a second hard disk that has spun do
 either shows its "No Disk / Please insert a disk into drive ..." box behind the full-screen game
 (a black screen that looks like a hang and reads like a CD request) or stalls the game for the
 seconds the disk needs to wake up, at start-up and at every menu.  Reported by players with more
-than one drive (18 Sep 2026).
+than one drive (18 Sep 2026); maintainer decision the same day: the game must not touch the CD
+path at all.
 
-Two single-byte edits per exe make the game drive-letter free: the probe function returns at
-once (its first instruction becomes "ret"; the "CD present" flag stays 0, which the "No CD
-required" bypasses assume anyway), and the path format string "%c:\dc\" loses its first
-character, so the CD path is the empty string and the fallbacks for a missing file retry the
-local name instead of opening a path on another drive.  No code moves, no relocation changes.
+Nine edits per exe, all inside existing instructions and strings, plus two relocation entries:
+  * start-up: the two instructions that load the HBNFUFL name become a jump over the whole
+    block - HBNFUFL is never opened, no drive letter is read, no CD path is built; the two
+    absolute operands that vanish had .reloc entries, which become type-0 padding
+  * start-up: the "call cd_probe" becomes five NOPs; cd_probe itself starts with "ret" for the
+    two remaining callers (menu screens, in-game check)
+  * the generic file-open helper and the sound loader jump to their ordinary "file missing"
+    exits instead of trying "<CD path><name>"; the movie opener never takes its CD branch
+  * the dead "%c:\dc\" format string is zeroed; the sound loader's box now says
+    "FILE NOT FOUND / A sound file is missing - see error.log" instead of asking for the disc
+The patched exe no longer needs HBNFUFL.A01 / .A02 (the originals still do).  Nothing moves.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
@@ -1695,10 +1749,28 @@ local name instead of opening a path on another drive.  No code moves, no reloca
                 Data = @(
                 )
                 Edits = @(
-                    # cd_probe (safefunc.c) entry: push ebx -> ret, the probe that opens <drive>:\dc\anim.dat at start-up, at every menu screen and in game returns at once, the "CD present" flag stays 0
+                    # movie opener: je <no CD> -> jmp (never the CD path, whatever the flag says)
+                    @{ Offset = 0x478; Old = '74 63'; New = 'EB 63' }
+                    # cd_probe entry: push ebx -> ret (the two remaining callers, load_interface and the in-game check, get nothing)
                     @{ Offset = 0x528C; Old = '53'; New = 'C3' }
-                    # DGROUP format string "%c:\dc\" -> "" (first byte NUL): the CD path built from HBNFUFL.A0x becomes empty, so the fallbacks for a missing file retry the local name instead of a path on another drive
-                    @{ Offset = 0x80054; Old = '25'; New = '00' }
+                    # start-up: mov edx,"r" / mov eax,"hbnfufl.a0x" -> jmp to the "full" marker check (HBNFUFL is not opened, no drive letter, no CD path, no probe)
+                    @{ Offset = 0x5393; Old = 'BA 30 26 48 00 B8 44 26 48 00'; New = 'E9 9C 00 00 00 90 90 90 90 90' }
+                    # start-up: call cd_probe -> 5 NOPs
+                    @{ Offset = 0x5454; Old = 'E8 33 FE FF FF'; New = '90 90 90 90 90' }
+                    # open helper: je <try "<CD path><name>"> -> jmp <fail as for any missing file>
+                    @{ Offset = 0x57BF; Old = '0F 84 6E FE FF FF'; New = 'E9 F9 FE FF FF 90' }
+                    # wave loader: jne <found> -> jmp: after the two local names the loader takes its error exit instead of the two CD-path attempts
+                    @{ Offset = 0x51F49; Old = '0F 85 D7 00 00 00'; New = 'E9 D8 00 00 00 90' }
+                    # DGROUP "%c:\dc\" (the CD-path format, now dead) -> 8 zero bytes
+                    @{ Offset = 0x80054; Old = '25 63 3A 5C 64 63 5C 00'; New = '00 00 00 00 00 00 00 00' }
+                    # DGROUP "CDROM NOT FOUND" -> "FILE NOT FOUND" (title of the wave loader's box for a missing WAV)
+                    @{ Offset = 0x857E8; Old = '43 44 52 4F 4D 20 4E 4F 54 20 46 4F 55 4E 44 00'; New = '46 49 4C 45 20 4E 4F 54 20 46 4F 55 4E 44 00 00' }
+                    # DGROUP "Please insert The Dark Colony ... CD and Restart" -> "A sound file is missing - see error.log" (NUL-padded to the old length)
+                    @{ Offset = 0x857F8; Old = '50 6C 65 61 73 65 20 69 6E 73 65 72 74 20 54 68 65 20 44 61 72 6B 20 43 6F 6C 6F 6E 79 20 45 78 70 61 6E 73 69 6F 6E 20 50 61 6B 20 43 44 20 2D 20 54 68 65 20 43 6F 75 6E 63 69 6C 20 57 61 72 73 20 61 6E 64 20 52 65 73 74 61 72 74 00'; New = '41 20 73 6F 75 6E 64 20 66 69 6C 65 20 69 73 20 6D 69 73 73 69 6E 67 20 2D 20 73 65 65 20 65 72 72 6F 72 2E 6C 6F 67 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
+                    # .reloc table: entry 3F94 (type 3 HIGHLOW, page offset 0xF94) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97C88; Old = '94 3F'; New = '94 0F' }
+                    # .reloc table: entry 3F99 (type 3 HIGHLOW, page offset 0xF99) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97C8A; Old = '99 3F'; New = '99 0F' }
                 )
             }
 
