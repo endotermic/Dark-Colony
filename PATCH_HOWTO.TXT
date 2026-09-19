@@ -163,7 +163,9 @@ What makes it trustworthy:
 
    Patch ids: nocd, resolution, hdpaths, cursor, pool, speed, clock,
    ddraw, for Dark Colony only movies (the Classic intro and endings
-   under their DC* names) and, for Council Wars only, ozi.  Map editor:
+   under their DC* names) and sounds (WAV files read from the game
+   root, not from exp\; the Classic briefings) and, for Council Wars only,
+   ozi.  Map editor:
    blocksets, teams, healer, troopsframe.  -Output sets the target
    file, -Overwrite allows replacing an existing one.
 

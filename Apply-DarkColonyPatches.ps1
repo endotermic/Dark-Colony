@@ -123,7 +123,7 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = 'c54f434f19b2cf56a613c1a87b7ef368cbc5f3aca3bb6446d0ea68e4f8a25be6'   # every patch applied = the exe in the repository (14 Sep 2026)
+        PatchedSha256  = '89894d73f0e5fc3184c2127fc006a7bc0d6ffff9f143973da3743c26803ca200'   # every patch applied = the exe in the repository (14 Sep 2026)
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -1126,6 +1126,48 @@ data from INTRF_HD" fix).  Dark Colony only: the Council Wars exe's intro.avi is
                 Edits = @(
                     # DGROUP string "intro.avi" -> "dcintro.avi": 69 6e 74 72 6f 2e 61 76 69 00 00 00 -> 64 63 69 6e 74 72 6f 2e 61 76 69 00; the movie name appended to "avi/" at start-up (0x004053A7) and by PLAY INTRO (0x004050FE); "intro.avi\0" plus its two alignment padding zeros is exactly 12 bytes, so the string grows in place, its address and the .reloc table are unchanged
                     @{ Offset = 0x7FCA8; Old = '69 6E 74 72 6F 2E 61 76 69 00 00 00'; New = '64 63 69 6E 74 72 6F 2E 61 76 69 00' }
+                )
+            }
+
+            # ---- sounds: WAV files read from the game root, not exp/: the Classic briefings and water ambience (Dark Colony only) ---------------------------------------------------------
+            #  Added      : 19 Sep 2026
+            #  Made with  : tools/patch_wavprefix.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.21
+            #  Changes    : 4 bytes in 1 edits
+            #  Classic and Council Wars are one code base.  Council Wars opens its files through a helper that
+            #  puts "exp/" in front of every name and falls back to the bare name; the Classic build has no such
+            #  prefix - except in the wave loader, the function that opens the mission briefings (mission/h1.wav,
+            #  g1.wav ...) and every other WAV.  Its own 8-byte prefix slot still says "exp/" in the Classic exe.
+            #  In the old "DC - Classic" folder no exp/ tree existed, so that first attempt always failed and
+            #  nothing was noticed.  Since both games share the "DC - Council wars" folder, exp/mission/h1-h8.wav
+            #  and g1-g8.wav are the Council Wars briefings and exp/sound/water.wav the Council Wars water sound:
+            #  the Classic exe found them first and played the wrong briefings for missions 1-8.  The fix empties
+            #  the prefix (the four letters become NUL) so the loader opens MISSION/ and SOUND/ directly.  Data
+            #  only, in place, no code and no relocation entry changes.
+            @{
+                Id = 'sounds'; Name = 'WAV files read from the game root, not exp/: the Classic briefings and water ambience (Dark Colony only)'; Date = '19 Sep 2026'
+                Tool = 'tools/patch_wavprefix.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.21'
+                Description = @'
+Classic and Council Wars are one code base.  Council Wars opens its files through a helper that
+puts "exp/" in front of every name and falls back to the bare name; the Classic build has no such
+prefix - except in the wave loader, the function that opens the mission briefings (mission/h1.wav,
+g1.wav ...) and every other WAV.  Its own 8-byte prefix slot still says "exp/" in the Classic exe.
+In the old "DC - Classic" folder no exp/ tree existed, so that first attempt always failed and
+nothing was noticed.  Since both games share the "DC - Council wars" folder, exp/mission/h1-h8.wav
+and g1-g8.wav are the Council Wars briefings and exp/sound/water.wav the Council Wars water sound:
+the Classic exe found them first and played the wrong briefings for missions 1-8.  The fix empties
+the prefix (the four letters become NUL) so the loader opens MISSION/ and SOUND/ directly.  Data
+only, in place, no code and no relocation entry changes.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # DGROUP string "exp/" -> "" (wave-loader prefix): 65 78 70 2f -> 00 00 00 00; the wave loader (0x00452A50) builds prefix+name first and falls back to the bare name, so in the shared Council Wars folder the Classic exe played exp/mission/h1-h8.wav, g1-g8.wav (the Council Wars briefings) and exp/sound/water.wav instead of the Classic files in MISSION/ and SOUND/; the slot is data only, same address, no code and no .reloc entry changes
+                    @{ Offset = 0x855C0; Old = '65 78 70 2F'; New = '00 00 00 00' }
                 )
             }
         )
