@@ -6990,8 +6990,9 @@ function Invoke-Patch([byte[]] $Data, $Patch) {
         $state = Get-EditState $Data $e
         if ($state -ne 'old') {
             $where = if ($e.ContainsKey('Insert')) { '0x{0:X}' -f $e.Insert } else { '0x{0:X}' -f $e.Offset }
-            throw ("fix '{0}': the bytes at file offset {1} are {2} - expected the documented original bytes. " +
-                   "Is this the untouched original exe?") -f $Patch.Id, $where, $(if ($state -eq 'new') { 'already patched' } else { 'unknown' })
+            $why = if ($state -eq 'new') { 'already patched - this file already carries the fix' } else { 'not the documented original bytes' }
+            throw ("fix '{0}': the bytes at file offset {1} are {2}. The fixes apply to the untouched original exe of the repository " +
+                   "(dc16.exe / ENGEXP16.EXE in 'DC - Council wars', maped.exe in the editor folder), not to an already patched build.") -f $Patch.Id, $where, $why
         }
     }
     $out = [byte[]] $Data.Clone()
@@ -8123,6 +8124,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
             return
         }
         $g.Path = $path; $g.Data = $data; $g.Build = $build; $g.IsOriginal = $isOriginal
+        $redirectOut = $null
         # the resolutions of this build; the default one preselected
         $g.Syncing = $true
         $c.Res.Items.Clear(); $g.ModeList = @($build.Modes)
@@ -8134,11 +8136,40 @@ function Show-PatcherWindow([string] $PreloadPath) {
             $c.Status.ForeColor = 'DarkGreen'
             $c.Status.Text = "$($build.Title)`r`nSHA-256 $sha = the untouched original."
         } else {
-            $c.Status.ForeColor = 'DarkOrange'
-            $c.Status.Text = "$($build.Title)`r`nSHA-256 does not match the untouched original (already patched, or another copy). Every byte is still checked before it is written."
+            # a known build, but not the untouched original: an already patched build (players pick the
+            # game exe they play, dc16new.exe, as the "original" - report of 21 Sep 2026), or another copy
+            $patched = $false
+            foreach ($e in $build.Patches[0].Edits) { if ((Get-EditState $data $e) -eq 'new') { $patched = $true } }
+            if ($patched) {
+                $name = [System.IO.Path]::GetFileName($path)
+                $origBeside = Join-Path (Split-Path $path) $build.OriginalName
+                $origData = $null
+                if (Test-Path -LiteralPath $origBeside) {
+                    try { $origData = [System.IO.File]::ReadAllBytes($origBeside) } catch { $origData = $null }
+                    if ($origData -and (Get-Sha256Hex $origData) -ne $build.OriginalSha256) { $origData = $null }
+                }
+                if ($origData) {
+                    # the untouched original sits beside it: that is the input, the picked file is the output
+                    $g.Path = $origBeside; $g.Data = $origData; $g.IsOriginal = $true
+                    $c.In.Text = $origBeside
+                    $redirectOut = $path
+                    $c.Status.ForeColor = 'DarkOrange'
+                    $c.Status.Text = "$name is already a patched build, not the untouched original.`r`nUsing $($build.OriginalName) beside it as the input (its SHA-256 is the untouched original); the result replaces $name."
+                } else {
+                    $c.Status.ForeColor = 'Firebrick'
+                    $c.Status.Text = "$name is already a patched build (fix $($build.Patches[0].Id) applied), not the untouched original - the fixes apply to the original only.`r`nBrowse to $($build.OriginalName) from the repository's game folder (https://github.com/endotermic/Dark-Colony), or put it beside this file and browse again."
+                    $c.List.Enabled = $false; $c.All.Enabled = $false; $c.Apply.Enabled = $false; $c.Res.Enabled = $false
+                    $g.Path = $null; $g.Data = $null; $g.Build = $null
+                    return
+                }
+            } else {
+                $c.Status.ForeColor = 'DarkOrange'
+                $c.Status.Text = "$($build.Title)`r`nSHA-256 does not match the untouched original (another copy?). Every byte is still checked before it is written."
+            }
         }
         $c.List.Enabled = $true; $c.All.Enabled = $true; $c.Apply.Enabled = $true
-        $c.Out.Text = Join-Path (Split-Path $path) $build.OutputName   # TextChanged -> Refresh (the list is not filled yet: no-op)
+        # TextChanged -> Refresh (the list is not filled yet: no-op)
+        $c.Out.Text = if ($redirectOut) { $redirectOut } else { Join-Path (Split-Path $path) $build.OutputName }
         & $script:gui.FillList
         $c.Log.Text = ''
     }
