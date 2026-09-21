@@ -147,13 +147,13 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '9f6b1f7b9bddd4548ac9e6187d865446b6efc85c49e809f601774594638e6c6f'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'ca488306b0d6f3c549b56c84bc7c8b4eb5efc8cfa227f9633bf26e196ba4ba91'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = 'e2bc82ff6569c38a5b98a9bfd92baa2b540d761897e79708fcf35d19f59ad788'; '1024x768' = '9f6b1f7b9bddd4548ac9e6187d865446b6efc85c49e809f601774594638e6c6f'; '1280x1024' = '24fa88bcb3cece4ad9a8acd4eaa7b13c2aa1c45a544751dfe567809ec1bdbc11'; '1280x720' = '1304b20ee676f1c2df67ea9870977b110bff2b95abe33e6236e02e979d26e905'; '1280x800' = '84fc06eb3562096759cfa1c73db41f03f6e29657a40416cb495d9da5eff3417a' }
+        ReferenceSha256 = @{ '640x480' = 'deb6c04444dae4d19681cf0c8162ff0a97f9df03ef99e6ac85c58e8d6ccc805b'; '1024x768' = 'ca488306b0d6f3c549b56c84bc7c8b4eb5efc8cfa227f9633bf26e196ba4ba91'; '1280x1024' = '4a42d6fa6020736a503de94a21103782f6104f177f18aa541343d9a0823b7b85'; '1280x720' = 'f741024ab45317aa3e56d5428bc681ae7911607b1131173e2fbe21f49ecd4647'; '1280x800' = '98a24204a329e01089aa80691175caaadfeb05504ccd57aae9dc9921c5d84c48' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -2791,7 +2791,7 @@ Only register-relative addressing, no relocation entries, nothing moves.  Harmle
             #  Added      : 21 Sep 2026
             #  Made with  : tools/patch_restore.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.28
-            #  Changes    : 87 bytes in 1 edits
+            #  Changes    : 86 bytes in 2 edits
             #  Leave the running game with Alt+Tab, the Win key or a click on another window and DirectDraw
             #  minimises it and restores the desktop resolution.  Coming back with Alt+Tab or the taskbar button
             #  the game stays minimised although it is the active window, or shows a black window at desktop
@@ -2809,9 +2809,15 @@ Only register-relative addressing, no relocation entries, nothing moves.  Harmle
             #  that is not minimised at the moment of activation, which is the path DirectDraw's hook handles: it
             #  re-sets the mode, the game's own per-frame surface restore repairs the surfaces and the next frame
             #  is drawn.  The two peeks it replaces looked for WM_SETCURSOR and WM_DESTROY, messages Windows never
-            #  posts (dead code).  The three calls go through the linker's import thunks; nothing moves, no
-            #  relocation entry changes.  Verified in game 21 Sep 2026 on both exes (Alt+Tab, taskbar button,
-            #  Start menu, minimise from the taskbar).
+            #  posts (dead code).  Second part: while minimised the game's main loop used to spin at 100 % of a
+            #  processor core - the per-frame present routine fails its blit, fails the surface restore and
+            #  returns early, so the Flip that normally paces the loop is never reached (about 4 400 passes per
+            #  second).  The branch taken after that failed restore now goes to a 12-byte stub in the spare tail
+            #  of the same block: Sleep(1) - one system timer period, at most 16 ms, well inside the 44 ms game
+            #  tick - then back to the routine's exit.  Game ticks are clock-driven and keep running while
+            #  minimised (a multiplayer client stays in the game), only the idle spin is gone.  The four calls go
+            #  through the linker's import thunks; nothing moves, no relocation entry changes.  Verified in game
+            #  21 Sep 2026 on both exes (Alt+Tab, taskbar button, Start menu, minimise from the taskbar).
             @{
                 Id = 'restore'; Name = 'Window restore after minimising: Alt+Tab and the taskbar bring the game back'; Date = '21 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
@@ -2835,9 +2841,15 @@ ShowWindow(SW_MINIMIZE) followed by ShowWindow(SW_RESTORE) - a deactivate/activa
 that is not minimised at the moment of activation, which is the path DirectDraw's hook handles: it
 re-sets the mode, the game's own per-frame surface restore repairs the surfaces and the next frame
 is drawn.  The two peeks it replaces looked for WM_SETCURSOR and WM_DESTROY, messages Windows never
-posts (dead code).  The three calls go through the linker's import thunks; nothing moves, no
-relocation entry changes.  Verified in game 21 Sep 2026 on both exes (Alt+Tab, taskbar button,
-Start menu, minimise from the taskbar).
+posts (dead code).  Second part: while minimised the game's main loop used to spin at 100 % of a
+processor core - the per-frame present routine fails its blit, fails the surface restore and
+returns early, so the Flip that normally paces the loop is never reached (about 4 400 passes per
+second).  The branch taken after that failed restore now goes to a 12-byte stub in the spare tail
+of the same block: Sleep(1) - one system timer period, at most 16 ms, well inside the 44 ms game
+tick - then back to the routine's exit.  Game ticks are clock-driven and keep running while
+minimised (a multiplayer client stays in the game), only the idle spin is gone.  The four calls go
+through the linker's import thunks; nothing moves, no relocation entry changes.  Verified in game
+21 Sep 2026 on both exes (Alt+Tab, taskbar button, Start menu, minimise from the taskbar).
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
@@ -2846,8 +2858,10 @@ Start menu, minimise from the taskbar).
                 Data = @(
                 )
                 Edits = @(
-                    # frame_end: posted WM_SYSCOMMAND dispatched, SC_RESTORE re-activates: the WM_SYSCOMMAND PeekMessageA(PM_REMOVE) keeps swallowing SC_SCREENSAVE but hands every other system command to DefWindowProcA(msg.hwnd, WM_SYSCOMMAND, wParam, lParam) - so the SC_RESTORE that Alt+Tab, the taskbar and Win+D post to a minimised window restores it; for SC_RESTORE it then calls ShowWindow(hwnd, SW_MINIMIZE) and ShowWindow(hwnd, SW_RESTORE), the deactivate/activate cycle on a non-iconic window that makes DirectDraw re-set the exclusive display mode; the two dead peeks for WM_SETCURSOR and WM_DESTROY (never posted) are replaced, the tail is NOP; calls through the import thunks 0x0047EFD8 / 0x0047EFBA / 0x0047EF90, no .reloc changes
-                    @{ Offset = 0x2E63D; Old = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 81 7D EC 40 F1 00 00 74 45 6A 01 6A 20 6A 20 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 6A 00 2E FF 15 E0 03 48 00 6A 01 6A 02 6A 02 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 0E E8 11 F0 FF FF 6A 00 2E FF 15 D8 03 48 00'; New = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 E8 84 FD 04 00 85 C0 74 50 81 7D EC 40 F1 00 00 74 47 FF 75 F0 FF 75 EC 68 12 01 00 00 FF 75 E4 E8 46 FD 04 00 81 7D EC 20 F1 00 00 75 2B 6A 06 FF 75 E4 E8 09 FD 04 00 6A 09 FF 75 E4 E8 FF FC 04 00 EB 15 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # present(): failed surface restore -> idle stub instead of exit: the jne after restore_surfaces (taken while the window is minimised: BltFast DDERR_SURFACELOST, Restore DDERR_WRONGMODE) goes to the stub at 0x0042F293, which sleeps one timer period and continues to the original exit 0x0042E2A1 - the main loop no longer spins at 100% CPU while minimised, game ticks are clock-driven and unaffected
+                    @{ Offset = 0x2D54F; Old = '0F 85 4C 01 00 00'; New = '0F 85 3E 11 00 00' }
+                    # frame_end: posted WM_SYSCOMMAND dispatched, SC_RESTORE re-activates: the WM_SYSCOMMAND PeekMessageA(PM_REMOVE) keeps swallowing SC_SCREENSAVE but hands every other system command to DefWindowProcA(msg.hwnd, WM_SYSCOMMAND, wParam, lParam) - so the SC_RESTORE that Alt+Tab, the taskbar and Win+D post to a minimised window restores it; for SC_RESTORE it then calls ShowWindow(hwnd, SW_MINIMIZE) and ShowWindow(hwnd, SW_RESTORE), the deactivate/activate cycle on a non-iconic window that makes DirectDraw re-set the exclusive display mode; the two dead peeks for WM_SETCURSOR and WM_DESTROY (never posted) are replaced; bytes 86..97 are the idle stub for present(): Sleep(1) through the thunk 0x0047F008, then jmp to the present() exit 0x0042E2A1; the rest is NOP; calls through the import thunks 0x0047EFD8 / 0x0047EFBA / 0x0047EF90, no .reloc changes
+                    @{ Offset = 0x2E63D; Old = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 81 7D EC 40 F1 00 00 74 45 6A 01 6A 20 6A 20 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 6A 00 2E FF 15 E0 03 48 00 6A 01 6A 02 6A 02 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 0E E8 11 F0 FF FF 6A 00 2E FF 15 D8 03 48 00'; New = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 E8 84 FD 04 00 85 C0 74 50 81 7D EC 40 F1 00 00 74 47 FF 75 F0 FF 75 EC 68 12 01 00 00 FF 75 E4 E8 46 FD 04 00 81 7D EC 20 F1 00 00 75 2B 6A 06 FF 75 E4 E8 09 FD 04 00 6A 09 FF 75 E4 E8 FF FC 04 00 EB 15 6A 01 E8 6E FD 04 00 E9 02 F0 FF FF 90 90 90 90 90 90 90 90 90' }
                 )
             }
 
@@ -3018,13 +3032,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '89c662446b4d0a70923ecd9792e745308a80061340c6e33e2778edbfa5e96e44'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '2ae4e2e9631022279aca7f3a2267b95371431c7b8c17fe4b36ff62af44417e54'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '9fa939decd1330d6af6f1e35043849940923d05795b41fd59945f30aafe7cef3'; '1024x768' = '89c662446b4d0a70923ecd9792e745308a80061340c6e33e2778edbfa5e96e44'; '1280x1024' = 'f5aa04743e2b276b8ce1e1ac5a4bcf0fd6ca882e6a0fe0746392b7858dd5ce39'; '1280x720' = '89b0fcc341da6b663ea33341678190969899674659815589374114ea3cc213c1'; '1280x800' = '75cfb8addde31c1c8db54c4d03b1b1fb6279451f0ae65924a67c791c8172fb70' }
+        ReferenceSha256 = @{ '640x480' = '3142d17ef2753676cb802df8bcdda8fe822c94aeb5984644ef994991d9e4caba'; '1024x768' = '2ae4e2e9631022279aca7f3a2267b95371431c7b8c17fe4b36ff62af44417e54'; '1280x1024' = '3aec38686ad6c3d9b172b563222a37f689af32a097ef6dca33ead738e6aec1c4'; '1280x720' = '9a75e52864a8a4c452dffa2fbea66233994366da1bb49e24ea7173be19158bf1'; '1280x800' = 'ce9621470955c272de52901221895b1515e87c3272eab896fd19e4fc6e5c899b' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -5699,7 +5713,7 @@ Only register-relative addressing, no relocation entries, nothing moves.  Harmle
             #  Added      : 21 Sep 2026
             #  Made with  : tools/patch_restore.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.28
-            #  Changes    : 87 bytes in 1 edits
+            #  Changes    : 86 bytes in 2 edits
             #  Leave the running game with Alt+Tab, the Win key or a click on another window and DirectDraw
             #  minimises it and restores the desktop resolution.  Coming back with Alt+Tab or the taskbar button
             #  the game stays minimised although it is the active window, or shows a black window at desktop
@@ -5717,9 +5731,15 @@ Only register-relative addressing, no relocation entries, nothing moves.  Harmle
             #  that is not minimised at the moment of activation, which is the path DirectDraw's hook handles: it
             #  re-sets the mode, the game's own per-frame surface restore repairs the surfaces and the next frame
             #  is drawn.  The two peeks it replaces looked for WM_SETCURSOR and WM_DESTROY, messages Windows never
-            #  posts (dead code).  The three calls go through the linker's import thunks; nothing moves, no
-            #  relocation entry changes.  Verified in game 21 Sep 2026 on both exes (Alt+Tab, taskbar button,
-            #  Start menu, minimise from the taskbar).
+            #  posts (dead code).  Second part: while minimised the game's main loop used to spin at 100 % of a
+            #  processor core - the per-frame present routine fails its blit, fails the surface restore and
+            #  returns early, so the Flip that normally paces the loop is never reached (about 4 400 passes per
+            #  second).  The branch taken after that failed restore now goes to a 12-byte stub in the spare tail
+            #  of the same block: Sleep(1) - one system timer period, at most 16 ms, well inside the 44 ms game
+            #  tick - then back to the routine's exit.  Game ticks are clock-driven and keep running while
+            #  minimised (a multiplayer client stays in the game), only the idle spin is gone.  The four calls go
+            #  through the linker's import thunks; nothing moves, no relocation entry changes.  Verified in game
+            #  21 Sep 2026 on both exes (Alt+Tab, taskbar button, Start menu, minimise from the taskbar).
             @{
                 Id = 'restore'; Name = 'Window restore after minimising: Alt+Tab and the taskbar bring the game back'; Date = '21 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
@@ -5743,9 +5763,15 @@ ShowWindow(SW_MINIMIZE) followed by ShowWindow(SW_RESTORE) - a deactivate/activa
 that is not minimised at the moment of activation, which is the path DirectDraw's hook handles: it
 re-sets the mode, the game's own per-frame surface restore repairs the surfaces and the next frame
 is drawn.  The two peeks it replaces looked for WM_SETCURSOR and WM_DESTROY, messages Windows never
-posts (dead code).  The three calls go through the linker's import thunks; nothing moves, no
-relocation entry changes.  Verified in game 21 Sep 2026 on both exes (Alt+Tab, taskbar button,
-Start menu, minimise from the taskbar).
+posts (dead code).  Second part: while minimised the game's main loop used to spin at 100 % of a
+processor core - the per-frame present routine fails its blit, fails the surface restore and
+returns early, so the Flip that normally paces the loop is never reached (about 4 400 passes per
+second).  The branch taken after that failed restore now goes to a 12-byte stub in the spare tail
+of the same block: Sleep(1) - one system timer period, at most 16 ms, well inside the 44 ms game
+tick - then back to the routine's exit.  Game ticks are clock-driven and keep running while
+minimised (a multiplayer client stays in the game), only the idle spin is gone.  The four calls go
+through the linker's import thunks; nothing moves, no relocation entry changes.  Verified in game
+21 Sep 2026 on both exes (Alt+Tab, taskbar button, Start menu, minimise from the taskbar).
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
@@ -5754,8 +5780,10 @@ Start menu, minimise from the taskbar).
                 Data = @(
                 )
                 Edits = @(
-                    # frame_end: posted WM_SYSCOMMAND dispatched, SC_RESTORE re-activates: the WM_SYSCOMMAND PeekMessageA(PM_REMOVE) keeps swallowing SC_SCREENSAVE but hands every other system command to DefWindowProcA(msg.hwnd, WM_SYSCOMMAND, wParam, lParam) - so the SC_RESTORE that Alt+Tab, the taskbar and Win+D post to a minimised window restores it; for SC_RESTORE it then calls ShowWindow(hwnd, SW_MINIMIZE) and ShowWindow(hwnd, SW_RESTORE), the deactivate/activate cycle on a non-iconic window that makes DirectDraw re-set the exclusive display mode; the two dead peeks for WM_SETCURSOR and WM_DESTROY (never posted) are replaced, the tail is NOP; calls through the import thunks 0x0047F038 / 0x0047F01A / 0x0047EFF0, no .reloc changes
-                    @{ Offset = 0x2E69D; Old = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 81 7D EC 40 F1 00 00 74 45 6A 01 6A 20 6A 20 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 6A 00 2E FF 15 E0 03 48 00 6A 01 6A 02 6A 02 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 0E E8 11 F0 FF FF 6A 00 2E FF 15 D8 03 48 00'; New = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 E8 84 FD 04 00 85 C0 74 50 81 7D EC 40 F1 00 00 74 47 FF 75 F0 FF 75 EC 68 12 01 00 00 FF 75 E4 E8 46 FD 04 00 81 7D EC 20 F1 00 00 75 2B 6A 06 FF 75 E4 E8 09 FD 04 00 6A 09 FF 75 E4 E8 FF FC 04 00 EB 15 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # present(): failed surface restore -> idle stub instead of exit: the jne after restore_surfaces (taken while the window is minimised: BltFast DDERR_SURFACELOST, Restore DDERR_WRONGMODE) goes to the stub at 0x0042F2F3, which sleeps one timer period and continues to the original exit 0x0042E301 - the main loop no longer spins at 100% CPU while minimised, game ticks are clock-driven and unaffected
+                    @{ Offset = 0x2D5AF; Old = '0F 85 4C 01 00 00'; New = '0F 85 3E 11 00 00' }
+                    # frame_end: posted WM_SYSCOMMAND dispatched, SC_RESTORE re-activates: the WM_SYSCOMMAND PeekMessageA(PM_REMOVE) keeps swallowing SC_SCREENSAVE but hands every other system command to DefWindowProcA(msg.hwnd, WM_SYSCOMMAND, wParam, lParam) - so the SC_RESTORE that Alt+Tab, the taskbar and Win+D post to a minimised window restores it; for SC_RESTORE it then calls ShowWindow(hwnd, SW_MINIMIZE) and ShowWindow(hwnd, SW_RESTORE), the deactivate/activate cycle on a non-iconic window that makes DirectDraw re-set the exclusive display mode; the two dead peeks for WM_SETCURSOR and WM_DESTROY (never posted) are replaced; bytes 86..97 are the idle stub for present(): Sleep(1) through the thunk 0x0047F068, then jmp to the present() exit 0x0042E301; the rest is NOP; calls through the import thunks 0x0047F038 / 0x0047F01A / 0x0047EFF0, no .reloc changes
+                    @{ Offset = 0x2E69D; Old = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 81 7D EC 40 F1 00 00 74 45 6A 01 6A 20 6A 20 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 6A 00 2E FF 15 E0 03 48 00 6A 01 6A 02 6A 02 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 0E E8 11 F0 FF FF 6A 00 2E FF 15 D8 03 48 00'; New = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 E8 84 FD 04 00 85 C0 74 50 81 7D EC 40 F1 00 00 74 47 FF 75 F0 FF 75 EC 68 12 01 00 00 FF 75 E4 E8 46 FD 04 00 81 7D EC 20 F1 00 00 75 2B 6A 06 FF 75 E4 E8 09 FD 04 00 6A 09 FF 75 E4 E8 FF FC 04 00 EB 15 6A 01 E8 6E FD 04 00 E9 02 F0 FF FF 90 90 90 90 90 90 90 90 90' }
                 )
             }
 
