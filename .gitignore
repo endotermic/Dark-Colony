@@ -11,7 +11,9 @@ hud_layers/
 hud_template.png
 
 # local material, never game content: the ozi_ns mission pack source and the maintainer's install of it
-OZI_NS/
+# (anchored to the repo root: on Windows git matches ignore rules case-insensitively, and an unanchored
+# OZI_NS/ silently ignored every NEW file under "DC - Council wars/ozi_ns/" - found 21 Sep 2026)
+/OZI_NS/
 DC Mission Pack by ozi_ns/
 
 # minimap caches the game regenerates on load (.OVH stays tracked, 1997-build cache the CD data carries)
