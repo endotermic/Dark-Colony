@@ -147,13 +147,13 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '49abd4e35fd9407593ab68ca43f450c5ab56cbc24557775d63ca6f3a7f19d6f3'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '36d3bada28f27b351d97df1a6bc40dca7d2b90e16d261d6c2a6e8b228accce74'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '78ad6ab5f9022728582fc7c009d3538adb21b52ce52e5210454db203b5486525'; '1024x768' = '49abd4e35fd9407593ab68ca43f450c5ab56cbc24557775d63ca6f3a7f19d6f3'; '1280x1024' = '0d09be34d9ce9a17e0225a7595f64d7cbd0085b257e5838981131317b2cf3bd3'; '1280x720' = '7404b05d3f7f7132b93ddeab1944d1a3162e6ddbad563addc00176708f372b39'; '1280x800' = '14ed298e6cc8961bc4939018e289dbf6554f78e10851f385e8cc387ccacc1496' }
+        ReferenceSha256 = @{ '640x480' = '3c462759bfa11c65d8d148b2a99f3911dd035cd398d3791d3310d8ce9c258bbf'; '1024x768' = '36d3bada28f27b351d97df1a6bc40dca7d2b90e16d261d6c2a6e8b228accce74'; '1280x1024' = 'c42c7c7b98b82ac3b787da2802b9dd4d1900e9d388e09bc2111fa082345c4b64'; '1280x720' = 'b9ce9b5108d773eb5d6951a99c3f5ea42c3fa0f6d4cb282f0ca49ee479e6fd44'; '1280x800' = '4fc122a0ca67a3de67ddad579c8c5ae67b0304f90b65a638f8e6119fdce083c9' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -2517,44 +2517,6 @@ headers are 32-bit and the size check unsigned, so nothing else changes.
                 )
             }
 
-            # ---- speed: Default game speed 150 % ---------------------------------------------------------
-            #  Added      : 10 Sep 2026
-            #  Made with  : tools/patch_speed.py --percent 150
-            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.14
-            #  Changes    : 2 bytes in 2 edits
-            #  One simulation tick runs every gs->tick_ms milliseconds.  Two stock values feed it and both
-            #  must change or the game resets the speed within a second: the game-state initialiser
-            #  ("mov dword ptr [esi+970h],66") and the persistent "desired tick" setting in DGROUP that the
-            #  options screen and the speed negotiation read.  66 ms = 100 %, 44 ms = 150 % (the slider shows
-            #  6600 / tick_ms).  Multiplayer speed comes from the server, saved games keep their own speed.
-            #  Cosmetic; pick it if you like the faster default.
-            @{
-                Id = 'speed'; Name = 'Default game speed 150 %'; Date = '10 Sep 2026'
-                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
-                Mode = $null
-                Tool = 'tools/patch_speed.py --percent 150'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.14'
-                Description = @'
-One simulation tick runs every gs->tick_ms milliseconds.  Two stock values feed it and both
-must change or the game resets the speed within a second: the game-state initialiser
-("mov dword ptr [esi+970h],66") and the persistent "desired tick" setting in DGROUP that the
-options screen and the speed negotiation read.  66 ms = 100 %, 44 ms = 150 % (the slider shows
-6600 / tick_ms).  Multiplayer speed comes from the server, saved games keep their own speed.
-Cosmetic; pick it if you like the faster default.
-'@
-                # fixes that must be applied together with this one (the exe would not work otherwise)
-                Requires = @()
-                # data files this fix needs next to the exe (0; listed from the repository when this
-                # script was generated) - the patcher refuses to write when any of them is missing
-                Data = @(
-                )
-                Edits = @(
-                    # game-state initialiser: imm32 of mov dword ptr [esi+970h],imm32 (gs->tick_ms) 66 ms -> 44 ms
-                    @{ Offset = 0x1B002; Old = '42 00 00 00'; New = '2C 00 00 00' }
-                    # DGROUP: persistent "desired tick" settings global (4th of four settings dwords) 66 ms -> 44 ms
-                    @{ Offset = 0x865EC; Old = '42 00 00 00'; New = '2C 00 00 00' }
-                )
-            }
-
             # ---- clock @ 1024x768: Day/night clock hand re-anchored (1024x768) ---------------------------------------------------------
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
@@ -3060,13 +3022,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '97eaaf011d5308cff5ffe7c16c4df78c9c702c16bafae88a7325dee19aeba77c'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '57b28dbf8a625fcf234b68626144c0f6bed5656b33c81fccd74f9f6801d790b6'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '4144ef0f7c73193c35b1cb25cc8e17dbfd864d3dbf29b478bc844c91d9f36381'; '1024x768' = '97eaaf011d5308cff5ffe7c16c4df78c9c702c16bafae88a7325dee19aeba77c'; '1280x1024' = '7a073bb4989da29f24beaedcaeb190da959022724ddbae345c34d205273d4c91'; '1280x720' = 'f2dfbb426a0d7ba4e1dab57724591cc231dbda92544963821077398a26e9f6f8'; '1280x800' = '6fa9a0434cbbd09404d4747466d587ce6e860f3316c8dbacca5b2319d034a5e5' }
+        ReferenceSha256 = @{ '640x480' = '54d28dfd000ce8c34e36a96a7696da49d2c5214fd7ff4d75be479d96ffab0cb8'; '1024x768' = '57b28dbf8a625fcf234b68626144c0f6bed5656b33c81fccd74f9f6801d790b6'; '1280x1024' = 'f1d3ebcbdf83fdd4cc00cc9820c47644682db7b42cc9c12c357d8d8dc115941b'; '1280x720' = '211413021ae134421d77c43cf3d5b441fd25bfc218fd9a96cc276ca03a163dd1'; '1280x800' = '7f3922716e307c4fbf5fc940b2b5d5242d5e7a354d3145dae54f077d480cea6e' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -5464,44 +5426,6 @@ headers are 32-bit and the size check unsigned, so nothing else changes.
                 Edits = @(
                     # mov eax,imm32 before call SMalloc_Pool: pool size 11 500 000 (0x00AF79E0) -> 33 554 432 bytes (0x02000000, 32 MiB)
                     @{ Offset = 0x4719; Old = 'B8 E0 79 AF 00'; New = 'B8 00 00 00 02' }
-                )
-            }
-
-            # ---- speed: Default game speed 150 % ---------------------------------------------------------
-            #  Added      : 10 Sep 2026
-            #  Made with  : tools/patch_speed.py --percent 150
-            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.14
-            #  Changes    : 2 bytes in 2 edits
-            #  One simulation tick runs every gs->tick_ms milliseconds.  Two stock values feed it and both
-            #  must change or the game resets the speed within a second: the game-state initialiser
-            #  ("mov dword ptr [esi+970h],66") and the persistent "desired tick" setting in DGROUP that the
-            #  options screen and the speed negotiation read.  66 ms = 100 %, 44 ms = 150 % (the slider shows
-            #  6600 / tick_ms).  Multiplayer speed comes from the server, saved games keep their own speed.
-            #  Cosmetic; pick it if you like the faster default.
-            @{
-                Id = 'speed'; Name = 'Default game speed 150 %'; Date = '10 Sep 2026'
-                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
-                Mode = $null
-                Tool = 'tools/patch_speed.py --percent 150'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.14'
-                Description = @'
-One simulation tick runs every gs->tick_ms milliseconds.  Two stock values feed it and both
-must change or the game resets the speed within a second: the game-state initialiser
-("mov dword ptr [esi+970h],66") and the persistent "desired tick" setting in DGROUP that the
-options screen and the speed negotiation read.  66 ms = 100 %, 44 ms = 150 % (the slider shows
-6600 / tick_ms).  Multiplayer speed comes from the server, saved games keep their own speed.
-Cosmetic; pick it if you like the faster default.
-'@
-                # fixes that must be applied together with this one (the exe would not work otherwise)
-                Requires = @()
-                # data files this fix needs next to the exe (0; listed from the repository when this
-                # script was generated) - the patcher refuses to write when any of them is missing
-                Data = @(
-                )
-                Edits = @(
-                    # game-state initialiser: imm32 of mov dword ptr [esi+970h],imm32 (gs->tick_ms) 66 ms -> 44 ms
-                    @{ Offset = 0x1B062; Old = '42 00 00 00'; New = '2C 00 00 00' }
-                    # DGROUP: persistent "desired tick" settings global (4th of four settings dwords) 66 ms -> 44 ms
-                    @{ Offset = 0x86814; Old = '42 00 00 00'; New = '2C 00 00 00' }
                 )
             }
 
