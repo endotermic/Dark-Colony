@@ -123,7 +123,7 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '89894d73f0e5fc3184c2127fc006a7bc0d6ffff9f143973da3743c26803ca200'   # every patch applied = the exe in the repository (14 Sep 2026)
+        PatchedSha256  = '09e9c00713fd4a31fd2d1b5453a7c6ed0740f3d2558c3c40f511941adbdfd3bb'   # every patch applied = the exe in the repository (14 Sep 2026)
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -1078,6 +1078,68 @@ absolute pointers, so their .reloc entries become type 0 ABSOLUTE padding.
                 )
             }
 
+            # ---- camera: Camera clamped at battle start: no crash when the start position is near the map edge ---------------------------------------------------------
+            #  Added      : 21 Sep 2026
+            #  Made with  : tools/patch_camera.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.22
+            #  Changes    : 34 bytes in 2 edits
+            #  When a battle starts the game puts the camera on the player's start position and only
+            #  afterwards computes the camera limits ("half a screen from every map edge") - but it never applies
+            #  them to that first position.  The per-frame scrolling code clamps the camera, yet the very first
+            #  frame already uses the unclamped position: it hands "camera minus half a screen" as the visible
+            #  tile rectangle to the routine that picks the ambient sounds from the terrain on screen, and that
+            #  routine walks the rectangle row by row through the map's row-pointer table without checking the far
+            #  edge.  With the original 16x14-tile view no shipped start position was close enough to an edge for
+            #  the rectangle to leave the map; with the 1024x768 view (28x23 tiles, "1024x768" fix) every start
+            #  row within 11 tiles of the far map edge does - the row pointers past the map are NULL and the game
+            #  dies with an access violation the moment the battlefield appears (Windows' crash dialog stays
+            #  hidden behind the full-screen surface, so it looks like a hang; a relay server then drops the
+            #  player after 5 s and the other players continue).  Hit on Fly on 19 Sep 2026 by the player whose
+            #  game slot got start position 0 of "Plink - O" (row 131 of 140); Plink - O positions 0 and 1,
+            #  Armageddon 3, Circle of Friends 1 and 2, Olympus Mons 0 and 1 and others are affected the same way.
+            #  The fix redirects the call that follows the limit computation into a 33-byte routine placed in the
+            #  unused zero bytes at the end of the code section: it calls the game's own 2-D clamp function with
+            #  those limits on the camera and then continues into the routine the call originally targeted.
+            #  Only register-relative addressing, no relocation entries, nothing moves.  Harmless without the
+            #  1024x768 fix and in single-player missions (a clamp can only move the camera inside the map).
+            @{
+                Id = 'camera'; Name = 'Camera clamped at battle start: no crash when the start position is near the map edge'; Date = '21 Sep 2026'
+                Tool = 'tools/patch_camera.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.22'
+                Description = @'
+When a battle starts the game puts the camera on the player's start position and only
+afterwards computes the camera limits ("half a screen from every map edge") - but it never applies
+them to that first position.  The per-frame scrolling code clamps the camera, yet the very first
+frame already uses the unclamped position: it hands "camera minus half a screen" as the visible
+tile rectangle to the routine that picks the ambient sounds from the terrain on screen, and that
+routine walks the rectangle row by row through the map's row-pointer table without checking the far
+edge.  With the original 16x14-tile view no shipped start position was close enough to an edge for
+the rectangle to leave the map; with the 1024x768 view (28x23 tiles, "1024x768" fix) every start
+row within 11 tiles of the far map edge does - the row pointers past the map are NULL and the game
+dies with an access violation the moment the battlefield appears (Windows' crash dialog stays
+hidden behind the full-screen surface, so it looks like a hang; a relay server then drops the
+player after 5 s and the other players continue).  Hit on Fly on 19 Sep 2026 by the player whose
+game slot got start position 0 of "Plink - O" (row 131 of 140); Plink - O positions 0 and 1,
+Armageddon 3, Circle of Friends 1 and 2, Olympus Mons 0 and 1 and others are affected the same way.
+The fix redirects the call that follows the limit computation into a 33-byte routine placed in the
+unused zero bytes at the end of the code section: it calls the game's own 2-D clamp function with
+those limits on the camera and then continues into the routine the call originally targeted.
+Only register-relative addressing, no relocation entries, nothing moves.  Harmless without the
+1024x768 fix and in single-player missions (a clamp can only move the camera inside the map).
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # proto.c init: call load_ambience -> call stub: rel32 operand of the E8 that follows the camera-bounds stores; the stub clamps the camera first and then continues into load_ambience 0x00432F80
+                    @{ Offset = 0x1E2B9; Old = 'C3 40 01 00'; New = '1F 03 06 00' }
+                    # stub clamp_camera in the AUTO zero tail: lea esi,[eax+108h]; push &cam_z, &cam_x, max_z, max_x, min_z, min_x (ui+0x120..0x114); call clamp2d 0x00436668; jmp load_ambience 0x00432F80 - register-relative only, no .reloc entries
+                    @{ Offset = 0x7E5DC; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '8D B0 08 01 00 00 8D 4E 08 51 56 FF 76 18 FF 76 14 FF 76 10 FF 76 0C E8 70 74 FB FF E9 83 3D FB FF' }
+                )
+            }
+
             # ---- movies: Classic movies under their own names: DCINTRO / DCAENDING / DCHENDING (Dark Colony only) ---------------------------------------------------------
             #  Added      : 15 Sep 2026
             #  Made with  : tools/patch_movies.py
@@ -1182,7 +1244,7 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '13c9548990b2bc1cbf2c01fa35a48fa8bd726a59592cafd01a62fb828b4c9436'   # every patch applied = the exe in the repository (14 Sep 2026)
+        PatchedSha256  = 'c098d3dc2dfb50d0ef98d6892dad856d40f6d00ddd9f719a8a23e21537078140'   # every patch applied = the exe in the repository (14 Sep 2026)
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -2146,6 +2208,68 @@ absolute pointers, so their .reloc entries become type 0 ABSOLUTE padding.
                     @{ Offset = 0x9A202; Old = '56 34'; New = '56 04' }
                     # .reloc table: entry 349F (type 3 HIGHLOW, page offset 0x49F) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
                     @{ Offset = 0x9A210; Old = '9F 34'; New = '9F 04' }
+                )
+            }
+
+            # ---- camera: Camera clamped at battle start: no crash when the start position is near the map edge ---------------------------------------------------------
+            #  Added      : 21 Sep 2026
+            #  Made with  : tools/patch_camera.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.22
+            #  Changes    : 34 bytes in 2 edits
+            #  When a battle starts the game puts the camera on the player's start position and only
+            #  afterwards computes the camera limits ("half a screen from every map edge") - but it never applies
+            #  them to that first position.  The per-frame scrolling code clamps the camera, yet the very first
+            #  frame already uses the unclamped position: it hands "camera minus half a screen" as the visible
+            #  tile rectangle to the routine that picks the ambient sounds from the terrain on screen, and that
+            #  routine walks the rectangle row by row through the map's row-pointer table without checking the far
+            #  edge.  With the original 16x14-tile view no shipped start position was close enough to an edge for
+            #  the rectangle to leave the map; with the 1024x768 view (28x23 tiles, "1024x768" fix) every start
+            #  row within 11 tiles of the far map edge does - the row pointers past the map are NULL and the game
+            #  dies with an access violation the moment the battlefield appears (Windows' crash dialog stays
+            #  hidden behind the full-screen surface, so it looks like a hang; a relay server then drops the
+            #  player after 5 s and the other players continue).  Hit on Fly on 19 Sep 2026 by the player whose
+            #  game slot got start position 0 of "Plink - O" (row 131 of 140); Plink - O positions 0 and 1,
+            #  Armageddon 3, Circle of Friends 1 and 2, Olympus Mons 0 and 1 and others are affected the same way.
+            #  The fix redirects the call that follows the limit computation into a 33-byte routine placed in the
+            #  unused zero bytes at the end of the code section: it calls the game's own 2-D clamp function with
+            #  those limits on the camera and then continues into the routine the call originally targeted.
+            #  Only register-relative addressing, no relocation entries, nothing moves.  Harmless without the
+            #  1024x768 fix and in single-player missions (a clamp can only move the camera inside the map).
+            @{
+                Id = 'camera'; Name = 'Camera clamped at battle start: no crash when the start position is near the map edge'; Date = '21 Sep 2026'
+                Tool = 'tools/patch_camera.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.22'
+                Description = @'
+When a battle starts the game puts the camera on the player's start position and only
+afterwards computes the camera limits ("half a screen from every map edge") - but it never applies
+them to that first position.  The per-frame scrolling code clamps the camera, yet the very first
+frame already uses the unclamped position: it hands "camera minus half a screen" as the visible
+tile rectangle to the routine that picks the ambient sounds from the terrain on screen, and that
+routine walks the rectangle row by row through the map's row-pointer table without checking the far
+edge.  With the original 16x14-tile view no shipped start position was close enough to an edge for
+the rectangle to leave the map; with the 1024x768 view (28x23 tiles, "1024x768" fix) every start
+row within 11 tiles of the far map edge does - the row pointers past the map are NULL and the game
+dies with an access violation the moment the battlefield appears (Windows' crash dialog stays
+hidden behind the full-screen surface, so it looks like a hang; a relay server then drops the
+player after 5 s and the other players continue).  Hit on Fly on 19 Sep 2026 by the player whose
+game slot got start position 0 of "Plink - O" (row 131 of 140); Plink - O positions 0 and 1,
+Armageddon 3, Circle of Friends 1 and 2, Olympus Mons 0 and 1 and others are affected the same way.
+The fix redirects the call that follows the limit computation into a 33-byte routine placed in the
+unused zero bytes at the end of the code section: it calls the game's own 2-D clamp function with
+those limits on the camera and then continues into the routine the call originally targeted.
+Only register-relative addressing, no relocation entries, nothing moves.  Harmless without the
+1024x768 fix and in single-player missions (a clamp can only move the camera inside the map).
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # proto.c init: call load_ambience -> call stub: rel32 operand of the E8 that follows the camera-bounds stores; the stub clamps the camera first and then continues into load_ambience 0x00432FE0
+                    @{ Offset = 0x1E319; Old = 'C3 40 01 00'; New = 'F3 03 06 00' }
+                    # stub clamp_camera in the AUTO zero tail: lea esi,[eax+108h]; push &cam_z, &cam_x, max_z, max_x, min_z, min_x (ui+0x120..0x114); call clamp2d 0x004366C8; jmp load_ambience 0x00432FE0 - register-relative only, no .reloc entries
+                    @{ Offset = 0x7E710; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '8D B0 08 01 00 00 8D 4E 08 51 56 FF 76 18 FF 76 14 FF 76 10 FF 76 0C E8 9C 73 FB FF E9 AF 3C FB FF' }
                 )
             }
 
