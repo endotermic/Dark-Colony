@@ -17,3 +17,9 @@ DC Mission Pack by ozi_ns/
 # minimap caches the game regenerates on load (.OVH stays tracked, 1997-build cache the CD data carries)
 *.o16
 *.O16
+
+# copies the patcher writes for a 640x480 build (the exe is pointed at them; the stock files stay untouched)
+DC - Council wars/GAMESTAT/HSCNDC.TXT
+DC - Council wars/GAMESTAT/GSCNDC.TXT
+DC - Council wars/exp/intrface/bintoze
+DC - Council wars/ozi_ns/intrface/bintoze
