@@ -13,3 +13,7 @@ hud_template.png
 # local material, never game content: the ozi_ns mission pack source and the maintainer's install of it
 OZI_NS/
 DC Mission Pack by ozi_ns/
+
+# minimap caches the game regenerates on load (.OVH stays tracked, 1997-build cache the CD data carries)
+*.o16
+*.O16
