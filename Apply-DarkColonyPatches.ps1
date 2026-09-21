@@ -147,13 +147,13 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '09e9c00713fd4a31fd2d1b5453a7c6ed0740f3d2558c3c40f511941adbdfd3bb'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '9f6b1f7b9bddd4548ac9e6187d865446b6efc85c49e809f601774594638e6c6f'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = 'ec0e6cef4214923a29794df7b6cba0e9843894aa75ddb173c3a9e736c59706f6'; '1024x768' = '09e9c00713fd4a31fd2d1b5453a7c6ed0740f3d2558c3c40f511941adbdfd3bb'; '1280x1024' = '4fb0d3f7afe791e52ecec26808648d2553802014726e3da1d24a600d586aa36a'; '1280x720' = '3f0fdc4e09c0e5110504e9b134f9821239df5149e80c799873524f3a93eef583'; '1280x800' = 'ba6f9e03212b49e638505b4b5a669860c1f97742021e7fd6840e80446e5c2b2b' }
+        ReferenceSha256 = @{ '640x480' = 'e2bc82ff6569c38a5b98a9bfd92baa2b540d761897e79708fcf35d19f59ad788'; '1024x768' = '9f6b1f7b9bddd4548ac9e6187d865446b6efc85c49e809f601774594638e6c6f'; '1280x1024' = '24fa88bcb3cece4ad9a8acd4eaa7b13c2aa1c45a544751dfe567809ec1bdbc11'; '1280x720' = '1304b20ee676f1c2df67ea9870977b110bff2b95abe33e6236e02e979d26e905'; '1280x800' = '84fc06eb3562096759cfa1c73db41f03f6e29657a40416cb495d9da5eff3417a' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -2787,6 +2787,70 @@ Only register-relative addressing, no relocation entries, nothing moves.  Harmle
                 )
             }
 
+            # ---- restore: Window restore after minimising: Alt+Tab and the taskbar bring the game back ---------------------------------------------------------
+            #  Added      : 21 Sep 2026
+            #  Made with  : tools/patch_restore.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.28
+            #  Changes    : 87 bytes in 1 edits
+            #  Leave the running game with Alt+Tab, the Win key or a click on another window and DirectDraw
+            #  minimises it and restores the desktop resolution.  Coming back with Alt+Tab or the taskbar button
+            #  the game stays minimised although it is the active window, or shows a black window at desktop
+            #  resolution; it is alive and busy, error.log stays empty.  The game has no message loop: once per
+            #  frame it pulls posted messages with range-filtered PeekMessage calls (mouse, keyboard, system
+            #  commands - the last only to swallow the screen-saver command) and dispatches none of them.
+            #  Windows restores a minimised window by posting the system command SC_RESTORE to it, so the request
+            #  is removed from the queue and dropped; being activated while still minimised also defeats
+            #  DirectDraw's own window hook, which re-sets the exclusive display mode only during a proper
+            #  activation - afterwards every attempt to restore the drawing surfaces fails with DDERR_WRONGMODE.
+            #  The fix rewrites that per-frame block in place (107 bytes, 86 of them new code, the rest NOP):
+            #  the system-command peek hands every command except the screen saver to DefWindowProcA, so
+            #  SC_RESTORE, SC_MINIMIZE and the others take effect, and after an SC_RESTORE it calls
+            #  ShowWindow(SW_MINIMIZE) followed by ShowWindow(SW_RESTORE) - a deactivate/activate cycle on a window
+            #  that is not minimised at the moment of activation, which is the path DirectDraw's hook handles: it
+            #  re-sets the mode, the game's own per-frame surface restore repairs the surfaces and the next frame
+            #  is drawn.  The two peeks it replaces looked for WM_SETCURSOR and WM_DESTROY, messages Windows never
+            #  posts (dead code).  The three calls go through the linker's import thunks; nothing moves, no
+            #  relocation entry changes.  Verified in game 21 Sep 2026 on both exes (Alt+Tab, taskbar button,
+            #  Start menu, minimise from the taskbar).
+            @{
+                Id = 'restore'; Name = 'Window restore after minimising: Alt+Tab and the taskbar bring the game back'; Date = '21 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_restore.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.28'
+                Description = @'
+Leave the running game with Alt+Tab, the Win key or a click on another window and DirectDraw
+minimises it and restores the desktop resolution.  Coming back with Alt+Tab or the taskbar button
+the game stays minimised although it is the active window, or shows a black window at desktop
+resolution; it is alive and busy, error.log stays empty.  The game has no message loop: once per
+frame it pulls posted messages with range-filtered PeekMessage calls (mouse, keyboard, system
+commands - the last only to swallow the screen-saver command) and dispatches none of them.
+Windows restores a minimised window by posting the system command SC_RESTORE to it, so the request
+is removed from the queue and dropped; being activated while still minimised also defeats
+DirectDraw's own window hook, which re-sets the exclusive display mode only during a proper
+activation - afterwards every attempt to restore the drawing surfaces fails with DDERR_WRONGMODE.
+The fix rewrites that per-frame block in place (107 bytes, 86 of them new code, the rest NOP):
+the system-command peek hands every command except the screen saver to DefWindowProcA, so
+SC_RESTORE, SC_MINIMIZE and the others take effect, and after an SC_RESTORE it calls
+ShowWindow(SW_MINIMIZE) followed by ShowWindow(SW_RESTORE) - a deactivate/activate cycle on a window
+that is not minimised at the moment of activation, which is the path DirectDraw's hook handles: it
+re-sets the mode, the game's own per-frame surface restore repairs the surfaces and the next frame
+is drawn.  The two peeks it replaces looked for WM_SETCURSOR and WM_DESTROY, messages Windows never
+posts (dead code).  The three calls go through the linker's import thunks; nothing moves, no
+relocation entry changes.  Verified in game 21 Sep 2026 on both exes (Alt+Tab, taskbar button,
+Start menu, minimise from the taskbar).
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # frame_end: posted WM_SYSCOMMAND dispatched, SC_RESTORE re-activates: the WM_SYSCOMMAND PeekMessageA(PM_REMOVE) keeps swallowing SC_SCREENSAVE but hands every other system command to DefWindowProcA(msg.hwnd, WM_SYSCOMMAND, wParam, lParam) - so the SC_RESTORE that Alt+Tab, the taskbar and Win+D post to a minimised window restores it; for SC_RESTORE it then calls ShowWindow(hwnd, SW_MINIMIZE) and ShowWindow(hwnd, SW_RESTORE), the deactivate/activate cycle on a non-iconic window that makes DirectDraw re-set the exclusive display mode; the two dead peeks for WM_SETCURSOR and WM_DESTROY (never posted) are replaced, the tail is NOP; calls through the import thunks 0x0047EFD8 / 0x0047EFBA / 0x0047EF90, no .reloc changes
+                    @{ Offset = 0x2E63D; Old = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 81 7D EC 40 F1 00 00 74 45 6A 01 6A 20 6A 20 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 6A 00 2E FF 15 E0 03 48 00 6A 01 6A 02 6A 02 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 0E E8 11 F0 FF FF 6A 00 2E FF 15 D8 03 48 00'; New = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 E8 84 FD 04 00 85 C0 74 50 81 7D EC 40 F1 00 00 74 47 FF 75 F0 FF 75 EC 68 12 01 00 00 FF 75 E4 E8 46 FD 04 00 81 7D EC 20 F1 00 00 75 2B 6A 06 FF 75 E4 E8 09 FD 04 00 6A 09 FF 75 E4 E8 FF FC 04 00 EB 15 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                )
+            }
+
             # ---- movies @ 640x480: Classic movies under their own names: DCINTRO / DCAENDING / DCHENDING (Dark Colony only) ---------------------------------------------------------
             #  Added      : 15 Sep 2026
             #  Made with  : tools/patch_movies.py
@@ -2954,13 +3018,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'c098d3dc2dfb50d0ef98d6892dad856d40f6d00ddd9f719a8a23e21537078140'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '89c662446b4d0a70923ecd9792e745308a80061340c6e33e2778edbfa5e96e44'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '81d6bc8180876a3895f4b8e2274c1539f394752bf600f49a7b4856f3499d0fd3'; '1024x768' = 'c098d3dc2dfb50d0ef98d6892dad856d40f6d00ddd9f719a8a23e21537078140'; '1280x1024' = '57aabf54da1513e26896671405575d2b5c8bf42771a2119aceff2c3d3d0c411e'; '1280x720' = '8a2b5230493e12f1b54bb31a35b6da6d0c45e45aa71278f976036e0e219571c7'; '1280x800' = '5362a35d995af1e527751ffad1dbe6d4f239055108001a999cbb3d25f600d0a0' }
+        ReferenceSha256 = @{ '640x480' = '9fa939decd1330d6af6f1e35043849940923d05795b41fd59945f30aafe7cef3'; '1024x768' = '89c662446b4d0a70923ecd9792e745308a80061340c6e33e2778edbfa5e96e44'; '1280x1024' = 'f5aa04743e2b276b8ce1e1ac5a4bcf0fd6ca882e6a0fe0746392b7858dd5ce39'; '1280x720' = '89b0fcc341da6b663ea33341678190969899674659815589374114ea3cc213c1'; '1280x800' = '75cfb8addde31c1c8db54c4d03b1b1fb6279451f0ae65924a67c791c8172fb70' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -5631,6 +5695,70 @@ Only register-relative addressing, no relocation entries, nothing moves.  Harmle
                 )
             }
 
+            # ---- restore: Window restore after minimising: Alt+Tab and the taskbar bring the game back ---------------------------------------------------------
+            #  Added      : 21 Sep 2026
+            #  Made with  : tools/patch_restore.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.28
+            #  Changes    : 87 bytes in 1 edits
+            #  Leave the running game with Alt+Tab, the Win key or a click on another window and DirectDraw
+            #  minimises it and restores the desktop resolution.  Coming back with Alt+Tab or the taskbar button
+            #  the game stays minimised although it is the active window, or shows a black window at desktop
+            #  resolution; it is alive and busy, error.log stays empty.  The game has no message loop: once per
+            #  frame it pulls posted messages with range-filtered PeekMessage calls (mouse, keyboard, system
+            #  commands - the last only to swallow the screen-saver command) and dispatches none of them.
+            #  Windows restores a minimised window by posting the system command SC_RESTORE to it, so the request
+            #  is removed from the queue and dropped; being activated while still minimised also defeats
+            #  DirectDraw's own window hook, which re-sets the exclusive display mode only during a proper
+            #  activation - afterwards every attempt to restore the drawing surfaces fails with DDERR_WRONGMODE.
+            #  The fix rewrites that per-frame block in place (107 bytes, 86 of them new code, the rest NOP):
+            #  the system-command peek hands every command except the screen saver to DefWindowProcA, so
+            #  SC_RESTORE, SC_MINIMIZE and the others take effect, and after an SC_RESTORE it calls
+            #  ShowWindow(SW_MINIMIZE) followed by ShowWindow(SW_RESTORE) - a deactivate/activate cycle on a window
+            #  that is not minimised at the moment of activation, which is the path DirectDraw's hook handles: it
+            #  re-sets the mode, the game's own per-frame surface restore repairs the surfaces and the next frame
+            #  is drawn.  The two peeks it replaces looked for WM_SETCURSOR and WM_DESTROY, messages Windows never
+            #  posts (dead code).  The three calls go through the linker's import thunks; nothing moves, no
+            #  relocation entry changes.  Verified in game 21 Sep 2026 on both exes (Alt+Tab, taskbar button,
+            #  Start menu, minimise from the taskbar).
+            @{
+                Id = 'restore'; Name = 'Window restore after minimising: Alt+Tab and the taskbar bring the game back'; Date = '21 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_restore.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.28'
+                Description = @'
+Leave the running game with Alt+Tab, the Win key or a click on another window and DirectDraw
+minimises it and restores the desktop resolution.  Coming back with Alt+Tab or the taskbar button
+the game stays minimised although it is the active window, or shows a black window at desktop
+resolution; it is alive and busy, error.log stays empty.  The game has no message loop: once per
+frame it pulls posted messages with range-filtered PeekMessage calls (mouse, keyboard, system
+commands - the last only to swallow the screen-saver command) and dispatches none of them.
+Windows restores a minimised window by posting the system command SC_RESTORE to it, so the request
+is removed from the queue and dropped; being activated while still minimised also defeats
+DirectDraw's own window hook, which re-sets the exclusive display mode only during a proper
+activation - afterwards every attempt to restore the drawing surfaces fails with DDERR_WRONGMODE.
+The fix rewrites that per-frame block in place (107 bytes, 86 of them new code, the rest NOP):
+the system-command peek hands every command except the screen saver to DefWindowProcA, so
+SC_RESTORE, SC_MINIMIZE and the others take effect, and after an SC_RESTORE it calls
+ShowWindow(SW_MINIMIZE) followed by ShowWindow(SW_RESTORE) - a deactivate/activate cycle on a window
+that is not minimised at the moment of activation, which is the path DirectDraw's hook handles: it
+re-sets the mode, the game's own per-frame surface restore repairs the surfaces and the next frame
+is drawn.  The two peeks it replaces looked for WM_SETCURSOR and WM_DESTROY, messages Windows never
+posts (dead code).  The three calls go through the linker's import thunks; nothing moves, no
+relocation entry changes.  Verified in game 21 Sep 2026 on both exes (Alt+Tab, taskbar button,
+Start menu, minimise from the taskbar).
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # frame_end: posted WM_SYSCOMMAND dispatched, SC_RESTORE re-activates: the WM_SYSCOMMAND PeekMessageA(PM_REMOVE) keeps swallowing SC_SCREENSAVE but hands every other system command to DefWindowProcA(msg.hwnd, WM_SYSCOMMAND, wParam, lParam) - so the SC_RESTORE that Alt+Tab, the taskbar and Win+D post to a minimised window restores it; for SC_RESTORE it then calls ShowWindow(hwnd, SW_MINIMIZE) and ShowWindow(hwnd, SW_RESTORE), the deactivate/activate cycle on a non-iconic window that makes DirectDraw re-set the exclusive display mode; the two dead peeks for WM_SETCURSOR and WM_DESTROY (never posted) are replaced, the tail is NOP; calls through the import thunks 0x0047F038 / 0x0047F01A / 0x0047EFF0, no .reloc changes
+                    @{ Offset = 0x2E69D; Old = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 81 7D EC 40 F1 00 00 74 45 6A 01 6A 20 6A 20 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 6A 00 2E FF 15 E0 03 48 00 6A 01 6A 02 6A 02 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 0E E8 11 F0 FF FF 6A 00 2E FF 15 D8 03 48 00'; New = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 E8 84 FD 04 00 85 C0 74 50 81 7D EC 40 F1 00 00 74 47 FF 75 F0 FF 75 EC 68 12 01 00 00 FF 75 E4 E8 46 FD 04 00 81 7D EC 20 F1 00 00 75 2B 6A 06 FF 75 E4 E8 09 FD 04 00 6A 09 FF 75 E4 E8 FF FC 04 00 EB 15 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                )
+            }
+
             # ---- ozi @ 640x480: OZI MISSIONS menu mode (Council Wars only) ---------------------------------------------------------
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
@@ -5697,7 +5825,7 @@ applied last.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
-                # data files this fix needs next to the exe (378; listed from the repository when this
+                # data files this fix needs next to the exe (380; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'ozi_ns\alta.gif'
@@ -5709,6 +5837,8 @@ applied last.
                     'ozi_ns\earth.gif'
                     'ozi_ns\gamestat\BOOMSTAT.TXT'
                     'ozi_ns\gamestat\gamestat.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\MBULLET.TXT'
                     'ozi_ns\gamestat\UNITID.TXT'
                     'ozi_ns\gamestat\WEAPSTAT.TXT'
@@ -6181,7 +6311,7 @@ applied last.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (377; listed from the repository when this
+                # data files this fix needs next to the exe (379; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'ozi_ns\alta.gif'
@@ -6193,6 +6323,8 @@ applied last.
                     'ozi_ns\earth.gif'
                     'ozi_ns\gamestat\BOOMSTAT.TXT'
                     'ozi_ns\gamestat\gamestat.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\MBULLET.TXT'
                     'ozi_ns\gamestat\UNITID.TXT'
                     'ozi_ns\gamestat\WEAPSTAT.TXT'
