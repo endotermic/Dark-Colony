@@ -1,0 +1,118 @@
+High Council                                        .
+Ternox                                              .
+Taar Council                                        .
+Globo Corporation                                   .
+Insurgents                                          .
+Taar Elite Guard                                    .
+Unknown                                             .
+Drone                                               .
+11
+globo/globo01.scn
+RETURN TO MARS
+DESERT
+scenario/globo/globo01
+avi/hvad2.avi
+avi/htran1.avi
+25 302 174
+0
+2 -1
+
+globo/globo02.scn
+CHANGING OF THE GUARD
+DESERT
+scenario/globo/globo02
+avi/hvad2.avi
+avi/htran10.avi
+70 262 214
+0
+4 5 3 -1
+
+globo/globo03.scn
+DARK CHAMBER
+THE UNDERGROUND 
+scenario/globo/globo03
+avi/hvad2.avi
+avi/htran5.avi
+35 372 234
+0
+2 3 -1
+
+globo/globo04.scn
+POWER OF COOPERATION 
+DESERT
+scenario/globo/globo04
+avi/electric.avi
+avi/htran7.avi
+60 332 219
+0
+5 2 -1
+
+globo/globo05.scn
+EXTERMINATION
+CENTAURI ALPHA 
+scenario/globo/globo05
+avi/hvad2.avi
+avi/htran2.avi
+1 307 234
+0
+2 3 5 -1
+
+globo/globo06.scn
+UNKNOWN SIGNAL
+MONORI JUNGLE
+scenario/globo/globo06
+avi/hvad2.avi
+avi/htran8.avi
+1 307 234
+0
+2 3 5 -1
+
+globo/globo07.scn
+OSPREY V
+MONORI JUNGLE
+scenario/globo/globo07
+avi/hvad2.avi
+avi/htran6.avi
+20 272 174
+0
+4 3 2 -1
+
+globo/globo08.scn
+CANYON
+VEXTAR
+scenario/globo/globo08
+avi/hending.avi
+avi/htran3.avi
+30 322 229
+0
+5 3 2 -1
+
+globo/globo09.scn
+BETRAYAL
+THE UNDERGROUND
+scenario/globo/globo09
+avi/hvad2.avi
+avi/htran10.avi
+75 262 234
+0
+5 3 2 -1
+
+globo/globo10.scn
+HOPE
+JUNGLE
+scenario/globo/globo10
+avi/hvad2.avi
+avi/htran6.avi
+20 272 174
+0
+4 3 2 -1
+
+globo/globo11.scn
+VENGEANCE
+TIRINUM VALLEY
+scenario/globo/globo11
+avi/hvad2.avi
+avi/htran2.avi
+40 282 274
+0
+3 2 -1

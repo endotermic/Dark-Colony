@@ -147,20 +147,20 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = 'ca488306b0d6f3c549b56c84bc7c8b4eb5efc8cfa227f9633bf26e196ba4ba91'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '49abd4e35fd9407593ab68ca43f450c5ab56cbc24557775d63ca6f3a7f19d6f3'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = 'deb6c04444dae4d19681cf0c8162ff0a97f9df03ef99e6ac85c58e8d6ccc805b'; '1024x768' = 'ca488306b0d6f3c549b56c84bc7c8b4eb5efc8cfa227f9633bf26e196ba4ba91'; '1280x1024' = '4a42d6fa6020736a503de94a21103782f6104f177f18aa541343d9a0823b7b85'; '1280x720' = 'f741024ab45317aa3e56d5428bc681ae7911607b1131173e2fbe21f49ecd4647'; '1280x800' = '98a24204a329e01089aa80691175caaadfeb05504ccd57aae9dc9921c5d84c48' }
+        ReferenceSha256 = @{ '640x480' = '78ad6ab5f9022728582fc7c009d3538adb21b52ce52e5210454db203b5486525'; '1024x768' = '49abd4e35fd9407593ab68ca43f450c5ab56cbc24557775d63ca6f3a7f19d6f3'; '1280x1024' = '0d09be34d9ce9a17e0225a7595f64d7cbd0085b257e5838981131317b2cf3bd3'; '1280x720' = '7404b05d3f7f7132b93ddeab1944d1a3162e6ddbad563addc00176708f372b39'; '1280x800' = '14ed298e6cc8961bc4939018e289dbf6554f78e10851f385e8cc387ccacc1496' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
-            #  Added      : 28-30 Sep 2025 / 18 Sep 2026
+            #  Added      : 28-30 Sep 2025 / 18 Sep 2026 / 21 Sep 2026
             #  Made with  : tools/patch_nocd.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19; CLAUDE.md "Patches applied so far" (the 2025 bytes)
-            #  Changes    : 94 bytes in 13 edits
+            #  Changes    : 166 bytes in 18 edits
             #  The game refuses to start, and greys out most main-menu buttons, when it cannot find its
             #  CD in a drive.  This one fix removes the whole CD business from the exe:
             #
@@ -189,11 +189,20 @@ $Builds = @(
             #       sound loader jump to their ordinary "file missing" exits instead of trying "<CD path><name>",
             #       the movie opener never takes its CD branch, the dead "%c:\dc\" string is zeroed, and the
             #       sound loader's box says "FILE NOT FOUND / A sound file is missing - see error.log".
+            #    3. The "Please insert Dark Colony CD" box (21 Sep 2026, player report).  That text is a picture,
+            #       not a string: when a file the game insists on is missing, the file-open helper draws the
+            #       sprite intrface/insee over the screen and waits for the file to appear - once for the disc to
+            #       be inserted, now forever.  Those 68 bytes of the display object's CD-prompt method become the
+            #       sound loader's error exit with the file name as the message: a line "unable to open file
+            #       <name>" in error.log, the desktop mode restored, a box "FILE NOT FOUND / <name>", exit.  The
+            #       four absolute operands of the new code take over the relocation entries of the old ones.
+            #       (Seen with a copy of the game that lacked ozi_ns\intrf_hd\: OZI MISSIONS -> NEXT showed the
+            #       prompt for intrf_hd/hxscene.txt.)
             #
             #  Every edit sits inside an existing instruction or string; nothing moves.  The patched exe no
             #  longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive letter from them).
             @{
-                Id = 'nocd'; Name = 'No CD: the game neither needs the disc nor touches the CD path'; Date = '28-30 Sep 2025 / 18 Sep 2026'
+                Id = 'nocd'; Name = 'No CD: the game neither needs the disc nor touches the CD path'; Date = '28-30 Sep 2025 / 18 Sep 2026 / 21 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = $null
                 Tool = 'tools/patch_nocd.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19; CLAUDE.md "Patches applied so far" (the 2025 bytes)'
@@ -226,6 +235,15 @@ CD in a drive.  This one fix removes the whole CD business from the exe:
      sound loader jump to their ordinary "file missing" exits instead of trying "<CD path><name>",
      the movie opener never takes its CD branch, the dead "%c:\dc\" string is zeroed, and the
      sound loader's box says "FILE NOT FOUND / A sound file is missing - see error.log".
+  3. The "Please insert Dark Colony CD" box (21 Sep 2026, player report).  That text is a picture,
+     not a string: when a file the game insists on is missing, the file-open helper draws the
+     sprite intrface/insee over the screen and waits for the file to appear - once for the disc to
+     be inserted, now forever.  Those 68 bytes of the display object's CD-prompt method become the
+     sound loader's error exit with the file name as the message: a line "unable to open file
+     <name>" in error.log, the desktop mode restored, a box "FILE NOT FOUND / <name>", exit.  The
+     four absolute operands of the new code take over the relocation entries of the old ones.
+     (Seen with a copy of the game that lacked ozi_ns\intrf_hd\: OZI MISSIONS -> NEXT showed the
+     prompt for intrf_hd/hxscene.txt.)
 
 Every edit sits inside an existing instruction or string; nothing moves.  The patched exe no
 longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive letter from them).
@@ -251,6 +269,8 @@ longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive le
                     @{ Offset = 0x5474; Old = 'E8 33 FE FF FF'; New = '90 90 90 90 90' }
                     # open helper: je <try "<CD path><name>"> -> jmp <fail as for any missing file>
                     @{ Offset = 0x57DF; Old = '0F 84 6E FE FF FF'; New = 'E9 F9 FE FF FF 90' }
+                    # CD-prompt method (display slot +4Ch, called for a missing required file): "draw intrface/insee and wait for the file" -> the wave loader's error exit: fprintf(error.log, "unable to open file %s", name); display shutdown; Sleep(2000); MessageBoxA(hwnd, name, "FILE NOT FOUND"); exit (68 bytes; the rest of the old body is dead)
+                    @{ Offset = 0x2B4BC; Old = '53 51 56 57 55 89 E5 83 EC 38 89 45 FC 89 55 E8 8B 40 20 8B 55 FC 89 45 F8 89 D1 B8 0C 54 48 00 BB 1C 54 48 00 FF 51 44 8B 49 24 89 C2 89 C8 E8 AC FF FD FF 8B 5D FC 8D 55 D8 89 D9 89 45 E0 B8 0C 54 48 00'; New = '52 52 68 C8 7D 48 00 FF 35 B4 49 4A 00 E8 78 FD 04 00 83 C4 0C E8 A1 FD 04 00 E8 D5 21 00 00 B8 D0 07 00 00 E8 E3 47 00 00 5A 6A 00 68 E0 7D 48 00 52 FF 35 30 97 48 00 E8 BB 2E 05 00 31 C0 E8 F7 FF 04 00' }
                     # wave loader: jne <found> -> jmp: after the two local names the loader takes its error exit instead of the two CD-path attempts
                     @{ Offset = 0x51EE9; Old = '0F 85 D7 00 00 00'; New = 'E9 D8 00 00 00 90' }
                     # DGROUP "%c:\dc\" (the CD-path format, now dead) -> 8 zero bytes
@@ -263,6 +283,14 @@ longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive le
                     @{ Offset = 0x97A8A; Old = 'B4 3F'; New = 'B4 0F' }
                     # .reloc table: entry 3FB9 (type 3 HIGHLOW, page offset 0xFB9) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
                     @{ Offset = 0x97A8C; Old = 'B9 3F'; New = 'B9 0F' }
+                    # .reloc table: entry 30D8 -> 30BF: the absolute operand moved from page offset 0x0D8 to 0x0BF, entry follows it
+                    @{ Offset = 0x99B78; Old = 'D8 30'; New = 'BF 30' }
+                    # .reloc table: entry 30DD -> 30C5: the absolute operand moved from page offset 0x0DD to 0x0C5, entry follows it
+                    @{ Offset = 0x99B7A; Old = 'DD 30'; New = 'C5 30' }
+                    # .reloc table: entry 30FC -> 30E9: the absolute operand moved from page offset 0x0FC to 0x0E9, entry follows it
+                    @{ Offset = 0x99B7C; Old = 'FC 30'; New = 'E9 30' }
+                    # .reloc table: entry 3132 -> 30F0: the absolute operand moved from page offset 0x132 to 0x0F0, entry follows it
+                    @{ Offset = 0x99B7E; Old = '32 31'; New = 'F0 30' }
                 )
             }
 
@@ -3032,20 +3060,20 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '2ae4e2e9631022279aca7f3a2267b95371431c7b8c17fe4b36ff62af44417e54'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '97eaaf011d5308cff5ffe7c16c4df78c9c702c16bafae88a7325dee19aeba77c'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '3142d17ef2753676cb802df8bcdda8fe822c94aeb5984644ef994991d9e4caba'; '1024x768' = '2ae4e2e9631022279aca7f3a2267b95371431c7b8c17fe4b36ff62af44417e54'; '1280x1024' = '3aec38686ad6c3d9b172b563222a37f689af32a097ef6dca33ead738e6aec1c4'; '1280x720' = '9a75e52864a8a4c452dffa2fbea66233994366da1bb49e24ea7173be19158bf1'; '1280x800' = 'ce9621470955c272de52901221895b1515e87c3272eab896fd19e4fc6e5c899b' }
+        ReferenceSha256 = @{ '640x480' = '4144ef0f7c73193c35b1cb25cc8e17dbfd864d3dbf29b478bc844c91d9f36381'; '1024x768' = '97eaaf011d5308cff5ffe7c16c4df78c9c702c16bafae88a7325dee19aeba77c'; '1280x1024' = '7a073bb4989da29f24beaedcaeb190da959022724ddbae345c34d205273d4c91'; '1280x720' = 'f2dfbb426a0d7ba4e1dab57724591cc231dbda92544963821077398a26e9f6f8'; '1280x800' = '6fa9a0434cbbd09404d4747466d587ce6e860f3316c8dbacca5b2319d034a5e5' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
-            #  Added      : 28-30 Sep 2025 / 18 Sep 2026
+            #  Added      : 28-30 Sep 2025 / 18 Sep 2026 / 21 Sep 2026
             #  Made with  : tools/patch_nocd.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19; CLAUDE.md "Patches applied so far" (the 2025 bytes)
-            #  Changes    : 127 bytes in 14 edits
+            #  Changes    : 198 bytes in 19 edits
             #  The game refuses to start, and greys out most main-menu buttons, when it cannot find its
             #  CD in a drive.  This one fix removes the whole CD business from the exe:
             #
@@ -3074,11 +3102,20 @@ only, in place, no code and no relocation entry changes.
             #       sound loader jump to their ordinary "file missing" exits instead of trying "<CD path><name>",
             #       the movie opener never takes its CD branch, the dead "%c:\dc\" string is zeroed, and the
             #       sound loader's box says "FILE NOT FOUND / A sound file is missing - see error.log".
+            #    3. The "Please insert Dark Colony CD" box (21 Sep 2026, player report).  That text is a picture,
+            #       not a string: when a file the game insists on is missing, the file-open helper draws the
+            #       sprite intrface/insee over the screen and waits for the file to appear - once for the disc to
+            #       be inserted, now forever.  Those 68 bytes of the display object's CD-prompt method become the
+            #       sound loader's error exit with the file name as the message: a line "unable to open file
+            #       <name>" in error.log, the desktop mode restored, a box "FILE NOT FOUND / <name>", exit.  The
+            #       four absolute operands of the new code take over the relocation entries of the old ones.
+            #       (Seen with a copy of the game that lacked ozi_ns\intrf_hd\: OZI MISSIONS -> NEXT showed the
+            #       prompt for intrf_hd/hxscene.txt.)
             #
             #  Every edit sits inside an existing instruction or string; nothing moves.  The patched exe no
             #  longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive letter from them).
             @{
-                Id = 'nocd'; Name = 'No CD: the game neither needs the disc nor touches the CD path'; Date = '28-30 Sep 2025 / 18 Sep 2026'
+                Id = 'nocd'; Name = 'No CD: the game neither needs the disc nor touches the CD path'; Date = '28-30 Sep 2025 / 18 Sep 2026 / 21 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = $null
                 Tool = 'tools/patch_nocd.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.19; CLAUDE.md "Patches applied so far" (the 2025 bytes)'
@@ -3111,6 +3148,15 @@ CD in a drive.  This one fix removes the whole CD business from the exe:
      sound loader jump to their ordinary "file missing" exits instead of trying "<CD path><name>",
      the movie opener never takes its CD branch, the dead "%c:\dc\" string is zeroed, and the
      sound loader's box says "FILE NOT FOUND / A sound file is missing - see error.log".
+  3. The "Please insert Dark Colony CD" box (21 Sep 2026, player report).  That text is a picture,
+     not a string: when a file the game insists on is missing, the file-open helper draws the
+     sprite intrface/insee over the screen and waits for the file to appear - once for the disc to
+     be inserted, now forever.  Those 68 bytes of the display object's CD-prompt method become the
+     sound loader's error exit with the file name as the message: a line "unable to open file
+     <name>" in error.log, the desktop mode restored, a box "FILE NOT FOUND / <name>", exit.  The
+     four absolute operands of the new code take over the relocation entries of the old ones.
+     (Seen with a copy of the game that lacked ozi_ns\intrf_hd\: OZI MISSIONS -> NEXT showed the
+     prompt for intrf_hd/hxscene.txt.)
 
 Every edit sits inside an existing instruction or string; nothing moves.  The patched exe no
 longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive letter from them).
@@ -3136,6 +3182,8 @@ longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive le
                     @{ Offset = 0x5454; Old = 'E8 33 FE FF FF'; New = '90 90 90 90 90' }
                     # open helper: je <try "<CD path><name>"> -> jmp <fail as for any missing file>
                     @{ Offset = 0x57BF; Old = '0F 84 6E FE FF FF'; New = 'E9 F9 FE FF FF 90' }
+                    # CD-prompt method (display slot +4Ch, called for a missing required file): "draw intrface/insee and wait for the file" -> the wave loader's error exit: fprintf(error.log, "unable to open file %s", name); display shutdown; Sleep(2000); MessageBoxA(hwnd, name, "FILE NOT FOUND"); exit (68 bytes; the rest of the old body is dead)
+                    @{ Offset = 0x2B51C; Old = '53 51 56 57 55 89 E5 83 EC 38 89 45 FC 89 55 E8 8B 40 20 8B 55 FC 89 45 F8 89 D1 B8 14 54 48 00 BB 24 54 48 00 FF 51 44 8B 49 24 89 C2 89 C8 E8 AC FF FD FF 8B 5D FC 8D 55 D8 89 D9 89 45 E0 B8 14 54 48 00'; New = '52 52 68 D0 7D 48 00 FF 35 B4 49 4A 00 E8 78 FD 04 00 83 C4 0C E8 A1 FD 04 00 E8 D5 21 00 00 B8 D0 07 00 00 E8 E3 47 00 00 5A 6A 00 68 E8 7D 48 00 52 FF 35 58 97 48 00 E8 BB 2E 05 00 31 C0 E8 F7 FF 04 00' }
                     # wave loader: jne <found> -> jmp: after the two local names the loader takes its error exit instead of the two CD-path attempts
                     @{ Offset = 0x51F49; Old = '0F 85 D7 00 00 00'; New = 'E9 D8 00 00 00 90' }
                     # in-game CD test (Council Wars only): jne -> je in the C-runtime write path, the 2025 hand patch that stopped the expansion from throwing the player out of a running game
@@ -3150,6 +3198,14 @@ longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive le
                     @{ Offset = 0x97C88; Old = '94 3F'; New = '94 0F' }
                     # .reloc table: entry 3F99 (type 3 HIGHLOW, page offset 0xF99) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
                     @{ Offset = 0x97C8A; Old = '99 3F'; New = '99 0F' }
+                    # .reloc table: entry 3138 -> 311F: the absolute operand moved from page offset 0x138 to 0x11F, entry follows it
+                    @{ Offset = 0x99D74; Old = '38 31'; New = '1F 31' }
+                    # .reloc table: entry 313D -> 3125: the absolute operand moved from page offset 0x13D to 0x125, entry follows it
+                    @{ Offset = 0x99D76; Old = '3D 31'; New = '25 31' }
+                    # .reloc table: entry 315C -> 3149: the absolute operand moved from page offset 0x15C to 0x149, entry follows it
+                    @{ Offset = 0x99D78; Old = '5C 31'; New = '49 31' }
+                    # .reloc table: entry 3192 -> 3150: the absolute operand moved from page offset 0x192 to 0x150, entry follows it
+                    @{ Offset = 0x99D7A; Old = '92 31'; New = '50 31' }
                 )
             }
 
@@ -5853,7 +5909,7 @@ applied last.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
-                # data files this fix needs next to the exe (380; listed from the repository when this
+                # data files this fix needs next to the exe (385; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'ozi_ns\alta.gif'
@@ -5877,6 +5933,11 @@ applied last.
                     'ozi_ns\gjungle.gif'
                     'ozi_ns\gjungle.rgb'
                     'ozi_ns\gJUNGLE.RMP'
+                    'ozi_ns\intrf_hd\bintroe'
+                    'ozi_ns\intrf_hd\gxscene.txt'
+                    'ozi_ns\intrf_hd\hxscene.txt'
+                    'ozi_ns\intrf_hd\introe'
+                    'ozi_ns\intrf_hd\shumane'
                     'ozi_ns\intrface\astory.txt'
                     'ozi_ns\intrface\credits.txt'
                     'ozi_ns\intrface\hstory.txt'
@@ -6339,7 +6400,7 @@ applied last.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (379; listed from the repository when this
+                # data files this fix needs next to the exe (384; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'ozi_ns\alta.gif'
@@ -6363,6 +6424,11 @@ applied last.
                     'ozi_ns\gjungle.gif'
                     'ozi_ns\gjungle.rgb'
                     'ozi_ns\gJUNGLE.RMP'
+                    'ozi_ns\intrf_hd\bintroe'
+                    'ozi_ns\intrf_hd\gxscene.txt'
+                    'ozi_ns\intrf_hd\hxscene.txt'
+                    'ozi_ns\intrf_hd\introe'
+                    'ozi_ns\intrf_hd\shumane'
                     'ozi_ns\intrface\astory.txt'
                     'ozi_ns\intrface\credits.txt'
                     'ozi_ns\intrface\hstory.txt'
