@@ -147,13 +147,13 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '71b570fa7e13e5ad469158ef3d2a05e8a80ebaf1a9beefa9b9854c4c0119cbbe'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '5a2e10b7c133be27a6641227401410ba03400fd6137e6a499e9ebf4c7bcfaf0b'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = 'eb80601e3082370ad5596d54e77b93a19e70f35d06d188730efa9ae4055edf37'; '1024x768' = '71b570fa7e13e5ad469158ef3d2a05e8a80ebaf1a9beefa9b9854c4c0119cbbe'; '1280x1024' = 'cae7f486dc02fcbaaf994605c858748b1da52aab0d05461ffbf2e1152ce591c2'; '1280x720' = 'a041516d31a1d66401f02ed9a550489f3f08218bb428818e889ae18acff2f905'; '1280x800' = '371cf78187fbf0d56414109a50b24d9563e29b21f21d85bf2df3a540f37c9d19' }
+        ReferenceSha256 = @{ '640x480' = '69346e9328607d914b8ebb953cbd32021042f8de3f601a820dbef94e793bff1d'; '1024x768' = '5a2e10b7c133be27a6641227401410ba03400fd6137e6a499e9ebf4c7bcfaf0b'; '1280x1024' = 'cad5c13ae4db3d1450d8f002032a25e8afb17578c4014084d01fddd13a84a7e4'; '1280x720' = '85a10765823cb647e8ec1c07cc93b72d94b6c1a8b40d7e25713e05066d19b03a'; '1280x800' = 'fb0c542d4f3a05045413f575ced5bb1719eae3038a5c65d430c7e9714aa42873' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -2921,6 +2921,168 @@ at 5 s, the fixed one plays on with an empty error.log.
                 )
             }
 
+            # ---- music: Original CD soundtrack from MP3 files (MUSIC\TRACK02-05.MP3 / exp\music\track02-05.mp3) ---------------------------------------------------------
+            #  Added      : 22 Sep 2026
+            #  Made with  : tools/patch_music.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.31
+            #  Changes    : 1790 bytes in 46 edits
+            #  The soundtrack of both games was never a file: the CDs are mixed-mode discs with the music as
+            #  audio tracks 2-5 after the data track, and the game plays them through Windows' CD-audio
+            #  interface (MCI "cdaudio") - at the start of every battle it seeks to track 2 and plays the disc to
+            #  its end, checks every five seconds whether the disc has stopped and then starts over at track 2,
+            #  and stops the disc when the battle ends.  Without a CD-ROM drive that interface fails at start-up
+            #  and the game is silent for good; the music slider of the options screen sets a "CD line" volume
+            #  that modern sound drivers no longer have.
+            #
+            #  This fix rewrites the CD-audio routines in place (the seven entry points the music code calls
+            #  keep their addresses) as an MP3 player on Windows' own MCI "mpegvideo" device (mciqtz32.dll,
+            #  part of every Windows since 98; the exe imports nothing new): at battle start it opens and plays
+            #  MUSIC\TRACK02.MP3, the five-second check plays the next file when one has ended and TRACK02
+            #  again after the last one - the original "whole disc, repeat" - and the music slider now sets the
+            #  volume of the playing file (the saved level is applied to every track).  Dark Colony reads
+            #  MUSIC\TRACK0N.MP3, Council Wars exp\music\track0N.mp3, because both exes share one folder and
+            #  the two discs have different music.  Everything inside the two rewritten routines; the
+            #  relocation entries of the old code's absolute operands are re-pointed at the new ones and the
+            #  rest become padding; nothing moves.
+            #
+            #  REQUIRES the eight tracks from the repository (encoded from the CD images at 192 kbit/s, 32 MB):
+            #  MUSIC\TRACK02.MP3 .. TRACK05.MP3 for Dark Colony, exp\music\track02.mp3 .. track05.mp3 for
+            #  Council Wars.  Without a TRACK02 file the game simply stays silent, as it does today.
+            @{
+                Id = 'music'; Name = 'Original CD soundtrack from MP3 files (MUSIC\TRACK02-05.MP3 / exp\music\track02-05.mp3)'; Date = '22 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_music.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.31'
+                Description = @'
+The soundtrack of both games was never a file: the CDs are mixed-mode discs with the music as
+audio tracks 2-5 after the data track, and the game plays them through Windows' CD-audio
+interface (MCI "cdaudio") - at the start of every battle it seeks to track 2 and plays the disc to
+its end, checks every five seconds whether the disc has stopped and then starts over at track 2,
+and stops the disc when the battle ends.  Without a CD-ROM drive that interface fails at start-up
+and the game is silent for good; the music slider of the options screen sets a "CD line" volume
+that modern sound drivers no longer have.
+
+This fix rewrites the CD-audio routines in place (the seven entry points the music code calls
+keep their addresses) as an MP3 player on Windows' own MCI "mpegvideo" device (mciqtz32.dll,
+part of every Windows since 98; the exe imports nothing new): at battle start it opens and plays
+MUSIC\TRACK02.MP3, the five-second check plays the next file when one has ended and TRACK02
+again after the last one - the original "whole disc, repeat" - and the music slider now sets the
+volume of the playing file (the saved level is applied to every track).  Dark Colony reads
+MUSIC\TRACK0N.MP3, Council Wars exp\music\track0N.mp3, because both exes share one folder and
+the two discs have different music.  Everything inside the two rewritten routines; the
+relocation entries of the old code's absolute operands are re-pointed at the new ones and the
+rest become padding; nothing moves.
+
+REQUIRES the eight tracks from the repository (encoded from the CD images at 192 kbit/s, 32 MB):
+MUSIC\TRACK02.MP3 .. TRACK05.MP3 for Dark Colony, exp\music\track02.mp3 .. track05.mp3 for
+Council Wars.  Without a TRACK02 file the game simply stays silent, as it does today.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (4; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'MUSIC\TRACK02.MP3'
+                    'MUSIC\TRACK03.MP3'
+                    'MUSIC\TRACK04.MP3'
+                    'MUSIC\TRACK05.MP3'
+                )
+                Edits = @(
+                    # cdaudio module -> MP3 player on MCI mpegvideo (seven entry points kept: cd_open +0, play_from_here +0x3C, close +0x88, stop +0xB8, tracks +0x338, seek_track +0x4E8, mode +0x6E0; helpers, "mpegvideo" and the path template "music\\track0?.mp3" inside; the rest zero)
+                    @{ Offset = 0x504D0; Old = '51 52 55 89 E5 83 EC 14 8D 45 EC 50 68 00 21 00 00 68 03 08 00 00 31 D2 B9 1C 7C 48 00 52 89 55 F0 89 4D F4 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F0 89 EC 5D 5A 59 C3 53 51 52 55 89 E5 83 EC 18 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 0A 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 75 15 8D 45 E8 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 5B C3 51 52 55 89 E5 6A 00 6A 00 68 04 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 06 31 C0 5D 5A 59 C3 B8 01 00 00 00 5D 5A 59 C3 8B C0 51 52 55 89 E5 83 EC 04 8D 55 FC 52 6A 00 68 08 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 C3 53 51 52 55 89 E5 83 EC 20 8D 5D E0 53 68 00 01 00 00 31 DB 68 14 08 00 00 66 89 C3 BA 04 00 00 00 53 89 55 E8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 4E 81 7D E4 0D 02 00 00 75 20 8D 45 F0 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 29 31 C0 89 EC 5D 5A 59 5B C3 8D 45 FC 50 6A 00 68 09 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5A 59 5B C3 B8 01 00 00 00 89 EC 5D 5A 59 5B C3 8D 40 00 53 51 52 56 57 55 89 E5 83 EC 28 89 C3 8D 45 D8 50 68 00 01 00 00 31 F6 68 14 08 00 00 66 89 DE BA 08 00 00 00 56 89 55 E0 2E FF 15 70 05 48 00 85 C0 74 07 31 C0 E9 A7 00 00 00 8B 45 DC 89 45 FC 8D 45 D8 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 56 89 4D E0 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8B 75 FC 8B 7D DC 46 BA 08 00 00 00 39 FE 76 0C B8 02 00 00 00 BE 01 00 00 00 EB 0A 8A 45 FC FE C0 25 FF 00 00 00 89 45 F8 8D 45 F4 50 52 68 07 08 00 00 81 E3 FF FF 00 00 53 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8D 45 E8 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 89 F0 89 EC 5D 5F 5E 5A 59 5B C3 90 53 51 52 56 57 55 89 E5 83 EC 24 89 C6 8D 45 DC 50 68 00 01 00 00 31 FF 68 14 08 00 00 66 89 F7 BA 08 00 00 00 57 89 55 E4 2E FF 15 70 05 48 00 85 C0 74 07 31 C0 E9 9A 00 00 00 8D 45 DC 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 57 8B 5D E0 89 4D E4 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 BF 08 00 00 00 83 FB 01 75 08 8A 45 E0 8B 5D E0 EB 0A 88 D8 FE C8 25 FF 00 00 00 4B 89 45 FC 8D 45 F8 50 57 68 07 08 00 00 81 E6 FF FF 00 00 56 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8D 45 EC 50 6A 00 68 06 08 00 00 56 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 89 D8 89 EC 5D 5F 5E 5A 59 5B C3 8B C0 51 52 55 89 E5 83 EC 10 C7 45 F8 03 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F4 89 EC 5D 5A 59 C3 90 51 52 55 89 E5 83 EC 10 C7 45 F8 08 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F4 89 EC 5D 5A 59 C3 90 53 51 52 55 89 E5 83 EC 1C 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 0A 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 2E 8D 45 E4 50 68 00 01 00 00 68 14 08 00 00 B9 02 00 00 00 53 89 4D EC 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5A 59 5B C3 8B 45 E8 89 EC 5D 5A 59 5B C3 8D 40 00 53 51 52 56 55 89 E5 83 EC 1C 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 02 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 5B 8D 45 E4 50 68 00 01 00 00 68 14 08 00 00 B9 02 00 00 00 53 89 4D EC 2E FF 15 70 05 48 00 85 C0 74 0A 31 C0 89 EC 5D 5E 5A 59 5B C3 8D 45 F4 50 68 00 04 00 00 68 0D 08 00 00 BE 0A 00 00 00 53 89 75 F8 2E FF 15 70 05 48 00 85 C0 74 0A 31 C0 89 EC 5D 5E 5A 59 5B C3 8B 45 E8 89 EC 5D 5E 5A 59 5B C3 51 52 55 89 E5 83 EC 0C 8D 55 F4 52 68 00 01 00 00 68 0D 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 C3 90 55 89 E5 5D C3 8D 40 00 53 51 56 55 89 E5 83 EC 20 88 D3 8D 75 EC 56 68 00 04 00 00 31 F6 68 0D 08 00 00 66 89 C6 BA 0A 00 00 00 56 89 55 F0 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 4E 88 D8 89 45 FC 8D 45 F8 50 6A 08 68 07 08 00 00 81 E3 FF 00 00 00 56 43 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5E 59 5B C3 8D 45 E0 50 6A 00 68 06 08 00 00 56 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5E 59 5B C3 89 D8 89 EC 5D 5E 59 5B C3 90 55 89 E5 31 C0 5D C3 90 53 51 52 56 57 55 89 E5 83 EC 20 89 C6 8D 45 F0 50 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 F3 BA 02 00 00 00 53 89 55 F4 2E FF 15 70 05 48 00 89 C7 85 C0 74 18 6A 00 6A 00 68 04 08 00 00 53 2E FF 15 70 05 48 00 89 F8 E9 EF 00 00 00 8D 45 E0 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 53 89 4D E8 2E FF 15 70 05 48 00 89 C7 85 C0 74 1C 6A 00 6A 00 68 04 08 00 00 53 2E FF 15 70 05 48 00 89 F8 89 EC 5D 5F 5E 5A 59 5B C3 8B 45 E4 A3 0C 28 53 00 83 F8 14 7C 05 B8 14 00 00 00 BB 01 00 00 00 A3 0C 28 53 00 3B 1D 0C 28 53 00 0F 8F 85 00 00 00 C7 45 E8 02 00 00 00 8D 45 E0 50 68 10 01 00 00 31 C0 68 14 08 00 00 66 89 F0 50 89 5D EC 89 45 FC 2E FF 15 70 05 48 00 89 C7 85 C0 74 1F 6A 00 6A 00 68 04 08 00 00 8B 4D FC 51 2E FF 15 70 05 48 00 89 F8 89 EC 5D 5F 5E 5A 59 5B C3 8D 7B FF 8D 04 BD 00 00 00 00 29 F8 89 C7 8A 45 E4 88 87 D0 27 53 00 31 C0 66 8B 45 E4 C1 F8 08 88 87 D1 27 53 00 8B 45 E4 C1 E8 10 43 88 87 D2 27 53 00 E9 6F FF FF FF 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8B C0 55 89 E5 25 FF FF 00 00 E8 A3 FC FF FF 39 D0 76 07 B8 01 00 00 00 5D C3 31 C0 5D C3 51 52 55 89 E5 83 EC 10 C7 45 F8 04 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 07 B8 04 00 00 00 EB 36 8B 4D F4 81 F9 12 02 00 00 75 0B B8 01 00 00 00 89 EC 5D 5A 59 C3 81 F9 0C 02 00 00 75 0B B8 02 00 00 00 89 EC 5D 5A 59 C3 81 F9 0D 02 00 00 75 05 B8 03 00 00 00 89 EC 5D 5A 59 C3'; New = 'E8 DB 00 00 00 A1 E8 8D 48 00 6B C0 64 A3 D8 27 53 00 B8 02 00 00 00 E8 F4 00 00 00 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 C0 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 EB 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 A1 D0 27 53 00 85 C0 74 10 6A 00 6A 00 68 08 08 00 00 50 FF 15 70 05 48 00 31 C0 5A 59 C3 00 00 00 00 00 00 00 00 51 52 A1 D0 27 53 00 85 C0 74 17 6A 00 6A 00 68 04 08 00 00 50 FF 15 70 05 48 00 31 C0 A3 D0 27 53 00 5A 59 C3 00 00 00 00 00 00 00 00 00 00 00 51 52 56 57 55 89 E5 83 EC 14 89 C2 BE AC 12 45 00 BF DC 27 53 00 B9 06 00 00 00 F3 A5 04 30 A2 E8 27 53 00 89 15 D4 27 53 00 31 C0 89 45 EC 89 45 F0 C7 45 F4 A0 12 45 00 C7 45 F8 DC 27 53 00 89 45 FC 8D 45 EC 50 68 02 22 00 00 68 03 08 00 00 6A 00 FF 15 70 05 48 00 85 C0 75 1A 8B 45 F0 A3 D0 27 53 00 8B 0D D8 27 53 00 E8 80 00 00 00 A1 D0 27 53 00 EB 02 31 C0 89 EC 5D 5F 5E 5A 59 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 55 89 E5 83 EC 0C 31 D2 89 55 F4 89 55 F8 89 55 FC 8D 55 F4 52 6A 00 68 06 08 00 00 50 FF 15 70 05 48 00 89 EC 5D 5A 59 C3 00 00 00 00 00 6D 70 65 67 76 69 64 65 6F 00 00 00 6D 75 73 69 63 5C 74 72 61 63 6B 30 3F 2E 6D 70 33 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 55 89 E5 83 EC 18 31 D2 89 55 E8 C7 45 EC 02 40 00 00 89 4D F0 89 55 F4 89 55 F8 89 55 FC 8D 55 E8 52 68 00 00 80 01 68 73 08 00 00 50 FF 15 70 05 48 00 89 EC 5D 5A 59 C3 00 00 00 00 00 51 52 55 89 E5 83 EC 10 A1 D0 27 53 00 85 C0 74 66 31 D2 89 55 F0 89 55 F4 C7 45 F8 04 00 00 00 89 55 FC 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 50 FF 15 70 05 48 00 85 C0 75 3B 81 7D F4 0D 02 00 00 75 2A 8B 15 D4 27 53 00 42 E8 4F FE FF FF 89 D0 E8 78 FE FF FF 85 C0 75 0E B8 02 00 00 00 E8 6A FE FF FF 85 C0 74 0D E8 F1 FE FF FF 31 C0 89 EC 5D 5A 59 C3 B8 04 00 00 00 EB F3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 C0 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 52 E8 F2 FB FF FF 0F B6 C2 E8 1A FC FF FF 85 C0 74 0B E8 A1 FC FF FF 0F B6 C2 40 5A C3 31 C0 5A C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E9 5B FB FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
+                    # set_volume method 0: aux CD-audio device walk -> store level*100, MCI_SETAUDIO volume on the open element (the rest zero)
+                    @{ Offset = 0x51C70; Old = '53 51 52 56 57 55 89 E5 83 EC 34 89 C7 2E FF 15 68 05 48 00 89 45 FC 31 F6 3B 75 FC 73 47 BB 30 00 00 00 8D 45 CC 31 D2 E8 AF 97 02 00 6A 30 8D 45 CC 50 56 2E FF 15 64 05 48 00 85 C0 75 23 66 83 7D F4 01 75 1C 8D 04 BD 00 00 00 00 29 F8 C1 E0 0B 89 C2 C1 E2 10 09 D0 50 56 2E FF 15 6C 05 48 00 46 EB B4 89 EC 5D 5F 5E 5A 59 5B C3'; New = '51 6B C8 64 89 0D D8 27 53 00 A1 D0 27 53 00 85 C0 74 05 E8 48 EA FF FF 59 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
+                    # .reloc table: entry 30E9 -> 30D6: the absolute operand moved from page offset 0x0E9 to 0x0D6, entry follows it
+                    @{ Offset = 0x9BE72; Old = 'E9 30'; New = 'D6 30' }
+                    # .reloc table: entry 30F7 -> 30DE: the absolute operand moved from page offset 0x0F7 to 0x0DE, entry follows it
+                    @{ Offset = 0x9BE74; Old = 'F7 30'; New = 'DE 30' }
+                    # .reloc table: entry 3134 -> 318B: the absolute operand moved from page offset 0x134 to 0x18B, entry follows it
+                    @{ Offset = 0x9BE76; Old = '34 31'; New = '8B 31' }
+                    # .reloc table: entry 314B -> 319F: the absolute operand moved from page offset 0x14B to 0x19F, entry follows it
+                    @{ Offset = 0x9BE78; Old = '4B 31'; New = '9F 31' }
+                    # .reloc table: entry 316F -> 31B3: the absolute operand moved from page offset 0x16F to 0x1B3, entry follows it
+                    @{ Offset = 0x9BE7A; Old = '6F 31'; New = 'B3 31' }
+                    # .reloc table: entry 31A4 -> 31C7: the absolute operand moved from page offset 0x1A4 to 0x1C7, entry follows it
+                    @{ Offset = 0x9BE7C; Old = 'A4 31'; New = 'C7 31' }
+                    # .reloc table: entry 31D8 -> 31CE: the absolute operand moved from page offset 0x1D8 to 0x1CE, entry follows it
+                    @{ Offset = 0x9BE7E; Old = 'D8 31'; New = 'CE 31' }
+                    # .reloc table: entry 31FC -> 31ED: the absolute operand moved from page offset 0x1FC to 0x1ED, entry follows it
+                    @{ Offset = 0x9BE80; Old = 'FC 31'; New = 'ED 31' }
+                    # .reloc table: entry 321C -> 31F2: the absolute operand moved from page offset 0x21C to 0x1F2, entry follows it
+                    @{ Offset = 0x9BE82; Old = '1C 32'; New = 'F2 31' }
+                    # .reloc table: entry 3268 -> 3200: the absolute operand moved from page offset 0x268 to 0x200, entry follows it
+                    @{ Offset = 0x9BE84; Old = '68 32'; New = '00 32' }
+                    # .reloc table: entry 3297 -> 3206: the absolute operand moved from page offset 0x297 to 0x206, entry follows it
+                    @{ Offset = 0x9BE86; Old = '97 32'; New = '06 32' }
+                    # .reloc table: entry 32E7 -> 3215: the absolute operand moved from page offset 0x2E7 to 0x215, entry follows it
+                    @{ Offset = 0x9BE88; Old = 'E7 32'; New = '15 32' }
+                    # .reloc table: entry 3309 -> 321C: the absolute operand moved from page offset 0x309 to 0x21C, entry follows it
+                    @{ Offset = 0x9BE8A; Old = '09 33'; New = '1C 32' }
+                    # .reloc table: entry 3354 -> 3235: the absolute operand moved from page offset 0x354 to 0x235, entry follows it
+                    @{ Offset = 0x9BE8C; Old = '54 33'; New = '35 32' }
+                    # .reloc table: entry 3380 -> 3241: the absolute operand moved from page offset 0x380 to 0x241, entry follows it
+                    @{ Offset = 0x9BE8E; Old = '80 33'; New = '41 32' }
+                    # .reloc table: entry 33C6 -> 3247: the absolute operand moved from page offset 0x3C6 to 0x247, entry follows it
+                    @{ Offset = 0x9BE90; Old = 'C6 33'; New = '47 32' }
+                    # .reloc table: entry 33E8 -> 3251: the absolute operand moved from page offset 0x3E8 to 0x251, entry follows it
+                    @{ Offset = 0x9BE92; Old = 'E8 33'; New = '51 32' }
+                    # .reloc table: entry 342E -> 3291: the absolute operand moved from page offset 0x42E to 0x291, entry follows it
+                    @{ Offset = 0x9BE94; Old = '2E 34'; New = '91 32' }
+                    # .reloc table: entry 346A -> 3301: the absolute operand moved from page offset 0x46A to 0x301, entry follows it
+                    @{ Offset = 0x9BE96; Old = '6A 34'; New = '01 33' }
+                    # .reloc table: entry 34A8 -> 3319: the absolute operand moved from page offset 0x4A8 to 0x319, entry follows it
+                    @{ Offset = 0x9BE98; Old = 'A8 34'; New = '19 33' }
+                    # .reloc table: entry 34CE -> 3344: the absolute operand moved from page offset 0x4CE to 0x344, entry follows it
+                    @{ Offset = 0x9BE9A; Old = 'CE 34'; New = '44 33' }
+                    # .reloc table: entry 3515 -> 3357: the absolute operand moved from page offset 0x515 to 0x357, entry follows it
+                    @{ Offset = 0x9BE9C; Old = '15 35'; New = '57 33' }
+                    # .reloc table: entry 353B (type 3 HIGHLOW, page offset 0x53B) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BE9E; Old = '3B 35'; New = '00 00' }
+                    # .reloc table: entry 3567 (type 3 HIGHLOW, page offset 0x567) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEA0; Old = '67 35'; New = '00 00' }
+                    # .reloc table: entry 35A3 (type 3 HIGHLOW, page offset 0x5A3) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEA2; Old = 'A3 35'; New = '00 00' }
+                    # .reloc table: entry 35E2 (type 3 HIGHLOW, page offset 0x5E2) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEA4; Old = 'E2 35'; New = '00 00' }
+                    # .reloc table: entry 3609 (type 3 HIGHLOW, page offset 0x609) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEA6; Old = '09 36'; New = '00 00' }
+                    # .reloc table: entry 3629 (type 3 HIGHLOW, page offset 0x629) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEA8; Old = '29 36'; New = '00 00' }
+                    # .reloc table: entry 3678 (type 3 HIGHLOW, page offset 0x678) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEAA; Old = '78 36'; New = '00 00' }
+                    # .reloc table: entry 368F (type 3 HIGHLOW, page offset 0x68F) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEAC; Old = '8F 36'; New = '00 00' }
+                    # .reloc table: entry 36B4 (type 3 HIGHLOW, page offset 0x6B4) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEAE; Old = 'B4 36'; New = '00 00' }
+                    # .reloc table: entry 36CB (type 3 HIGHLOW, page offset 0x6CB) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEB0; Old = 'CB 36'; New = '00 00' }
+                    # .reloc table: entry 36DE (type 3 HIGHLOW, page offset 0x6DE) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEB2; Old = 'DE 36'; New = '00 00' }
+                    # .reloc table: entry 36F2 (type 3 HIGHLOW, page offset 0x6F2) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEB4; Old = 'F2 36'; New = '00 00' }
+                    # .reloc table: entry 36F8 (type 3 HIGHLOW, page offset 0x6F8) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEB6; Old = 'F8 36'; New = '00 00' }
+                    # .reloc table: entry 3726 (type 3 HIGHLOW, page offset 0x726) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEB8; Old = '26 37'; New = '00 00' }
+                    # .reloc table: entry 3740 (type 3 HIGHLOW, page offset 0x740) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEBA; Old = '40 37'; New = '00 00' }
+                    # .reloc table: entry 3762 (type 3 HIGHLOW, page offset 0x762) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEBC; Old = '62 37'; New = '00 00' }
+                    # .reloc table: entry 3771 (type 3 HIGHLOW, page offset 0x771) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEBE; Old = '71 37'; New = '00 00' }
+                    # .reloc table: entry 377E (type 3 HIGHLOW, page offset 0x77E) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEC0; Old = '7E 37'; New = '00 00' }
+                    # .reloc table: entry 37D6 (type 3 HIGHLOW, page offset 0x7D6) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9BEC2; Old = 'D6 37'; New = '00 00' }
+                    # .reloc table: entry 3880 -> 3876: the absolute operand moved from page offset 0x880 to 0x876, entry follows it
+                    @{ Offset = 0x9C0F0; Old = '80 38'; New = '76 38' }
+                    # .reloc table: entry 38A7 -> 387B: the absolute operand moved from page offset 0x8A7 to 0x87B, entry follows it
+                    @{ Offset = 0x9C0F2; Old = 'A7 38'; New = '7B 38' }
+                    # .reloc table: entry 38CE (type 3 HIGHLOW, page offset 0x8CE) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0F4; Old = 'CE 38'; New = '00 00' }
+                )
+            }
+
             # ---- movies @ 640x480: Classic movies under their own names: DCINTRO / DCAENDING / DCHENDING (Dark Colony only) ---------------------------------------------------------
             #  Added      : 15 Sep 2026
             #  Made with  : tools/patch_movies.py
@@ -3088,13 +3250,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'd4ca85553ba2ee751333dc2c4b40194fa2af78cda4b4a939794cab40566ae914'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'd7b30c1a3d9cd1dea92e8c1ac0fc7565233ce2743ddef1a926208625de067f6a'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = 'f5f3bf350f3897d3fc622eb3746c3e68e74fb2a8ea97605f6e69e6c78fa76399'; '1024x768' = 'd4ca85553ba2ee751333dc2c4b40194fa2af78cda4b4a939794cab40566ae914'; '1280x1024' = '4c9001b315323f16fc1472baa47e5bbb4e9a632babbc61238715d62b061f9bfa'; '1280x720' = 'de9b447c1f9dfc18397d315b89ffc970a73db1298d4e029564985bb2e5363562'; '1280x800' = 'adc809c30857b2fd3dd5cf973166e6b06b899031f5253fc8627018741654f9d6' }
+        ReferenceSha256 = @{ '640x480' = '05383a4827aed4381cccf07084ba34f192091884bdefd69fe57c7c0c0382c7ea'; '1024x768' = 'd7b30c1a3d9cd1dea92e8c1ac0fc7565233ce2743ddef1a926208625de067f6a'; '1280x1024' = '9c1b30a3bd974840945eed093d2e9d116cb177ced23d523573a5a1e1ac21a7f8'; '1280x720' = 'a43818eadd09b601e182cbd866fd33c4cadacc1404835be6513cc72b99be2283'; '1280x800' = 'f555d2114758f9a2e6f174a31fa344450672a4a50192c0fdf037c5254dca1eee' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -5896,6 +6058,168 @@ at 5 s, the fixed one plays on with an empty error.log.
                     @{ Offset = 0x51F4F; Old = 'E8 2C 33 FB FF 8D BD F2 FB FF FF 89 C6 57 8A 06 88 07 3C 00 74 10'; New = '6A 00 6A 00 6A 03 6A 00 6A 01 68 00 00 00 80 50 E8 38 C4 02 00 C3' }
                     # error exit fprintf/MessageBox name: lea eax,[ebp-40Eh] (CD buffer, empty since nocd) -> lea eax,[ebp-80Eh] (prefix+name)
                     @{ Offset = 0x5202D; Old = 'F2 FB FF FF'; New = 'F2 F7 FF FF' }
+                )
+            }
+
+            # ---- music: Original CD soundtrack from MP3 files (MUSIC\TRACK02-05.MP3 / exp\music\track02-05.mp3) ---------------------------------------------------------
+            #  Added      : 22 Sep 2026
+            #  Made with  : tools/patch_music.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.31
+            #  Changes    : 1794 bytes in 46 edits
+            #  The soundtrack of both games was never a file: the CDs are mixed-mode discs with the music as
+            #  audio tracks 2-5 after the data track, and the game plays them through Windows' CD-audio
+            #  interface (MCI "cdaudio") - at the start of every battle it seeks to track 2 and plays the disc to
+            #  its end, checks every five seconds whether the disc has stopped and then starts over at track 2,
+            #  and stops the disc when the battle ends.  Without a CD-ROM drive that interface fails at start-up
+            #  and the game is silent for good; the music slider of the options screen sets a "CD line" volume
+            #  that modern sound drivers no longer have.
+            #
+            #  This fix rewrites the CD-audio routines in place (the seven entry points the music code calls
+            #  keep their addresses) as an MP3 player on Windows' own MCI "mpegvideo" device (mciqtz32.dll,
+            #  part of every Windows since 98; the exe imports nothing new): at battle start it opens and plays
+            #  MUSIC\TRACK02.MP3, the five-second check plays the next file when one has ended and TRACK02
+            #  again after the last one - the original "whole disc, repeat" - and the music slider now sets the
+            #  volume of the playing file (the saved level is applied to every track).  Dark Colony reads
+            #  MUSIC\TRACK0N.MP3, Council Wars exp\music\track0N.mp3, because both exes share one folder and
+            #  the two discs have different music.  Everything inside the two rewritten routines; the
+            #  relocation entries of the old code's absolute operands are re-pointed at the new ones and the
+            #  rest become padding; nothing moves.
+            #
+            #  REQUIRES the eight tracks from the repository (encoded from the CD images at 192 kbit/s, 32 MB):
+            #  MUSIC\TRACK02.MP3 .. TRACK05.MP3 for Dark Colony, exp\music\track02.mp3 .. track05.mp3 for
+            #  Council Wars.  Without a TRACK02 file the game simply stays silent, as it does today.
+            @{
+                Id = 'music'; Name = 'Original CD soundtrack from MP3 files (MUSIC\TRACK02-05.MP3 / exp\music\track02-05.mp3)'; Date = '22 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_music.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.31'
+                Description = @'
+The soundtrack of both games was never a file: the CDs are mixed-mode discs with the music as
+audio tracks 2-5 after the data track, and the game plays them through Windows' CD-audio
+interface (MCI "cdaudio") - at the start of every battle it seeks to track 2 and plays the disc to
+its end, checks every five seconds whether the disc has stopped and then starts over at track 2,
+and stops the disc when the battle ends.  Without a CD-ROM drive that interface fails at start-up
+and the game is silent for good; the music slider of the options screen sets a "CD line" volume
+that modern sound drivers no longer have.
+
+This fix rewrites the CD-audio routines in place (the seven entry points the music code calls
+keep their addresses) as an MP3 player on Windows' own MCI "mpegvideo" device (mciqtz32.dll,
+part of every Windows since 98; the exe imports nothing new): at battle start it opens and plays
+MUSIC\TRACK02.MP3, the five-second check plays the next file when one has ended and TRACK02
+again after the last one - the original "whole disc, repeat" - and the music slider now sets the
+volume of the playing file (the saved level is applied to every track).  Dark Colony reads
+MUSIC\TRACK0N.MP3, Council Wars exp\music\track0N.mp3, because both exes share one folder and
+the two discs have different music.  Everything inside the two rewritten routines; the
+relocation entries of the old code's absolute operands are re-pointed at the new ones and the
+rest become padding; nothing moves.
+
+REQUIRES the eight tracks from the repository (encoded from the CD images at 192 kbit/s, 32 MB):
+MUSIC\TRACK02.MP3 .. TRACK05.MP3 for Dark Colony, exp\music\track02.mp3 .. track05.mp3 for
+Council Wars.  Without a TRACK02 file the game simply stays silent, as it does today.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (4; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'exp\music\track02.mp3'
+                    'exp\music\track03.mp3'
+                    'exp\music\track04.mp3'
+                    'exp\music\track05.mp3'
+                )
+                Edits = @(
+                    # cdaudio module -> MP3 player on MCI mpegvideo (seven entry points kept: cd_open +0, play_from_here +0x3C, close +0x88, stop +0xB8, tracks +0x338, seek_track +0x4E8, mode +0x6E0; helpers, "mpegvideo" and the path template "exp\\music\\track0?.mp3" inside; the rest zero)
+                    @{ Offset = 0x50530; Old = '51 52 55 89 E5 83 EC 14 8D 45 EC 50 68 00 21 00 00 68 03 08 00 00 31 D2 B9 24 7C 48 00 52 89 55 F0 89 4D F4 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F0 89 EC 5D 5A 59 C3 53 51 52 55 89 E5 83 EC 18 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 0A 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 75 15 8D 45 E8 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 5B C3 51 52 55 89 E5 6A 00 6A 00 68 04 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 06 31 C0 5D 5A 59 C3 B8 01 00 00 00 5D 5A 59 C3 8B C0 51 52 55 89 E5 83 EC 04 8D 55 FC 52 6A 00 68 08 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 C3 53 51 52 55 89 E5 83 EC 20 8D 5D E0 53 68 00 01 00 00 31 DB 68 14 08 00 00 66 89 C3 BA 04 00 00 00 53 89 55 E8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 4E 81 7D E4 0D 02 00 00 75 20 8D 45 F0 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 29 31 C0 89 EC 5D 5A 59 5B C3 8D 45 FC 50 6A 00 68 09 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5A 59 5B C3 B8 01 00 00 00 89 EC 5D 5A 59 5B C3 8D 40 00 53 51 52 56 57 55 89 E5 83 EC 28 89 C3 8D 45 D8 50 68 00 01 00 00 31 F6 68 14 08 00 00 66 89 DE BA 08 00 00 00 56 89 55 E0 2E FF 15 70 05 48 00 85 C0 74 07 31 C0 E9 A7 00 00 00 8B 45 DC 89 45 FC 8D 45 D8 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 56 89 4D E0 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8B 75 FC 8B 7D DC 46 BA 08 00 00 00 39 FE 76 0C B8 02 00 00 00 BE 01 00 00 00 EB 0A 8A 45 FC FE C0 25 FF 00 00 00 89 45 F8 8D 45 F4 50 52 68 07 08 00 00 81 E3 FF FF 00 00 53 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8D 45 E8 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 89 F0 89 EC 5D 5F 5E 5A 59 5B C3 90 53 51 52 56 57 55 89 E5 83 EC 24 89 C6 8D 45 DC 50 68 00 01 00 00 31 FF 68 14 08 00 00 66 89 F7 BA 08 00 00 00 57 89 55 E4 2E FF 15 70 05 48 00 85 C0 74 07 31 C0 E9 9A 00 00 00 8D 45 DC 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 57 8B 5D E0 89 4D E4 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 BF 08 00 00 00 83 FB 01 75 08 8A 45 E0 8B 5D E0 EB 0A 88 D8 FE C8 25 FF 00 00 00 4B 89 45 FC 8D 45 F8 50 57 68 07 08 00 00 81 E6 FF FF 00 00 56 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8D 45 EC 50 6A 00 68 06 08 00 00 56 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 89 D8 89 EC 5D 5F 5E 5A 59 5B C3 8B C0 51 52 55 89 E5 83 EC 10 C7 45 F8 03 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F4 89 EC 5D 5A 59 C3 90 51 52 55 89 E5 83 EC 10 C7 45 F8 08 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F4 89 EC 5D 5A 59 C3 90 53 51 52 55 89 E5 83 EC 1C 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 0A 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 2E 8D 45 E4 50 68 00 01 00 00 68 14 08 00 00 B9 02 00 00 00 53 89 4D EC 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5A 59 5B C3 8B 45 E8 89 EC 5D 5A 59 5B C3 8D 40 00 53 51 52 56 55 89 E5 83 EC 1C 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 02 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 5B 8D 45 E4 50 68 00 01 00 00 68 14 08 00 00 B9 02 00 00 00 53 89 4D EC 2E FF 15 70 05 48 00 85 C0 74 0A 31 C0 89 EC 5D 5E 5A 59 5B C3 8D 45 F4 50 68 00 04 00 00 68 0D 08 00 00 BE 0A 00 00 00 53 89 75 F8 2E FF 15 70 05 48 00 85 C0 74 0A 31 C0 89 EC 5D 5E 5A 59 5B C3 8B 45 E8 89 EC 5D 5E 5A 59 5B C3 51 52 55 89 E5 83 EC 0C 8D 55 F4 52 68 00 01 00 00 68 0D 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 C3 90 55 89 E5 5D C3 8D 40 00 53 51 56 55 89 E5 83 EC 20 88 D3 8D 75 EC 56 68 00 04 00 00 31 F6 68 0D 08 00 00 66 89 C6 BA 0A 00 00 00 56 89 55 F0 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 4E 88 D8 89 45 FC 8D 45 F8 50 6A 08 68 07 08 00 00 81 E3 FF 00 00 00 56 43 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5E 59 5B C3 8D 45 E0 50 6A 00 68 06 08 00 00 56 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5E 59 5B C3 89 D8 89 EC 5D 5E 59 5B C3 90 55 89 E5 31 C0 5D C3 90 53 51 52 56 57 55 89 E5 83 EC 20 89 C6 8D 45 F0 50 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 F3 BA 02 00 00 00 53 89 55 F4 2E FF 15 70 05 48 00 89 C7 85 C0 74 18 6A 00 6A 00 68 04 08 00 00 53 2E FF 15 70 05 48 00 89 F8 E9 EF 00 00 00 8D 45 E0 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 53 89 4D E8 2E FF 15 70 05 48 00 89 C7 85 C0 74 1C 6A 00 6A 00 68 04 08 00 00 53 2E FF 15 70 05 48 00 89 F8 89 EC 5D 5F 5E 5A 59 5B C3 8B 45 E4 A3 0C 28 53 00 83 F8 14 7C 05 B8 14 00 00 00 BB 01 00 00 00 A3 0C 28 53 00 3B 1D 0C 28 53 00 0F 8F 85 00 00 00 C7 45 E8 02 00 00 00 8D 45 E0 50 68 10 01 00 00 31 C0 68 14 08 00 00 66 89 F0 50 89 5D EC 89 45 FC 2E FF 15 70 05 48 00 89 C7 85 C0 74 1F 6A 00 6A 00 68 04 08 00 00 8B 4D FC 51 2E FF 15 70 05 48 00 89 F8 89 EC 5D 5F 5E 5A 59 5B C3 8D 7B FF 8D 04 BD 00 00 00 00 29 F8 89 C7 8A 45 E4 88 87 D0 27 53 00 31 C0 66 8B 45 E4 C1 F8 08 88 87 D1 27 53 00 8B 45 E4 C1 E8 10 43 88 87 D2 27 53 00 E9 6F FF FF FF 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8B C0 55 89 E5 25 FF FF 00 00 E8 A3 FC FF FF 39 D0 76 07 B8 01 00 00 00 5D C3 31 C0 5D C3 51 52 55 89 E5 83 EC 10 C7 45 F8 04 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 07 B8 04 00 00 00 EB 36 8B 4D F4 81 F9 12 02 00 00 75 0B B8 01 00 00 00 89 EC 5D 5A 59 C3 81 F9 0C 02 00 00 75 0B B8 02 00 00 00 89 EC 5D 5A 59 C3 81 F9 0D 02 00 00 75 05 B8 03 00 00 00 89 EC 5D 5A 59 C3'; New = 'E8 DB 00 00 00 A1 10 8E 48 00 6B C0 64 A3 D8 27 53 00 B8 02 00 00 00 E8 F4 00 00 00 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 C0 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 EB 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 A1 D0 27 53 00 85 C0 74 10 6A 00 6A 00 68 08 08 00 00 50 FF 15 70 05 48 00 31 C0 5A 59 C3 00 00 00 00 00 00 00 00 51 52 A1 D0 27 53 00 85 C0 74 17 6A 00 6A 00 68 04 08 00 00 50 FF 15 70 05 48 00 31 C0 A3 D0 27 53 00 5A 59 C3 00 00 00 00 00 00 00 00 00 00 00 51 52 56 57 55 89 E5 83 EC 14 89 C2 BE 0C 13 45 00 BF DC 27 53 00 B9 06 00 00 00 F3 A5 04 30 A2 EC 27 53 00 89 15 D4 27 53 00 31 C0 89 45 EC 89 45 F0 C7 45 F4 00 13 45 00 C7 45 F8 DC 27 53 00 89 45 FC 8D 45 EC 50 68 02 22 00 00 68 03 08 00 00 6A 00 FF 15 70 05 48 00 85 C0 75 1A 8B 45 F0 A3 D0 27 53 00 8B 0D D8 27 53 00 E8 80 00 00 00 A1 D0 27 53 00 EB 02 31 C0 89 EC 5D 5F 5E 5A 59 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 55 89 E5 83 EC 0C 31 D2 89 55 F4 89 55 F8 89 55 FC 8D 55 F4 52 6A 00 68 06 08 00 00 50 FF 15 70 05 48 00 89 EC 5D 5A 59 C3 00 00 00 00 00 6D 70 65 67 76 69 64 65 6F 00 00 00 65 78 70 5C 6D 75 73 69 63 5C 74 72 61 63 6B 30 3F 2E 6D 70 33 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 55 89 E5 83 EC 18 31 D2 89 55 E8 C7 45 EC 02 40 00 00 89 4D F0 89 55 F4 89 55 F8 89 55 FC 8D 55 E8 52 68 00 00 80 01 68 73 08 00 00 50 FF 15 70 05 48 00 89 EC 5D 5A 59 C3 00 00 00 00 00 51 52 55 89 E5 83 EC 10 A1 D0 27 53 00 85 C0 74 66 31 D2 89 55 F0 89 55 F4 C7 45 F8 04 00 00 00 89 55 FC 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 50 FF 15 70 05 48 00 85 C0 75 3B 81 7D F4 0D 02 00 00 75 2A 8B 15 D4 27 53 00 42 E8 4F FE FF FF 89 D0 E8 78 FE FF FF 85 C0 75 0E B8 02 00 00 00 E8 6A FE FF FF 85 C0 74 0D E8 F1 FE FF FF 31 C0 89 EC 5D 5A 59 C3 B8 04 00 00 00 EB F3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 C0 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 52 E8 F2 FB FF FF 0F B6 C2 E8 1A FC FF FF 85 C0 74 0B E8 A1 FC FF FF 0F B6 C2 40 5A C3 31 C0 5A C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E9 5B FB FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
+                    # set_volume method 0: aux CD-audio device walk -> store level*100, MCI_SETAUDIO volume on the open element (the rest zero)
+                    @{ Offset = 0x51CD0; Old = '53 51 52 56 57 55 89 E5 83 EC 34 89 C7 2E FF 15 68 05 48 00 89 45 FC 31 F6 3B 75 FC 73 47 BB 30 00 00 00 8D 45 CC 31 D2 E8 AF 97 02 00 6A 30 8D 45 CC 50 56 2E FF 15 64 05 48 00 85 C0 75 23 66 83 7D F4 01 75 1C 8D 04 BD 00 00 00 00 29 F8 C1 E0 0B 89 C2 C1 E2 10 09 D0 50 56 2E FF 15 6C 05 48 00 46 EB B4 89 EC 5D 5F 5E 5A 59 5B C3'; New = '51 6B C8 64 89 0D D8 27 53 00 A1 D0 27 53 00 85 C0 74 05 E8 48 EA FF FF 59 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
+                    # .reloc table: entry 3149 -> 3136: the absolute operand moved from page offset 0x149 to 0x136, entry follows it
+                    @{ Offset = 0x9C072; Old = '49 31'; New = '36 31' }
+                    # .reloc table: entry 3157 -> 313E: the absolute operand moved from page offset 0x157 to 0x13E, entry follows it
+                    @{ Offset = 0x9C074; Old = '57 31'; New = '3E 31' }
+                    # .reloc table: entry 3194 -> 31EB: the absolute operand moved from page offset 0x194 to 0x1EB, entry follows it
+                    @{ Offset = 0x9C076; Old = '94 31'; New = 'EB 31' }
+                    # .reloc table: entry 31AB -> 31FF: the absolute operand moved from page offset 0x1AB to 0x1FF, entry follows it
+                    @{ Offset = 0x9C078; Old = 'AB 31'; New = 'FF 31' }
+                    # .reloc table: entry 31CF -> 3213: the absolute operand moved from page offset 0x1CF to 0x213, entry follows it
+                    @{ Offset = 0x9C07A; Old = 'CF 31'; New = '13 32' }
+                    # .reloc table: entry 3204 -> 3227: the absolute operand moved from page offset 0x204 to 0x227, entry follows it
+                    @{ Offset = 0x9C07C; Old = '04 32'; New = '27 32' }
+                    # .reloc table: entry 3238 -> 322E: the absolute operand moved from page offset 0x238 to 0x22E, entry follows it
+                    @{ Offset = 0x9C07E; Old = '38 32'; New = '2E 32' }
+                    # .reloc table: entry 325C -> 324D: the absolute operand moved from page offset 0x25C to 0x24D, entry follows it
+                    @{ Offset = 0x9C080; Old = '5C 32'; New = '4D 32' }
+                    # .reloc table: entry 327C -> 3252: the absolute operand moved from page offset 0x27C to 0x252, entry follows it
+                    @{ Offset = 0x9C082; Old = '7C 32'; New = '52 32' }
+                    # .reloc table: entry 32C8 -> 3260: the absolute operand moved from page offset 0x2C8 to 0x260, entry follows it
+                    @{ Offset = 0x9C084; Old = 'C8 32'; New = '60 32' }
+                    # .reloc table: entry 32F7 -> 3266: the absolute operand moved from page offset 0x2F7 to 0x266, entry follows it
+                    @{ Offset = 0x9C086; Old = 'F7 32'; New = '66 32' }
+                    # .reloc table: entry 3347 -> 3275: the absolute operand moved from page offset 0x347 to 0x275, entry follows it
+                    @{ Offset = 0x9C088; Old = '47 33'; New = '75 32' }
+                    # .reloc table: entry 3369 -> 327C: the absolute operand moved from page offset 0x369 to 0x27C, entry follows it
+                    @{ Offset = 0x9C08A; Old = '69 33'; New = '7C 32' }
+                    # .reloc table: entry 33B4 -> 3295: the absolute operand moved from page offset 0x3B4 to 0x295, entry follows it
+                    @{ Offset = 0x9C08C; Old = 'B4 33'; New = '95 32' }
+                    # .reloc table: entry 33E0 -> 32A1: the absolute operand moved from page offset 0x3E0 to 0x2A1, entry follows it
+                    @{ Offset = 0x9C08E; Old = 'E0 33'; New = 'A1 32' }
+                    # .reloc table: entry 3426 -> 32A7: the absolute operand moved from page offset 0x426 to 0x2A7, entry follows it
+                    @{ Offset = 0x9C090; Old = '26 34'; New = 'A7 32' }
+                    # .reloc table: entry 3448 -> 32B1: the absolute operand moved from page offset 0x448 to 0x2B1, entry follows it
+                    @{ Offset = 0x9C092; Old = '48 34'; New = 'B1 32' }
+                    # .reloc table: entry 348E -> 32F1: the absolute operand moved from page offset 0x48E to 0x2F1, entry follows it
+                    @{ Offset = 0x9C094; Old = '8E 34'; New = 'F1 32' }
+                    # .reloc table: entry 34CA -> 3361: the absolute operand moved from page offset 0x4CA to 0x361, entry follows it
+                    @{ Offset = 0x9C096; Old = 'CA 34'; New = '61 33' }
+                    # .reloc table: entry 3508 -> 3379: the absolute operand moved from page offset 0x508 to 0x379, entry follows it
+                    @{ Offset = 0x9C098; Old = '08 35'; New = '79 33' }
+                    # .reloc table: entry 352E -> 33A4: the absolute operand moved from page offset 0x52E to 0x3A4, entry follows it
+                    @{ Offset = 0x9C09A; Old = '2E 35'; New = 'A4 33' }
+                    # .reloc table: entry 3575 -> 33B7: the absolute operand moved from page offset 0x575 to 0x3B7, entry follows it
+                    @{ Offset = 0x9C09C; Old = '75 35'; New = 'B7 33' }
+                    # .reloc table: entry 359B (type 3 HIGHLOW, page offset 0x59B) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C09E; Old = '9B 35'; New = '00 00' }
+                    # .reloc table: entry 35C7 (type 3 HIGHLOW, page offset 0x5C7) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0A0; Old = 'C7 35'; New = '00 00' }
+                    # .reloc table: entry 3603 (type 3 HIGHLOW, page offset 0x603) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0A2; Old = '03 36'; New = '00 00' }
+                    # .reloc table: entry 3642 (type 3 HIGHLOW, page offset 0x642) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0A4; Old = '42 36'; New = '00 00' }
+                    # .reloc table: entry 3669 (type 3 HIGHLOW, page offset 0x669) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0A6; Old = '69 36'; New = '00 00' }
+                    # .reloc table: entry 3689 (type 3 HIGHLOW, page offset 0x689) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0A8; Old = '89 36'; New = '00 00' }
+                    # .reloc table: entry 36D8 (type 3 HIGHLOW, page offset 0x6D8) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0AA; Old = 'D8 36'; New = '00 00' }
+                    # .reloc table: entry 36EF (type 3 HIGHLOW, page offset 0x6EF) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0AC; Old = 'EF 36'; New = '00 00' }
+                    # .reloc table: entry 3714 (type 3 HIGHLOW, page offset 0x714) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0AE; Old = '14 37'; New = '00 00' }
+                    # .reloc table: entry 372B (type 3 HIGHLOW, page offset 0x72B) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0B0; Old = '2B 37'; New = '00 00' }
+                    # .reloc table: entry 373E (type 3 HIGHLOW, page offset 0x73E) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0B2; Old = '3E 37'; New = '00 00' }
+                    # .reloc table: entry 3752 (type 3 HIGHLOW, page offset 0x752) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0B4; Old = '52 37'; New = '00 00' }
+                    # .reloc table: entry 3758 (type 3 HIGHLOW, page offset 0x758) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0B6; Old = '58 37'; New = '00 00' }
+                    # .reloc table: entry 3786 (type 3 HIGHLOW, page offset 0x786) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0B8; Old = '86 37'; New = '00 00' }
+                    # .reloc table: entry 37A0 (type 3 HIGHLOW, page offset 0x7A0) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0BA; Old = 'A0 37'; New = '00 00' }
+                    # .reloc table: entry 37C2 (type 3 HIGHLOW, page offset 0x7C2) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0BC; Old = 'C2 37'; New = '00 00' }
+                    # .reloc table: entry 37D1 (type 3 HIGHLOW, page offset 0x7D1) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0BE; Old = 'D1 37'; New = '00 00' }
+                    # .reloc table: entry 37DE (type 3 HIGHLOW, page offset 0x7DE) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0C0; Old = 'DE 37'; New = '00 00' }
+                    # .reloc table: entry 3836 (type 3 HIGHLOW, page offset 0x836) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0C2; Old = '36 38'; New = '00 00' }
+                    # .reloc table: entry 38E0 -> 38D6: the absolute operand moved from page offset 0x8E0 to 0x8D6, entry follows it
+                    @{ Offset = 0x9C2F0; Old = 'E0 38'; New = 'D6 38' }
+                    # .reloc table: entry 3907 -> 38DB: the absolute operand moved from page offset 0x907 to 0x8DB, entry follows it
+                    @{ Offset = 0x9C2F2; Old = '07 39'; New = 'DB 38' }
+                    # .reloc table: entry 392E (type 3 HIGHLOW, page offset 0x92E) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2F4; Old = '2E 39'; New = '00 00' }
                 )
             }
 
