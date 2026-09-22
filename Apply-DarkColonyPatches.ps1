@@ -7996,12 +7996,20 @@ function Write-StockOziMenu([string] $GameDir) {
 
 # Applies the chosen patches (canonical order) to the bytes of $OriginalPath and writes $OutputPath.
 # Returns a small result object; throws on any check failure.
-function Invoke-PatchRun([string] $OriginalPath, $Build, [object[]] $Chosen, [string] $OutputPath, [string] $Mode) {
+# $Progress (optional): a script block called with one line of text before each step - the window
+# shows it in its "patching in progress" box; the command line passes nothing.
+function Invoke-PatchRun([string] $OriginalPath, $Build, [object[]] $Chosen, [string] $OutputPath, [string] $Mode, [scriptblock] $Progress) {
     $data = [System.IO.File]::ReadAllBytes($OriginalPath)
     $effective = @(Get-BuildPatches $Build $Mode)
     $ordered = @($effective | Where-Object { $p = $_; ($Chosen | Where-Object { $_.Id -eq $p.Id -and $_.Mode -eq $p.Mode }) })
     $result = $data
-    foreach ($p in $ordered) { $result = Invoke-Patch $result $p }
+    $n = 0
+    foreach ($p in $ordered) {
+        $n++
+        if ($Progress) { & $Progress ("Applying fix {0} of {1}: '{2}' ({3}, {4} edits)..." -f $n, $ordered.Count, $p.Id, $p.Name, @($p.Edits).Count) }
+        $result = Invoke-Patch $result $p
+    }
+    if ($Progress) { & $Progress ("Writing {0} ({1} bytes)..." -f (Split-Path -Leaf $OutputPath), $result.Length) }
     [System.IO.File]::WriteAllBytes($OutputPath, $result)
     $outSha = Get-Sha256Hex $result
     $ref = if ($Mode) { $Build.ReferenceSha256[$Mode] } else { $Build.PatchedSha256 }
@@ -8010,6 +8018,7 @@ function Invoke-PatchRun([string] $OriginalPath, $Build, [object[]] $Chosen, [st
     $generated = @()
     if ($Mode -and $Mode -ne '640x480' -and ($ordered | Where-Object { $_.ContainsKey('SetSources') })) {
         $movies = [bool] ($ordered | Where-Object { $_.Id -eq 'movies' })
+        if ($Progress) { & $Progress ("Writing the {0} interface set into INTRF_HD (scripts, backgrounds, loading screens) - this takes a few seconds..." -f $Mode) }
         try {
             $generated = @(Write-InterfaceSet (Split-Path -Parent ([System.IO.Path]::GetFullPath($OutputPath))) $Mode $movies)
         } catch {
@@ -8215,11 +8224,14 @@ function Show-PatcherWindow([string] $PreloadPath) {
 
     # --- bottom: output + buttons + log
     $lblOut = New-Object System.Windows.Forms.Label
-    $lblOut.Text = 'Write to:'; $lblOut.Location = '12,565'; $lblOut.AutoSize = $true; $lblOut.Anchor = 'Bottom,Left'
+    # The output is not selectable (22 Sep 2026, maintainer request "disable resulting path and filename
+    # selection"): the patched exe is always written under the build's name beside the original
+    # (dc16new.exe / engexp16new.exe / maped_ozi_ns_v1.2.exe), because that is where its data files are
+    # and what the READMEs, the server tests and the players' shortcuts expect.  The box only shows it.
+    $lblOut.Text = 'Written to:'; $lblOut.Location = '12,565'; $lblOut.AutoSize = $true; $lblOut.Anchor = 'Bottom,Left'
     $txtOut = New-Object System.Windows.Forms.TextBox
-    $txtOut.Location = '110,562'; $txtOut.Size = '760,23'; $txtOut.Anchor = 'Bottom,Left,Right'
-    $btnOut = New-Object System.Windows.Forms.Button
-    $btnOut.Text = '...'; $btnOut.Location = '880,560'; $btnOut.Size = '92,26'; $btnOut.Anchor = 'Bottom,Right'
+    $txtOut.Location = '110,562'; $txtOut.Size = '862,23'; $txtOut.Anchor = 'Bottom,Left,Right'; $txtOut.ReadOnly = $true
+    $txtOut.TabStop = $false
     $btnApply = New-Object System.Windows.Forms.Button
     $btnApply.Text = 'Apply selected fixes'; $btnApply.Location = '110,596'; $btnApply.Size = '170,30'; $btnApply.Anchor = 'Bottom,Left'
     $btnApply.Enabled = $false
@@ -8228,8 +8240,8 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $lblLog = New-Object System.Windows.Forms.Label
     $lblLog.Location = '440,596'; $lblLog.Size = '532,40'; $lblLog.Anchor = 'Bottom,Left,Right'; $lblLog.Font = $mono
 
-    $form.Controls.AddRange(@($lblIn, $txtIn, $btnBrowse, $lblStatus, $grpFix, $grpInfo, $lblOut, $txtOut, $btnOut, $btnApply, $btnVerify, $lblLog))
-    $script:gui.Controls = @{ Form = $form; In = $txtIn; Status = $lblStatus; All = $chkAll; List = $lst; Info = $txtInfo; Out = $txtOut; Apply = $btnApply; Log = $lblLog; Browse = $btnBrowse; OutBtn = $btnOut; Verify = $btnVerify; Res = $cmbRes }
+    $form.Controls.AddRange(@($lblIn, $txtIn, $btnBrowse, $lblStatus, $grpFix, $grpInfo, $lblOut, $txtOut, $btnApply, $btnVerify, $lblLog))
+    $script:gui.Controls = @{ Form = $form; In = $txtIn; Status = $lblStatus; All = $chkAll; List = $lst; Info = $txtInfo; Out = $txtOut; Apply = $btnApply; Log = $lblLog; Browse = $btnBrowse; Verify = $btnVerify; Res = $cmbRes }
     $c = $script:gui.Controls   # event handlers run outside this function's scope, so they reach the controls through this table
 
     # --- behaviour
@@ -8362,15 +8374,6 @@ function Show-PatcherWindow([string] $PreloadPath) {
         if ($dlg.ShowDialog($c.Form) -eq 'OK') { & $script:gui.Load $dlg.FileName }
     })
 
-    $c.OutBtn.Add_Click({
-        $c = $script:gui.Controls
-        $dlg = New-Object System.Windows.Forms.SaveFileDialog
-        $dlg.Title = 'Where to write the patched exe'; $dlg.Filter = 'Executable (*.exe)|*.exe'
-        $dlg.OverwritePrompt = $false
-        if ($c.Out.Text) { $dlg.FileName = Split-Path -Leaf $c.Out.Text; try { $dlg.InitialDirectory = Split-Path $c.Out.Text } catch {} }
-        if ($dlg.ShowDialog($c.Form) -eq 'OK') { $c.Out.Text = $dlg.FileName }
-    })
-
     # "Select all" <-> individual boxes, without the two events feeding each other; fixes whose
     # resources are not found stay unticked in both directions
     $c.All.Add_CheckedChanged({
@@ -8436,55 +8439,123 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $c.Info.SelectionStart = 0; $c.Info.SelectionLength = 0; $c.Info.ScrollToCaret()
     })
 
+    # Popups (22 Sep 2026, maintainer request "show a popup when patching is in progress and when it
+    # succeeds and when it fails"): while the bytes and the interface set are written a small owned
+    # "Patching in progress" box names the current step (the run is synchronous on the UI thread, so
+    # the box is repainted by hand between the steps and the main window is disabled meanwhile), and
+    # the outcome - written and byte-identical, written with a warning, refused, failed - is one
+    # message box.  Every box goes through $script:gui.Notify so a headless test can replace it
+    # with a recorder; the button passes $interactive = $true, a test may pass $false for silence.
+    $script:gui.Notify = {
+        param([string] $text, [string] $title, [string] $icon)
+        [System.Windows.Forms.MessageBox]::Show($script:gui.Controls.Form, $text, $title, 'OK', $icon) | Out-Null
+    }
+    $script:gui.Busy = $null
+    $script:gui.Progress = {
+        param([string] $step)
+        $c = $script:gui.Controls
+        $c.Log.ForeColor = 'Black'; $c.Log.Text = $step
+        $b = $script:gui.Busy
+        if ($b) {
+            $b.Label.Text = "Patching in progress - please wait.`r`n`r`n$step"
+            $b.Form.Refresh()
+            [System.Windows.Forms.Application]::DoEvents()
+        }
+    }
     $script:gui.Apply = {
-        param([bool] $confirmOverwrite)
+        param([bool] $interactive)
         $c = $script:gui.Controls
         $g = $script:gui
         if (-not $g.Build) { return $null }
         $chosen = @()
         for ($i = 0; $i -lt $c.List.Items.Count; $i++) { if ($c.List.GetItemChecked($i)) { $chosen += $g.Patches[$i] } }
-        if ($chosen.Count -eq 0) { $c.Log.ForeColor = 'Firebrick'; $c.Log.Text = 'No fix selected.'; return $null }
         $outPath = $c.Out.Text.Trim()
-        if (-not $outPath) { $c.Log.ForeColor = 'Firebrick'; $c.Log.Text = 'Choose where to write the result.'; return $null }
-        if ([System.IO.Path]::GetFullPath($outPath) -eq [System.IO.Path]::GetFullPath($g.Path)) {
-            $c.Log.ForeColor = 'Firebrick'; $c.Log.Text = 'The output must not be the original file.'; return $null
+        $refused = $null
+        if ($chosen.Count -eq 0) { $refused = 'No fix selected - tick at least one fix.' }
+        elseif (-not $outPath) { $refused = 'No output path - pick the original exe again.' }
+        elseif ([System.IO.Path]::GetFullPath($outPath) -eq [System.IO.Path]::GetFullPath($g.Path)) { $refused = 'The output must not be the original file - the original is never written over.' }
+        if ($refused) {
+            $c.Log.ForeColor = 'Firebrick'; $c.Log.Text = $refused
+            if ($interactive) { & $g.Notify $refused 'Nothing to do' 'Warning' }
+            return $null
         }
-        if ((Test-Path $outPath) -and $confirmOverwrite) {
+        if ((Test-Path $outPath) -and $interactive) {
             $answer = [System.Windows.Forms.MessageBox]::Show($c.Form, "$outPath exists.`r`nReplace it?", 'Replace file?', 'YesNo', 'Question')
             if ($answer -ne 'Yes') { return $null }
         }
         $problems = @(Get-DataProblems $g.Build $chosen (Split-Path -Parent ([System.IO.Path]::GetFullPath($outPath))) $g.Mode)
         if ($problems.Count -gt 0) {
             $c.Log.ForeColor = 'Firebrick'; $c.Log.Text = 'Nothing written: data files or dependent fixes are missing (see the message).'
-            [System.Windows.Forms.MessageBox]::Show($c.Form, (($problems | ForEach-Object { '* ' + $_ }) -join "`r`n`r`n") +
+            & $g.Notify ((($problems | ForEach-Object { '* ' + $_ }) -join "`r`n`r`n") +
                 "`r`n`r`nAn exe written without them fails at start-up or draws garbage, which would look like a bug of the fix. " +
-                "Write the exe into the game folder from the repository, or run the script from the command line with -IgnoreMissingData.",
-                'Prerequisites missing - nothing written', 'OK', 'Warning') | Out-Null
+                "Write the exe into the game folder from the repository, or run the script from the command line with -IgnoreMissingData.") `
+                'Prerequisites missing - nothing written' 'Warning'
             return $null
         }
+        # the "in progress" box: an owned, unclosable form with the current step and a marquee bar
+        if ($interactive) {
+            $busy = New-Object System.Windows.Forms.Form
+            $busy.Text = 'Patching in progress'
+            $busy.FormBorderStyle = 'FixedDialog'; $busy.ControlBox = $false; $busy.ShowInTaskbar = $false
+            $busy.Size = New-Object System.Drawing.Size(560, 190)
+            $busy.StartPosition = if ($c.Form.Visible) { 'CenterParent' } else { 'CenterScreen' }
+            $busy.Font = $c.Form.Font
+            $busyLabel = New-Object System.Windows.Forms.Label
+            $busyLabel.Location = '16,16'; $busyLabel.Size = '512,96'
+            $busyLabel.Text = "Patching in progress - please wait.`r`n`r`nApplying $($chosen.Count) fixes to $(Split-Path -Leaf $g.Path), writing $(Split-Path -Leaf $outPath)..."
+            $busyBar = New-Object System.Windows.Forms.ProgressBar
+            $busyBar.Location = '16,120'; $busyBar.Size = '512,20'; $busyBar.Style = 'Marquee'; $busyBar.MarqueeAnimationSpeed = 30
+            $busy.Controls.AddRange(@($busyLabel, $busyBar))
+            $c.Form.Enabled = $false; $c.Form.UseWaitCursor = $true
+            $busy.Show($c.Form)
+            $g.Busy = @{ Form = $busy; Label = $busyLabel }
+            $busy.Refresh(); [System.Windows.Forms.Application]::DoEvents()
+        }
         try {
-            $r = Invoke-PatchRun $g.Path $g.Build $chosen $outPath $g.Mode
+            $r = Invoke-PatchRun $g.Path $g.Build $chosen $outPath $g.Mode $g.Progress
         } catch {
-            $c.Log.ForeColor = 'Firebrick'; $c.Log.Text = 'Nothing written.'
-            [System.Windows.Forms.MessageBox]::Show($c.Form, $_.Exception.Message, 'Check failed - nothing written', 'OK', 'Error') | Out-Null
+            $c.Log.ForeColor = 'Firebrick'; $c.Log.Text = 'Patching failed - nothing written.'
+            & $g.Notify ("Patching failed:`r`n`r`n$($_.Exception.Message)`r`n`r`nNothing was written to $outPath.") 'Patching failed' 'Error'
             return $null
+        } finally {
+            if ($g.Busy) {
+                $g.Busy.Form.Close(); $g.Busy.Form.Dispose(); $g.Busy = $null
+                $c.Form.Enabled = $true; $c.Form.UseWaitCursor = $false
+            }
         }
         $ids = ($r.Applied | ForEach-Object { $_.Id }) -join ', '
         $modeText = if ($r.Mode) { " for $($r.Mode)" } else { '' }
         if ($r.Generated.Count -gt 0) { $modeText += ' (' + ($r.Generated -join '; ') + ')' }
-        if ($r.Complete -and $r.Published) {
+        $notWritten = @($r.Generated | Where-Object { $_ -match 'NOT WRITTEN|NOT written' })
+        $where = "Written: $outPath"
+        if ($notWritten.Count -gt 0) {
+            $c.Log.ForeColor = 'Firebrick'
+            $c.Log.Text = "The exe was written, but not its data files - see the message.`r`n$($notWritten -join '; ')"
+            $title = 'Patching failed - data files not written'; $icon = 'Error'
+            $text = "$where`r`n`r`nbut the data files it needs were NOT written:`r`n`r`n" + (($notWritten | ForEach-Object { '* ' + $_ }) -join "`r`n") +
+                "`r`n`r`nThe game would fail at start-up with this exe. Fix the cause (a read-only or locked game folder?) and patch again."
+        } elseif ($r.Complete -and $r.Published) {
             $c.Log.ForeColor = 'DarkGreen'
             $c.Log.Text = "Written: $($r.Size) bytes, all $($r.Applied.Count) fixes$modeText.`r`nSHA-256 $($r.Sha256) = byte-identical to the exe published in the repository."
+            $title = 'Patching succeeded'; $icon = 'Information'
+            $text = "$where`r`n`r`n$($r.Size) bytes, all $($r.Applied.Count) fixes$modeText.`r`n`r`nSHA-256 $($r.Sha256)`r`n= byte-identical to the exe published in the repository.`r`n`r`nStart the game with this file."
         } elseif ($r.Complete -and $r.Matches) {
             $c.Log.ForeColor = 'DarkGreen'
             $c.Log.Text = "Written: $($r.Size) bytes, all $($r.Applied.Count) fixes$modeText.`r`nSHA-256 $($r.Sha256) = byte-identical to the reference build for $($r.Mode)."
+            $title = 'Patching succeeded'; $icon = 'Information'
+            $text = "$where`r`n`r`n$($r.Size) bytes, all $($r.Applied.Count) fixes$modeText.`r`n`r`nSHA-256 $($r.Sha256)`r`n= byte-identical to the reference build for $($r.Mode).`r`n`r`nStart the game with this file."
         } elseif ($r.Complete) {
             $c.Log.ForeColor = 'Firebrick'
             $c.Log.Text = "Written, but the SHA-256 differs from the reference build$modeText - please report this.`r`n$($r.Sha256)"
+            $title = 'Patched, but the result differs from the reference build'; $icon = 'Warning'
+            $text = "$where`r`n`r`n$($r.Size) bytes, all $($r.Applied.Count) fixes$modeText, but the SHA-256 differs from the reference build:`r`n`r`n$($r.Sha256)`r`n`r`nThe file may still work - please report this together with the name and SHA-256 of your original."
         } else {
             $c.Log.ForeColor = 'Black'
             $c.Log.Text = "Written: $($r.Size) bytes with $($r.Applied.Count) of $($g.Patches.Count) fixes$modeText ($ids).`r`nSHA-256 $($r.Sha256)"
+            $title = 'Patching succeeded'; $icon = 'Information'
+            $text = "$where`r`n`r`n$($r.Size) bytes with $($r.Applied.Count) of $($g.Patches.Count) fixes${modeText}:`r`n$ids`r`n`r`nSHA-256 $($r.Sha256)`r`n`r`nStart the game with this file."
         }
+        if ($interactive) { & $g.Notify $text $title $icon }
         return $r
     }
     $c.Apply.Add_Click({ & $script:gui.Apply $true | Out-Null })

@@ -131,18 +131,23 @@ What makes it trustworthy:
       drive D: is a card reader, an empty DVD drive or a second hard
       disk - the original would hang behind a "No Disk" box or stall).
 
-   c) "Write to:"  -> where the patched exe is written.  The default
-      is dc16new.exe / engexp16new.exe next to the original, i.e. inside the
-      game folder - keep it there, the game needs its data files.  If
-      the file already exists the script asks before replacing it.
+   c) "Written to:" shows where the patched exe goes: always
+      dc16new.exe / engexp16new.exe next to the original, i.e. inside
+      the game folder, where its data files are (the box cannot be
+      edited; the command line's -Output is there for special cases).
+      If the file already exists the script asks before replacing it.
       It never writes over the original.
 
    d) Press  "Apply selected fixes".
 
-      The log at the bottom shows how many bytes were written, how
-      many fixes were applied and the SHA-256 of the result.  With all
-      fixes selected it reads "byte-identical to the exe published in
-      the repository".
+      A small "Patching in progress" box names each step: fix by fix,
+      then the exe, then - for an HD resolution - the INTRF_HD interface
+      set (that one takes a few seconds).  When it is done a message
+      box tells you whether patching succeeded (the file written, its
+      size, the fixes and the SHA-256; with all fixes selected it reads
+      "byte-identical to the exe published in the repository") or
+      failed (what went wrong, and that nothing was written).  The log
+      at the bottom keeps the same text.
 
    e) Start the game with the file you just wrote.
 
