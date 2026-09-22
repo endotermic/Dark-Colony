@@ -147,13 +147,13 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = 'b0551fc0c5e8bd1174a1893f6a692da9435f36e8e6b4fa6785dc8d9e3ecfb861'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'a71d038b0c8cab089b267748e0c6e1b2e3467678dbed680b55002226834f8f3c'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '5f4d028b6bd8107508601900b8859c18e75fcd12713d02d8dfb8c45a4f77e604'; '1024x768' = 'b0551fc0c5e8bd1174a1893f6a692da9435f36e8e6b4fa6785dc8d9e3ecfb861'; '1280x1024' = '6ebb23e21d5642edb37db6e59ae7b8694883cbaf5ee8b70fffb24fbc20f88c5c'; '1280x720' = 'dcd4606599f0eeecfdecbdbc6ee39af02263a9f3ee5fda287ebbb72a97c8c1f4'; '1280x800' = 'c1495a288474b670ef0c9f12886bbbd8b959915dc0fa88abe0ae2ca03877800b'; '3840x1080' = '6f0ba62eb4177a8a5fc8d4475bb4a5569cd56c47dea34fef38048cdd2feb3c2b' }
+        ReferenceSha256 = @{ '640x480' = 'ef82c30a197f556817e48c3177a4efae9ee9a5cb96754ce44128b97c2328df48'; '1024x768' = 'a71d038b0c8cab089b267748e0c6e1b2e3467678dbed680b55002226834f8f3c'; '1280x1024' = '37420219be4bd6905ce07963ead474280aaaac98e8ed5416bb1f02832b2cca4b'; '1280x720' = 'f228661d7228a934acdeca67990fde7f6998662342f11148a3c717db3b7c67c0'; '1280x800' = 'e72b1ec135d633f39da61fb11f81897827e36f0cb400c32d7f003d4bb38e9c6c'; '3840x1080' = '5c4934b23ed49a8ff3e6e3cac7f2ac88d21bffdfb7f48fe5cd12f59746cb58dd' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -3310,7 +3310,7 @@ Only register-relative addressing, no relocation entries, nothing moves.  Harmle
             #  Added      : 22 Sep 2026
             #  Made with  : tools/patch_widemap.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.32
-            #  Changes    : 367 bytes in 26 edits
+            #  Changes    : 370 bytes in 26 edits
             #  The battlefield view is the screen minus the panel, in whole 32-pixel tiles: 28 tiles across at
             #  1024x768, 36 at 1280x800, 76 at 2560x1440, 116 at 3840x1080.  The maps are 64 to 160 tiles wide
             #  (the training maps and two two-player maps 64, the first two campaign missions and 22 two-player
@@ -3372,7 +3372,7 @@ Without a wide screen the fix changes nothing visible: every map is wider than 2
                 )
                 Edits = @(
                     # cd_probe dead body: bounds rule + column stub + vision stub + order stub: bounds rule at +0 (per axis `if max < min: min = max = (min+max)/2`, 10 absolute operands, jmp camera stub 0x0047F1DC), column stub at +73, vision stub at +124 (call make_rect 0x004365BC, 1 absolute operand), order stub at +158
-                    @{ Offset = 0x52AD; Old = '51 52 56 55 89 E5 81 EC 00 01 00 00 68 B0 48 4A 00 30 E4 68 24 26 48 00 88 25 B8 49 4A 00 8D 85 00 FF FF FF 50 E8 8D 61 07 00 83 C4 0C BA 30 26 48 00 8D 85 00 FF FF FF E8 9A 5C 07 00 85 C0 75 0F A0 F4 8D 48 00 A2 B8 49 4A 00 E9 83 00 00 00 E8 7D 5D 07 00 BE A0 86 01 00 31 D2 E8 22 55 00 00 F7 F6 52 68 B0 48 4A 00 68 34 26 48 00 8D 85 00 FF FF FF 50 E8 3D 61 07 00 83 C4 10 BA 3C 26 48 00 8D 85 00 FF FF FF E8 4A 5C 07 00 89 C6 85 C0 75 0F C6 05 B8 49 4A 00 01 89 EC 5D 5E 5A 59 5B C3 BB 01 00 00 00 89 C1 B8 40 26 48 00 89 DA E8 E6 61 07 00 85 C0 75 09 C6 05 B8 49 4A 00 01 EB 0A A0 F4 8D 48 00 A2 B8 49 4A 00'; New = '8B 0D EC AA 4A 00 3B 0D E4 AA 4A 00 7D 14 03 0D E4 AA 4A 00 D1 F9 89 0D E4 AA 4A 00 89 0D EC AA 4A 00 8B 0D F0 AA 4A 00 3B 0D E8 AA 4A 00 7D 14 03 0D E8 AA 4A 00 D1 F9 89 0D E8 AA 4A 00 89 0D F0 AA 4A 00 E9 E6 92 07 00 8B 06 C1 F8 05 8D 14 38 85 D2 7D 02 31 D2 8B 4E 14 0F BF 09 49 39 CA 7E 02 89 CA 29 C2 C1 E2 02 89 55 BC 8B 45 C8 8D 04 B8 89 45 B8 8A 4D F4 8B 45 F8 C3 E8 8E 06 03 00 8B 15 C0 44 50 00 83 38 00 7D 03 83 20 00 8B 8A B0 A4 09 00 39 48 08 7E 03 89 48 08 C3 51 8B 88 4C 6F 04 00 85 D2 7D 02 31 D2 3B 91 B8 A4 09 00 7C 07 8B 91 B8 A4 09 00 4A 89 D6 59 66 89 98 92 07 00 00 66 89 90 90 07 00 00 C3' }
+                    @{ Offset = 0x52AD; Old = '51 52 56 55 89 E5 81 EC 00 01 00 00 68 B0 48 4A 00 30 E4 68 24 26 48 00 88 25 B8 49 4A 00 8D 85 00 FF FF FF 50 E8 8D 61 07 00 83 C4 0C BA 30 26 48 00 8D 85 00 FF FF FF E8 9A 5C 07 00 85 C0 75 0F A0 F4 8D 48 00 A2 B8 49 4A 00 E9 83 00 00 00 E8 7D 5D 07 00 BE A0 86 01 00 31 D2 E8 22 55 00 00 F7 F6 52 68 B0 48 4A 00 68 34 26 48 00 8D 85 00 FF FF FF 50 E8 3D 61 07 00 83 C4 10 BA 3C 26 48 00 8D 85 00 FF FF FF E8 4A 5C 07 00 89 C6 85 C0 75 0F C6 05 B8 49 4A 00 01 89 EC 5D 5E 5A 59 5B C3 BB 01 00 00 00 89 C1 B8 40 26 48 00 89 DA E8 E6 61 07 00 85 C0 75 09 C6 05 B8 49 4A 00 01 EB 0A A0 F4 8D 48 00 A2 B8 49 4A 00 89 F0 E8'; New = '8B 0D EC AA 4A 00 3B 0D E4 AA 4A 00 7D 14 03 0D E4 AA 4A 00 D1 F9 89 0D E4 AA 4A 00 89 0D EC AA 4A 00 8B 0D F0 AA 4A 00 3B 0D E8 AA 4A 00 7D 14 03 0D E8 AA 4A 00 D1 F9 89 0D E8 AA 4A 00 89 0D F0 AA 4A 00 E9 E6 92 07 00 8B 06 C1 F8 05 8D 14 38 85 D2 7D 02 31 D2 8B 4E 14 0F BF 09 49 39 CA 7E 02 89 CA 29 C2 C1 E2 02 89 55 BC 8B 45 C8 8D 04 B8 89 45 B8 8A 4D F4 8B 45 F8 C3 E8 8E 06 03 00 8B 15 C0 44 50 00 83 38 00 7D 03 83 20 00 8B 8A B0 A4 09 00 39 48 08 7E 03 89 48 08 C3 51 8B 48 0C 8B 89 4C 6F 04 00 85 D2 7D 02 31 D2 3B 91 B8 A4 09 00 7C 07 8B 91 B8 A4 09 00 4A 89 D6 59 66 89 98 92 07 00 00 66 89 90 90 07 00 00 C3' }
                     # spot order: the two 16-bit stores of the world point -> call order stub (clamps x to [0, map_w*256-1], updates esi, then stores)
                     @{ Offset = 0x8A9F; Old = '66 89 98 92 07 00 00 66 89 90 90 07 00 00'; New = 'E8 A7 C8 FF FF 90 90 90 90 90 90 90 90 90' }
                     # proto.c init: call camera stub -> call bounds rule (which chains into the camera stub)
@@ -3899,13 +3899,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'f00fc454c0cab006ebe20733847b477720e201bf4cc6a2d630bf3bb5c13d1693'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'bb6a1e77aa0aaf888ec6b0fe61c8a553e67b79e64b825799722ca6e35e9e75bd'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = 'cda9b4c196da8f303378de7089975f136acd8c7778ab983f5495bc4be157e30e'; '1024x768' = 'f00fc454c0cab006ebe20733847b477720e201bf4cc6a2d630bf3bb5c13d1693'; '1280x1024' = 'fd87b3e8ec9f1be78bcc4434591ff283976fd75f9668bd062f5a9a4a4cde6a4e'; '1280x720' = 'c1b80860eed505c8b8ddcb7be0fcd434dfa07abdec7de91701ce97bcdce676f0'; '1280x800' = '86653ce674fe81874ec04a9e221a38336f2cac4f2b9f3e5338933ac82296a0af'; '3840x1080' = '6ca3706ae59e9deec77af8a6de8ebabadc0e60674afe6bb2a5aa00158eb59602' }
+        ReferenceSha256 = @{ '640x480' = '33449a9c375d16acfa9301b2ad6ff35f8f9fd0189a83a3537e602aa944210f62'; '1024x768' = 'bb6a1e77aa0aaf888ec6b0fe61c8a553e67b79e64b825799722ca6e35e9e75bd'; '1280x1024' = '66792021705e55ddd7cf4db498eafe039aa8b8e3f393c6208b9dc5a7cbcfa7a5'; '1280x720' = '55a807eb6b893e3ca7dc187af074ae5656cf7500364a50aac2606f82dec44f15'; '1280x800' = 'f8d8287709f5ef19a8dfae65045f5fd902049c9307347039da7d26050993c0ec'; '3840x1080' = '71b3666ec3734664038d5a098a0c6eedf68a56e87abc75685e7a585b32fe0f65' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -7106,7 +7106,7 @@ Only register-relative addressing, no relocation entries, nothing moves.  Harmle
             #  Added      : 22 Sep 2026
             #  Made with  : tools/patch_widemap.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.32
-            #  Changes    : 365 bytes in 26 edits
+            #  Changes    : 368 bytes in 26 edits
             #  The battlefield view is the screen minus the panel, in whole 32-pixel tiles: 28 tiles across at
             #  1024x768, 36 at 1280x800, 76 at 2560x1440, 116 at 3840x1080.  The maps are 64 to 160 tiles wide
             #  (the training maps and two two-player maps 64, the first two campaign missions and 22 two-player
@@ -7168,7 +7168,7 @@ Without a wide screen the fix changes nothing visible: every map is wider than 2
                 )
                 Edits = @(
                     # cd_probe dead body: bounds rule + column stub + vision stub + order stub: bounds rule at +0 (per axis `if max < min: min = max = (min+max)/2`, 10 absolute operands, jmp camera stub 0x0047F310), column stub at +73, vision stub at +124 (call make_rect 0x0043661C, 1 absolute operand), order stub at +158
-                    @{ Offset = 0x528D; Old = '51 52 56 55 89 E5 81 EC 00 01 00 00 68 B0 48 4A 00 30 E4 68 24 26 48 00 88 25 B8 49 4A 00 8D 85 00 FF FF FF 50 E8 0D 62 07 00 83 C4 0C BA 30 26 48 00 8D 85 00 FF FF FF E8 1A 5D 07 00 85 C0 75 0F A0 1C 8E 48 00 A2 B8 49 4A 00 E9 83 00 00 00 E8 FD 5D 07 00 BE A0 86 01 00 31 D2 E8 A2 55 00 00 F7 F6 52 68 B0 48 4A 00 68 34 26 48 00 8D 85 00 FF FF FF 50 E8 BD 61 07 00 83 C4 10 BA 3C 26 48 00 8D 85 00 FF FF FF E8 CA 5C 07 00 89 C6 85 C0 75 0F C6 05 B8 49 4A 00 01 89 EC 5D 5E 5A 59 5B C3 BB 01 00 00 00 89 C1 B8 40 26 48 00 89 DA E8 66 62 07 00 85 C0 75 09 C6 05 B8 49 4A 00 01 EB 0A A0 1C 8E 48 00 A2 B8 49 4A 00'; New = '8B 0D EC AA 4A 00 3B 0D E4 AA 4A 00 7D 14 03 0D E4 AA 4A 00 D1 F9 89 0D E4 AA 4A 00 89 0D EC AA 4A 00 8B 0D F0 AA 4A 00 3B 0D E8 AA 4A 00 7D 14 03 0D E8 AA 4A 00 D1 F9 89 0D E8 AA 4A 00 89 0D F0 AA 4A 00 E9 3A 94 07 00 8B 06 C1 F8 05 8D 14 38 85 D2 7D 02 31 D2 8B 4E 14 0F BF 09 49 39 CA 7E 02 89 CA 29 C2 C1 E2 02 89 55 BC 8B 45 C8 8D 04 B8 89 45 B8 8A 4D F4 8B 45 F8 C3 E8 0E 07 03 00 8B 15 C0 44 50 00 83 38 00 7D 03 83 20 00 8B 8A B0 A4 09 00 39 48 08 7E 03 89 48 08 C3 51 8B 88 4C 6F 04 00 85 D2 7D 02 31 D2 3B 91 B8 A4 09 00 7C 07 8B 91 B8 A4 09 00 4A 89 D6 59 66 89 98 92 07 00 00 66 89 90 90 07 00 00 C3' }
+                    @{ Offset = 0x528D; Old = '51 52 56 55 89 E5 81 EC 00 01 00 00 68 B0 48 4A 00 30 E4 68 24 26 48 00 88 25 B8 49 4A 00 8D 85 00 FF FF FF 50 E8 0D 62 07 00 83 C4 0C BA 30 26 48 00 8D 85 00 FF FF FF E8 1A 5D 07 00 85 C0 75 0F A0 1C 8E 48 00 A2 B8 49 4A 00 E9 83 00 00 00 E8 FD 5D 07 00 BE A0 86 01 00 31 D2 E8 A2 55 00 00 F7 F6 52 68 B0 48 4A 00 68 34 26 48 00 8D 85 00 FF FF FF 50 E8 BD 61 07 00 83 C4 10 BA 3C 26 48 00 8D 85 00 FF FF FF E8 CA 5C 07 00 89 C6 85 C0 75 0F C6 05 B8 49 4A 00 01 89 EC 5D 5E 5A 59 5B C3 BB 01 00 00 00 89 C1 B8 40 26 48 00 89 DA E8 66 62 07 00 85 C0 75 09 C6 05 B8 49 4A 00 01 EB 0A A0 1C 8E 48 00 A2 B8 49 4A 00 89 F0 E8'; New = '8B 0D EC AA 4A 00 3B 0D E4 AA 4A 00 7D 14 03 0D E4 AA 4A 00 D1 F9 89 0D E4 AA 4A 00 89 0D EC AA 4A 00 8B 0D F0 AA 4A 00 3B 0D E8 AA 4A 00 7D 14 03 0D E8 AA 4A 00 D1 F9 89 0D E8 AA 4A 00 89 0D F0 AA 4A 00 E9 3A 94 07 00 8B 06 C1 F8 05 8D 14 38 85 D2 7D 02 31 D2 8B 4E 14 0F BF 09 49 39 CA 7E 02 89 CA 29 C2 C1 E2 02 89 55 BC 8B 45 C8 8D 04 B8 89 45 B8 8A 4D F4 8B 45 F8 C3 E8 0E 07 03 00 8B 15 C0 44 50 00 83 38 00 7D 03 83 20 00 8B 8A B0 A4 09 00 39 48 08 7E 03 89 48 08 C3 51 8B 48 0C 8B 89 4C 6F 04 00 85 D2 7D 02 31 D2 3B 91 B8 A4 09 00 7C 07 8B 91 B8 A4 09 00 4A 89 D6 59 66 89 98 92 07 00 00 66 89 90 90 07 00 00 C3' }
                     # spot order: the two 16-bit stores of the world point -> call order stub (clamps x to [0, map_w*256-1], updates esi, then stores)
                     @{ Offset = 0x8AFF; Old = '66 89 98 92 07 00 00 66 89 90 90 07 00 00'; New = 'E8 27 C8 FF FF 90 90 90 90 90 90 90 90 90' }
                     # proto.c init: call camera stub -> call bounds rule (which chains into the camera stub)
