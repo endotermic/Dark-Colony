@@ -19,7 +19,7 @@
       * after writing it prints the SHA-256 of the result; with every patch selected the result
         is byte-identical to the executable published in the repository and the script says so
       * the screen resolution is chosen in a drop-down (or -Resolution): 640x480, 1024x768, 1280x1024,
-        1280x720, 1280x800; the sizes with your monitor's aspect ratio are marked "recommended for your
+        1280x720, 1280x800, 3840x1080; the sizes with your monitor's aspect ratio are marked "recommended for your
         screen" and the largest of them is preselected in the window (the command line defaults to
         1024x768, the published exes)
       * for an HD resolution the script also WRITES the interface data the patched exe reads
@@ -68,7 +68,7 @@
 
 .PARAMETER Resolution
     Screen resolution to patch for: 640x480 (the stock size: no display fixes), 1024x768 (default,
-    the published exes), 1280x1024, 1280x720 or 1280x800.  The 'resolution' and 'clock' fixes exist
+    the published exes), 1280x1024, 1280x720, 1280x800 or 3840x1080 (32:9).  The 'resolution' and 'clock' fixes exist
     once per size; all sizes share the one INTRF_HD data folder, which must hold the interface set
     built for the chosen size.  The window offers the same choice in a drop-down, marks the sizes
     with your monitor's aspect ratio as "recommended for your screen" and preselects the largest of
@@ -147,13 +147,13 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '5a2e10b7c133be27a6641227401410ba03400fd6137e6a499e9ebf4c7bcfaf0b'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'b0551fc0c5e8bd1174a1893f6a692da9435f36e8e6b4fa6785dc8d9e3ecfb861'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
-        Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
+        Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '69346e9328607d914b8ebb953cbd32021042f8de3f601a820dbef94e793bff1d'; '1024x768' = '5a2e10b7c133be27a6641227401410ba03400fd6137e6a499e9ebf4c7bcfaf0b'; '1280x1024' = 'cad5c13ae4db3d1450d8f002032a25e8afb17578c4014084d01fddd13a84a7e4'; '1280x720' = '85a10765823cb647e8ec1c07cc93b72d94b6c1a8b40d7e25713e05066d19b03a'; '1280x800' = 'fb0c542d4f3a05045413f575ced5bb1719eae3038a5c65d430c7e9714aa42873' }
+        ReferenceSha256 = @{ '640x480' = '5f4d028b6bd8107508601900b8859c18e75fcd12713d02d8dfb8c45a4f77e604'; '1024x768' = 'b0551fc0c5e8bd1174a1893f6a692da9435f36e8e6b4fa6785dc8d9e3ecfb861'; '1280x1024' = '6ebb23e21d5642edb37db6e59ae7b8694883cbaf5ee8b70fffb24fbc20f88c5c'; '1280x720' = 'dcd4606599f0eeecfdecbdbc6ee39af02263a9f3ee5fda287ebbb72a97c8c1f4'; '1280x800' = 'c1495a288474b670ef0c9f12886bbbd8b959915dc0fa88abe0ae2ca03877800b'; '3840x1080' = '6f0ba62eb4177a8a5fc8d4475bb4a5569cd56c47dea34fef38048cdd2feb3c2b' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -2240,6 +2240,499 @@ the ones in place have another size.
                 )
             }
 
+            # ---- resolution @ 3840x1080: 3840x1080 display ---------------------------------------------------------
+            #  Added      : 9 Sep 2026 (any size since 21 Sep 2026)
+            #  Made with  : tools/patch_resolution.py (Dark-Colony-Server)
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.24, 10.25
+            #  Changes    : 436 bytes in 178 edits
+            #  The engine is hard-wired for 640x480: the DirectDraw display mode, the framebuffer stride
+            #  (y*640 done as shl 7 + add), clip rectangles, the map viewport (16x14 tiles), the minimap
+            #  position, the movie blit, the 44 code-positioned main-menu elements, the terrain light plane's
+            #  512-byte row advances and the size of draw_terrain's stack lightmap.  Every one of those
+            #  constants was read out of the disassembly and is replaced by the 3840x1080 equivalent here:
+            #    stage 1  display mode, framebuffer stride (imul: 3840 is not a power of two), clip rect
+            #    stage 2  full-screen chrome, mouse, cursor clip, loading screens, and the 44 menu elements
+            #             moved by (+1600,+300) - the same offset the letterboxed 640x480 menu screens use
+            #    stage 3  map viewport 3712x1024 (116x32 tiles) at (4,6) plus 24 spare rows given to the taller HUD bottom bar, minimap 96x84 at
+            #             (3719,6), the 31 lightplane row advances, the six lightmap row idioms x144 -> x512 (more than 34 tiles across), and a bigger stack frame for
+            #             draw_terrain (so the PE header's SizeOfStackReserve / SizeOfStackCommit go up as
+            #             well - the two edits at file offsets 0xE0 / 0xE4)
+            #    stage 4  movies: pitch-aware back-buffer clear and the 320x180 movie frames stretched to
+            #             (960,0)-(2880,1080) through IDirectDrawSurface::Blt
+            #  Every edit swaps one immediate constant or one arithmetic opcode inside an existing
+            #  instruction; no code is added and no instruction moves.  Council Wars is the same code at
+            #  +0x60 (AUTO) / +0x28 (DGROUP) with three site fixups, hence the slightly different offsets.
+            #
+            #  REQUIRES the interface data rebuilt for 3840x1080 next to the exe - in the INTRF_HD/ folder,
+            #  read through the "Interface data from INTRF_HD" patch below (select both).  One INTRF_HD folder
+            #  serves every resolution, so it must hold the set built for THIS size: the patcher reads the
+            #  size of INTRF_HD\INTRFACE.GIF and refuses a mismatch (with a 1024x768 set the game would draw
+            #  the menus and the HUD frame at the wrong size).  The two loading screens INTRF_HD\LOAD.BMP /
+            #  LOAD2.BMP are not part of a set: this patcher writes them for the chosen size from the stock
+            #  INTRFACE\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 3840x1080 canvas) whenever
+            #  the ones in place have another size.
+            @{
+                Id = 'resolution'; Name = '3840x1080 display'; Date = '9 Sep 2026 (any size since 21 Sep 2026)'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = '3840x1080'
+                # applying this fix also GENERATES the INTRF_HD interface set for this size from the stock files
+                # (Write-InterfaceSet); these three pictures cannot be derived and ship with the game
+                SetSources = @('INTRF_HD\3840x1080\INTRG.GIF', 'INTRF_HD\3840x1080\INTRO.GIF', 'INTRF_HD\3840x1080\INTRFACE.GIF')
+                Tool = 'tools/patch_resolution.py (Dark-Colony-Server)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.24, 10.25'
+                Description = @'
+The engine is hard-wired for 640x480: the DirectDraw display mode, the framebuffer stride
+(y*640 done as shl 7 + add), clip rectangles, the map viewport (16x14 tiles), the minimap
+position, the movie blit, the 44 code-positioned main-menu elements, the terrain light plane's
+512-byte row advances and the size of draw_terrain's stack lightmap.  Every one of those
+constants was read out of the disassembly and is replaced by the 3840x1080 equivalent here:
+  stage 1  display mode, framebuffer stride (imul: 3840 is not a power of two), clip rect
+  stage 2  full-screen chrome, mouse, cursor clip, loading screens, and the 44 menu elements
+           moved by (+1600,+300) - the same offset the letterboxed 640x480 menu screens use
+  stage 3  map viewport 3712x1024 (116x32 tiles) at (4,6) plus 24 spare rows given to the taller HUD bottom bar, minimap 96x84 at
+           (3719,6), the 31 lightplane row advances, the six lightmap row idioms x144 -> x512 (more than 34 tiles across), and a bigger stack frame for
+           draw_terrain (so the PE header's SizeOfStackReserve / SizeOfStackCommit go up as
+           well - the two edits at file offsets 0xE0 / 0xE4)
+  stage 4  movies: pitch-aware back-buffer clear and the 320x180 movie frames stretched to
+           (960,0)-(2880,1080) through IDirectDrawSurface::Blt
+Every edit swaps one immediate constant or one arithmetic opcode inside an existing
+instruction; no code is added and no instruction moves.  Council Wars is the same code at
++0x60 (AUTO) / +0x28 (DGROUP) with three site fixups, hence the slightly different offsets.
+
+REQUIRES the interface data rebuilt for 3840x1080 next to the exe - in the INTRF_HD/ folder,
+read through the "Interface data from INTRF_HD" patch below (select both).  One INTRF_HD folder
+serves every resolution, so it must hold the set built for THIS size: the patcher reads the
+size of INTRF_HD\INTRFACE.GIF and refuses a mismatch (with a 1024x768 set the game would draw
+the menus and the HUD frame at the wrong size).  The two loading screens INTRF_HD\LOAD.BMP /
+LOAD2.BMP are not part of a set: this patcher writes them for the chosen size from the stock
+INTRFACE\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 3840x1080 canvas) whenever
+the ones in place have another size.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('hdpaths')
+                # data files this fix needs next to the exe (60; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'INTRFACE\BINTROE'
+                    'INTRFACE\BUTTONSE'
+                    'INTRFACE\CHOO.GIF'
+                    'INTRFACE\DEMOWINE'
+                    'INTRFACE\DINTROE'
+                    'INTRFACE\DPBLANKE'
+                    'INTRFACE\DPLAYSE'
+                    'INTRFACE\ENCY.GIF'
+                    'INTRFACE\ENCYCLOE'
+                    'INTRFACE\GETSVRE'
+                    'INTRFACE\GTSUX.GIF'
+                    'INTRFACE\INTRG.DAT'
+                    'INTRFACE\INTRO.DAT'
+                    'INTRFACE\INTROE'
+                    'INTRFACE\IPXNAMEE'
+                    'INTRFACE\LOAD.BMP'
+                    'INTRFACE\LOAD2.BMP'
+                    'INTRFACE\LOADER.GIF'
+                    'INTRFACE\LOADGE'
+                    'INTRFACE\LOBJE'
+                    'INTRFACE\LOGOE'
+                    'INTRFACE\LOPTE'
+                    'INTRFACE\LOST.GIF'
+                    'INTRFACE\LOSTE'
+                    'INTRFACE\LQCE'
+                    'INTRFACE\LSGE'
+                    'INTRFACE\MAINE'
+                    'INTRFACE\METAE'
+                    'INTRFACE\MULTIE'
+                    'INTRFACE\MULTIWIN.GIF'
+                    'INTRFACE\MULTIWNE'
+                    'INTRFACE\NAME.GIF'
+                    'INTRFACE\NET.GIF'
+                    'INTRFACE\NETOPTE'
+                    'INTRFACE\NEWGAMEE'
+                    'INTRFACE\SERVER.GIF'
+                    'INTRFACE\SHUMAN.GIF'
+                    'INTRFACE\SHUMANE'
+                    'INTRFACE\STORY.GIF'
+                    'INTRFACE\STORYE'
+                    'INTRFACE\TCPWAIT.GIF'
+                    'INTRFACE\VICTORG.GIF'
+                    'INTRFACE\VICTORY.GIF'
+                    'INTRFACE\WINE'
+                    'INTRFACE\WINGAME.GIF'
+                    'INTRFACE\WINGAMEE'
+                    'INTRFACE\WINUKE'
+                    'GAMESTAT\HSCENE.TXT'
+                    'GAMESTAT\GSCENE.TXT'
+                    'GAMESTAT\HTSCENE.TXT'
+                    'GAMESTAT\GTSCENE.TXT'
+                    'SPRITES\DCSS_HD.SPR'
+                    'SPRITES\DCUK_HD.SPR'
+                    'SPRITES\DCUT_HD.SPR'
+                    'ANIMATE\DCSS_HD.FIN'
+                    'ANIMATE\DCUK_HD.FIN'
+                    'ANIMATE\DCUT_HD.FIN'
+                    'INTRF_HD\3840x1080\INTRG.GIF'
+                    'INTRF_HD\3840x1080\INTRO.GIF'
+                    'INTRF_HD\3840x1080\INTRFACE.GIF'
+                )
+                Edits = @(
+                    # PE header: SizeOfStackReserve
+                    @{ Offset = 0xE0; Old = '80 38 01 00'; New = '00 00 10 00' }
+                    # PE header: SizeOfStackCommit
+                    @{ Offset = 0xE4; Old = '00 00 01 00'; New = '00 00 04 00' }
+                    # main.c full-screen rect right
+                    @{ Offset = 0x4E5; Old = 'BF 7F 02 00 00'; New = 'BF FF 0E 00 00' }
+                    # main.c full-screen rect bottom
+                    @{ Offset = 0x4EA; Old = 'B8 DF 01 00 00'; New = 'B8 37 04 00 00' }
+                    # menu: campaign overview text y 13
+                    @{ Offset = 0x1871; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: campaign overview text x 10
+                    @{ Offset = 0x187B; Old = 'BA 0A 00 00 00'; New = 'BA 4A 06 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x1B02; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x1B07; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x1B28; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x1B2F; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x1D76; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x1D7C; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x1DC7; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x1DCE; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x1EC2; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x1EC8; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x1F13; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x1F1A; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x1FE0; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x1FE5; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x2029; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x2030; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x210D; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x2117; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x2156; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x215D; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x2240; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x224A; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x2284; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x228B; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: mission description text y 212
+                    @{ Offset = 0x2600; Old = 'BB D4 00 00 00'; New = 'BB 00 02 00 00' }
+                    # menu: mission description text x 310
+                    @{ Offset = 0x260A; Old = 'BA 36 01 00 00'; New = 'BA 76 07 00 00' }
+                    # menu: mission globe (human) x 34
+                    @{ Offset = 0x263F; Old = 'BA 22 00 00 00'; New = 'BA 62 06 00 00' }
+                    # menu: mission globe (human) y 26
+                    @{ Offset = 0x2649; Old = 'BB 1A 00 00 00'; New = 'BB 46 01 00 00' }
+                    # menu: mission globe (alien) y 26
+                    @{ Offset = 0x2675; Old = 'BB 1A 00 00 00'; New = 'BB 46 01 00 00' }
+                    # menu: mission globe (alien) x 34
+                    @{ Offset = 0x267C; Old = 'BA 22 00 00 00'; New = 'BA 62 06 00 00' }
+                    # menu: mission globe overlay y 26
+                    @{ Offset = 0x269A; Old = 'BB 1A 00 00 00'; New = 'BB 46 01 00 00' }
+                    # menu: mission globe overlay x 34
+                    @{ Offset = 0x269F; Old = 'BA 22 00 00 00'; New = 'BA 62 06 00 00' }
+                    # menu: victory debrief text y 190
+                    @{ Offset = 0x367A; Old = 'BB BE 00 00 00'; New = 'BB EA 01 00 00' }
+                    # menu: victory debrief text x 29
+                    @{ Offset = 0x3681; Old = 'BA 1D 00 00 00'; New = 'BA 5D 06 00 00' }
+                    # menu: victory medal y 169
+                    @{ Offset = 0x386D; Old = 'BB A9 00 00 00'; New = 'BB D5 01 00 00' }
+                    # menu: victory medal x 541
+                    @{ Offset = 0x3874; Old = 'BA 1D 02 00 00'; New = 'BA 5D 08 00 00' }
+                    # menu: victory medal (re-create) y 169
+                    @{ Offset = 0x3BEC; Old = 'BB A9 00 00 00'; New = 'BB D5 01 00 00' }
+                    # menu: victory medal (re-create) x 541
+                    @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 08 00 00' }
+                    # menu: intro credits text y 200
+                    @{ Offset = 0x4299; Old = 'BB C8 00 00 00'; New = 'BB 44 02 00 00' }
+                    # menu: intro credits text x 178
+                    @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 06 00 00' }
+                    # menu: network screen globe y 24
+                    @{ Offset = 0x5060; Old = 'BB 18 00 00 00'; New = 'BB 44 01 00 00' }
+                    # menu: network screen globe x 336
+                    @{ Offset = 0x5071; Old = 'BA 50 01 00 00'; New = 'BA 90 07 00 00' }
+                    # release_surfaces: release the movie surface whenever it exists
+                    @{ Offset = 0x6430; Old = '75 18'; New = '90 90' }
+                    # avi_create_surfaces: after GetAttachedSurface, mov edx,eax; jmp 4071E0 (edx=0 -> create the 320x180 surface; else return 0)
+                    @{ Offset = 0x652E; Old = '85 C0 0F 84 55 01 00 00 E9 71 02 00 00'; New = '89 C2 E9 AB 00 00 00 90 90 90 90 90 90' }
+                    # avi_create_surfaces: keep the flip flag when creating the movie surface
+                    @{ Offset = 0x663D; Old = '89 1D 0C 8E 48 00'; New = '90 90 90 90 90 90' }
+                    # movie clear: cmp eax,[ebp-60h] (dwWidth from the Lock)
+                    @{ Offset = 0x67F4; Old = '3D 80 02 00 00'; New = '3B 45 A0 90 90' }
+                    # movie clear: add ecx,[ebp-5Ch] (lPitch from the Lock)
+                    @{ Offset = 0x6805; Old = '81 C1 00 05 00 00'; New = '03 4D A4 90 90 90' }
+                    # movie clear: cmp edx,[ebp-64h] (dwHeight from the Lock)
+                    @{ Offset = 0x680B; Old = '81 FA E0 01 00 00'; New = '3B 55 9C 90 90 90' }
+                    # clear_and_flip: also clear the movie surface in flip mode
+                    @{ Offset = 0x6879; Old = 'E9 D4 00 00 00'; New = '90 90 90 90 90' }
+                    # draw_offscreen: draw all H rows, not H-1 (jae -> ja)
+                    @{ Offset = 0x6D1B; Old = '0F 83'; New = '0F 87' }
+                    # draw_offscreen: BltFast -> stretching Blt(primary, dest rect, movie surface)
+                    @{ Offset = 0x7214; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 18 97 48 00 89 55 5A 8D 55 52 8B 1D 00 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C'; New = '31 FF C7 45 62 C0 03 00 00 C7 45 66 00 00 00 00 C7 45 6A 40 0B 00 00 C7 45 6E 38 04 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 00 8E 48 00 8D 55 62 52 A1 18 97 48 00 50 8B 08 FF 51 14 90 90' }
+                    # display thread: always draw through the 320x180 movie surface
+                    @{ Offset = 0x7F3E; Old = '75 07'; New = 'EB 07' }
+                    # minimap click: mouse x - minimap x
+                    @{ Offset = 0x9484; Old = '2D 07 02 00 00'; New = '2D 87 0E 00 00' }
+                    # interface update: push tiles_down (imm8)
+                    @{ Offset = 0x9F0A; Old = '6A 0E'; New = '6A 20' }
+                    # interface update: tiles_across
+                    @{ Offset = 0x9F0C; Old = 'B9 10 00 00 00'; New = 'B9 74 00 00 00' }
+                    # interface update: sub ebx,half_viewport_y
+                    @{ Offset = 0x9F1C; Old = '81 EB 00 07 00 00'; New = '81 EB 00 10 00 00' }
+                    # interface update: sub edx,half_viewport_x
+                    @{ Offset = 0x9F2B; Old = '81 EA 00 08 00 00'; New = '81 EA 00 3A 00 00' }
+                    # frame render: sub edx,half_viewport_y
+                    @{ Offset = 0xA4BC; Old = '81 EA 00 07 00 00'; New = '81 EA 00 10 00 00' }
+                    # frame render: sub edx,half_viewport_x
+                    @{ Offset = 0xA4E0; Old = '81 EA 00 08 00 00'; New = '81 EA 00 3A 00 00' }
+                    # proto.c map view rect height
+                    @{ Offset = 0x1E11E; Old = 'B9 C0 01 00 00'; New = 'B9 00 04 00 00' }
+                    # proto.c map view rect width
+                    @{ Offset = 0x1E123; Old = 'BB 00 02 00 00'; New = 'BB 80 0E 00 00' }
+                    # minimap hit rect x (proto.c make_rect -> ui+0x7B4)
+                    @{ Offset = 0x1E243; Old = 'B8 07 02 00 00'; New = 'B8 87 0E 00 00' }
+                    # scroll clamp: half_viewport_x
+                    @{ Offset = 0x1E266; Old = 'B9 00 08 00 00'; New = 'B9 00 3A 00 00' }
+                    # scroll clamp: half_viewport_y
+                    @{ Offset = 0x1E26F; Old = 'BB 00 07 00 00'; New = 'BB 00 10 00 00' }
+                    # driver.c row advance (a)
+                    @{ Offset = 0x2B594; Old = 'BB 80 02 00 00'; New = 'BB 00 0F 00 00' }
+                    # driver.c y*640 -> y*W: lea edx,[ecx*4] -> imul edx,ecx,W
+                    @{ Offset = 0x2B609; Old = '8D 14 8D 00 00 00 00'; New = '69 D1 00 0F 00 00 90' }
+                    # driver.c y*640: neutralise add edx,ecx
+                    @{ Offset = 0x2B613; Old = '01 CA'; New = '89 D2' }
+                    # driver.c y*640: neutralise shl edx,7 (lea edx,[edx+0])
+                    @{ Offset = 0x2B618; Old = 'C1 E2 07'; New = '8D 52 00' }
+                    # driver.c row advance (b)
+                    @{ Offset = 0x2B661; Old = 'BA 80 02 00 00'; New = 'BA 00 0F 00 00' }
+                    # driver.c clip rect width
+                    @{ Offset = 0x2B747; Old = 'BB 80 02 00 00'; New = 'BB 00 0F 00 00' }
+                    # driver.c clip rect height
+                    @{ Offset = 0x2B763; Old = 'B9 E0 01 00 00'; New = 'B9 38 04 00 00' }
+                    # cursor clip width (a)
+                    @{ Offset = 0x2D5D2; Old = 'B8 80 02 00 00'; New = 'B8 00 0F 00 00' }
+                    # cursor clip width (b)
+                    @{ Offset = 0x2D5FF; Old = 'B8 80 02 00 00'; New = 'B8 00 0F 00 00' }
+                    # cursor clip height (a)
+                    @{ Offset = 0x2D60E; Old = 'B8 E0 01 00 00'; New = 'B8 38 04 00 00' }
+                    # cursor clip height (b)
+                    @{ Offset = 0x2D619; Old = 'B8 E0 01 00 00'; New = 'B8 38 04 00 00' }
+                    # initial mouse X (screen centre)
+                    @{ Offset = 0x2DBC4; Old = 'BA 40 01 00 00'; New = 'BA 80 07 00 00' }
+                    # initial mouse Y (screen centre)
+                    @{ Offset = 0x2DBC9; Old = 'B9 F0 00 00 00'; New = 'B9 1C 02 00 00' }
+                    # SetDisplayMode 8-bit height
+                    @{ Offset = 0x2DC98; Old = '68 E0 01 00 00'; New = '68 38 04 00 00' }
+                    # SetDisplayMode 8-bit width
+                    @{ Offset = 0x2DCA2; Old = '68 80 02 00 00'; New = '68 00 0F 00 00' }
+                    # SetDisplayMode 16-bit height
+                    @{ Offset = 0x2DD1C; Old = '68 E0 01 00 00'; New = '68 38 04 00 00' }
+                    # SetDisplayMode 16-bit width
+                    @{ Offset = 0x2DD26; Old = '68 80 02 00 00'; New = '68 00 0F 00 00' }
+                    # offscreen surface width
+                    @{ Offset = 0x2DE89; Old = 'B8 80 02 00 00'; New = 'B8 00 0F 00 00' }
+                    # offscreen surface height
+                    @{ Offset = 0x2DE8E; Old = 'BA E0 01 00 00'; New = 'BA 38 04 00 00' }
+                    # load.bmp LoadImageA height
+                    @{ Offset = 0x2E307; Old = '68 E0 01 00 00'; New = '68 38 04 00 00' }
+                    # load.bmp LoadImageA width
+                    @{ Offset = 0x2E30C; Old = '68 80 02 00 00'; New = '68 00 0F 00 00' }
+                    # load2.bmp LoadImageA height
+                    @{ Offset = 0x2E338; Old = '68 E0 01 00 00'; New = '68 38 04 00 00' }
+                    # load2.bmp LoadImageA width
+                    @{ Offset = 0x2E33D; Old = '68 80 02 00 00'; New = '68 00 0F 00 00' }
+                    # loading screen BitBlt height
+                    @{ Offset = 0x2E3ED; Old = '68 E0 01 00 00'; New = '68 38 04 00 00' }
+                    # loading screen BitBlt width
+                    @{ Offset = 0x2E3F2; Old = '68 80 02 00 00'; New = '68 00 0F 00 00' }
+                    # clear_screen pixel count (a)
+                    @{ Offset = 0x2EBAD; Old = '3D 00 B0 04 00'; New = '3D 00 48 3F 00' }
+                    # clear_screen pixel count (b)
+                    @{ Offset = 0x2EBE2; Old = '3D 00 B0 04 00'; New = '3D 00 48 3F 00' }
+                    # visible tiles down
+                    @{ Offset = 0x35247; Old = 'B9 0E 00 00 00'; New = 'B9 20 00 00 00' }
+                    # clip_view_to_map: lea edx,[eax-tiles_down]
+                    @{ Offset = 0x3524C; Old = '8D 50 F2'; New = '8D 50 E0' }
+                    # visible tiles across
+                    @{ Offset = 0x3524F; Old = 'BB 10 00 00 00'; New = 'BB 74 00 00 00' }
+                    # viewport width
+                    @{ Offset = 0x35346; Old = 'BA 00 02 00 00'; New = 'BA 80 0E 00 00' }
+                    # viewport height
+                    @{ Offset = 0x35361; Old = 'BB C0 01 00 00'; New = 'BB 00 04 00 00' }
+                    # occlusion mask size
+                    @{ Offset = 0x35388; Old = 'BA 00 70 00 00'; New = 'BA 00 40 07 00' }
+                    # render destination stride
+                    @{ Offset = 0x3539F; Old = 'B8 80 02 00 00'; New = 'B8 00 0F 00 00' }
+                    # engmain.c y*1280 -> y*W*2: shl/add/shl window -> imul eax,eax,W*2; mov ebx,[ebx+8]
+                    @{ Offset = 0x354B6; Old = 'C1 E0 02 01 F8 8B 5B 08 C1 E0 08'; New = '69 C0 00 1E 00 00 8B 5B 08 90 90' }
+                    # engmain.c y*640 -> y*W: lea eax,[ecx*4] -> imul eax,ecx,W
+                    @{ Offset = 0x357B6; Old = '8D 04 8D 00 00 00 00'; New = '69 C1 00 0F 00 00 90' }
+                    # engmain.c y*640: neutralise add eax,ecx
+                    @{ Offset = 0x357BD; Old = '01 C8'; New = '89 C0' }
+                    # engmain.c y*640: neutralise shl eax,7 (lea eax,[eax+0])
+                    @{ Offset = 0x357C5; Old = 'C1 E0 07'; New = '8D 40 00' }
+                    # minimap stride (a)
+                    @{ Offset = 0x3949B; Old = 'B8 80 02 00 00'; New = 'B8 00 0F 00 00' }
+                    # minimap origin (a)
+                    @{ Offset = 0x394AF; Old = '81 C2 0E 22 00 00'; New = '81 C2 0E D1 00 00' }
+                    # minimap draw: clip rect x
+                    @{ Offset = 0x395E4; Old = 'B8 07 02 00 00'; New = 'B8 87 0E 00 00' }
+                    # minimap draw: view-box indicator x
+                    @{ Offset = 0x3967A; Old = '05 07 02 00 00'; New = '05 87 0E 00 00' }
+                    # minimap stride (b)
+                    @{ Offset = 0x3985B; Old = 'BA 80 02 00 00'; New = 'BA 00 0F 00 00' }
+                    # minimap origin (b)
+                    @{ Offset = 0x39884; Old = '81 45 F0 0E 22 00 00'; New = '81 45 F0 0E D1 00 00' }
+                    # mouse clamp: compare X against width
+                    @{ Offset = 0x50247; Old = '81 FE 80 02 00 00'; New = '81 FE 00 0F 00 00' }
+                    # mouse clamp: X maximum
+                    @{ Offset = 0x5024F; Old = 'BE 7F 02 00 00'; New = 'BE FF 0E 00 00' }
+                    # mouse clamp: compare Y against height
+                    @{ Offset = 0x5025C; Old = '81 FF E0 01 00 00'; New = '81 FF 38 04 00 00' }
+                    # mouse clamp: Y maximum
+                    @{ Offset = 0x50264; Old = 'BF DF 01 00 00'; New = 'BF 37 04 00 00' }
+                    # DirectInput clamp: compare X
+                    @{ Offset = 0x50346; Old = '3D 7F 02 00 00'; New = '3D FF 0E 00 00' }
+                    # DirectInput clamp: X maximum
+                    @{ Offset = 0x5034D; Old = 'C7 05 C0 27 53 00 7F 02 00 00'; New = 'C7 05 C0 27 53 00 FF 0E 00 00' }
+                    # DirectInput clamp: compare Y
+                    @{ Offset = 0x5036B; Old = '81 FE DF 01 00 00'; New = '81 FE 37 04 00 00' }
+                    # DirectInput clamp: Y maximum
+                    @{ Offset = 0x50373; Old = 'C7 05 C4 27 53 00 DF 01 00 00'; New = 'C7 05 C4 27 53 00 37 04 00 00' }
+                    # draw_terrain: sub esp,frame
+                    @{ Offset = 0x52D15; Old = '81 EC CC 14 00 00'; New = '81 EC FC 87 00 00' }
+                    # lightmap x144 -> x512, loop 1 row 2r+2 (eax,esi): neutralise add
+                    @{ Offset = 0x52F0E; Old = '01 F0'; New = '89 C0' }
+                    # lightmap x144 -> x512, loop 1 row 2r+2 (eax,esi): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x52F10; Old = 'C1 E0 04'; New = 'C1 E0 06' }
+                    # lightmap store, loop 1 (2r, 2c)
+                    @{ Offset = 0x52F20; Old = '89 B4 28 B6 EB FF FF'; New = '89 B4 28 86 78 FF FF' }
+                    # lightmap x144 -> x512, loop 2 row r+2 (eax,ebx): neutralise add
+                    @{ Offset = 0x52F5C; Old = '01 D8'; New = '89 C0' }
+                    # lightmap x144 -> x512, loop 2 row r+2 (eax,ebx): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x52F5E; Old = 'C1 E0 04'; New = 'C1 E0 06' }
+                    # lightmap x144 -> x512, loop 2 row r (eax,edx): neutralise add
+                    @{ Offset = 0x52F72; Old = '01 D0'; New = '89 C0' }
+                    # lightmap x144 -> x512, loop 2 row r (eax,edx): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x52F74; Old = 'C1 E0 04'; New = 'C1 E0 06' }
+                    # lightmap read, loop 2 (r, c)
+                    @{ Offset = 0x52F7A; Old = '8B 84 2E AE EB FF FF'; New = '8B 84 2E 7E 78 FF FF' }
+                    # lightmap read, loop 2 (r+2, c)
+                    @{ Offset = 0x52F81; Old = '03 84 2F AE EB FF FF'; New = '03 84 2F 7E 78 FF FF' }
+                    # lightmap read, loop 2 (r, c+2)
+                    @{ Offset = 0x52F88; Old = '03 84 2E B6 EB FF FF'; New = '03 84 2E 86 78 FF FF' }
+                    # lightmap read, loop 2 (r+2, c+2)
+                    @{ Offset = 0x52F91; Old = '8B 84 2F B6 EB FF FF'; New = '8B 84 2F 86 78 FF FF' }
+                    # lightmap x144 -> x512, loop 2 row r+1 (eax,esi): neutralise add
+                    @{ Offset = 0x52FA6; Old = '01 F0'; New = '89 C0' }
+                    # lightmap x144 -> x512, loop 2 row r+1 (eax,esi): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x52FA8; Old = 'C1 E0 04'; New = 'C1 E0 06' }
+                    # lightmap store, loop 2 (r+1, c+1)
+                    @{ Offset = 0x52FB3; Old = '89 BC 2B B2 EB FF FF'; New = '89 BC 2B 82 78 FF FF' }
+                    # lightmap x144 -> x512, loop 3 row 2i+1 (edx,eax): neutralise add
+                    @{ Offset = 0x52FFB; Old = '01 C2'; New = '89 D2' }
+                    # lightmap x144 -> x512, loop 3 row 2i+1 (edx,eax): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x53000; Old = 'C1 E2 04'; New = 'C1 E2 06' }
+                    # lightmap read, loop 3 (2i+1, 2j+1)
+                    @{ Offset = 0x53005; Old = '8B 8C 2A AA EB FF FF'; New = '8B 8C 2A 7A 78 FF FF' }
+                    # lightmap x144 -> x512, loop 3 row 2i+3 (eax,ecx): neutralise add
+                    @{ Offset = 0x53023; Old = '01 C8'; New = '89 C0' }
+                    # lightmap x144 -> x512, loop 3 row 2i+3 (eax,ecx): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x53025; Old = 'C1 E0 04'; New = 'C1 E0 06' }
+                    # lightmap read, loop 3 (2i+3, 2j+1)
+                    @{ Offset = 0x5302D; Old = '8B 84 28 AA EB FF FF'; New = '8B 84 28 7A 78 FF FF' }
+                    # lightmap read, loop 3 (2i+1, 2j+3)
+                    @{ Offset = 0x5303C; Old = '8B 94 2A B2 EB FF FF'; New = '8B 94 2A 82 78 FF FF' }
+                    # lightmap read, loop 3 (2i+3, 2j+3)
+                    @{ Offset = 0x5305D; Old = '8B 84 28 B2 EB FF FF'; New = '8B 84 28 82 78 FF FF' }
+                    # lightplane row advance 1/32 (add eax)
+                    @{ Offset = 0x530CB; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 2/32 (add eax)
+                    @{ Offset = 0x530F2; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 3/32 (add eax)
+                    @{ Offset = 0x53115; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 4/32 (add eax)
+                    @{ Offset = 0x53162; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 5/32 (add eax)
+                    @{ Offset = 0x5318E; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 6/32 (add eax)
+                    @{ Offset = 0x531C9; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 7/32 (add eax)
+                    @{ Offset = 0x531FC; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 8/32 (add eax)
+                    @{ Offset = 0x53226; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 9/32 (add eax)
+                    @{ Offset = 0x53258; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 10/32 (add eax)
+                    @{ Offset = 0x53293; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 11/32 (add eax)
+                    @{ Offset = 0x532C6; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 12/32 (add eax)
+                    @{ Offset = 0x532F9; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 13/32 (add eax)
+                    @{ Offset = 0x53324; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 14/32 (add eax)
+                    @{ Offset = 0x53361; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 15/32 (add eax)
+                    @{ Offset = 0x53394; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 16/32 (add eax)
+                    @{ Offset = 0x533C7; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 17/32 (add eax)
+                    @{ Offset = 0x533FA; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 18/32 (add eax)
+                    @{ Offset = 0x5342D; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 19/32 (add eax)
+                    @{ Offset = 0x53457; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 20/32 (add eax)
+                    @{ Offset = 0x53492; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 21/32 (add eax)
+                    @{ Offset = 0x534B4; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 22/32 (add eax)
+                    @{ Offset = 0x534F6; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 23/32 (add eax)
+                    @{ Offset = 0x53529; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 24/32 (add eax)
+                    @{ Offset = 0x53545; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 25/32 (add eax)
+                    @{ Offset = 0x5358F; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 26/32 (add eax)
+                    @{ Offset = 0x535C2; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 27/32 (add eax)
+                    @{ Offset = 0x535F5; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 28/32 (add eax)
+                    @{ Offset = 0x53628; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 29/32 (add eax)
+                    @{ Offset = 0x5365B; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 30/32 (add eax)
+                    @{ Offset = 0x53676; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 31/32 (lea edi)
+                    @{ Offset = 0x536BC; Old = '8D B8 00 02 00 00'; New = '8D B8 80 0E 00 00' }
+                    # screen width global
+                    @{ Offset = 0x865B4; Old = '80 02 00 00'; New = '00 0F 00 00' }
+                    # screen height global
+                    @{ Offset = 0x865B8; Old = 'E0 01 00 00'; New = '38 04 00 00' }
+                )
+            }
+
             # ---- hdpaths: Interface data from INTRF_HD (rebuilt files renamed) ---------------------------------------------------------
             #  Added      : 14 Sep 2026
             #  Made with  : tools/patch_hd_paths.py
@@ -2661,6 +3154,42 @@ HUD frame has the clock face.  Only meaningful together with the 1280x800 displa
                 )
             }
 
+            # ---- clock @ 3840x1080: Day/night clock hand re-anchored (3840x1080) ---------------------------------------------------------
+            #  Added      : 13 Sep 2026
+            #  Made with  : tools/patch_clock.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
+            #  Changes    : 4 bytes in 2 edits
+            #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
+            #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
+            #  sweep did not touch them.  At 3840x1080 that point lies inside the enlarged map view and the
+            #  terrain paints over the hand every frame.  The anchor moves to (3808,1050), where the rebuilt
+            #  HUD frame has the clock face.  Only meaningful together with the 3840x1080 display patch.
+            @{
+                Id = 'clock'; Name = 'Day/night clock hand re-anchored (3840x1080)'; Date = '13 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = '3840x1080'
+                Tool = 'tools/patch_clock.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15'
+                Description = @'
+The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
+corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
+sweep did not touch them.  At 3840x1080 that point lies inside the enlarged map view and the
+terrain paints over the hand every frame.  The anchor moves to (3808,1050), where the rebuilt
+HUD frame has the clock face.  Only meaningful together with the 3840x1080 display patch.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('resolution')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # clock_draw: imm32 of mov edx,ANCHOR_Y - bottom-right anchor y 450 (0x1C2) -> 1050 (0x41A)
+                    @{ Offset = 0x3A0A3; Old = 'C2 01 00 00'; New = '1A 04 00 00' }
+                    # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 3808 (0xEE0)
+                    @{ Offset = 0x3A0B6; Old = '60 02 00 00'; New = 'E0 0E 00 00' }
+                )
+            }
+
             # ---- ddraw: Two-monitor start-up hang fixed ---------------------------------------------------------
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_ddraw_lost.py
@@ -2774,6 +3303,126 @@ Only register-relative addressing, no relocation entries, nothing moves.  Harmle
                     @{ Offset = 0x1E2B9; Old = 'C3 40 01 00'; New = '1F 03 06 00' }
                     # stub clamp_camera in the AUTO zero tail: lea esi,[eax+108h]; push &cam_z, &cam_x, max_z, max_x, min_z, min_x (ui+0x120..0x114); call clamp2d 0x00436668; jmp load_ambience 0x00432F80 - register-relative only, no .reloc entries
                     @{ Offset = 0x7E5DC; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '8D B0 08 01 00 00 8D 4E 08 51 56 FF 76 18 FF 76 14 FF 76 10 FF 76 0C E8 70 74 FB FF E9 83 3D FB FF' }
+                )
+            }
+
+            # ---- widemap: Maps narrower than the screen: the view is centred on the map and every map read stays inside it ---------------------------------------------------------
+            #  Added      : 22 Sep 2026
+            #  Made with  : tools/patch_widemap.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.32
+            #  Changes    : 367 bytes in 26 edits
+            #  The battlefield view is the screen minus the panel, in whole 32-pixel tiles: 28 tiles across at
+            #  1024x768, 36 at 1280x800, 76 at 2560x1440, 116 at 3840x1080.  The maps are 64 to 160 tiles wide
+            #  (the training maps and two two-player maps 64, the first two campaign missions and 22 two-player
+            #  maps 96).  Once the view is wider than the map the game's camera limits ("half a screen from every
+            #  map edge") contradict each other and the camera settles at the far one, so the view begins left of
+            #  the map; nothing that then reads the map checks for that: the terrain drawer continues into the
+            #  neighbouring rows (the far side of the map drawn shifted by a row) and, at the top and bottom map
+            #  row, past the tile block into memory whose contents it takes for tile numbers - a crash in the tile
+            #  blitter as soon as the camera reaches those rows; the lighting pass reads before and after each row;
+            #  the visibility scan tests tiles of the wrong row; the ambient sounds fall silent (their picker gives
+            #  up when the visible rectangle starts left of the map); a click on the black margin sends units to
+            #  the far side of the map (the position wraps in a 16-bit field).  The fix, in six parts written into
+            #  the dead body of the CD-probe routine (unused since the "No CD" fix, which is therefore required,
+            #  as is the "Camera clamped" fix whose stub the first part chains into): (1) when the limits
+            #  contradict each other, both become the map centre, so the map sits centred in the view and cannot
+            #  scroll sideways; (2) the terrain drawer clamps every column to the map, so the margin repeats the
+            #  edge tiles instead of reading beyond them; (3) the lighting pass clamps rows and columns the same
+            #  way (in place of its four edge cases); (4) the visibility rectangle is cut to the map; (5) the
+            #  ambient-sound picker clamps its rectangle instead of giving up; (6) a spot order's x is clamped to
+            #  the map.  The 14 relocation entries of the dead routine are re-pointed to the new absolute operands
+            #  or neutralised.  Rows are never affected with the shipped maps (the tallest view, 44 rows at
+            #  5120x1440, is shorter than the smallest map, 56 rows), so only the column direction is handled.
+            #  Without a wide screen the fix changes nothing visible: every map is wider than 28 or 36 tiles.
+            @{
+                Id = 'widemap'; Name = 'Maps narrower than the screen: the view is centred on the map and every map read stays inside it'; Date = '22 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_widemap.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.32'
+                Description = @'
+The battlefield view is the screen minus the panel, in whole 32-pixel tiles: 28 tiles across at
+1024x768, 36 at 1280x800, 76 at 2560x1440, 116 at 3840x1080.  The maps are 64 to 160 tiles wide
+(the training maps and two two-player maps 64, the first two campaign missions and 22 two-player
+maps 96).  Once the view is wider than the map the game's camera limits ("half a screen from every
+map edge") contradict each other and the camera settles at the far one, so the view begins left of
+the map; nothing that then reads the map checks for that: the terrain drawer continues into the
+neighbouring rows (the far side of the map drawn shifted by a row) and, at the top and bottom map
+row, past the tile block into memory whose contents it takes for tile numbers - a crash in the tile
+blitter as soon as the camera reaches those rows; the lighting pass reads before and after each row;
+the visibility scan tests tiles of the wrong row; the ambient sounds fall silent (their picker gives
+up when the visible rectangle starts left of the map); a click on the black margin sends units to
+the far side of the map (the position wraps in a 16-bit field).  The fix, in six parts written into
+the dead body of the CD-probe routine (unused since the "No CD" fix, which is therefore required,
+as is the "Camera clamped" fix whose stub the first part chains into): (1) when the limits
+contradict each other, both become the map centre, so the map sits centred in the view and cannot
+scroll sideways; (2) the terrain drawer clamps every column to the map, so the margin repeats the
+edge tiles instead of reading beyond them; (3) the lighting pass clamps rows and columns the same
+way (in place of its four edge cases); (4) the visibility rectangle is cut to the map; (5) the
+ambient-sound picker clamps its rectangle instead of giving up; (6) a spot order's x is clamped to
+the map.  The 14 relocation entries of the dead routine are re-pointed to the new absolute operands
+or neutralised.  Rows are never affected with the shipped maps (the tallest view, 44 rows at
+5120x1440, is shorter than the smallest map, 56 rows), so only the column direction is handled.
+Without a wide screen the fix changes nothing visible: every map is wider than 28 or 36 tiles.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('nocd', 'camera')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # cd_probe dead body: bounds rule + column stub + vision stub + order stub: bounds rule at +0 (per axis `if max < min: min = max = (min+max)/2`, 10 absolute operands, jmp camera stub 0x0047F1DC), column stub at +73, vision stub at +124 (call make_rect 0x004365BC, 1 absolute operand), order stub at +158
+                    @{ Offset = 0x52AD; Old = '51 52 56 55 89 E5 81 EC 00 01 00 00 68 B0 48 4A 00 30 E4 68 24 26 48 00 88 25 B8 49 4A 00 8D 85 00 FF FF FF 50 E8 8D 61 07 00 83 C4 0C BA 30 26 48 00 8D 85 00 FF FF FF E8 9A 5C 07 00 85 C0 75 0F A0 F4 8D 48 00 A2 B8 49 4A 00 E9 83 00 00 00 E8 7D 5D 07 00 BE A0 86 01 00 31 D2 E8 22 55 00 00 F7 F6 52 68 B0 48 4A 00 68 34 26 48 00 8D 85 00 FF FF FF 50 E8 3D 61 07 00 83 C4 10 BA 3C 26 48 00 8D 85 00 FF FF FF E8 4A 5C 07 00 89 C6 85 C0 75 0F C6 05 B8 49 4A 00 01 89 EC 5D 5E 5A 59 5B C3 BB 01 00 00 00 89 C1 B8 40 26 48 00 89 DA E8 E6 61 07 00 85 C0 75 09 C6 05 B8 49 4A 00 01 EB 0A A0 F4 8D 48 00 A2 B8 49 4A 00'; New = '8B 0D EC AA 4A 00 3B 0D E4 AA 4A 00 7D 14 03 0D E4 AA 4A 00 D1 F9 89 0D E4 AA 4A 00 89 0D EC AA 4A 00 8B 0D F0 AA 4A 00 3B 0D E8 AA 4A 00 7D 14 03 0D E8 AA 4A 00 D1 F9 89 0D E8 AA 4A 00 89 0D F0 AA 4A 00 E9 E6 92 07 00 8B 06 C1 F8 05 8D 14 38 85 D2 7D 02 31 D2 8B 4E 14 0F BF 09 49 39 CA 7E 02 89 CA 29 C2 C1 E2 02 89 55 BC 8B 45 C8 8D 04 B8 89 45 B8 8A 4D F4 8B 45 F8 C3 E8 8E 06 03 00 8B 15 C0 44 50 00 83 38 00 7D 03 83 20 00 8B 8A B0 A4 09 00 39 48 08 7E 03 89 48 08 C3 51 8B 88 4C 6F 04 00 85 D2 7D 02 31 D2 3B 91 B8 A4 09 00 7C 07 8B 91 B8 A4 09 00 4A 89 D6 59 66 89 98 92 07 00 00 66 89 90 90 07 00 00 C3' }
+                    # spot order: the two 16-bit stores of the world point -> call order stub (clamps x to [0, map_w*256-1], updates esi, then stores)
+                    @{ Offset = 0x8A9F; Old = '66 89 98 92 07 00 00 66 89 90 90 07 00 00'; New = 'E8 A7 C8 FF FF 90 90 90 90 90 90 90 90 90' }
+                    # proto.c init: call camera stub -> call bounds rule (which chains into the camera stub)
+                    @{ Offset = 0x1E2B8; Old = 'E8 1F 03 06 00'; New = 'E8 F0 6F FE FF' }
+                    # clip_view_to_map: call make_rect -> call vision stub (make_rect, then x0 = max(x0,0), x1 = min(x1,w))
+                    @{ Offset = 0x35262; Old = 'E8 55 07 00 00'; New = 'E8 C2 00 FD FF' }
+                    # ambience pick: origin guards -> x0 = max(x0,0), w = min(w, W-x0); the z guard keeps its stock meaning (return 0 via 0x00445BEA)
+                    @{ Offset = 0x44EBD; Old = '85 FF 7C 0E 8B 96 4C 6F 04 00 3B BA B0 A4 09 00 7E 07 31 C0 E9 14 01 00 00 85 DB 7C 08 3B 9A B4 A4 09 00 7E 0B 31 C0 8D 65 7E 5D 5F 5E C2 04 00'; New = '85 FF 7D 02 31 FF 8B 96 4C 6F 04 00 8B 8A B0 A4 09 00 29 F9 39 C8 7E 02 89 C8 85 DB 7C 08 3B 9A B4 A4 09 00 7E 0A 31 C0 E9 00 01 00 00 90 90 90' }
+                    # tile drawer: sub esp,38h -> 48h; two new locals [ebp-44h] = clamped column offset, [ebp-48h] = mask column pointer
+                    @{ Offset = 0x4F523; Old = '83 EC 38'; New = '83 EC 48' }
+                    # tile drawer: column-loop head `mov cl,[ebp-0Ch]; mov eax,[ebp-8]` -> call column stub (which runs both); NOP
+                    @{ Offset = 0x4F5D2; Old = '8A 4D F4 8B 45 F8'; New = 'E8 1F 5D FB FF 90' }
+                    # tile drawer: `lea ecx,[edi*4]` (tile word column) -> `mov ecx,[ebp-44h]` clamped offset
+                    @{ Offset = 0x4F60C; Old = '8D 0C BD 00 00 00 00'; New = '8B 4D BC 90 90 90 90' }
+                    # tile drawer: mask pointer `mov eax,[ebp-38h]; add eax,ecx` -> `mov eax,[ebp-48h]` (real column, computed by the stub)
+                    @{ Offset = 0x4F674; Old = '8B 45 C8 8A 5C 11 03 01 C8 F6 C3 08'; New = '8B 45 B8 8A 5C 11 03 90 90 F6 C3 08' }
+                    # tile drawer: `lea edx,[edi*4]` (fg flag word) -> `mov edx,[ebp-44h]`
+                    @{ Offset = 0x4F693; Old = '8D 14 BD 00 00 00 00'; New = '8B 55 BC 90 90 90 90' }
+                    # tile drawer: `lea edx,[edi*4]` (fg tile word) -> `mov edx,[ebp-44h]`
+                    @{ Offset = 0x4F6B3; Old = '8D 14 BD 00 00 00 00'; New = '8B 55 BC 90 90 90 90' }
+                    # draw_terrain lightmap pass: the four edge-flag corrections -> clamp the map row to [0,h-1] and the column to [0,w-1] (esi/edi scratch, eax = row, [ebp+72h] = column)
+                    @{ Offset = 0x52E80; Old = '85 F6 74 06 83 F9 FF 75 01 40 83 7D 42 00 74 06 3B 4D 6A 75 01 48 83 7D 3E 00 74 08 83 FA FF 75 03 FF 45 72 83 7D 46 00 74 08 3B 55 6E 75 03 FF 4D 72'; New = '8B 73 14 85 C0 7D 02 31 C0 8B BE B4 A4 09 00 4F 39 F8 7E 02 89 F8 8B 7D 72 85 FF 7D 02 31 FF 8B B6 B0 A4 09 00 4E 39 F7 7E 02 89 F7 89 7D 72 90 90 90' }
+                    # .reloc table: entry 3EBA -> 3EAF: the absolute operand moved from page offset 0xEBA to 0xEAF, entry follows it
+                    @{ Offset = 0x97A6A; Old = 'BA 3E'; New = 'AF 3E' }
+                    # .reloc table: entry 3EC1 -> 3EB5: the absolute operand moved from page offset 0xEC1 to 0xEB5, entry follows it
+                    @{ Offset = 0x97A6C; Old = 'C1 3E'; New = 'B5 3E' }
+                    # .reloc table: entry 3EC7 -> 3EBD: the absolute operand moved from page offset 0xEC7 to 0xEBD, entry follows it
+                    @{ Offset = 0x97A6E; Old = 'C7 3E'; New = 'BD 3E' }
+                    # .reloc table: entry 3EDB -> 3EC5: the absolute operand moved from page offset 0xEDB to 0xEC5, entry follows it
+                    @{ Offset = 0x97A70; Old = 'DB 3E'; New = 'C5 3E' }
+                    # .reloc table: entry 3EEF -> 3ECB: the absolute operand moved from page offset 0xEEF to 0xECB, entry follows it
+                    @{ Offset = 0x97A72; Old = 'EF 3E'; New = 'CB 3E' }
+                    # .reloc table: entry 3EF4 -> 3ED1: the absolute operand moved from page offset 0xEF4 to 0xED1, entry follows it
+                    @{ Offset = 0x97A74; Old = 'F4 3E'; New = 'D1 3E' }
+                    # .reloc table: entry 3F12 -> 3ED7: the absolute operand moved from page offset 0xF12 to 0xED7, entry follows it
+                    @{ Offset = 0x97A76; Old = '12 3F'; New = 'D7 3E' }
+                    # .reloc table: entry 3F17 -> 3EDF: the absolute operand moved from page offset 0xF17 to 0xEDF, entry follows it
+                    @{ Offset = 0x97A78; Old = '17 3F'; New = 'DF 3E' }
+                    # .reloc table: entry 3F2B -> 3EE7: the absolute operand moved from page offset 0xF2B to 0xEE7, entry follows it
+                    @{ Offset = 0x97A7A; Old = '2B 3F'; New = 'E7 3E' }
+                    # .reloc table: entry 3F42 -> 3EED: the absolute operand moved from page offset 0xF42 to 0xEED, entry follows it
+                    @{ Offset = 0x97A7C; Old = '42 3F'; New = 'ED 3E' }
+                    # .reloc table: entry 3F57 -> 3F30: the absolute operand moved from page offset 0xF57 to 0xF30, entry follows it
+                    @{ Offset = 0x97A7E; Old = '57 3F'; New = '30 3F' }
+                    # .reloc table: entry 3F68 (type 3 HIGHLOW, page offset 0xF68) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97A80; Old = '68 3F'; New = '00 00' }
+                    # .reloc table: entry 3F70 (type 3 HIGHLOW, page offset 0xF70) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97A82; Old = '70 3F'; New = '00 00' }
+                    # .reloc table: entry 3F75 (type 3 HIGHLOW, page offset 0xF75) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97A84; Old = '75 3F'; New = '00 00' }
                 )
             }
 
@@ -3250,13 +3899,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'd7b30c1a3d9cd1dea92e8c1ac0fc7565233ce2743ddef1a926208625de067f6a'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'f00fc454c0cab006ebe20733847b477720e201bf4cc6a2d630bf3bb5c13d1693'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
-        Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
+        Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '05383a4827aed4381cccf07084ba34f192091884bdefd69fe57c7c0c0382c7ea'; '1024x768' = 'd7b30c1a3d9cd1dea92e8c1ac0fc7565233ce2743ddef1a926208625de067f6a'; '1280x1024' = '9c1b30a3bd974840945eed093d2e9d116cb177ced23d523573a5a1e1ac21a7f8'; '1280x720' = 'a43818eadd09b601e182cbd866fd33c4cadacc1404835be6513cc72b99be2283'; '1280x800' = 'f555d2114758f9a2e6f174a31fa344450672a4a50192c0fdf037c5254dca1eee' }
+        ReferenceSha256 = @{ '640x480' = 'cda9b4c196da8f303378de7089975f136acd8c7778ab983f5495bc4be157e30e'; '1024x768' = 'f00fc454c0cab006ebe20733847b477720e201bf4cc6a2d630bf3bb5c13d1693'; '1280x1024' = 'fd87b3e8ec9f1be78bcc4434591ff283976fd75f9668bd062f5a9a4a4cde6a4e'; '1280x720' = 'c1b80860eed505c8b8ddcb7be0fcd434dfa07abdec7de91701ce97bcdce676f0'; '1280x800' = '86653ce674fe81874ec04a9e221a38336f2cac4f2b9f3e5338933ac82296a0af'; '3840x1080' = '6ca3706ae59e9deec77af8a6de8ebabadc0e60674afe6bb2a5aa00158eb59602' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -5373,6 +6022,506 @@ the ones in place have another size.
                 )
             }
 
+            # ---- resolution @ 3840x1080: 3840x1080 display ---------------------------------------------------------
+            #  Added      : 9 Sep 2026 (any size since 21 Sep 2026)
+            #  Made with  : tools/patch_resolution.py (Dark-Colony-Server)
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.24, 10.25
+            #  Changes    : 436 bytes in 178 edits
+            #  The engine is hard-wired for 640x480: the DirectDraw display mode, the framebuffer stride
+            #  (y*640 done as shl 7 + add), clip rectangles, the map viewport (16x14 tiles), the minimap
+            #  position, the movie blit, the 44 code-positioned main-menu elements, the terrain light plane's
+            #  512-byte row advances and the size of draw_terrain's stack lightmap.  Every one of those
+            #  constants was read out of the disassembly and is replaced by the 3840x1080 equivalent here:
+            #    stage 1  display mode, framebuffer stride (imul: 3840 is not a power of two), clip rect
+            #    stage 2  full-screen chrome, mouse, cursor clip, loading screens, and the 44 menu elements
+            #             moved by (+1600,+300) - the same offset the letterboxed 640x480 menu screens use
+            #    stage 3  map viewport 3712x1024 (116x32 tiles) at (4,6) plus 24 spare rows given to the taller HUD bottom bar, minimap 96x84 at
+            #             (3719,6), the 31 lightplane row advances, the six lightmap row idioms x144 -> x512 (more than 34 tiles across), and a bigger stack frame for
+            #             draw_terrain (so the PE header's SizeOfStackReserve / SizeOfStackCommit go up as
+            #             well - the two edits at file offsets 0xE0 / 0xE4)
+            #    stage 4  movies: pitch-aware back-buffer clear and the 320x180 movie frames stretched to
+            #             (960,0)-(2880,1080) through IDirectDrawSurface::Blt
+            #  Every edit swaps one immediate constant or one arithmetic opcode inside an existing
+            #  instruction; no code is added and no instruction moves.  Council Wars is the same code at
+            #  +0x60 (AUTO) / +0x28 (DGROUP) with three site fixups, hence the slightly different offsets.
+            #
+            #  REQUIRES the interface data rebuilt for 3840x1080 next to the exe - in the INTRF_HD/ folder,
+            #  read through the "Interface data from INTRF_HD" patch below (select both).  One INTRF_HD folder
+            #  serves every resolution, so it must hold the set built for THIS size: the patcher reads the
+            #  size of INTRF_HD\INTRFACE.GIF and refuses a mismatch (with a 1024x768 set the game would draw
+            #  the menus and the HUD frame at the wrong size).  The two loading screens INTRF_HD\LOAD.BMP /
+            #  LOAD2.BMP are not part of a set: this patcher writes them for the chosen size from the stock
+            #  INTRFACE\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 3840x1080 canvas) whenever
+            #  the ones in place have another size.
+            @{
+                Id = 'resolution'; Name = '3840x1080 display'; Date = '9 Sep 2026 (any size since 21 Sep 2026)'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = '3840x1080'
+                # applying this fix also GENERATES the INTRF_HD interface set for this size from the stock files
+                # (Write-InterfaceSet); these three pictures cannot be derived and ship with the game
+                SetSources = @('INTRF_HD\3840x1080\INTRG.GIF', 'INTRF_HD\3840x1080\INTRO.GIF', 'INTRF_HD\3840x1080\INTRFACE.GIF')
+                Tool = 'tools/patch_resolution.py (Dark-Colony-Server)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.24, 10.25'
+                Description = @'
+The engine is hard-wired for 640x480: the DirectDraw display mode, the framebuffer stride
+(y*640 done as shl 7 + add), clip rectangles, the map viewport (16x14 tiles), the minimap
+position, the movie blit, the 44 code-positioned main-menu elements, the terrain light plane's
+512-byte row advances and the size of draw_terrain's stack lightmap.  Every one of those
+constants was read out of the disassembly and is replaced by the 3840x1080 equivalent here:
+  stage 1  display mode, framebuffer stride (imul: 3840 is not a power of two), clip rect
+  stage 2  full-screen chrome, mouse, cursor clip, loading screens, and the 44 menu elements
+           moved by (+1600,+300) - the same offset the letterboxed 640x480 menu screens use
+  stage 3  map viewport 3712x1024 (116x32 tiles) at (4,6) plus 24 spare rows given to the taller HUD bottom bar, minimap 96x84 at
+           (3719,6), the 31 lightplane row advances, the six lightmap row idioms x144 -> x512 (more than 34 tiles across), and a bigger stack frame for
+           draw_terrain (so the PE header's SizeOfStackReserve / SizeOfStackCommit go up as
+           well - the two edits at file offsets 0xE0 / 0xE4)
+  stage 4  movies: pitch-aware back-buffer clear and the 320x180 movie frames stretched to
+           (960,0)-(2880,1080) through IDirectDrawSurface::Blt
+Every edit swaps one immediate constant or one arithmetic opcode inside an existing
+instruction; no code is added and no instruction moves.  Council Wars is the same code at
++0x60 (AUTO) / +0x28 (DGROUP) with three site fixups, hence the slightly different offsets.
+
+REQUIRES the interface data rebuilt for 3840x1080 next to the exe - in the INTRF_HD/ folder,
+read through the "Interface data from INTRF_HD" patch below (select both).  One INTRF_HD folder
+serves every resolution, so it must hold the set built for THIS size: the patcher reads the
+size of INTRF_HD\INTRFACE.GIF and refuses a mismatch (with a 1024x768 set the game would draw
+the menus and the HUD frame at the wrong size).  The two loading screens INTRF_HD\LOAD.BMP /
+LOAD2.BMP are not part of a set: this patcher writes them for the chosen size from the stock
+INTRFACE\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 3840x1080 canvas) whenever
+the ones in place have another size.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('hdpaths')
+                # data files this fix needs next to the exe (67; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'INTRFACE\BINTROE'
+                    'INTRFACE\BUTTONSE'
+                    'INTRFACE\CHOO.GIF'
+                    'INTRFACE\DEMOWINE'
+                    'INTRFACE\DINTROE'
+                    'INTRFACE\DPBLANKE'
+                    'INTRFACE\DPLAYSE'
+                    'INTRFACE\ENCY.GIF'
+                    'INTRFACE\ENCYCLOE'
+                    'INTRFACE\GETSVRE'
+                    'INTRFACE\GTSUX.GIF'
+                    'INTRFACE\INTRG.DAT'
+                    'INTRFACE\INTRO.DAT'
+                    'INTRFACE\INTROE'
+                    'INTRFACE\IPXNAMEE'
+                    'INTRFACE\LOAD.BMP'
+                    'INTRFACE\LOAD2.BMP'
+                    'INTRFACE\LOADER.GIF'
+                    'INTRFACE\LOADGE'
+                    'INTRFACE\LOBJE'
+                    'INTRFACE\LOGOE'
+                    'INTRFACE\LOPTE'
+                    'INTRFACE\LOST.GIF'
+                    'INTRFACE\LOSTE'
+                    'INTRFACE\LQCE'
+                    'INTRFACE\LSGE'
+                    'INTRFACE\MAINE'
+                    'INTRFACE\METAE'
+                    'INTRFACE\MULTIE'
+                    'INTRFACE\MULTIWIN.GIF'
+                    'INTRFACE\MULTIWNE'
+                    'INTRFACE\NAME.GIF'
+                    'INTRFACE\NET.GIF'
+                    'INTRFACE\NETOPTE'
+                    'INTRFACE\NEWGAMEE'
+                    'INTRFACE\SERVER.GIF'
+                    'INTRFACE\SHUMAN.GIF'
+                    'INTRFACE\SHUMANE'
+                    'INTRFACE\STORY.GIF'
+                    'INTRFACE\STORYE'
+                    'INTRFACE\TCPWAIT.GIF'
+                    'INTRFACE\VICTORG.GIF'
+                    'INTRFACE\VICTORY.GIF'
+                    'INTRFACE\WINE'
+                    'INTRFACE\WINGAME.GIF'
+                    'INTRFACE\WINGAMEE'
+                    'INTRFACE\WINUKE'
+                    'GAMESTAT\HSCENE.TXT'
+                    'GAMESTAT\GSCENE.TXT'
+                    'GAMESTAT\HTSCENE.TXT'
+                    'GAMESTAT\GTSCENE.TXT'
+                    'SPRITES\DCSS_HD.SPR'
+                    'SPRITES\DCUK_HD.SPR'
+                    'SPRITES\DCUT_HD.SPR'
+                    'ANIMATE\DCSS_HD.FIN'
+                    'ANIMATE\DCUK_HD.FIN'
+                    'ANIMATE\DCUT_HD.FIN'
+                    'exp\intrface\bintroe'
+                    'exp\intrface\introe'
+                    'exp\intrface\shumane'
+                    'exp\gamestat\hxscene.txt'
+                    'exp\gamestat\gxscene.txt'
+                    'ozi_ns\gamestat\hxscene.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'INTRF_HD\3840x1080\INTRG.GIF'
+                    'INTRF_HD\3840x1080\INTRO.GIF'
+                    'INTRF_HD\3840x1080\INTRFACE.GIF'
+                )
+                Edits = @(
+                    # PE header: SizeOfStackReserve
+                    @{ Offset = 0xE0; Old = '80 38 01 00'; New = '00 00 10 00' }
+                    # PE header: SizeOfStackCommit
+                    @{ Offset = 0xE4; Old = '00 00 01 00'; New = '00 00 04 00' }
+                    # main.c full-screen rect right
+                    @{ Offset = 0x4E5; Old = 'BF 7F 02 00 00'; New = 'BF FF 0E 00 00' }
+                    # main.c full-screen rect bottom
+                    @{ Offset = 0x4EA; Old = 'B8 DF 01 00 00'; New = 'B8 37 04 00 00' }
+                    # menu: campaign overview text y 13
+                    @{ Offset = 0x1871; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: campaign overview text x 10
+                    @{ Offset = 0x187B; Old = 'BA 0A 00 00 00'; New = 'BA 4A 06 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x1B02; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x1B07; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x1B28; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x1B2F; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x1D76; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x1D7C; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x1DC7; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x1DCE; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x1EC2; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x1EC8; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x1F13; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x1F1A; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x1FE0; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x1FE5; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x2029; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x2030; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x210D; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x2117; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x2156; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x215D; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: encyclopedia text x 20
+                    @{ Offset = 0x2240; Old = 'BA 14 00 00 00'; New = 'BA 54 06 00 00' }
+                    # menu: encyclopedia text y 106
+                    @{ Offset = 0x224A; Old = 'BB 6A 00 00 00'; New = 'BB 96 01 00 00' }
+                    # menu: encyclopedia model y 13
+                    @{ Offset = 0x2284; Old = 'BB 0D 00 00 00'; New = 'BB 39 01 00 00' }
+                    # menu: encyclopedia model x 303
+                    @{ Offset = 0x228B; Old = 'BA 2F 01 00 00'; New = 'BA 6F 07 00 00' }
+                    # menu: mission description text y 212
+                    @{ Offset = 0x2600; Old = 'BB D4 00 00 00'; New = 'BB 00 02 00 00' }
+                    # menu: mission description text x 310
+                    @{ Offset = 0x260A; Old = 'BA 36 01 00 00'; New = 'BA 76 07 00 00' }
+                    # menu: mission globe (human) x 34
+                    @{ Offset = 0x263F; Old = 'BA 22 00 00 00'; New = 'BA 62 06 00 00' }
+                    # menu: mission globe (human) y 26
+                    @{ Offset = 0x2649; Old = 'BB 1A 00 00 00'; New = 'BB 46 01 00 00' }
+                    # menu: mission globe (alien) y 26
+                    @{ Offset = 0x2675; Old = 'BB 1A 00 00 00'; New = 'BB 46 01 00 00' }
+                    # menu: mission globe (alien) x 34
+                    @{ Offset = 0x267C; Old = 'BA 22 00 00 00'; New = 'BA 62 06 00 00' }
+                    # menu: mission globe overlay y 26
+                    @{ Offset = 0x269A; Old = 'BB 1A 00 00 00'; New = 'BB 46 01 00 00' }
+                    # menu: mission globe overlay x 34
+                    @{ Offset = 0x269F; Old = 'BA 22 00 00 00'; New = 'BA 62 06 00 00' }
+                    # menu: victory debrief text y 190
+                    @{ Offset = 0x367A; Old = 'BB BE 00 00 00'; New = 'BB EA 01 00 00' }
+                    # menu: victory debrief text x 29
+                    @{ Offset = 0x3681; Old = 'BA 1D 00 00 00'; New = 'BA 5D 06 00 00' }
+                    # menu: victory medal y 169
+                    @{ Offset = 0x386D; Old = 'BB A9 00 00 00'; New = 'BB D5 01 00 00' }
+                    # menu: victory medal x 541
+                    @{ Offset = 0x3874; Old = 'BA 1D 02 00 00'; New = 'BA 5D 08 00 00' }
+                    # menu: victory medal (re-create) y 169
+                    @{ Offset = 0x3BEC; Old = 'BB A9 00 00 00'; New = 'BB D5 01 00 00' }
+                    # menu: victory medal (re-create) x 541
+                    @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 08 00 00' }
+                    # menu: intro credits text y 200
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 72 02 00 00' }
+                    # menu: intro credits text x 178
+                    @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 06 00 00' }
+                    # menu: network screen globe y 24
+                    @{ Offset = 0x5040; Old = 'BB 18 00 00 00'; New = 'BB 44 01 00 00' }
+                    # menu: network screen globe x 336
+                    @{ Offset = 0x5051; Old = 'BA 50 01 00 00'; New = 'BA 90 07 00 00' }
+                    # release_surfaces: release the movie surface whenever it exists
+                    @{ Offset = 0x6490; Old = '75 18'; New = '90 90' }
+                    # avi_create_surfaces: after GetAttachedSurface, mov edx,eax; jmp 4071E0 (edx=0 -> create the 320x180 surface; else return 0)
+                    @{ Offset = 0x658E; Old = '85 C0 0F 84 55 01 00 00 E9 71 02 00 00'; New = '89 C2 E9 AB 00 00 00 90 90 90 90 90 90' }
+                    # avi_create_surfaces: keep the flip flag when creating the movie surface
+                    @{ Offset = 0x669D; Old = '89 1D 34 8E 48 00'; New = '90 90 90 90 90 90' }
+                    # movie clear: cmp eax,[ebp-60h] (dwWidth from the Lock)
+                    @{ Offset = 0x6854; Old = '3D 80 02 00 00'; New = '3B 45 A0 90 90' }
+                    # movie clear: add ecx,[ebp-5Ch] (lPitch from the Lock)
+                    @{ Offset = 0x6865; Old = '81 C1 00 05 00 00'; New = '03 4D A4 90 90 90' }
+                    # movie clear: cmp edx,[ebp-64h] (dwHeight from the Lock)
+                    @{ Offset = 0x686B; Old = '81 FA E0 01 00 00'; New = '3B 55 9C 90 90 90' }
+                    # clear_and_flip: also clear the movie surface in flip mode
+                    @{ Offset = 0x68D9; Old = 'E9 D4 00 00 00'; New = '90 90 90 90 90' }
+                    # draw_offscreen: draw all H rows, not H-1 (jae -> ja)
+                    @{ Offset = 0x6D7B; Old = '0F 83'; New = '0F 87' }
+                    # draw_offscreen: BltFast -> stretching Blt(primary, dest rect, movie surface)
+                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C'; New = '31 FF C7 45 62 C0 03 00 00 C7 45 66 00 00 00 00 C7 45 6A 40 0B 00 00 C7 45 6E 38 04 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 40 97 48 00 50 8B 08 FF 51 14 90 90' }
+                    # display thread: always draw through the 320x180 movie surface
+                    @{ Offset = 0x7F9E; Old = '75 07'; New = 'EB 07' }
+                    # minimap click: mouse x - minimap x
+                    @{ Offset = 0x94E4; Old = '2D 07 02 00 00'; New = '2D 87 0E 00 00' }
+                    # interface update: push tiles_down (imm8)
+                    @{ Offset = 0x9F6A; Old = '6A 0E'; New = '6A 20' }
+                    # interface update: tiles_across
+                    @{ Offset = 0x9F6C; Old = 'B9 10 00 00 00'; New = 'B9 74 00 00 00' }
+                    # interface update: sub ebx,half_viewport_y
+                    @{ Offset = 0x9F7C; Old = '81 EB 00 07 00 00'; New = '81 EB 00 10 00 00' }
+                    # interface update: sub edx,half_viewport_x
+                    @{ Offset = 0x9F8B; Old = '81 EA 00 08 00 00'; New = '81 EA 00 3A 00 00' }
+                    # frame render: sub edx,half_viewport_y
+                    @{ Offset = 0xA51C; Old = '81 EA 00 07 00 00'; New = '81 EA 00 10 00 00' }
+                    # frame render: sub edx,half_viewport_x
+                    @{ Offset = 0xA540; Old = '81 EA 00 08 00 00'; New = '81 EA 00 3A 00 00' }
+                    # proto.c map view rect height
+                    @{ Offset = 0x1E17E; Old = 'B9 C0 01 00 00'; New = 'B9 00 04 00 00' }
+                    # proto.c map view rect width
+                    @{ Offset = 0x1E183; Old = 'BB 00 02 00 00'; New = 'BB 80 0E 00 00' }
+                    # minimap hit rect x (proto.c make_rect -> ui+0x7B4)
+                    @{ Offset = 0x1E2A3; Old = 'B8 07 02 00 00'; New = 'B8 87 0E 00 00' }
+                    # scroll clamp: half_viewport_x
+                    @{ Offset = 0x1E2C6; Old = 'B9 00 08 00 00'; New = 'B9 00 3A 00 00' }
+                    # scroll clamp: half_viewport_y
+                    @{ Offset = 0x1E2CF; Old = 'BB 00 07 00 00'; New = 'BB 00 10 00 00' }
+                    # driver.c row advance (a)
+                    @{ Offset = 0x2B5F4; Old = 'BB 80 02 00 00'; New = 'BB 00 0F 00 00' }
+                    # driver.c y*640 -> y*W: lea edx,[ecx*4] -> imul edx,ecx,W
+                    @{ Offset = 0x2B669; Old = '8D 14 8D 00 00 00 00'; New = '69 D1 00 0F 00 00 90' }
+                    # driver.c y*640: neutralise add edx,ecx
+                    @{ Offset = 0x2B673; Old = '01 CA'; New = '89 D2' }
+                    # driver.c y*640: neutralise shl edx,7 (lea edx,[edx+0])
+                    @{ Offset = 0x2B678; Old = 'C1 E2 07'; New = '8D 52 00' }
+                    # driver.c row advance (b)
+                    @{ Offset = 0x2B6C1; Old = 'BA 80 02 00 00'; New = 'BA 00 0F 00 00' }
+                    # driver.c clip rect width
+                    @{ Offset = 0x2B7A7; Old = 'BB 80 02 00 00'; New = 'BB 00 0F 00 00' }
+                    # driver.c clip rect height
+                    @{ Offset = 0x2B7C3; Old = 'B9 E0 01 00 00'; New = 'B9 38 04 00 00' }
+                    # cursor clip width (a)
+                    @{ Offset = 0x2D632; Old = 'B8 80 02 00 00'; New = 'B8 00 0F 00 00' }
+                    # cursor clip width (b)
+                    @{ Offset = 0x2D65F; Old = 'B8 80 02 00 00'; New = 'B8 00 0F 00 00' }
+                    # cursor clip height (a)
+                    @{ Offset = 0x2D66E; Old = 'B8 E0 01 00 00'; New = 'B8 38 04 00 00' }
+                    # cursor clip height (b)
+                    @{ Offset = 0x2D679; Old = 'B8 E0 01 00 00'; New = 'B8 38 04 00 00' }
+                    # initial mouse X (screen centre)
+                    @{ Offset = 0x2DC24; Old = 'BA 40 01 00 00'; New = 'BA 80 07 00 00' }
+                    # initial mouse Y (screen centre)
+                    @{ Offset = 0x2DC29; Old = 'B9 F0 00 00 00'; New = 'B9 1C 02 00 00' }
+                    # SetDisplayMode 8-bit height
+                    @{ Offset = 0x2DCF8; Old = '68 E0 01 00 00'; New = '68 38 04 00 00' }
+                    # SetDisplayMode 8-bit width
+                    @{ Offset = 0x2DD02; Old = '68 80 02 00 00'; New = '68 00 0F 00 00' }
+                    # SetDisplayMode 16-bit height
+                    @{ Offset = 0x2DD7C; Old = '68 E0 01 00 00'; New = '68 38 04 00 00' }
+                    # SetDisplayMode 16-bit width
+                    @{ Offset = 0x2DD86; Old = '68 80 02 00 00'; New = '68 00 0F 00 00' }
+                    # offscreen surface width
+                    @{ Offset = 0x2DEE9; Old = 'B8 80 02 00 00'; New = 'B8 00 0F 00 00' }
+                    # offscreen surface height
+                    @{ Offset = 0x2DEEE; Old = 'BA E0 01 00 00'; New = 'BA 38 04 00 00' }
+                    # load.bmp LoadImageA height
+                    @{ Offset = 0x2E367; Old = '68 E0 01 00 00'; New = '68 38 04 00 00' }
+                    # load.bmp LoadImageA width
+                    @{ Offset = 0x2E36C; Old = '68 80 02 00 00'; New = '68 00 0F 00 00' }
+                    # load2.bmp LoadImageA height
+                    @{ Offset = 0x2E398; Old = '68 E0 01 00 00'; New = '68 38 04 00 00' }
+                    # load2.bmp LoadImageA width
+                    @{ Offset = 0x2E39D; Old = '68 80 02 00 00'; New = '68 00 0F 00 00' }
+                    # loading screen BitBlt height
+                    @{ Offset = 0x2E44D; Old = '68 E0 01 00 00'; New = '68 38 04 00 00' }
+                    # loading screen BitBlt width
+                    @{ Offset = 0x2E452; Old = '68 80 02 00 00'; New = '68 00 0F 00 00' }
+                    # clear_screen pixel count (a)
+                    @{ Offset = 0x2EC0D; Old = '3D 00 B0 04 00'; New = '3D 00 48 3F 00' }
+                    # clear_screen pixel count (b)
+                    @{ Offset = 0x2EC42; Old = '3D 00 B0 04 00'; New = '3D 00 48 3F 00' }
+                    # visible tiles down
+                    @{ Offset = 0x352A7; Old = 'B9 0E 00 00 00'; New = 'B9 20 00 00 00' }
+                    # clip_view_to_map: lea edx,[eax-tiles_down]
+                    @{ Offset = 0x352AC; Old = '8D 50 F2'; New = '8D 50 E0' }
+                    # visible tiles across
+                    @{ Offset = 0x352AF; Old = 'BB 10 00 00 00'; New = 'BB 74 00 00 00' }
+                    # viewport width
+                    @{ Offset = 0x353A6; Old = 'BA 00 02 00 00'; New = 'BA 80 0E 00 00' }
+                    # viewport height
+                    @{ Offset = 0x353C1; Old = 'BB C0 01 00 00'; New = 'BB 00 04 00 00' }
+                    # occlusion mask size
+                    @{ Offset = 0x353E8; Old = 'BA 00 70 00 00'; New = 'BA 00 40 07 00' }
+                    # render destination stride
+                    @{ Offset = 0x353FF; Old = 'B8 80 02 00 00'; New = 'B8 00 0F 00 00' }
+                    # engmain.c y*1280 -> y*W*2: shl/add/shl window -> imul eax,eax,W*2; mov ebx,[ebx+8]
+                    @{ Offset = 0x35516; Old = 'C1 E0 02 01 F8 8B 5B 08 C1 E0 08'; New = '69 C0 00 1E 00 00 8B 5B 08 90 90' }
+                    # engmain.c y*640 -> y*W: lea eax,[ecx*4] -> imul eax,ecx,W
+                    @{ Offset = 0x35816; Old = '8D 04 8D 00 00 00 00'; New = '69 C1 00 0F 00 00 90' }
+                    # engmain.c y*640: neutralise add eax,ecx
+                    @{ Offset = 0x3581D; Old = '01 C8'; New = '89 C0' }
+                    # engmain.c y*640: neutralise shl eax,7 (lea eax,[eax+0])
+                    @{ Offset = 0x35825; Old = 'C1 E0 07'; New = '8D 40 00' }
+                    # minimap stride (a)
+                    @{ Offset = 0x394FB; Old = 'B8 80 02 00 00'; New = 'B8 00 0F 00 00' }
+                    # minimap origin (a)
+                    @{ Offset = 0x3950F; Old = '81 C2 0E 22 00 00'; New = '81 C2 0E D1 00 00' }
+                    # minimap draw: clip rect x
+                    @{ Offset = 0x39644; Old = 'B8 07 02 00 00'; New = 'B8 87 0E 00 00' }
+                    # minimap draw: view-box indicator x
+                    @{ Offset = 0x396DA; Old = '05 07 02 00 00'; New = '05 87 0E 00 00' }
+                    # minimap stride (b)
+                    @{ Offset = 0x398BB; Old = 'BA 80 02 00 00'; New = 'BA 00 0F 00 00' }
+                    # minimap origin (b)
+                    @{ Offset = 0x398E4; Old = '81 45 F0 0E 22 00 00'; New = '81 45 F0 0E D1 00 00' }
+                    # mouse clamp: compare X against width
+                    @{ Offset = 0x502A7; Old = '81 FE 80 02 00 00'; New = '81 FE 00 0F 00 00' }
+                    # mouse clamp: X maximum
+                    @{ Offset = 0x502AF; Old = 'BE 7F 02 00 00'; New = 'BE FF 0E 00 00' }
+                    # mouse clamp: compare Y against height
+                    @{ Offset = 0x502BC; Old = '81 FF E0 01 00 00'; New = '81 FF 38 04 00 00' }
+                    # mouse clamp: Y maximum
+                    @{ Offset = 0x502C4; Old = 'BF DF 01 00 00'; New = 'BF 37 04 00 00' }
+                    # DirectInput clamp: compare X
+                    @{ Offset = 0x503A6; Old = '3D 7F 02 00 00'; New = '3D FF 0E 00 00' }
+                    # DirectInput clamp: X maximum
+                    @{ Offset = 0x503AD; Old = 'C7 05 C0 27 53 00 7F 02 00 00'; New = 'C7 05 C0 27 53 00 FF 0E 00 00' }
+                    # DirectInput clamp: compare Y
+                    @{ Offset = 0x503CB; Old = '81 FE DF 01 00 00'; New = '81 FE 37 04 00 00' }
+                    # DirectInput clamp: Y maximum
+                    @{ Offset = 0x503D3; Old = 'C7 05 C4 27 53 00 DF 01 00 00'; New = 'C7 05 C4 27 53 00 37 04 00 00' }
+                    # draw_terrain: sub esp,frame
+                    @{ Offset = 0x52D75; Old = '81 EC CC 14 00 00'; New = '81 EC FC 87 00 00' }
+                    # lightmap x144 -> x512, loop 1 row 2r+2 (eax,esi): neutralise add
+                    @{ Offset = 0x52F6E; Old = '01 F0'; New = '89 C0' }
+                    # lightmap x144 -> x512, loop 1 row 2r+2 (eax,esi): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x52F70; Old = 'C1 E0 04'; New = 'C1 E0 06' }
+                    # lightmap store, loop 1 (2r, 2c)
+                    @{ Offset = 0x52F80; Old = '89 B4 28 B6 EB FF FF'; New = '89 B4 28 86 78 FF FF' }
+                    # lightmap x144 -> x512, loop 2 row r+2 (eax,ebx): neutralise add
+                    @{ Offset = 0x52FBC; Old = '01 D8'; New = '89 C0' }
+                    # lightmap x144 -> x512, loop 2 row r+2 (eax,ebx): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x52FBE; Old = 'C1 E0 04'; New = 'C1 E0 06' }
+                    # lightmap x144 -> x512, loop 2 row r (eax,edx): neutralise add
+                    @{ Offset = 0x52FD2; Old = '01 D0'; New = '89 C0' }
+                    # lightmap x144 -> x512, loop 2 row r (eax,edx): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x52FD4; Old = 'C1 E0 04'; New = 'C1 E0 06' }
+                    # lightmap read, loop 2 (r, c)
+                    @{ Offset = 0x52FDA; Old = '8B 84 2E AE EB FF FF'; New = '8B 84 2E 7E 78 FF FF' }
+                    # lightmap read, loop 2 (r+2, c)
+                    @{ Offset = 0x52FE1; Old = '03 84 2F AE EB FF FF'; New = '03 84 2F 7E 78 FF FF' }
+                    # lightmap read, loop 2 (r, c+2)
+                    @{ Offset = 0x52FE8; Old = '03 84 2E B6 EB FF FF'; New = '03 84 2E 86 78 FF FF' }
+                    # lightmap read, loop 2 (r+2, c+2)
+                    @{ Offset = 0x52FF1; Old = '8B 84 2F B6 EB FF FF'; New = '8B 84 2F 86 78 FF FF' }
+                    # lightmap x144 -> x512, loop 2 row r+1 (eax,esi): neutralise add
+                    @{ Offset = 0x53006; Old = '01 F0'; New = '89 C0' }
+                    # lightmap x144 -> x512, loop 2 row r+1 (eax,esi): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x53008; Old = 'C1 E0 04'; New = 'C1 E0 06' }
+                    # lightmap store, loop 2 (r+1, c+1)
+                    @{ Offset = 0x53013; Old = '89 BC 2B B2 EB FF FF'; New = '89 BC 2B 82 78 FF FF' }
+                    # lightmap x144 -> x512, loop 3 row 2i+1 (edx,eax): neutralise add
+                    @{ Offset = 0x5305B; Old = '01 C2'; New = '89 D2' }
+                    # lightmap x144 -> x512, loop 3 row 2i+1 (edx,eax): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x53060; Old = 'C1 E2 04'; New = 'C1 E2 06' }
+                    # lightmap read, loop 3 (2i+1, 2j+1)
+                    @{ Offset = 0x53065; Old = '8B 8C 2A AA EB FF FF'; New = '8B 8C 2A 7A 78 FF FF' }
+                    # lightmap x144 -> x512, loop 3 row 2i+3 (eax,ecx): neutralise add
+                    @{ Offset = 0x53083; Old = '01 C8'; New = '89 C0' }
+                    # lightmap x144 -> x512, loop 3 row 2i+3 (eax,ecx): shl 4 -> shl log2(stride/8)
+                    @{ Offset = 0x53085; Old = 'C1 E0 04'; New = 'C1 E0 06' }
+                    # lightmap read, loop 3 (2i+3, 2j+1)
+                    @{ Offset = 0x5308D; Old = '8B 84 28 AA EB FF FF'; New = '8B 84 28 7A 78 FF FF' }
+                    # lightmap read, loop 3 (2i+1, 2j+3)
+                    @{ Offset = 0x5309C; Old = '8B 94 2A B2 EB FF FF'; New = '8B 94 2A 82 78 FF FF' }
+                    # lightmap read, loop 3 (2i+3, 2j+3)
+                    @{ Offset = 0x530BD; Old = '8B 84 28 B2 EB FF FF'; New = '8B 84 28 82 78 FF FF' }
+                    # lightplane row advance 1/32 (add eax)
+                    @{ Offset = 0x5312B; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 2/32 (add eax)
+                    @{ Offset = 0x53152; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 3/32 (add eax)
+                    @{ Offset = 0x53175; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 4/32 (add eax)
+                    @{ Offset = 0x531C2; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 5/32 (add eax)
+                    @{ Offset = 0x531EE; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 6/32 (add eax)
+                    @{ Offset = 0x53229; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 7/32 (add eax)
+                    @{ Offset = 0x5325C; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 8/32 (add eax)
+                    @{ Offset = 0x53286; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 9/32 (add eax)
+                    @{ Offset = 0x532B8; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 10/32 (add eax)
+                    @{ Offset = 0x532F3; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 11/32 (add eax)
+                    @{ Offset = 0x53326; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 12/32 (add eax)
+                    @{ Offset = 0x53359; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 13/32 (add eax)
+                    @{ Offset = 0x53384; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 14/32 (add eax)
+                    @{ Offset = 0x533C1; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 15/32 (add eax)
+                    @{ Offset = 0x533F4; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 16/32 (add eax)
+                    @{ Offset = 0x53427; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 17/32 (add eax)
+                    @{ Offset = 0x5345A; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 18/32 (add eax)
+                    @{ Offset = 0x5348D; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 19/32 (add eax)
+                    @{ Offset = 0x534B7; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 20/32 (add eax)
+                    @{ Offset = 0x534F2; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 21/32 (add eax)
+                    @{ Offset = 0x53514; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 22/32 (add eax)
+                    @{ Offset = 0x53556; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 23/32 (add eax)
+                    @{ Offset = 0x53589; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 24/32 (add eax)
+                    @{ Offset = 0x535A5; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 25/32 (add eax)
+                    @{ Offset = 0x535EF; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 26/32 (add eax)
+                    @{ Offset = 0x53622; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 27/32 (add eax)
+                    @{ Offset = 0x53655; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 28/32 (add eax)
+                    @{ Offset = 0x53688; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 29/32 (add eax)
+                    @{ Offset = 0x536BB; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 30/32 (add eax)
+                    @{ Offset = 0x536D6; Old = '05 00 02 00 00'; New = '05 80 0E 00 00' }
+                    # lightplane row advance 31/32 (lea edi)
+                    @{ Offset = 0x5371C; Old = '8D B8 00 02 00 00'; New = '8D B8 80 0E 00 00' }
+                    # screen width global
+                    @{ Offset = 0x867DC; Old = '80 02 00 00'; New = '00 0F 00 00' }
+                    # screen height global
+                    @{ Offset = 0x867E0; Old = 'E0 01 00 00'; New = '38 04 00 00' }
+                )
+            }
+
             # ---- hdpaths: Interface data from INTRF_HD (rebuilt files renamed) ---------------------------------------------------------
             #  Added      : 14 Sep 2026
             #  Made with  : tools/patch_hd_paths.py
@@ -5801,6 +6950,42 @@ HUD frame has the clock face.  Only meaningful together with the 1280x800 displa
                 )
             }
 
+            # ---- clock @ 3840x1080: Day/night clock hand re-anchored (3840x1080) ---------------------------------------------------------
+            #  Added      : 13 Sep 2026
+            #  Made with  : tools/patch_clock.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
+            #  Changes    : 4 bytes in 2 edits
+            #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
+            #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
+            #  sweep did not touch them.  At 3840x1080 that point lies inside the enlarged map view and the
+            #  terrain paints over the hand every frame.  The anchor moves to (3808,1050), where the rebuilt
+            #  HUD frame has the clock face.  Only meaningful together with the 3840x1080 display patch.
+            @{
+                Id = 'clock'; Name = 'Day/night clock hand re-anchored (3840x1080)'; Date = '13 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = '3840x1080'
+                Tool = 'tools/patch_clock.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15'
+                Description = @'
+The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
+corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
+sweep did not touch them.  At 3840x1080 that point lies inside the enlarged map view and the
+terrain paints over the hand every frame.  The anchor moves to (3808,1050), where the rebuilt
+HUD frame has the clock face.  Only meaningful together with the 3840x1080 display patch.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('resolution')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # clock_draw: imm32 of mov edx,ANCHOR_Y - bottom-right anchor y 450 (0x1C2) -> 1050 (0x41A)
+                    @{ Offset = 0x3A103; Old = 'C2 01 00 00'; New = '1A 04 00 00' }
+                    # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 3808 (0xEE0)
+                    @{ Offset = 0x3A116; Old = '60 02 00 00'; New = 'E0 0E 00 00' }
+                )
+            }
+
             # ---- ddraw: Two-monitor start-up hang fixed ---------------------------------------------------------
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_ddraw_lost.py
@@ -5914,6 +7099,126 @@ Only register-relative addressing, no relocation entries, nothing moves.  Harmle
                     @{ Offset = 0x1E319; Old = 'C3 40 01 00'; New = 'F3 03 06 00' }
                     # stub clamp_camera in the AUTO zero tail: lea esi,[eax+108h]; push &cam_z, &cam_x, max_z, max_x, min_z, min_x (ui+0x120..0x114); call clamp2d 0x004366C8; jmp load_ambience 0x00432FE0 - register-relative only, no .reloc entries
                     @{ Offset = 0x7E710; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '8D B0 08 01 00 00 8D 4E 08 51 56 FF 76 18 FF 76 14 FF 76 10 FF 76 0C E8 9C 73 FB FF E9 AF 3C FB FF' }
+                )
+            }
+
+            # ---- widemap: Maps narrower than the screen: the view is centred on the map and every map read stays inside it ---------------------------------------------------------
+            #  Added      : 22 Sep 2026
+            #  Made with  : tools/patch_widemap.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.32
+            #  Changes    : 365 bytes in 26 edits
+            #  The battlefield view is the screen minus the panel, in whole 32-pixel tiles: 28 tiles across at
+            #  1024x768, 36 at 1280x800, 76 at 2560x1440, 116 at 3840x1080.  The maps are 64 to 160 tiles wide
+            #  (the training maps and two two-player maps 64, the first two campaign missions and 22 two-player
+            #  maps 96).  Once the view is wider than the map the game's camera limits ("half a screen from every
+            #  map edge") contradict each other and the camera settles at the far one, so the view begins left of
+            #  the map; nothing that then reads the map checks for that: the terrain drawer continues into the
+            #  neighbouring rows (the far side of the map drawn shifted by a row) and, at the top and bottom map
+            #  row, past the tile block into memory whose contents it takes for tile numbers - a crash in the tile
+            #  blitter as soon as the camera reaches those rows; the lighting pass reads before and after each row;
+            #  the visibility scan tests tiles of the wrong row; the ambient sounds fall silent (their picker gives
+            #  up when the visible rectangle starts left of the map); a click on the black margin sends units to
+            #  the far side of the map (the position wraps in a 16-bit field).  The fix, in six parts written into
+            #  the dead body of the CD-probe routine (unused since the "No CD" fix, which is therefore required,
+            #  as is the "Camera clamped" fix whose stub the first part chains into): (1) when the limits
+            #  contradict each other, both become the map centre, so the map sits centred in the view and cannot
+            #  scroll sideways; (2) the terrain drawer clamps every column to the map, so the margin repeats the
+            #  edge tiles instead of reading beyond them; (3) the lighting pass clamps rows and columns the same
+            #  way (in place of its four edge cases); (4) the visibility rectangle is cut to the map; (5) the
+            #  ambient-sound picker clamps its rectangle instead of giving up; (6) a spot order's x is clamped to
+            #  the map.  The 14 relocation entries of the dead routine are re-pointed to the new absolute operands
+            #  or neutralised.  Rows are never affected with the shipped maps (the tallest view, 44 rows at
+            #  5120x1440, is shorter than the smallest map, 56 rows), so only the column direction is handled.
+            #  Without a wide screen the fix changes nothing visible: every map is wider than 28 or 36 tiles.
+            @{
+                Id = 'widemap'; Name = 'Maps narrower than the screen: the view is centred on the map and every map read stays inside it'; Date = '22 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_widemap.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.32'
+                Description = @'
+The battlefield view is the screen minus the panel, in whole 32-pixel tiles: 28 tiles across at
+1024x768, 36 at 1280x800, 76 at 2560x1440, 116 at 3840x1080.  The maps are 64 to 160 tiles wide
+(the training maps and two two-player maps 64, the first two campaign missions and 22 two-player
+maps 96).  Once the view is wider than the map the game's camera limits ("half a screen from every
+map edge") contradict each other and the camera settles at the far one, so the view begins left of
+the map; nothing that then reads the map checks for that: the terrain drawer continues into the
+neighbouring rows (the far side of the map drawn shifted by a row) and, at the top and bottom map
+row, past the tile block into memory whose contents it takes for tile numbers - a crash in the tile
+blitter as soon as the camera reaches those rows; the lighting pass reads before and after each row;
+the visibility scan tests tiles of the wrong row; the ambient sounds fall silent (their picker gives
+up when the visible rectangle starts left of the map); a click on the black margin sends units to
+the far side of the map (the position wraps in a 16-bit field).  The fix, in six parts written into
+the dead body of the CD-probe routine (unused since the "No CD" fix, which is therefore required,
+as is the "Camera clamped" fix whose stub the first part chains into): (1) when the limits
+contradict each other, both become the map centre, so the map sits centred in the view and cannot
+scroll sideways; (2) the terrain drawer clamps every column to the map, so the margin repeats the
+edge tiles instead of reading beyond them; (3) the lighting pass clamps rows and columns the same
+way (in place of its four edge cases); (4) the visibility rectangle is cut to the map; (5) the
+ambient-sound picker clamps its rectangle instead of giving up; (6) a spot order's x is clamped to
+the map.  The 14 relocation entries of the dead routine are re-pointed to the new absolute operands
+or neutralised.  Rows are never affected with the shipped maps (the tallest view, 44 rows at
+5120x1440, is shorter than the smallest map, 56 rows), so only the column direction is handled.
+Without a wide screen the fix changes nothing visible: every map is wider than 28 or 36 tiles.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('nocd', 'camera')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # cd_probe dead body: bounds rule + column stub + vision stub + order stub: bounds rule at +0 (per axis `if max < min: min = max = (min+max)/2`, 10 absolute operands, jmp camera stub 0x0047F310), column stub at +73, vision stub at +124 (call make_rect 0x0043661C, 1 absolute operand), order stub at +158
+                    @{ Offset = 0x528D; Old = '51 52 56 55 89 E5 81 EC 00 01 00 00 68 B0 48 4A 00 30 E4 68 24 26 48 00 88 25 B8 49 4A 00 8D 85 00 FF FF FF 50 E8 0D 62 07 00 83 C4 0C BA 30 26 48 00 8D 85 00 FF FF FF E8 1A 5D 07 00 85 C0 75 0F A0 1C 8E 48 00 A2 B8 49 4A 00 E9 83 00 00 00 E8 FD 5D 07 00 BE A0 86 01 00 31 D2 E8 A2 55 00 00 F7 F6 52 68 B0 48 4A 00 68 34 26 48 00 8D 85 00 FF FF FF 50 E8 BD 61 07 00 83 C4 10 BA 3C 26 48 00 8D 85 00 FF FF FF E8 CA 5C 07 00 89 C6 85 C0 75 0F C6 05 B8 49 4A 00 01 89 EC 5D 5E 5A 59 5B C3 BB 01 00 00 00 89 C1 B8 40 26 48 00 89 DA E8 66 62 07 00 85 C0 75 09 C6 05 B8 49 4A 00 01 EB 0A A0 1C 8E 48 00 A2 B8 49 4A 00'; New = '8B 0D EC AA 4A 00 3B 0D E4 AA 4A 00 7D 14 03 0D E4 AA 4A 00 D1 F9 89 0D E4 AA 4A 00 89 0D EC AA 4A 00 8B 0D F0 AA 4A 00 3B 0D E8 AA 4A 00 7D 14 03 0D E8 AA 4A 00 D1 F9 89 0D E8 AA 4A 00 89 0D F0 AA 4A 00 E9 3A 94 07 00 8B 06 C1 F8 05 8D 14 38 85 D2 7D 02 31 D2 8B 4E 14 0F BF 09 49 39 CA 7E 02 89 CA 29 C2 C1 E2 02 89 55 BC 8B 45 C8 8D 04 B8 89 45 B8 8A 4D F4 8B 45 F8 C3 E8 0E 07 03 00 8B 15 C0 44 50 00 83 38 00 7D 03 83 20 00 8B 8A B0 A4 09 00 39 48 08 7E 03 89 48 08 C3 51 8B 88 4C 6F 04 00 85 D2 7D 02 31 D2 3B 91 B8 A4 09 00 7C 07 8B 91 B8 A4 09 00 4A 89 D6 59 66 89 98 92 07 00 00 66 89 90 90 07 00 00 C3' }
+                    # spot order: the two 16-bit stores of the world point -> call order stub (clamps x to [0, map_w*256-1], updates esi, then stores)
+                    @{ Offset = 0x8AFF; Old = '66 89 98 92 07 00 00 66 89 90 90 07 00 00'; New = 'E8 27 C8 FF FF 90 90 90 90 90 90 90 90 90' }
+                    # proto.c init: call camera stub -> call bounds rule (which chains into the camera stub)
+                    @{ Offset = 0x1E318; Old = 'E8 F3 03 06 00'; New = 'E8 70 6F FE FF' }
+                    # clip_view_to_map: call make_rect -> call vision stub (make_rect, then x0 = max(x0,0), x1 = min(x1,w))
+                    @{ Offset = 0x352C2; Old = 'E8 55 07 00 00'; New = 'E8 42 00 FD FF' }
+                    # ambience pick: origin guards -> x0 = max(x0,0), w = min(w, W-x0); the z guard keeps its stock meaning (return 0 via 0x00445C4A)
+                    @{ Offset = 0x44F1D; Old = '85 FF 7C 0E 8B 96 4C 6F 04 00 3B BA B0 A4 09 00 7E 07 31 C0 E9 14 01 00 00 85 DB 7C 08 3B 9A B4 A4 09 00 7E 0B 31 C0 8D 65 7E 5D 5F 5E C2 04 00'; New = '85 FF 7D 02 31 FF 8B 96 4C 6F 04 00 8B 8A B0 A4 09 00 29 F9 39 C8 7E 02 89 C8 85 DB 7C 08 3B 9A B4 A4 09 00 7E 0A 31 C0 E9 00 01 00 00 90 90 90' }
+                    # tile drawer: sub esp,38h -> 48h; two new locals [ebp-44h] = clamped column offset, [ebp-48h] = mask column pointer
+                    @{ Offset = 0x4F583; Old = '83 EC 38'; New = '83 EC 48' }
+                    # tile drawer: column-loop head `mov cl,[ebp-0Ch]; mov eax,[ebp-8]` -> call column stub (which runs both); NOP
+                    @{ Offset = 0x4F632; Old = '8A 4D F4 8B 45 F8'; New = 'E8 9F 5C FB FF 90' }
+                    # tile drawer: `lea ecx,[edi*4]` (tile word column) -> `mov ecx,[ebp-44h]` clamped offset
+                    @{ Offset = 0x4F66C; Old = '8D 0C BD 00 00 00 00'; New = '8B 4D BC 90 90 90 90' }
+                    # tile drawer: mask pointer `mov eax,[ebp-38h]; add eax,ecx` -> `mov eax,[ebp-48h]` (real column, computed by the stub)
+                    @{ Offset = 0x4F6D4; Old = '8B 45 C8 8A 5C 11 03 01 C8 F6 C3 08'; New = '8B 45 B8 8A 5C 11 03 90 90 F6 C3 08' }
+                    # tile drawer: `lea edx,[edi*4]` (fg flag word) -> `mov edx,[ebp-44h]`
+                    @{ Offset = 0x4F6F3; Old = '8D 14 BD 00 00 00 00'; New = '8B 55 BC 90 90 90 90' }
+                    # tile drawer: `lea edx,[edi*4]` (fg tile word) -> `mov edx,[ebp-44h]`
+                    @{ Offset = 0x4F713; Old = '8D 14 BD 00 00 00 00'; New = '8B 55 BC 90 90 90 90' }
+                    # draw_terrain lightmap pass: the four edge-flag corrections -> clamp the map row to [0,h-1] and the column to [0,w-1] (esi/edi scratch, eax = row, [ebp+72h] = column)
+                    @{ Offset = 0x52EE0; Old = '85 F6 74 06 83 F9 FF 75 01 40 83 7D 42 00 74 06 3B 4D 6A 75 01 48 83 7D 3E 00 74 08 83 FA FF 75 03 FF 45 72 83 7D 46 00 74 08 3B 55 6E 75 03 FF 4D 72'; New = '8B 73 14 85 C0 7D 02 31 C0 8B BE B4 A4 09 00 4F 39 F8 7E 02 89 F8 8B 7D 72 85 FF 7D 02 31 FF 8B B6 B0 A4 09 00 4E 39 F7 7E 02 89 F7 89 7D 72 90 90 90' }
+                    # .reloc table: entry 3E9A -> 3E8F: the absolute operand moved from page offset 0xE9A to 0xE8F, entry follows it
+                    @{ Offset = 0x97C68; Old = '9A 3E'; New = '8F 3E' }
+                    # .reloc table: entry 3EA1 -> 3E95: the absolute operand moved from page offset 0xEA1 to 0xE95, entry follows it
+                    @{ Offset = 0x97C6A; Old = 'A1 3E'; New = '95 3E' }
+                    # .reloc table: entry 3EA7 -> 3E9D: the absolute operand moved from page offset 0xEA7 to 0xE9D, entry follows it
+                    @{ Offset = 0x97C6C; Old = 'A7 3E'; New = '9D 3E' }
+                    # .reloc table: entry 3EBB -> 3EA5: the absolute operand moved from page offset 0xEBB to 0xEA5, entry follows it
+                    @{ Offset = 0x97C6E; Old = 'BB 3E'; New = 'A5 3E' }
+                    # .reloc table: entry 3ECF -> 3EAB: the absolute operand moved from page offset 0xECF to 0xEAB, entry follows it
+                    @{ Offset = 0x97C70; Old = 'CF 3E'; New = 'AB 3E' }
+                    # .reloc table: entry 3ED4 -> 3EB1: the absolute operand moved from page offset 0xED4 to 0xEB1, entry follows it
+                    @{ Offset = 0x97C72; Old = 'D4 3E'; New = 'B1 3E' }
+                    # .reloc table: entry 3EF2 -> 3EB7: the absolute operand moved from page offset 0xEF2 to 0xEB7, entry follows it
+                    @{ Offset = 0x97C74; Old = 'F2 3E'; New = 'B7 3E' }
+                    # .reloc table: entry 3EF7 -> 3EBF: the absolute operand moved from page offset 0xEF7 to 0xEBF, entry follows it
+                    @{ Offset = 0x97C76; Old = 'F7 3E'; New = 'BF 3E' }
+                    # .reloc table: entry 3F0B -> 3EC7: the absolute operand moved from page offset 0xF0B to 0xEC7, entry follows it
+                    @{ Offset = 0x97C78; Old = '0B 3F'; New = 'C7 3E' }
+                    # .reloc table: entry 3F22 -> 3ECD: the absolute operand moved from page offset 0xF22 to 0xECD, entry follows it
+                    @{ Offset = 0x97C7A; Old = '22 3F'; New = 'CD 3E' }
+                    # .reloc table: entry 3F37 -> 3F10: the absolute operand moved from page offset 0xF37 to 0xF10, entry follows it
+                    @{ Offset = 0x97C7C; Old = '37 3F'; New = '10 3F' }
+                    # .reloc table: entry 3F48 (type 3 HIGHLOW, page offset 0xF48) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97C7E; Old = '48 3F'; New = '00 00' }
+                    # .reloc table: entry 3F50 (type 3 HIGHLOW, page offset 0xF50) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97C80; Old = '50 3F'; New = '00 00' }
+                    # .reloc table: entry 3F55 (type 3 HIGHLOW, page offset 0xF55) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97C82; Old = '55 3F'; New = '00 00' }
                 )
             }
 
