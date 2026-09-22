@@ -8156,7 +8156,8 @@ function Show-PatcherWindow([string] $PreloadPath) {
     [System.Windows.Forms.Application]::EnableVisualStyles()
 
     $script:gui = @{ Path = $null; Data = $null; Build = $null; IsOriginal = $false; Syncing = $false; Unavailable = @{}
-                     Mode = ''; ModeList = @(); Patches = @(); Monitor = (Get-MonitorSize) }
+                     Mode = ''; ModeList = @(); Patches = @(); Monitor = (Get-MonitorSize)
+                     Here = $PSScriptRoot }     # the folder this script sits in = the repository root; the Browse dialog starts in its game folder
     $mono = New-Object System.Drawing.Font('Consolas', 9)
 
     $form = New-Object System.Windows.Forms.Form
@@ -8177,6 +8178,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $lblStatus = New-Object System.Windows.Forms.Label
     $lblStatus.Location = '110,40'; $lblStatus.Size = '860,36'; $lblStatus.Anchor = 'Top,Left,Right'
     $lblStatus.Text = 'Pick dc16.exe (Dark Colony) or ENGEXP16.EXE (Council Wars) from the "DC - Council wars" folder, or maped.exe from "Dark Colony - Map editor" - all three are in the repository, untouched.'
+    if ($PSScriptRoot) { $lblStatus.Text += "`r`nThis script is in $PSScriptRoot - Browse starts in its game folder; the result is written next to the exe you pick." }
 
     # --- left: the fixes
     $grpFix = New-Object System.Windows.Forms.GroupBox
@@ -8370,7 +8372,15 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $dlg = New-Object System.Windows.Forms.OpenFileDialog
         $dlg.Title = 'Pick the untouched original executable'
         $dlg.Filter = 'Dark Colony executables (*.exe)|*.exe|All files (*.*)|*.*'
+        # Start in the folder of the exe already loaded, else in the game folder BESIDE THIS SCRIPT: without this
+        # the dialog opens in the folder Windows last used for PowerShell's file dialogs - with two copies of the
+        # repository (a git clone in Documents, a ZIP in Downloads) a player picks the other copy's exe without
+        # noticing and the result lands there (22 Sep 2026: "the fresh copy isn't widescreen" - it was never patched)
         if ($script:gui.Path) { $dlg.InitialDirectory = Split-Path $script:gui.Path }
+        elseif ($script:gui.Here) {
+            $game = Join-Path $script:gui.Here 'DC - Council wars'
+            $dlg.InitialDirectory = if (Test-Path -LiteralPath $game) { $game } else { $script:gui.Here }
+        }
         if ($dlg.ShowDialog($c.Form) -eq 'OK') { & $script:gui.Load $dlg.FileName }
     })
 
