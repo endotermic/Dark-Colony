@@ -147,13 +147,13 @@ $Builds = @(
         OutputName     = 'dc16new.exe'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '36d3bada28f27b351d97df1a6bc40dca7d2b90e16d261d6c2a6e8b228accce74'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '71b570fa7e13e5ad469158ef3d2a05e8a80ebaf1a9beefa9b9854c4c0119cbbe'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '3c462759bfa11c65d8d148b2a99f3911dd035cd398d3791d3310d8ce9c258bbf'; '1024x768' = '36d3bada28f27b351d97df1a6bc40dca7d2b90e16d261d6c2a6e8b228accce74'; '1280x1024' = 'c42c7c7b98b82ac3b787da2802b9dd4d1900e9d388e09bc2111fa082345c4b64'; '1280x720' = 'b9ce9b5108d773eb5d6951a99c3f5ea42c3fa0f6d4cb282f0ca49ee479e6fd44'; '1280x800' = '4fc122a0ca67a3de67ddad579c8c5ae67b0304f90b65a638f8e6119fdce083c9' }
+        ReferenceSha256 = @{ '640x480' = 'eb80601e3082370ad5596d54e77b93a19e70f35d06d188730efa9ae4055edf37'; '1024x768' = '71b570fa7e13e5ad469158ef3d2a05e8a80ebaf1a9beefa9b9854c4c0119cbbe'; '1280x1024' = 'cae7f486dc02fcbaaf994605c858748b1da52aab0d05461ffbf2e1152ce591c2'; '1280x720' = 'a041516d31a1d66401f02ed9a550489f3f08218bb428818e889ae18acff2f905'; '1280x800' = '371cf78187fbf0d56414109a50b24d9563e29b21f21d85bf2df3a540f37c9d19' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -2855,6 +2855,72 @@ through the linker's import thunks; nothing moves, no relocation entry changes. 
                 )
             }
 
+            # ---- longpath: Sound files load from any folder depth: the wave loader no longer uses the 128-character OpenFile ---------------------------------------------------------
+            #  Added      : 22 Sep 2026
+            #  Made with  : tools/patch_longpath.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.29
+            #  Changes    : 57 bytes in 4 edits
+            #  Installed in a deep folder (about 128 characters of path and more, e.g. a repository ZIP
+            #  extracted under Downloads and then moved into a sub-folder), the game shows "FILE NOT FOUND /
+            #  A sound file is missing - see error.log" about five seconds after start and exits; error.log
+            #  holds the line "unable to open file" with no name after it.  The same files run fine from a
+            #  short path.  Cause: the routine that loads every WAV (sound banks, briefings, ambience) is the
+            #  only code in the game that opens files through the Windows 3.1-era OpenFile function, which
+            #  writes the full path into a 128-character field and fails outright when it does not fit.  All
+            #  other loaders use the C runtime (CreateFileA underneath) and have no such limit, so the rest
+            #  of the game runs and only the first sound kills it.  The empty name is a leftover of the
+            #  "No CD" fix: the error message printed the buffer of the skipped CD attempt.  The fix replaces
+            #  the two live OpenFile calls with calls to a 22-byte routine written over the first CD attempt
+            #  (dead code since the "No CD" fix, which is therefore required): CreateFileA(name, GENERIC_READ,
+            #  FILE_SHARE_READ, OPEN_EXISTING) - it returns -1 on failure exactly like OpenFile, and its
+            #  handle is what the loader's seek, read and close calls take.  The error message now names the
+            #  file that was tried.  Register-relative operands and a call through the import thunk only;
+            #  nothing moves, no relocation entry changes; the same four edits at +0x60 in Council Wars.
+            #  Verified 22 Sep 2026: from a 161-character game folder path the unfixed Council Wars exe fails
+            #  at 5 s, the fixed one plays on with an empty error.log.
+            @{
+                Id = 'longpath'; Name = 'Sound files load from any folder depth: the wave loader no longer uses the 128-character OpenFile'; Date = '22 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_longpath.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.29'
+                Description = @'
+Installed in a deep folder (about 128 characters of path and more, e.g. a repository ZIP
+extracted under Downloads and then moved into a sub-folder), the game shows "FILE NOT FOUND /
+A sound file is missing - see error.log" about five seconds after start and exits; error.log
+holds the line "unable to open file" with no name after it.  The same files run fine from a
+short path.  Cause: the routine that loads every WAV (sound banks, briefings, ambience) is the
+only code in the game that opens files through the Windows 3.1-era OpenFile function, which
+writes the full path into a 128-character field and fails outright when it does not fit.  All
+other loaders use the C runtime (CreateFileA underneath) and have no such limit, so the rest
+of the game runs and only the first sound kills it.  The empty name is a leftover of the
+"No CD" fix: the error message printed the buffer of the skipped CD attempt.  The fix replaces
+the two live OpenFile calls with calls to a 22-byte routine written over the first CD attempt
+(dead code since the "No CD" fix, which is therefore required): CreateFileA(name, GENERIC_READ,
+FILE_SHARE_READ, OPEN_EXISTING) - it returns -1 on failure exactly like OpenFile, and its
+handle is what the loader's seek, read and close calls take.  The error message now names the
+file that was tried.  Register-relative operands and a call through the import thunk only;
+nothing moves, no relocation entry changes; the same four edits at +0x60 in Council Wars.
+Verified 22 Sep 2026: from a 161-character game folder path the unfixed Council Wars exe fails
+at 5 s, the fixed one plays on with an empty error.log.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('nocd')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # wave loader, first open (prefix+name): OpenFile(name,&ofs,OF_READ) -> lea eax,[ebp-80Eh]; call open_read 0x00452aef; 9 x nop
+                    @{ Offset = 0x51EB7; Old = '6A 00 8D 45 F2 50 8D 85 F2 F7 FF FF 50 2E FF 15 C8 04 48 00'; New = '8D 85 F2 F7 FF FF E8 2D 00 00 00 90 90 90 90 90 90 90 90 90' }
+                    # wave loader, second open (bare name): OpenFile(ebx,&ofs,OF_READ) -> mov eax,ebx; call open_read 0x00452aef; 7 x nop
+                    @{ Offset = 0x51ED6; Old = '6A 00 8D 45 F2 50 53 2E FF 15 C8 04 48 00'; New = '89 D8 E8 12 00 00 00 90 90 90 90 90 90 90' }
+                    # stub open_read over the dead first CD attempt: push 0,0,OPEN_EXISTING,0,FILE_SHARE_READ,GENERIC_READ,eax; call CreateFileA thunk 0x0047ef3c (IAT slot 0x004803f8); ret - returns the handle or -1 like OpenFile did
+                    @{ Offset = 0x51EEF; Old = 'E8 AC 33 FB FF 8D BD F2 FB FF FF 89 C6 57 8A 06 88 07 3C 00 74 10'; New = '6A 00 6A 00 6A 03 6A 00 6A 01 68 00 00 00 80 50 E8 38 C4 02 00 C3' }
+                    # error exit fprintf/MessageBox name: lea eax,[ebp-40Eh] (CD buffer, empty since nocd) -> lea eax,[ebp-80Eh] (prefix+name)
+                    @{ Offset = 0x51FCD; Old = 'F2 FB FF FF'; New = 'F2 F7 FF FF' }
+                )
+            }
+
             # ---- movies @ 640x480: Classic movies under their own names: DCINTRO / DCAENDING / DCHENDING (Dark Colony only) ---------------------------------------------------------
             #  Added      : 15 Sep 2026
             #  Made with  : tools/patch_movies.py
@@ -3022,13 +3088,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '57b28dbf8a625fcf234b68626144c0f6bed5656b33c81fccd74f9f6801d790b6'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'd4ca85553ba2ee751333dc2c4b40194fa2af78cda4b4a939794cab40566ae914'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '54d28dfd000ce8c34e36a96a7696da49d2c5214fd7ff4d75be479d96ffab0cb8'; '1024x768' = '57b28dbf8a625fcf234b68626144c0f6bed5656b33c81fccd74f9f6801d790b6'; '1280x1024' = 'f1d3ebcbdf83fdd4cc00cc9820c47644682db7b42cc9c12c357d8d8dc115941b'; '1280x720' = '211413021ae134421d77c43cf3d5b441fd25bfc218fd9a96cc276ca03a163dd1'; '1280x800' = '7f3922716e307c4fbf5fc940b2b5d5242d5e7a354d3145dae54f077d480cea6e' }
+        ReferenceSha256 = @{ '640x480' = 'f5f3bf350f3897d3fc622eb3746c3e68e74fb2a8ea97605f6e69e6c78fa76399'; '1024x768' = 'd4ca85553ba2ee751333dc2c4b40194fa2af78cda4b4a939794cab40566ae914'; '1280x1024' = '4c9001b315323f16fc1472baa47e5bbb4e9a632babbc61238715d62b061f9bfa'; '1280x720' = 'de9b447c1f9dfc18397d315b89ffc970a73db1298d4e029564985bb2e5363562'; '1280x800' = 'adc809c30857b2fd3dd5cf973166e6b06b899031f5253fc8627018741654f9d6' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -5764,6 +5830,72 @@ through the linker's import thunks; nothing moves, no relocation entry changes. 
                     @{ Offset = 0x2D5AF; Old = '0F 85 4C 01 00 00'; New = '0F 85 3E 11 00 00' }
                     # frame_end: posted WM_SYSCOMMAND dispatched, SC_RESTORE re-activates: the WM_SYSCOMMAND PeekMessageA(PM_REMOVE) keeps swallowing SC_SCREENSAVE but hands every other system command to DefWindowProcA(msg.hwnd, WM_SYSCOMMAND, wParam, lParam) - so the SC_RESTORE that Alt+Tab, the taskbar and Win+D post to a minimised window restores it; for SC_RESTORE it then calls ShowWindow(hwnd, SW_MINIMIZE) and ShowWindow(hwnd, SW_RESTORE), the deactivate/activate cycle on a non-iconic window that makes DirectDraw re-set the exclusive display mode; the two dead peeks for WM_SETCURSOR and WM_DESTROY (never posted) are replaced; bytes 86..97 are the idle stub for present(): Sleep(1) through the thunk 0x0047F068, then jmp to the present() exit 0x0042E301; the rest is NOP; calls through the import thunks 0x0047F038 / 0x0047F01A / 0x0047EFF0, no .reloc changes
                     @{ Offset = 0x2E69D; Old = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 81 7D EC 40 F1 00 00 74 45 6A 01 6A 20 6A 20 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 09 6A 00 2E FF 15 E0 03 48 00 6A 01 6A 02 6A 02 6A 00 8D 45 E4 50 2E FF 15 D4 03 48 00 85 C0 74 0E E8 11 F0 FF FF 6A 00 2E FF 15 D8 03 48 00'; New = '6A 01 68 12 01 00 00 68 12 01 00 00 6A 00 8D 45 E4 50 E8 84 FD 04 00 85 C0 74 50 81 7D EC 40 F1 00 00 74 47 FF 75 F0 FF 75 EC 68 12 01 00 00 FF 75 E4 E8 46 FD 04 00 81 7D EC 20 F1 00 00 75 2B 6A 06 FF 75 E4 E8 09 FD 04 00 6A 09 FF 75 E4 E8 FF FC 04 00 EB 15 6A 01 E8 6E FD 04 00 E9 02 F0 FF FF 90 90 90 90 90 90 90 90 90' }
+                )
+            }
+
+            # ---- longpath: Sound files load from any folder depth: the wave loader no longer uses the 128-character OpenFile ---------------------------------------------------------
+            #  Added      : 22 Sep 2026
+            #  Made with  : tools/patch_longpath.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.29
+            #  Changes    : 57 bytes in 4 edits
+            #  Installed in a deep folder (about 128 characters of path and more, e.g. a repository ZIP
+            #  extracted under Downloads and then moved into a sub-folder), the game shows "FILE NOT FOUND /
+            #  A sound file is missing - see error.log" about five seconds after start and exits; error.log
+            #  holds the line "unable to open file" with no name after it.  The same files run fine from a
+            #  short path.  Cause: the routine that loads every WAV (sound banks, briefings, ambience) is the
+            #  only code in the game that opens files through the Windows 3.1-era OpenFile function, which
+            #  writes the full path into a 128-character field and fails outright when it does not fit.  All
+            #  other loaders use the C runtime (CreateFileA underneath) and have no such limit, so the rest
+            #  of the game runs and only the first sound kills it.  The empty name is a leftover of the
+            #  "No CD" fix: the error message printed the buffer of the skipped CD attempt.  The fix replaces
+            #  the two live OpenFile calls with calls to a 22-byte routine written over the first CD attempt
+            #  (dead code since the "No CD" fix, which is therefore required): CreateFileA(name, GENERIC_READ,
+            #  FILE_SHARE_READ, OPEN_EXISTING) - it returns -1 on failure exactly like OpenFile, and its
+            #  handle is what the loader's seek, read and close calls take.  The error message now names the
+            #  file that was tried.  Register-relative operands and a call through the import thunk only;
+            #  nothing moves, no relocation entry changes; the same four edits at +0x60 in Council Wars.
+            #  Verified 22 Sep 2026: from a 161-character game folder path the unfixed Council Wars exe fails
+            #  at 5 s, the fixed one plays on with an empty error.log.
+            @{
+                Id = 'longpath'; Name = 'Sound files load from any folder depth: the wave loader no longer uses the 128-character OpenFile'; Date = '22 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_longpath.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.29'
+                Description = @'
+Installed in a deep folder (about 128 characters of path and more, e.g. a repository ZIP
+extracted under Downloads and then moved into a sub-folder), the game shows "FILE NOT FOUND /
+A sound file is missing - see error.log" about five seconds after start and exits; error.log
+holds the line "unable to open file" with no name after it.  The same files run fine from a
+short path.  Cause: the routine that loads every WAV (sound banks, briefings, ambience) is the
+only code in the game that opens files through the Windows 3.1-era OpenFile function, which
+writes the full path into a 128-character field and fails outright when it does not fit.  All
+other loaders use the C runtime (CreateFileA underneath) and have no such limit, so the rest
+of the game runs and only the first sound kills it.  The empty name is a leftover of the
+"No CD" fix: the error message printed the buffer of the skipped CD attempt.  The fix replaces
+the two live OpenFile calls with calls to a 22-byte routine written over the first CD attempt
+(dead code since the "No CD" fix, which is therefore required): CreateFileA(name, GENERIC_READ,
+FILE_SHARE_READ, OPEN_EXISTING) - it returns -1 on failure exactly like OpenFile, and its
+handle is what the loader's seek, read and close calls take.  The error message now names the
+file that was tried.  Register-relative operands and a call through the import thunk only;
+nothing moves, no relocation entry changes; the same four edits at +0x60 in Council Wars.
+Verified 22 Sep 2026: from a 161-character game folder path the unfixed Council Wars exe fails
+at 5 s, the fixed one plays on with an empty error.log.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('nocd')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # wave loader, first open (prefix+name): OpenFile(name,&ofs,OF_READ) -> lea eax,[ebp-80Eh]; call open_read 0x00452b4f; 9 x nop
+                    @{ Offset = 0x51F17; Old = '6A 00 8D 45 F2 50 8D 85 F2 F7 FF FF 50 2E FF 15 C8 04 48 00'; New = '8D 85 F2 F7 FF FF E8 2D 00 00 00 90 90 90 90 90 90 90 90 90' }
+                    # wave loader, second open (bare name): OpenFile(ebx,&ofs,OF_READ) -> mov eax,ebx; call open_read 0x00452b4f; 7 x nop
+                    @{ Offset = 0x51F36; Old = '6A 00 8D 45 F2 50 53 2E FF 15 C8 04 48 00'; New = '89 D8 E8 12 00 00 00 90 90 90 90 90 90 90' }
+                    # stub open_read over the dead first CD attempt: push 0,0,OPEN_EXISTING,0,FILE_SHARE_READ,GENERIC_READ,eax; call CreateFileA thunk 0x0047ef9c (IAT slot 0x004803f8); ret - returns the handle or -1 like OpenFile did
+                    @{ Offset = 0x51F4F; Old = 'E8 2C 33 FB FF 8D BD F2 FB FF FF 89 C6 57 8A 06 88 07 3C 00 74 10'; New = '6A 00 6A 00 6A 03 6A 00 6A 01 68 00 00 00 80 50 E8 38 C4 02 00 C3' }
+                    # error exit fprintf/MessageBox name: lea eax,[ebp-40Eh] (CD buffer, empty since nocd) -> lea eax,[ebp-80Eh] (prefix+name)
+                    @{ Offset = 0x5202D; Old = 'F2 FB FF FF'; New = 'F2 F7 FF FF' }
                 )
             }
 
