@@ -3899,13 +3899,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'a19972fb50b2a1a03bfcd3355611fffc2541294656358bb19b11ea0985d98980'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'b12a0b14ecbaf06f331490471cee7ba30330dfe6231f21c838daea25b2549887'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '7bc0edca696993ab321680c4cc8e1b1f2757f90156689bee3f3c80a0a18cfce7'; '1024x768' = 'a19972fb50b2a1a03bfcd3355611fffc2541294656358bb19b11ea0985d98980'; '1280x1024' = '4ea2ca22d6b220c6f56d20736f0d4b7bd0d59f346f6bc2029639b53667a6a5be'; '1280x720' = '11bb14824f802c6f89a0251e2f3cdc429a6a10b9f95a2ef44f69893df89e01a7'; '1280x800' = '76c70e6d8079b3da92e3a0e19409529664e89b2b832a7c6586ae3dbe873b572a'; '3840x1080' = '795684400b2492cd141edb6988832cf2d9ea419cc485e41880d6d632d5e434a0' }
+        ReferenceSha256 = @{ '640x480' = '5d8202f8dbd84b592c6cfae60531675195f96fe88fe84ffc3ea339aeb3f907b2'; '1024x768' = 'b12a0b14ecbaf06f331490471cee7ba30330dfe6231f21c838daea25b2549887'; '1280x1024' = 'a20818142bb820ffd28b045cfa4eab5e951dd3fb05a723e41da9dc2672a28a52'; '1280x720' = 'e21805f646313c8696281171e2f1f4dc0cb5ef626480101be6d6bcc800ff8c69'; '1280x800' = '5dc15e774d9b9847cfc1a86c03f26ccda26794dc12c29e6d87fda03380ce51fa'; '3840x1080' = '3577fac6e8658b533615de2f0b0761f53f25a76fd92a5406ac879b057f221d39' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -8043,10 +8043,10 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
                     # credits TTY destroy count 1 -> 0 (nothing was created)
                     @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    # NEW CAMPAIGN call -> tramp_cw_campaign
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
-                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 58 A2 07 00' }
+                    # ACADEMY (TRAINING) call -> tramp_dc_campaign
+                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 08 A3 07 00' }
                     # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
                     @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
                     # LOAD GAME call -> tramp_cw_load
@@ -8590,10 +8590,10 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
                     # credits TTY destroy count 1 -> 0 (nothing was created)
                     @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    # NEW CAMPAIGN call -> tramp_cw_campaign
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
-                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 58 A2 07 00' }
+                    # ACADEMY (TRAINING) call -> tramp_dc_campaign
+                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 08 A3 07 00' }
                     # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
                     @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
                     # LOAD GAME call -> tramp_cw_load
@@ -9135,10 +9135,10 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
                     # credits TTY destroy count 1 -> 0 (nothing was created)
                     @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    # NEW CAMPAIGN call -> tramp_cw_campaign
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
-                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 58 A2 07 00' }
+                    # ACADEMY (TRAINING) call -> tramp_dc_campaign
+                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 08 A3 07 00' }
                     # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
                     @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
                     # LOAD GAME call -> tramp_cw_load
@@ -9680,10 +9680,10 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
                     # credits TTY destroy count 1 -> 0 (nothing was created)
                     @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    # NEW CAMPAIGN call -> tramp_cw_campaign
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
-                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 58 A2 07 00' }
+                    # ACADEMY (TRAINING) call -> tramp_dc_campaign
+                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 08 A3 07 00' }
                     # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
                     @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
                     # LOAD GAME call -> tramp_cw_load
@@ -10225,10 +10225,10 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
                     # credits TTY destroy count 1 -> 0 (nothing was created)
                     @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    # NEW CAMPAIGN call -> tramp_cw_campaign
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
-                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 58 A2 07 00' }
+                    # ACADEMY (TRAINING) call -> tramp_dc_campaign
+                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 08 A3 07 00' }
                     # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
                     @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
                     # LOAD GAME call -> tramp_cw_load
@@ -10770,10 +10770,10 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
                     # credits TTY destroy count 1 -> 0 (nothing was created)
                     @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    # NEW CAMPAIGN call -> tramp_cw_campaign
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
-                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
-                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 58 A2 07 00' }
+                    # ACADEMY (TRAINING) call -> tramp_dc_campaign
+                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 08 A3 07 00' }
                     # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
                     @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
                     # LOAD GAME call -> tramp_cw_load
