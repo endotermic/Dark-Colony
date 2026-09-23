@@ -9506,12 +9506,18 @@ function Edit-OziMenu([string] $Text) {
         $t = [regex]::Match($line, '^\s*textmsg\s+(\d+)\s')
         if ($m.Success -and $move.ContainsKey([int]$m.Groups[2].Value)) {   # button and gadget ids do not overlap
             $pos = $move[[int]$m.Groups[2].Value]
+            # the one-shot plate animation marks the first row, whatever button stands there (the
+            # stock script starts gadget 6 - its own first row - as anim_oneoff)
+            $anim = if ($m.Groups[1].Value -eq 'pushb') { $null }
+                    elseif ([int]$m.Groups[2].Value -eq $gadgetOf[[int]$cols[0][0]]) { 'anim_oneoff' } else { 'anim_stopped' }
             $toks = @($TOKENS.Matches($line) | ForEach-Object { $_.Value })
             $n = 0
             for ($i = 0; $i -lt $toks.Count; $i++) {
                 if ($toks[$i].Trim().Length -eq 0) { continue }
                 $n++
-                if ($n -eq 4) { $toks[$i] = [string]$pos[0] } elseif ($n -eq 5) { $toks[$i] = [string]$pos[1]; break }
+                if ($n -eq 4) { $toks[$i] = [string]$pos[0] }
+                elseif ($n -eq 5) { $toks[$i] = [string]$pos[1]; if ($null -eq $anim) { break } }
+                elseif ($n -eq 9) { $toks[$i] = $anim; break }          # a plate's animation state
             }
             $line = -join $toks
         } elseif ($t.Success -and $labels.ContainsKey([int]$t.Groups[1].Value)) {

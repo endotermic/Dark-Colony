@@ -17,8 +17,8 @@ pushb   3       0       518     478     179     25      -11     0        label c
 pushb   4       0       327     606     179     25      -11     0        label centre   5 0 - remap 0
 pushb   5       0       518     542     179     25      -11     0        label centre   6 0 - remap 0
 
-gadget  6       0       327     516     179     25      LARGEBUTTON  anim_oneoff
-gadget  7       0       327     478     179     25      LARGEBUTTON  anim_stopped
+gadget  6       0       327     516     179     25      LARGEBUTTON  anim_stopped
+gadget  7       0       327     478     179     25      LARGEBUTTON  anim_oneoff
 gadget  8       0       327     542     179     25      LARGEBUTTON  anim_stopped
 gadget  9       0       518     478     179     25      LARGEBUTTON  anim_stopped
 gadget  10      0       327     606     179     25      LARGEBUTTON  anim_stopped
