@@ -3899,13 +3899,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'a4107c2f470014cd34a5dca37078dc63dc8365a86f4ee10bd68684a7ac799ed2'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'bfba1bd5d11fa229068ebd53f673f6b02d7a3a7d3cb8237db7bd0336c0458ffe'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = 'a72235362749a2f595d6a21283c119950e624b34a036b29b1439c8c356e3207b'; '1024x768' = 'a4107c2f470014cd34a5dca37078dc63dc8365a86f4ee10bd68684a7ac799ed2'; '1280x1024' = 'a48ac57d65d998396ffefa4689b69a31690975c46e2c87ff482368db2f1f234e'; '1280x720' = 'cc48e7031510fd8e3c6864c6e51e4c31930ab8d94ed7703a7efd8dd8562d2c36'; '1280x800' = '7c1c96089f5321e5dac7a7aed30e6bf742a2cfe3f9bbdda54c3b85d17b9b8a7d'; '3840x1080' = 'c408d252ac1b1f0d1b7e2c7c13bd0b49941e21836fbeb9804741b47887d63d5f' }
+        ReferenceSha256 = @{ '640x480' = '99071b792cdf04ee5a9e586654196d37d03540edfe1a24a88129c569f7a23531'; '1024x768' = 'bfba1bd5d11fa229068ebd53f673f6b02d7a3a7d3cb8237db7bd0336c0458ffe'; '1280x1024' = '892fba96276bd8661f37433f31d9c9d145d7573dbde3711ab8098c1fe455fd72'; '1280x720' = '155be4958e4a6a2be70b807005df6001c58b63be1d4fc13e152d7e917c54b39a'; '1280x800' = '47eafe9e9621ab27caf0fe5bdd2ca2cc11610ee57abca677ce8cfc64ef5f10a9'; '3840x1080' = '33d276019c661736272aca3bf64477f87ae0277dbcc5c1b359fa2c3795cbc779' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -4052,7 +4052,7 @@ longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive le
             #  Added      : 9 Sep 2026 (any size since 21 Sep 2026)
             #  Made with  : tools/patch_resolution.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.24, 10.25
-            #  Changes    : 364 bytes in 165 edits
+            #  Changes    : 365 bytes in 166 edits
             #  The engine is hard-wired for 640x480: the DirectDraw display mode, the framebuffer stride
             #  (y*640 done as shl 7 + add), clip rectangles, the map viewport (16x14 tiles), the minimap
             #  position, the movie blit, the 44 code-positioned main-menu elements, the terrain light plane's
@@ -4278,7 +4278,9 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA DD 02 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 8A 01 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 92 01 00 00' }
+                    # menu: intro credits text height 100 -> 80 (room for the OZI menu row)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA 74 01 00 00' }
                     # menu: network screen globe y 24
@@ -4526,7 +4528,7 @@ the ones in place have another size.
             #  Added      : 9 Sep 2026 (any size since 21 Sep 2026)
             #  Made with  : tools/patch_resolution.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.24, 10.25
-            #  Changes    : 441 bytes in 178 edits
+            #  Changes    : 442 bytes in 179 edits
             #  The engine is hard-wired for 640x480: the DirectDraw display mode, the framebuffer stride
             #  (y*640 done as shl 7 + add), clip rectangles, the map viewport (16x14 tiles), the minimap
             #  position, the movie blit, the 44 code-positioned main-menu elements, the terrain light plane's
@@ -4752,7 +4754,9 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 27 02 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 2F 02 00 00' }
+                    # menu: intro credits text height 100 -> 80 (room for the OZI menu row)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -5026,7 +5030,7 @@ the ones in place have another size.
             #  Added      : 9 Sep 2026 (any size since 21 Sep 2026)
             #  Made with  : tools/patch_resolution.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.24, 10.25
-            #  Changes    : 423 bytes in 178 edits
+            #  Changes    : 424 bytes in 179 edits
             #  The engine is hard-wired for 640x480: the DirectDraw display mode, the framebuffer stride
             #  (y*640 done as shl 7 + add), clip rectangles, the map viewport (16x14 tiles), the minimap
             #  position, the movie blit, the 44 code-positioned main-menu elements, the terrain light plane's
@@ -5252,7 +5256,9 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 6C 01 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 74 01 00 00' }
+                    # menu: intro credits text height 100 -> 80 (room for the OZI menu row)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -5526,7 +5532,7 @@ the ones in place have another size.
             #  Added      : 9 Sep 2026 (any size since 21 Sep 2026)
             #  Made with  : tools/patch_resolution.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.24, 10.25
-            #  Changes    : 427 bytes in 178 edits
+            #  Changes    : 428 bytes in 179 edits
             #  The engine is hard-wired for 640x480: the DirectDraw display mode, the framebuffer stride
             #  (y*640 done as shl 7 + add), clip rectangles, the map viewport (16x14 tiles), the minimap
             #  position, the movie blit, the 44 code-positioned main-menu elements, the terrain light plane's
@@ -5752,7 +5758,9 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 9D 01 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB A5 01 00 00' }
+                    # menu: intro credits text height 100 -> 80 (room for the OZI menu row)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -6026,7 +6034,7 @@ the ones in place have another size.
             #  Added      : 9 Sep 2026 (any size since 21 Sep 2026)
             #  Made with  : tools/patch_resolution.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.24, 10.25
-            #  Changes    : 436 bytes in 178 edits
+            #  Changes    : 437 bytes in 179 edits
             #  The engine is hard-wired for 640x480: the DirectDraw display mode, the framebuffer stride
             #  (y*640 done as shl 7 + add), clip rectangles, the map viewport (16x14 tiles), the minimap
             #  position, the movie blit, the 44 code-positioned main-menu elements, the terrain light plane's
@@ -6252,7 +6260,9 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 08 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 4A 02 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 52 02 00 00' }
+                    # menu: intro credits text height 100 -> 80 (room for the OZI menu row)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 06 00 00' }
                     # menu: network screen globe y 24
@@ -7532,7 +7542,7 @@ Council Wars.  Without a TRACK02 file the game simply stays silent, as it does t
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.13
-            #  Changes    : 3295 bytes in 17 edits
+            #  Changes    : 3296 bytes in 18 edits
             #  Council Wars opens every data file through one helper that prefixes the name with the
             #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
             #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
@@ -7986,8 +7996,10 @@ applied last.
                 Edits = @(
                     # PE optional header: base-relocation directory size 0x93CC -> 0x93DC (+16)
                     @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'DC 93 00 00' }
-                    # credits box y 230 -> 196 (640x480: room for the five-row OZI menu)
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB C4 00 00 00' }
+                    # credits box y 230 -> 204 (640x480: room for the five-row OZI menu)
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB CC 00 00 00' }
+                    # credits box height 100 -> 80 (640x480: room for the five-row OZI menu)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
                     # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
                     # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
@@ -9428,10 +9440,12 @@ function Edit-DatList([string] $Text) {
 #     OZI MISSIONS (16)
 #     LOAD OZI GAME (4)   QUIT            (12)
 #
-# The block is anchored on the BOTTOM row of the grid in the script - the one row that must not move,
-# since the 640x480 backdrop's artwork starts 3 px below it - so applying this twice changes nothing.
-# The fifth row is won at the top, where the code-positioned credits box moves up by one row and a bit
-# (patch_resolution's credits_y(196, 296) at HD sizes, patch_ozi_menu's 640x480 site at the stock size).
+# with a gap of about a quarter button height (6 px) after rows 1 and 3, which separates ACADEMY, the
+# two Council Wars entries and the two pack entries.  The block is anchored on the BOTTOM row of the
+# grid in the script - the one row that must not move, since the 640x480 backdrop's artwork starts 3 px
+# below it - so applying this twice changes nothing.  The two gaps and the fifth row are won at the top,
+# out of the credits box: it moves up and gets 20 rows shorter (patch_resolution's credits_y(204, 296)
+# plus that build's height site at HD sizes, patch_ozi_menu's two 640x480 sites at the stock size).
 # The untouched exe keeps Classic's four-row grid and labels in exp\intrface\bintroe (doc 10.35).
 function Edit-OziMenu([string] $Text) {
     $cols = @(@(1, 0, 2, 16, 4), @(3, $null, 5, $null, 12))
@@ -9453,12 +9467,22 @@ function Edit-OziMenu([string] $Text) {
     $pitch = [int]::MaxValue
     for ($i = 1; $i -lt $ys.Count; $i++) { if ($ys[$i] - $ys[$i - 1] -lt $pitch) { $pitch = $ys[$i] - $ys[$i - 1] } }
     $bottom = $ys[$ys.Count - 1]
+    # the maintainer's grouping: about a quarter of a button's height after rows 1 and 3
+    $hs = @([regex]::Matches($Text, '(?m)^\s*pushb\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+(\d+)\s') | ForEach-Object { [int]$_.Groups[1].Value } | Sort-Object)
+    $gap = [int][Math]::Round($hs[0] * 0.25)
+    $rows = $cols[0].Count
+    $offs = @()
+    for ($k = 0; $k -lt $rows; $k++) {
+        $extra = 0
+        foreach ($r in 1, 3) { if ($r -le $k) { $extra += $gap } }
+        $offs += ($k * $pitch + $extra)
+    }
     $move = @{}
     for ($c = 0; $c -lt $cols.Count; $c++) {
         for ($k = 0; $k -lt $cols[$c].Count; $k++) {
             $id = $cols[$c][$k]
             if ($null -ne $id) {
-                $pos = @($xs[$c], ($bottom - ($cols[$c].Count - 1 - $k) * $pitch))
+                $pos = @($xs[$c], ($bottom - ($offs[$rows - 1] - $offs[$k])))
                 $move[[int]$id] = $pos
                 $move[[int]$gadgetOf[[int]$id]] = $pos        # the gadget follows its button
             }
