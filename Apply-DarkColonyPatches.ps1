@@ -3899,13 +3899,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'bfba1bd5d11fa229068ebd53f673f6b02d7a3a7d3cb8237db7bd0336c0458ffe'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '4783eb2d7f851255c21f40d3336ce51dac1354429fc65b4cd39f14660e63df56'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '99071b792cdf04ee5a9e586654196d37d03540edfe1a24a88129c569f7a23531'; '1024x768' = 'bfba1bd5d11fa229068ebd53f673f6b02d7a3a7d3cb8237db7bd0336c0458ffe'; '1280x1024' = '892fba96276bd8661f37433f31d9c9d145d7573dbde3711ab8098c1fe455fd72'; '1280x720' = '155be4958e4a6a2be70b807005df6001c58b63be1d4fc13e152d7e917c54b39a'; '1280x800' = '47eafe9e9621ab27caf0fe5bdd2ca2cc11610ee57abca677ce8cfc64ef5f10a9'; '3840x1080' = '33d276019c661736272aca3bf64477f87ae0277dbcc5c1b359fa2c3795cbc779' }
+        ReferenceSha256 = @{ '640x480' = '45399ed329093a4a381219dea8662bc2244a35375e97310b569a0da9d20b61f0'; '1024x768' = '4783eb2d7f851255c21f40d3336ce51dac1354429fc65b4cd39f14660e63df56'; '1280x1024' = 'bb9654bb9844212c58ed3068a79d01301f912750b83f05fe7691165c62e9920f'; '1280x720' = 'eef14760949f7ead86f2be8fc6ee8efe0850d44bda5b4fa1a550046a27e96927'; '1280x800' = '772672fccc16af78c566a7db89854372ac7f705c3240fff9b30c99041ddbe895'; '3840x1080' = 'bb7d44a3dbbc264acc12f2fae96ba738e5b821a28de3fbdb51f4ccb0c645ccd0' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -4278,9 +4278,9 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA DD 02 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 92 01 00 00' }
-                    # menu: intro credits text height 100 -> 80 (room for the OZI menu row)
-                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 91 01 00 00' }
+                    # menu: intro credits text height 100 -> 68 (room for the OZI menu rows)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 44' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA 74 01 00 00' }
                     # menu: network screen globe y 24
@@ -4754,9 +4754,9 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 2F 02 00 00' }
-                    # menu: intro credits text height 100 -> 80 (room for the OZI menu row)
-                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 2E 02 00 00' }
+                    # menu: intro credits text height 100 -> 68 (room for the OZI menu rows)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 44' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -5256,9 +5256,9 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 74 01 00 00' }
-                    # menu: intro credits text height 100 -> 80 (room for the OZI menu row)
-                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 73 01 00 00' }
+                    # menu: intro credits text height 100 -> 68 (room for the OZI menu rows)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 44' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -5758,9 +5758,9 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB A5 01 00 00' }
-                    # menu: intro credits text height 100 -> 80 (room for the OZI menu row)
-                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB A4 01 00 00' }
+                    # menu: intro credits text height 100 -> 68 (room for the OZI menu rows)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 44' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -6260,9 +6260,9 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 08 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 52 02 00 00' }
-                    # menu: intro credits text height 100 -> 80 (room for the OZI menu row)
-                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 51 02 00 00' }
+                    # menu: intro credits text height 100 -> 68 (room for the OZI menu rows)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 44' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 06 00 00' }
                     # menu: network screen globe y 24
@@ -7996,10 +7996,10 @@ applied last.
                 Edits = @(
                     # PE optional header: base-relocation directory size 0x93CC -> 0x93DC (+16)
                     @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'DC 93 00 00' }
-                    # credits box y 230 -> 204 (640x480: room for the five-row OZI menu)
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB CC 00 00 00' }
-                    # credits box height 100 -> 80 (640x480: room for the five-row OZI menu)
-                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 50' }
+                    # credits box y 230 -> 219 (640x480: clear of the crescent, above the five-row OZI menu)
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB DB 00 00 00' }
+                    # credits box height 100 -> 52 (640x480: room for the five-row OZI menu)
+                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 34' }
                     # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
                     # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
@@ -9440,12 +9440,14 @@ function Edit-DatList([string] $Text) {
 #     OZI MISSIONS (16)
 #     LOAD OZI GAME (4)   QUIT            (12)
 #
-# with a gap of about a quarter button height (6 px) after rows 1 and 3, which separates ACADEMY, the
-# two Council Wars entries and the two pack entries.  The block is anchored on the BOTTOM row of the
-# grid in the script - the one row that must not move, since the 640x480 backdrop's artwork starts 3 px
-# below it - so applying this twice changes nothing.  The two gaps and the fifth row are won at the top,
-# out of the credits box: it moves up and gets 20 rows shorter (patch_resolution's credits_y(204, 296)
-# plus that build's height site at HD sizes, patch_ozi_menu's two 640x480 sites at the stock size).
+# with a gap of half a button height (12 px) after rows 1 and 3, which separates ACADEMY, the two
+# Council Wars entries and the two pack entries, and the same gap between the two columns, after which
+# the block is re-centred on the screen.  It is anchored on the BOTTOM row of the grid in the script -
+# the one row that must not move, since the 640x480 backdrop's artwork starts 3 px below it - so
+# applying this twice changes nothing.  The two row gaps and the fifth row are won at the top, out of
+# the credits box, which moves up and gets shorter: 68 rows at y = 203 through patch_resolution
+# (credits_y(203, 296) plus that build's own height site), and 52 rows at y = 219 at 640x480 through
+# patch_ozi_menu, because the stock backdrop there draws the planet's crescent across rows 198..218.
 # The untouched exe keeps Classic's four-row grid and labels in exp\intrface\bintroe (doc 10.35).
 function Edit-OziMenu([string] $Text) {
     $cols = @(@(1, 0, 2, 16, 4), @(3, $null, 5, $null, 12))
@@ -9467,9 +9469,13 @@ function Edit-OziMenu([string] $Text) {
     $pitch = [int]::MaxValue
     for ($i = 1; $i -lt $ys.Count; $i++) { if ($ys[$i] - $ys[$i - 1] -lt $pitch) { $pitch = $ys[$i] - $ys[$i - 1] } }
     $bottom = $ys[$ys.Count - 1]
-    # the maintainer's grouping: about a quarter of a button's height after rows 1 and 3
-    $hs = @([regex]::Matches($Text, '(?m)^\s*pushb\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+(\d+)\s') | ForEach-Object { [int]$_.Groups[1].Value } | Sort-Object)
-    $gap = [int][Math]::Round($hs[0] * 0.25)
+    # the maintainer's grouping: half a button's height after rows 1 and 3, and the same between the
+    # columns, after which the block is re-centred on the screen (25 * 0.5 rounds to 12 in .NET and
+    # in Python alike, so both implementations produce the same bytes)
+    $sz = [regex]::Matches($Text, '(?m)^\s*pushb\s+\d+\s+\d+\s+\d+\s+\d+\s+(\d+)\s+(\d+)\s')   # two passes: a
+    $bw = ($sz | ForEach-Object { [int]$_.Groups[1].Value } | Measure-Object -Minimum).Minimum      # pipeline flattens
+    $bh = ($sz | ForEach-Object { [int]$_.Groups[2].Value } | Measure-Object -Minimum).Minimum      # nested arrays
+    $gap = [int][Math]::Round($bh * 0.5)
     $rows = $cols[0].Count
     $offs = @()
     for ($k = 0; $k -lt $rows; $k++) {
@@ -9477,12 +9483,16 @@ function Edit-OziMenu([string] $Text) {
         foreach ($r in 1, 3) { if ($r -le $k) { $extra += $gap } }
         $offs += ($k * $pitch + $extra)
     }
+    $m4 = $SIZE4.Match($Text); $m2 = $SIZE2.Match($Text)
+    $screenW = if ($m4.Success) { [int]$m4.Groups[5].Value } elseif ($m2.Success) { [int]$m2.Groups[3].Value } else { throw 'bintroe: no size line' }   # SIZE4 = size X Y W H
+    $left = [int][Math]::Floor(($screenW - (2 * $bw + $gap)) / 2)
+    $colX = @($left, ($left + $bw + $gap))
     $move = @{}
     for ($c = 0; $c -lt $cols.Count; $c++) {
         for ($k = 0; $k -lt $cols[$c].Count; $k++) {
             $id = $cols[$c][$k]
             if ($null -ne $id) {
-                $pos = @($xs[$c], ($bottom - ($offs[$rows - 1] - $offs[$k])))
+                $pos = @($colX[$c], ($bottom - ($offs[$rows - 1] - $offs[$k])))
                 $move[[int]$id] = $pos
                 $move[[int]$gadgetOf[[int]$id]] = $pos        # the gadget follows its button
             }
