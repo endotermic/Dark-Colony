@@ -3899,13 +3899,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '4783eb2d7f851255c21f40d3336ce51dac1354429fc65b4cd39f14660e63df56'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'a19972fb50b2a1a03bfcd3355611fffc2541294656358bb19b11ea0985d98980'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '45399ed329093a4a381219dea8662bc2244a35375e97310b569a0da9d20b61f0'; '1024x768' = '4783eb2d7f851255c21f40d3336ce51dac1354429fc65b4cd39f14660e63df56'; '1280x1024' = 'bb9654bb9844212c58ed3068a79d01301f912750b83f05fe7691165c62e9920f'; '1280x720' = 'eef14760949f7ead86f2be8fc6ee8efe0850d44bda5b4fa1a550046a27e96927'; '1280x800' = '772672fccc16af78c566a7db89854372ac7f705c3240fff9b30c99041ddbe895'; '3840x1080' = 'bb7d44a3dbbc264acc12f2fae96ba738e5b821a28de3fbdb51f4ccb0c645ccd0' }
+        ReferenceSha256 = @{ '640x480' = '7bc0edca696993ab321680c4cc8e1b1f2757f90156689bee3f3c80a0a18cfce7'; '1024x768' = 'a19972fb50b2a1a03bfcd3355611fffc2541294656358bb19b11ea0985d98980'; '1280x1024' = '4ea2ca22d6b220c6f56d20736f0d4b7bd0d59f346f6bc2029639b53667a6a5be'; '1280x720' = '11bb14824f802c6f89a0251e2f3cdc429a6a10b9f95a2ef44f69893df89e01a7'; '1280x800' = '76c70e6d8079b3da92e3a0e19409529664e89b2b832a7c6586ae3dbe873b572a'; '3840x1080' = '795684400b2492cd141edb6988832cf2d9ea419cc485e41880d6d632d5e434a0' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -7538,11 +7538,11 @@ Council Wars.  Without a TRACK02 file the game simply stays silent, as it does t
                 )
             }
 
-            # ---- ozi @ 640x480: OZI MISSIONS menu mode (Council Wars only) ---------------------------------------------------------
+            # ---- ozi @ 640x480: DARK COLONY and OZI MISSIONS menu modes (Council Wars only) ---------------------------------------------------------
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
-            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.13
-            #  Changes    : 3296 bytes in 18 edits
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36
+            #  Changes    : 3495 bytes in 24 edits
             #  Council Wars opens every data file through one helper that prefixes the name with the
             #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
             #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
@@ -7565,15 +7565,35 @@ Council Wars.  Without a TRACK02 file the game simply stays silent, as it does t
             #      string in the data section): exp/animozi.dat is the stock list plus the pack's three new
             #      units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
             #      the original exe reads stay untouched.
+            #  The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+            #  doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+            #  the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+            #  the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+            #  holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+            #  Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+            #  SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+            #  itself uses.  Two buttons are added for it:
+            #    * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+            #      6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+            #      them to 19 and 20 and gives the new buttons the plates 21 and 22
+            #    * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+            #      sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+            #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+            #      and their four absolute slot addresses add four more entries to the .reloc insert
+            #    * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+            #      is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+            #      the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+            #      two string operands the call carried become type 0 relocation padding.
             #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
-            #  exp/sprites/tranozi.spr and the rewritten main-menu script (exp/intrf_hd/bintroe) from the
-            #  repository.  Because the .reloc insert shifts every later relocation entry, this patch is always
-            #  applied last.
+            #  exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+            #  (exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+            #  relocation entry, this patch is always applied last.
             @{
-                Id = 'ozi'; Name = 'OZI MISSIONS menu mode (Council Wars only)'; Date = '10 Sep 2026'
+                Id = 'ozi'; Name = 'DARK COLONY and OZI MISSIONS menu modes (Council Wars only)'; Date = '10 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = '640x480'
-                Tool = 'tools/patch_ozi_menu.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.13'
+                Tool = 'tools/patch_ozi_menu.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36'
                 Description = @'
 Council Wars opens every data file through one helper that prefixes the name with the
 8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
@@ -7597,13 +7617,581 @@ the main menu:
     string in the data section): exp/animozi.dat is the stock list plus the pack's three new
     units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
     the original exe reads stay untouched.
+The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+itself uses.  Two buttons are added for it:
+  * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+    6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+    them to 19 and 20 and gives the new buttons the plates 21 and 22
+  * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+    sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+    the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+    and their four absolute slot addresses add four more entries to the .reloc insert
+  * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+    is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+    the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+    two string operands the call carried become type 0 relocation padding.
 REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
-exp/sprites/tranozi.spr and the rewritten main-menu script (exp/intrf_hd/bintroe) from the
-repository.  Because the .reloc insert shifts every later relocation entry, this patch is always
-applied last.
+exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+(exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+relocation entry, this patch is always applied last.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
+                # data files this fix needs next to the exe (386; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'ozi_ns\alta.gif'
+                    'ozi_ns\alta.rgb'
+                    'ozi_ns\alta.rmp'
+                    'ozi_ns\area52.gif'
+                    'ozi_ns\area52.rgb'
+                    'ozi_ns\area52.rmp'
+                    'ozi_ns\earth.gif'
+                    'ozi_ns\gamestat\BOOMSTAT.TXT'
+                    'ozi_ns\gamestat\gamestat.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'ozi_ns\gamestat\hxscene.txt'
+                    'ozi_ns\gamestat\MBULLET.TXT'
+                    'ozi_ns\gamestat\UNITID.TXT'
+                    'ozi_ns\gamestat\WEAPSTAT.TXT'
+                    'ozi_ns\gatlan.GIF'
+                    'ozi_ns\gatlan.NCY'
+                    'ozi_ns\gatlan.RGB'
+                    'ozi_ns\gatlan.RMP'
+                    'ozi_ns\gjungle.gif'
+                    'ozi_ns\gjungle.rgb'
+                    'ozi_ns\gJUNGLE.RMP'
+                    'ozi_ns\intrf_hd\bintroe'
+                    'ozi_ns\intrf_hd\gxscene.txt'
+                    'ozi_ns\intrf_hd\hxscene.txt'
+                    'ozi_ns\intrf_hd\introe'
+                    'ozi_ns\intrf_hd\shumane'
+                    'ozi_ns\intrface\astory.txt'
+                    'ozi_ns\intrface\credits.txt'
+                    'ozi_ns\intrface\hstory.txt'
+                    'ozi_ns\jubjub.gif'
+                    'ozi_ns\jubjub.rgb'
+                    'ozi_ns\jubjub.rmp'
+                    'ozi_ns\mission\g1.wav'
+                    'ozi_ns\mission\g10.wav'
+                    'ozi_ns\mission\g11.wav'
+                    'ozi_ns\mission\g2.wav'
+                    'ozi_ns\mission\g3.wav'
+                    'ozi_ns\mission\g4.wav'
+                    'ozi_ns\mission\g5.wav'
+                    'ozi_ns\mission\g6.wav'
+                    'ozi_ns\mission\g7.wav'
+                    'ozi_ns\mission\g8.wav'
+                    'ozi_ns\mission\g9.wav'
+                    'ozi_ns\mission\h1.wav'
+                    'ozi_ns\mission\h10.wav'
+                    'ozi_ns\mission\h11.wav'
+                    'ozi_ns\mission\h2.wav'
+                    'ozi_ns\mission\h3.wav'
+                    'ozi_ns\mission\h4.wav'
+                    'ozi_ns\mission\h5.wav'
+                    'ozi_ns\mission\h6.wav'
+                    'ozi_ns\mission\h7.wav'
+                    'ozi_ns\mission\h8.wav'
+                    'ozi_ns\mission\h80.wav'
+                    'ozi_ns\mission\h9.wav'
+                    'ozi_ns\scenario\all.jus'
+                    'ozi_ns\scenario\alta.bts'
+                    'ozi_ns\scenario\area52.bts'
+                    'ozi_ns\scenario\atlantis.bts'
+                    'ozi_ns\scenario\council\scene.txt'
+                    'ozi_ns\scenario\council\tarr01.001'
+                    'ozi_ns\scenario\council\tarr01.002'
+                    'ozi_ns\scenario\council\tarr01.003'
+                    'ozi_ns\scenario\council\tarr01.004'
+                    'ozi_ns\scenario\council\tarr01.map'
+                    'ozi_ns\scenario\council\tarr01.msg'
+                    'ozi_ns\scenario\council\tarr01.mtg'
+                    'ozi_ns\scenario\council\tarr01.ovh'
+                    'ozi_ns\scenario\council\tarr01.pop'
+                    'ozi_ns\scenario\council\tarr01.pth'
+                    'ozi_ns\scenario\council\tarr01.scn'
+                    'ozi_ns\scenario\council\tarr01.tro'
+                    'ozi_ns\scenario\council\tarr01.txt'
+                    'ozi_ns\scenario\council\tarr02.001'
+                    'ozi_ns\scenario\council\tarr02.002'
+                    'ozi_ns\scenario\council\tarr02.map'
+                    'ozi_ns\scenario\council\tarr02.msg'
+                    'ozi_ns\scenario\council\tarr02.mtg'
+                    'ozi_ns\scenario\council\tarr02.ovh'
+                    'ozi_ns\scenario\council\tarr02.pop'
+                    'ozi_ns\scenario\council\tarr02.pth'
+                    'ozi_ns\scenario\council\tarr02.scn'
+                    'ozi_ns\scenario\council\tarr02.tro'
+                    'ozi_ns\scenario\council\tarr02.txt'
+                    'ozi_ns\scenario\council\tarr03.001'
+                    'ozi_ns\scenario\council\tarr03.002'
+                    'ozi_ns\scenario\council\tarr03.map'
+                    'ozi_ns\scenario\council\tarr03.msg'
+                    'ozi_ns\scenario\council\tarr03.mtg'
+                    'ozi_ns\scenario\council\tarr03.ovh'
+                    'ozi_ns\scenario\council\tarr03.pop'
+                    'ozi_ns\scenario\council\tarr03.pth'
+                    'ozi_ns\scenario\council\tarr03.scn'
+                    'ozi_ns\scenario\council\tarr03.tro'
+                    'ozi_ns\scenario\council\tarr03.txt'
+                    'ozi_ns\scenario\council\tarr04.001'
+                    'ozi_ns\scenario\council\tarr04.002'
+                    'ozi_ns\scenario\council\tarr04.map'
+                    'ozi_ns\scenario\council\tarr04.msg'
+                    'ozi_ns\scenario\council\tarr04.mtg'
+                    'ozi_ns\scenario\council\tarr04.ovh'
+                    'ozi_ns\scenario\council\tarr04.pop'
+                    'ozi_ns\scenario\council\tarr04.pth'
+                    'ozi_ns\scenario\council\tarr04.scn'
+                    'ozi_ns\scenario\council\tarr04.tro'
+                    'ozi_ns\scenario\council\tarr04.txt'
+                    'ozi_ns\scenario\council\tarr05.001'
+                    'ozi_ns\scenario\council\tarr05.002'
+                    'ozi_ns\scenario\council\tarr05.map'
+                    'ozi_ns\scenario\council\tarr05.msg'
+                    'ozi_ns\scenario\council\tarr05.mtg'
+                    'ozi_ns\scenario\council\tarr05.ovh'
+                    'ozi_ns\scenario\council\tarr05.pop'
+                    'ozi_ns\scenario\council\tarr05.pth'
+                    'ozi_ns\scenario\council\tarr05.scn'
+                    'ozi_ns\scenario\council\tarr05.tro'
+                    'ozi_ns\scenario\council\tarr05.txt'
+                    'ozi_ns\scenario\council\tarr06.001'
+                    'ozi_ns\scenario\council\tarr06.002'
+                    'ozi_ns\scenario\council\tarr06.003'
+                    'ozi_ns\scenario\council\tarr06.map'
+                    'ozi_ns\scenario\council\tarr06.msg'
+                    'ozi_ns\scenario\council\tarr06.mtg'
+                    'ozi_ns\scenario\council\tarr06.ovh'
+                    'ozi_ns\scenario\council\tarr06.pop'
+                    'ozi_ns\scenario\council\tarr06.pth'
+                    'ozi_ns\scenario\council\tarr06.scn'
+                    'ozi_ns\scenario\council\tarr06.tro'
+                    'ozi_ns\scenario\council\tarr06.txt'
+                    'ozi_ns\scenario\council\tarr07.001'
+                    'ozi_ns\scenario\council\tarr07.002'
+                    'ozi_ns\scenario\council\tarr07.003'
+                    'ozi_ns\scenario\council\tarr07.004'
+                    'ozi_ns\scenario\council\tarr07.map'
+                    'ozi_ns\scenario\council\tarr07.msg'
+                    'ozi_ns\scenario\council\tarr07.mtg'
+                    'ozi_ns\scenario\council\tarr07.ovh'
+                    'ozi_ns\scenario\council\tarr07.pop'
+                    'ozi_ns\scenario\council\tarr07.pth'
+                    'ozi_ns\scenario\council\tarr07.scn'
+                    'ozi_ns\scenario\council\tarr07.tro'
+                    'ozi_ns\scenario\council\tarr07.txt'
+                    'ozi_ns\scenario\council\tarr08.001'
+                    'ozi_ns\scenario\council\tarr08.002'
+                    'ozi_ns\scenario\council\tarr08.003'
+                    'ozi_ns\scenario\council\tarr08.004'
+                    'ozi_ns\scenario\council\tarr08.map'
+                    'ozi_ns\scenario\council\tarr08.msg'
+                    'ozi_ns\scenario\council\tarr08.mtg'
+                    'ozi_ns\scenario\council\tarr08.ovh'
+                    'ozi_ns\scenario\council\tarr08.pop'
+                    'ozi_ns\scenario\council\tarr08.pth'
+                    'ozi_ns\scenario\council\tarr08.scn'
+                    'ozi_ns\scenario\council\tarr08.tro'
+                    'ozi_ns\scenario\council\tarr08.txt'
+                    'ozi_ns\scenario\council\tarr09.001'
+                    'ozi_ns\scenario\council\tarr09.002'
+                    'ozi_ns\scenario\council\tarr09.003'
+                    'ozi_ns\scenario\council\tarr09.map'
+                    'ozi_ns\scenario\council\tarr09.msg'
+                    'ozi_ns\scenario\council\tarr09.mtg'
+                    'ozi_ns\scenario\council\tarr09.ovh'
+                    'ozi_ns\scenario\council\tarr09.pop'
+                    'ozi_ns\scenario\council\tarr09.pth'
+                    'ozi_ns\scenario\council\tarr09.scn'
+                    'ozi_ns\scenario\council\tarr09.tro'
+                    'ozi_ns\scenario\council\tarr09.txt'
+                    'ozi_ns\scenario\council\tarr10.001'
+                    'ozi_ns\scenario\council\tarr10.002'
+                    'ozi_ns\scenario\council\tarr10.003'
+                    'ozi_ns\scenario\council\tarr10.004'
+                    'ozi_ns\scenario\council\tarr10.map'
+                    'ozi_ns\scenario\council\tarr10.MSG'
+                    'ozi_ns\scenario\council\tarr10.mtg'
+                    'ozi_ns\scenario\council\tarr10.ovh'
+                    'ozi_ns\scenario\council\tarr10.pop'
+                    'ozi_ns\scenario\council\tarr10.pth'
+                    'ozi_ns\scenario\council\tarr10.scn'
+                    'ozi_ns\scenario\council\tarr10.tro'
+                    'ozi_ns\scenario\council\tarr10.TXT'
+                    'ozi_ns\scenario\council\tarr11.001'
+                    'ozi_ns\scenario\council\tarr11.002'
+                    'ozi_ns\scenario\council\tarr11.map'
+                    'ozi_ns\scenario\council\tarr11.msg'
+                    'ozi_ns\scenario\council\tarr11.mtg'
+                    'ozi_ns\scenario\council\tarr11.ovh'
+                    'ozi_ns\scenario\council\tarr11.pop'
+                    'ozi_ns\scenario\council\tarr11.pth'
+                    'ozi_ns\scenario\council\tarr11.scn'
+                    'ozi_ns\scenario\council\tarr11.tro'
+                    'ozi_ns\scenario\council\tarr11.txt'
+                    'ozi_ns\scenario\DESERT.BTS'
+                    'ozi_ns\scenario\earth.bts'
+                    'ozi_ns\scenario\gatlan.bts'
+                    'ozi_ns\scenario\GJUNGLE.BTS'
+                    'ozi_ns\scenario\globo\globo01.001'
+                    'ozi_ns\scenario\globo\globo01.002'
+                    'ozi_ns\scenario\globo\globo01.003'
+                    'ozi_ns\scenario\globo\globo01.map'
+                    'ozi_ns\scenario\globo\globo01.msg'
+                    'ozi_ns\scenario\globo\globo01.mtg'
+                    'ozi_ns\scenario\globo\globo01.ovh'
+                    'ozi_ns\scenario\globo\globo01.pop'
+                    'ozi_ns\scenario\globo\globo01.pth'
+                    'ozi_ns\scenario\globo\globo01.scn'
+                    'ozi_ns\scenario\globo\globo01.tro'
+                    'ozi_ns\scenario\globo\globo01.txt'
+                    'ozi_ns\scenario\globo\globo02.001'
+                    'ozi_ns\scenario\globo\globo02.002'
+                    'ozi_ns\scenario\globo\globo02.003'
+                    'ozi_ns\scenario\globo\globo02.map'
+                    'ozi_ns\scenario\globo\globo02.msg'
+                    'ozi_ns\scenario\globo\globo02.mtg'
+                    'ozi_ns\scenario\globo\globo02.ovh'
+                    'ozi_ns\scenario\globo\globo02.pop'
+                    'ozi_ns\scenario\globo\globo02.pth'
+                    'ozi_ns\scenario\globo\globo02.scn'
+                    'ozi_ns\scenario\globo\globo02.tro'
+                    'ozi_ns\scenario\globo\globo02.txt'
+                    'ozi_ns\scenario\globo\globo03.001'
+                    'ozi_ns\scenario\globo\globo03.002'
+                    'ozi_ns\scenario\globo\globo03.003'
+                    'ozi_ns\scenario\globo\globo03.map'
+                    'ozi_ns\scenario\globo\globo03.msg'
+                    'ozi_ns\scenario\globo\globo03.mtg'
+                    'ozi_ns\scenario\globo\globo03.ovh'
+                    'ozi_ns\scenario\globo\globo03.pop'
+                    'ozi_ns\scenario\globo\globo03.pth'
+                    'ozi_ns\scenario\globo\globo03.scn'
+                    'ozi_ns\scenario\globo\globo03.tro'
+                    'ozi_ns\scenario\globo\globo03.txt'
+                    'ozi_ns\scenario\globo\globo04.001'
+                    'ozi_ns\scenario\globo\globo04.002'
+                    'ozi_ns\scenario\globo\globo04.003'
+                    'ozi_ns\scenario\globo\globo04.map'
+                    'ozi_ns\scenario\globo\globo04.msg'
+                    'ozi_ns\scenario\globo\globo04.mtg'
+                    'ozi_ns\scenario\globo\globo04.ovh'
+                    'ozi_ns\scenario\globo\globo04.pop'
+                    'ozi_ns\scenario\globo\globo04.pth'
+                    'ozi_ns\scenario\globo\globo04.scn'
+                    'ozi_ns\scenario\globo\globo04.tro'
+                    'ozi_ns\scenario\globo\globo04.txt'
+                    'ozi_ns\scenario\globo\globo05.001'
+                    'ozi_ns\scenario\globo\globo05.002'
+                    'ozi_ns\scenario\globo\globo05.map'
+                    'ozi_ns\scenario\globo\globo05.msg'
+                    'ozi_ns\scenario\globo\globo05.mtg'
+                    'ozi_ns\scenario\globo\globo05.ovh'
+                    'ozi_ns\scenario\globo\globo05.pop'
+                    'ozi_ns\scenario\globo\globo05.pth'
+                    'ozi_ns\scenario\globo\globo05.scn'
+                    'ozi_ns\scenario\globo\globo05.tro'
+                    'ozi_ns\scenario\globo\globo05.txt'
+                    'ozi_ns\scenario\globo\globo06.001'
+                    'ozi_ns\scenario\globo\globo06.002'
+                    'ozi_ns\scenario\globo\globo06.003'
+                    'ozi_ns\scenario\globo\globo06.map'
+                    'ozi_ns\scenario\globo\globo06.msg'
+                    'ozi_ns\scenario\globo\globo06.mtg'
+                    'ozi_ns\scenario\globo\globo06.ovh'
+                    'ozi_ns\scenario\globo\globo06.pop'
+                    'ozi_ns\scenario\globo\globo06.pth'
+                    'ozi_ns\scenario\globo\globo06.scn'
+                    'ozi_ns\scenario\globo\globo06.tro'
+                    'ozi_ns\scenario\globo\globo06.txt'
+                    'ozi_ns\scenario\globo\globo07.001'
+                    'ozi_ns\scenario\globo\globo07.002'
+                    'ozi_ns\scenario\globo\globo07.003'
+                    'ozi_ns\scenario\globo\globo07.004'
+                    'ozi_ns\scenario\globo\globo07.map'
+                    'ozi_ns\scenario\globo\globo07.msg'
+                    'ozi_ns\scenario\globo\globo07.mtg'
+                    'ozi_ns\scenario\globo\globo07.ovh'
+                    'ozi_ns\scenario\globo\globo07.pop'
+                    'ozi_ns\scenario\globo\globo07.pth'
+                    'ozi_ns\scenario\globo\globo07.scn'
+                    'ozi_ns\scenario\globo\globo07.tro'
+                    'ozi_ns\scenario\globo\globo07.txt'
+                    'ozi_ns\scenario\globo\globo08.001'
+                    'ozi_ns\scenario\globo\globo08.002'
+                    'ozi_ns\scenario\globo\globo08.003'
+                    'ozi_ns\scenario\globo\globo08.map'
+                    'ozi_ns\scenario\globo\globo08.msg'
+                    'ozi_ns\scenario\globo\globo08.mtg'
+                    'ozi_ns\scenario\globo\globo08.ovh'
+                    'ozi_ns\scenario\globo\globo08.pop'
+                    'ozi_ns\scenario\globo\globo08.pth'
+                    'ozi_ns\scenario\globo\globo08.scn'
+                    'ozi_ns\scenario\globo\globo08.tro'
+                    'ozi_ns\scenario\globo\globo08.txt'
+                    'ozi_ns\scenario\globo\globo09.001'
+                    'ozi_ns\scenario\globo\globo09.002'
+                    'ozi_ns\scenario\globo\globo09.003'
+                    'ozi_ns\scenario\globo\globo09.map'
+                    'ozi_ns\scenario\globo\globo09.msg'
+                    'ozi_ns\scenario\globo\globo09.mtg'
+                    'ozi_ns\scenario\globo\globo09.ovh'
+                    'ozi_ns\scenario\globo\globo09.pop'
+                    'ozi_ns\scenario\globo\globo09.pth'
+                    'ozi_ns\scenario\globo\globo09.scn'
+                    'ozi_ns\scenario\globo\globo09.tro'
+                    'ozi_ns\scenario\globo\globo09.txt'
+                    'ozi_ns\scenario\globo\globo10.001'
+                    'ozi_ns\scenario\globo\globo10.002'
+                    'ozi_ns\scenario\globo\globo10.003'
+                    'ozi_ns\scenario\globo\globo10.004'
+                    'ozi_ns\scenario\globo\globo10.map'
+                    'ozi_ns\scenario\globo\globo10.msg'
+                    'ozi_ns\scenario\globo\globo10.mtg'
+                    'ozi_ns\scenario\globo\globo10.ovh'
+                    'ozi_ns\scenario\globo\globo10.pop'
+                    'ozi_ns\scenario\globo\globo10.pth'
+                    'ozi_ns\scenario\globo\globo10.scn'
+                    'ozi_ns\scenario\globo\globo10.tro'
+                    'ozi_ns\scenario\globo\globo10.txt'
+                    'ozi_ns\scenario\globo\globo11.001'
+                    'ozi_ns\scenario\globo\globo11.002'
+                    'ozi_ns\scenario\globo\globo11.003'
+                    'ozi_ns\scenario\globo\globo11.map'
+                    'ozi_ns\scenario\globo\globo11.msg'
+                    'ozi_ns\scenario\globo\globo11.mtg'
+                    'ozi_ns\scenario\globo\globo11.ovh'
+                    'ozi_ns\scenario\globo\globo11.pop'
+                    'ozi_ns\scenario\globo\globo11.pth'
+                    'ozi_ns\scenario\globo\globo11.scn'
+                    'ozi_ns\scenario\globo\globo11.tro'
+                    'ozi_ns\scenario\globo\globo11.txt'
+                    'ozi_ns\scenario\globo\scene.txt'
+                    'ozi_ns\scenario\HTRAIN.BTS'
+                    'ozi_ns\scenario\jubjub.bts'
+                    'ozi_ns\scenario\JUNGLE.BTS'
+                    'ozi_ns\scenario\special.bts'
+                    'ozi_ns\scenario\trainh.bts'
+                    'ozi_ns\scenario\vent.jus'
+                    'ozi_ns\sound\ALIST.DAT'
+                    'ozi_ns\sound\alta.amb'
+                    'ozi_ns\sound\area52.amb'
+                    'ozi_ns\sound\ATLANTIS.AMB'
+                    'ozi_ns\sound\ATLANTIS.DAT'
+                    'ozi_ns\sound\ATRAIN.DAT'
+                    'ozi_ns\sound\birds.wav'
+                    'ozi_ns\sound\cobra.wav'
+                    'ozi_ns\sound\cow.wav'
+                    'ozi_ns\sound\cricket.wav'
+                    'ozi_ns\sound\DALG1DEA.wav'
+                    'ozi_ns\sound\DALG1SEL.wav'
+                    'ozi_ns\sound\DALG2ACK.wav'
+                    'ozi_ns\sound\DALG2SEL.wav'
+                    'ozi_ns\sound\dog.wav'
+                    'ozi_ns\sound\dog2.wav'
+                    'ozi_ns\sound\earth.amb'
+                    'ozi_ns\sound\frog.wav'
+                    'ozi_ns\sound\frogs.wav'
+                    'ozi_ns\sound\gatlan.AMB'
+                    'ozi_ns\sound\gease.wav'
+                    'ozi_ns\sound\GJUNGLE.AMB'
+                    'ozi_ns\sound\GJUNGLE.DAT'
+                    'ozi_ns\sound\jubjub.amb'
+                    'ozi_ns\sound\KOMANDWE.wav'
+                    'ozi_ns\sound\KOMANWEA.wav'
+                    'ozi_ns\sound\mosq.wav'
+                    'ozi_ns\sound\r2bird.wav'
+                    'ozi_ns\sound\SCENESND.DAT'
+                    'ozi_ns\sound\seagull.wav'
+                    'ozi_ns\sound\slist.dat'
+                    'ozi_ns\sound\turkey.wav'
+                    'ozi_ns\sound\water.wav'
+                    'ozi_ns\sound\wolf.wav'
+                    'ozi_ns\special.gif'
+                    'ozi_ns\special.rgb'
+                    'ozi_ns\special.rmp'
+                    'ozisave\ozisave.txt'
+                    'exp\animozi.dat'
+                    'exp\animate\dalg.fin'
+                    'exp\animate\reae.fin'
+                    'exp\animate\spyo.fin'
+                    'exp\animate\tranozi.fin'
+                    'exp\sprites\dalg.spr'
+                    'exp\sprites\reae.spr'
+                    'exp\sprites\spyo.spr'
+                    'exp\sprites\tranozi.spr'
+                    'ozi_ns\gamestat\hxscene.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'dc\intrf_hd\bintroe'
+                    'exp\intrface\bintroe'
+                )
+                Edits = @(
+                    # PE optional header: base-relocation directory size 0x93CC -> 0x93E4 (+16)
+                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'E4 93 00 00' }
+                    # credits TTY create -> 45 NOPs (the seven-row menu needs the rows)
+                    @{ Offset = 0x4280; Old = '6A 00 6A 00 6A 00 6A 05 6A 02 68 84 21 48 00 68 6C 24 48 00 B9 18 01 00 00 BB E6 00 00 00 6A 64 BA B2 00 00 00 8B 45 FC E8 FB 35 02 00'; New = '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # menu id filter: accept the button ids 6 and 7 (cmp edx,5 -> 7)
+                    @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
+                    # credits TTY destroy count 1 -> 0 (nothing was created)
+                    @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
+                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
+                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 58 A2 07 00' }
+                    # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
+                    @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
+                    # LOAD GAME call -> tramp_cw_load
+                    @{ Offset = 0x44BF; Old = 'E8 E0 E9 FF FF'; New = 'E8 2C A2 07 00' }
+                    # end of the id chain: jne 0040513D -> the Dark Colony handlers
+                    @{ Offset = 0x44DB; Old = '75 60'; New = '75 25' }
+                    # OZI MISSIONS + DARK COLONY handlers (was PLAY INTRO)
+                    @{ Offset = 0x44DD; Old = 'BE F2 46 4A 00 8D BD F0 FE FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD F0 FE FF FF 8D 95 F0 FE FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8B 45 FC E8 EB BE FF FF'; New = 'C7 80 F4 14 00 00 01 00 00 00 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 45 A1 07 00 E8 08 CB FF FF EB 3B 83 FF 06 75 16 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 75 A2 07 00 EB 20 83 FF 07 75 14 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 6A A2 07 00 90 90 90 90 90 90 90' }
+                    # stub_pack (pack strings into the 4 slots)
+                    @{ Offset = 0x7E640; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF C8 7D 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF 44 23 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB BF 5C 5E 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB 5F 58 C3' }
+                    # stub_cw_set (Council Wars strings)
+                    @{ Offset = 0x7E690; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF 44 23 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB BF 5C 5E 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB 5F 58 C3 00 00 00 00' }
+                    # tramp_cw_campaign (stub_cw_set; jmp 401C08)
+                    @{ Offset = 0x7E6E0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 1E 29 F8 FF' }
+                    # tramp_cw_load (stub_cw_set; jmp 403AA4)
+                    @{ Offset = 0x7E6F0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 AA 47 F8 FF' }
+                    # tramp_pack_load (stub_pack; jmp 403AA4)
+                    @{ Offset = 0x7E700; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 3B FF FF FF E9 9A 47 F8 FF' }
+                    # stub_dc_set (Dark Colony strings)
+                    @{ Offset = 0x7E740; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF 44 23 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB BF 5C 5E 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB 5F 58 C3' }
+                    # tramp_dc_campaign (stub_dc_set; jmp 401C08)
+                    @{ Offset = 0x7E790; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 6E 28 F8 FF' }
+                    # tramp_dc_load (stub_dc_set; jmp 403AA4)
+                    @{ Offset = 0x7E7A0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 FA 46 F8 FF' }
+                    # main menu script "intrface/bintro" -> "intrface/bintoz" (640x480: exp/intrface/bintoze = stock menu + OZI rows, written by the patcher)
+                    @{ Offset = 0x7FE98; Old = '69 6E 74 72 66 61 63 65 2F 62 69 6E 74 72 6F 00'; New = '69 6E 74 72 66 61 63 65 2F 62 69 6E 74 6F 7A 00' }
+                    # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
+                    @{ Offset = 0x7FEB8; Old = '61 6E 69 6D 2E 64 61 74 00 00 00 00'; New = '61 6E 69 6D 6F 7A 69 2E 64 61 74 00' }
+                    # .reloc table, page-0x4000 block: entries 3E8B, 3E90 -> 0000 (the two string pushes of the removed credits TTY create at VA 0x404E8B / 0x404E90 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BCE; Old = '8B 3E 90 3E'; New = '00 00 00 00' }
+                    # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BE0; Old = 'DE 30 03 31'; New = '00 00 00 00' }
+                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xD8
+                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'D8 00 00 00' }
+                    # .reloc table: insert 12 HIGHLOW entries (3243, 3254, 3265, 3276, 3293, 32A4, 32B5, 32C6, 3343, 3354, 3365, 3376) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DE8 move up by 24, the 24 zero slack bytes 0xA0DE8..0xA0E00 at the end of the section are dropped
+                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 93 32 A4 32 B5 32 C6 32 43 33 54 33 65 33 76 33'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D F8 3D FC 3D 00 3E 04 3E'; SectionEnd = 0xA0E00 }
+                )
+            }
+
+            # ---- ozi @ 1024x768: DARK COLONY and OZI MISSIONS menu modes (Council Wars only) ---------------------------------------------------------
+            #  Added      : 10 Sep 2026
+            #  Made with  : tools/patch_ozi_menu.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36
+            #  Changes    : 3493 bytes in 23 edits
+            #  Council Wars opens every data file through one helper that prefixes the name with the
+            #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
+            #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
+            #  those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
+            #  and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
+            #  the main menu:
+            #    * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
+            #      stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
+            #      the rest is NOP padding
+            #    * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
+            #      Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
+            #    * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
+            #      section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
+            #    * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
+            #      entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
+            #      size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
+            #      slack at the end of the .reloc section are dropped so the file size stays the same.  The
+            #      two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
+            #    * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+            #      string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+            #      units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+            #      the original exe reads stay untouched.
+            #  The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+            #  doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+            #  the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+            #  the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+            #  holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+            #  Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+            #  SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+            #  itself uses.  Two buttons are added for it:
+            #    * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+            #      6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+            #      them to 19 and 20 and gives the new buttons the plates 21 and 22
+            #    * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+            #      sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+            #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+            #      and their four absolute slot addresses add four more entries to the .reloc insert
+            #    * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+            #      is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+            #      the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+            #      two string operands the call carried become type 0 relocation padding.
+            #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+            #  exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+            #  (exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+            #  relocation entry, this patch is always applied last.
+            @{
+                Id = 'ozi'; Name = 'DARK COLONY and OZI MISSIONS menu modes (Council Wars only)'; Date = '10 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = '1024x768'
+                Tool = 'tools/patch_ozi_menu.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36'
+                Description = @'
+Council Wars opens every data file through one helper that prefixes the name with the
+8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
+folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
+those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
+and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
+the main menu:
+  * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
+    stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
+    the rest is NOP padding
+  * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
+    Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
+  * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
+    section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
+  * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
+    entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
+    size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
+    slack at the end of the .reloc section are dropped so the file size stays the same.  The
+    two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
+  * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+    string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+    units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+    the original exe reads stay untouched.
+The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+itself uses.  Two buttons are added for it:
+  * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+    6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+    them to 19 and 20 and gives the new buttons the plates 21 and 22
+  * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+    sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+    the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+    and their four absolute slot addresses add four more entries to the .reloc insert
+  * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+    is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+    the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+    two string operands the call carried become type 0 relocation padding.
+REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+(exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+relocation entry, this patch is always applied last.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('hdpaths')
                 # data files this fix needs next to the exe (385; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
@@ -7991,15 +8579,17 @@ applied last.
                     'exp\sprites\tranozi.spr'
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
-                    'exp\intrface\bintroe'
+                    'dc\intrf_hd\bintroe'
                 )
                 Edits = @(
-                    # PE optional header: base-relocation directory size 0x93CC -> 0x93DC (+16)
-                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'DC 93 00 00' }
-                    # credits box y 230 -> 219 (640x480: clear of the crescent, above the five-row OZI menu)
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB DB 00 00 00' }
-                    # credits box height 100 -> 52 (640x480: room for the five-row OZI menu)
-                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 34' }
+                    # PE optional header: base-relocation directory size 0x93CC -> 0x93E4 (+16)
+                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'E4 93 00 00' }
+                    # credits TTY create -> 45 NOPs (the seven-row menu needs the rows)
+                    @{ Offset = 0x4280; Old = '6A 00 6A 00 6A 00 6A 05 6A 02 68 84 21 48 00 68 6C 24 48 00 B9 18 01 00 00 BB 91 01 00 00 6A 44 BA 74 01 00 00 8B 45 FC E8 FB 35 02 00'; New = '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # menu id filter: accept the button ids 6 and 7 (cmp edx,5 -> 7)
+                    @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
+                    # credits TTY destroy count 1 -> 0 (nothing was created)
+                    @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
                     # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
                     # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
@@ -8008,8 +8598,10 @@ applied last.
                     @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
                     # LOAD GAME call -> tramp_cw_load
                     @{ Offset = 0x44BF; Old = 'E8 E0 E9 FF FF'; New = 'E8 2C A2 07 00' }
-                    # OZI MISSIONS handler (was PLAY INTRO)
-                    @{ Offset = 0x44DD; Old = 'BE F2 46 4A 00 8D BD F0 FE FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD F0 FE FF FF 8D 95 F0 FE FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8B 45 FC E8 EB BE FF FF'; New = 'C7 80 F4 14 00 00 01 00 00 00 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 45 A1 07 00 E8 08 CB FF FF EB 3B 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # end of the id chain: jne 0040513D -> the Dark Colony handlers
+                    @{ Offset = 0x44DB; Old = '75 60'; New = '75 25' }
+                    # OZI MISSIONS + DARK COLONY handlers (was PLAY INTRO)
+                    @{ Offset = 0x44DD; Old = 'BE F2 46 4A 00 8D BD F0 FE FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD F0 FE FF FF 8D 95 F0 FE FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8B 45 FC E8 EB BE FF FF'; New = 'C7 80 F4 14 00 00 01 00 00 00 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 45 A1 07 00 E8 08 CB FF FF EB 3B 83 FF 06 75 16 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 75 A2 07 00 EB 20 83 FF 07 75 14 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 6A A2 07 00 90 90 90 90 90 90 90' }
                     # stub_pack (pack strings into the 4 slots)
                     @{ Offset = 0x7E640; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF C8 7D 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF 44 23 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB BF 5C 5E 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB 5F 58 C3' }
                     # stub_cw_set (Council Wars strings)
@@ -8020,24 +8612,30 @@ applied last.
                     @{ Offset = 0x7E6F0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 AA 47 F8 FF' }
                     # tramp_pack_load (stub_pack; jmp 403AA4)
                     @{ Offset = 0x7E700; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 3B FF FF FF E9 9A 47 F8 FF' }
-                    # main menu script "intrface/bintro" -> "intrface/bintoz" (640x480: exp/intrface/bintoze = stock menu + OZI rows, written by the patcher)
-                    @{ Offset = 0x7FE98; Old = '69 6E 74 72 66 61 63 65 2F 62 69 6E 74 72 6F 00'; New = '69 6E 74 72 66 61 63 65 2F 62 69 6E 74 6F 7A 00' }
+                    # stub_dc_set (Dark Colony strings)
+                    @{ Offset = 0x7E740; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF 44 23 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB BF 5C 5E 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB 5F 58 C3' }
+                    # tramp_dc_campaign (stub_dc_set; jmp 401C08)
+                    @{ Offset = 0x7E790; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 6E 28 F8 FF' }
+                    # tramp_dc_load (stub_dc_set; jmp 403AA4)
+                    @{ Offset = 0x7E7A0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 FA 46 F8 FF' }
                     # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
                     @{ Offset = 0x7FEB8; Old = '61 6E 69 6D 2E 64 61 74 00 00 00 00'; New = '61 6E 69 6D 6F 7A 69 2E 64 61 74 00' }
-                    # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the absolute operands of the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
+                    # .reloc table, page-0x4000 block: entries 3E8B, 3E90 -> 0000 (the two string pushes of the removed credits TTY create at VA 0x404E8B / 0x404E90 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BCE; Old = '8B 3E 90 3E'; New = '00 00 00 00' }
+                    # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
                     @{ Offset = 0x97BE0; Old = 'DE 30 03 31'; New = '00 00 00 00' }
-                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xD0
-                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'D0 00 00 00' }
-                    # .reloc table: insert 8 HIGHLOW entries (3243, 3254, 3265, 3276, 3293, 32A4, 32B5, 32C6) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DF0 move up by 16, the 16 zero slack bytes 0xA0DF0..0xA0E00 at the end of the section are dropped
-                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 93 32 A4 32 B5 32 C6 32'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D'; SectionEnd = 0xA0E00 }
+                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xD8
+                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'D8 00 00 00' }
+                    # .reloc table: insert 12 HIGHLOW entries (3243, 3254, 3265, 3276, 3293, 32A4, 32B5, 32C6, 3343, 3354, 3365, 3376) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DE8 move up by 24, the 24 zero slack bytes 0xA0DE8..0xA0E00 at the end of the section are dropped
+                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 93 32 A4 32 B5 32 C6 32 43 33 54 33 65 33 76 33'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D F8 3D FC 3D 00 3E 04 3E'; SectionEnd = 0xA0E00 }
                 )
             }
 
-            # ---- ozi: OZI MISSIONS menu mode (Council Wars only) ---------------------------------------------------------
+            # ---- ozi @ 1280x1024: DARK COLONY and OZI MISSIONS menu modes (Council Wars only) ---------------------------------------------------------
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
-            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.13
-            #  Changes    : 3292 bytes in 15 edits
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36
+            #  Changes    : 3493 bytes in 23 edits
             #  Council Wars opens every data file through one helper that prefixes the name with the
             #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
             #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
@@ -8060,15 +8658,35 @@ applied last.
             #      string in the data section): exp/animozi.dat is the stock list plus the pack's three new
             #      units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
             #      the original exe reads stay untouched.
+            #  The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+            #  doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+            #  the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+            #  the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+            #  holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+            #  Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+            #  SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+            #  itself uses.  Two buttons are added for it:
+            #    * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+            #      6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+            #      them to 19 and 20 and gives the new buttons the plates 21 and 22
+            #    * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+            #      sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+            #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+            #      and their four absolute slot addresses add four more entries to the .reloc insert
+            #    * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+            #      is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+            #      the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+            #      two string operands the call carried become type 0 relocation padding.
             #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
-            #  exp/sprites/tranozi.spr and the rewritten main-menu script (exp/intrf_hd/bintroe) from the
-            #  repository.  Because the .reloc insert shifts every later relocation entry, this patch is always
-            #  applied last.
+            #  exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+            #  (exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+            #  relocation entry, this patch is always applied last.
             @{
-                Id = 'ozi'; Name = 'OZI MISSIONS menu mode (Council Wars only)'; Date = '10 Sep 2026'
+                Id = 'ozi'; Name = 'DARK COLONY and OZI MISSIONS menu modes (Council Wars only)'; Date = '10 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
-                Mode = 'hd'
-                Tool = 'tools/patch_ozi_menu.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.13'
+                Mode = '1280x1024'
+                Tool = 'tools/patch_ozi_menu.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36'
                 Description = @'
 Council Wars opens every data file through one helper that prefixes the name with the
 8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
@@ -8092,14 +8710,34 @@ the main menu:
     string in the data section): exp/animozi.dat is the stock list plus the pack's three new
     units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
     the original exe reads stay untouched.
+The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+itself uses.  Two buttons are added for it:
+  * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+    6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+    them to 19 and 20 and gives the new buttons the plates 21 and 22
+  * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+    sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+    the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+    and their four absolute slot addresses add four more entries to the .reloc insert
+  * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+    is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+    the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+    two string operands the call carried become type 0 relocation padding.
 REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
-exp/sprites/tranozi.spr and the rewritten main-menu script (exp/intrf_hd/bintroe) from the
-repository.  Because the .reloc insert shifts every later relocation entry, this patch is always
-applied last.
+exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+(exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+relocation entry, this patch is always applied last.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (384; listed from the repository when this
+                # data files this fix needs next to the exe (385; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'ozi_ns\alta.gif'
@@ -8486,10 +9124,17 @@ applied last.
                     'exp\sprites\tranozi.spr'
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
+                    'dc\intrf_hd\bintroe'
                 )
                 Edits = @(
-                    # PE optional header: base-relocation directory size 0x93CC -> 0x93DC (+16)
-                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'DC 93 00 00' }
+                    # PE optional header: base-relocation directory size 0x93CC -> 0x93E4 (+16)
+                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'E4 93 00 00' }
+                    # credits TTY create -> 45 NOPs (the seven-row menu needs the rows)
+                    @{ Offset = 0x4280; Old = '6A 00 6A 00 6A 00 6A 05 6A 02 68 84 21 48 00 68 6C 24 48 00 B9 18 01 00 00 BB 2E 02 00 00 6A 44 BA F4 01 00 00 8B 45 FC E8 FB 35 02 00'; New = '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # menu id filter: accept the button ids 6 and 7 (cmp edx,5 -> 7)
+                    @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
+                    # credits TTY destroy count 1 -> 0 (nothing was created)
+                    @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
                     # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
                     # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
@@ -8498,8 +9143,10 @@ applied last.
                     @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
                     # LOAD GAME call -> tramp_cw_load
                     @{ Offset = 0x44BF; Old = 'E8 E0 E9 FF FF'; New = 'E8 2C A2 07 00' }
-                    # OZI MISSIONS handler (was PLAY INTRO)
-                    @{ Offset = 0x44DD; Old = 'BE F2 46 4A 00 8D BD F0 FE FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD F0 FE FF FF 8D 95 F0 FE FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8B 45 FC E8 EB BE FF FF'; New = 'C7 80 F4 14 00 00 01 00 00 00 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 45 A1 07 00 E8 08 CB FF FF EB 3B 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # end of the id chain: jne 0040513D -> the Dark Colony handlers
+                    @{ Offset = 0x44DB; Old = '75 60'; New = '75 25' }
+                    # OZI MISSIONS + DARK COLONY handlers (was PLAY INTRO)
+                    @{ Offset = 0x44DD; Old = 'BE F2 46 4A 00 8D BD F0 FE FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD F0 FE FF FF 8D 95 F0 FE FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8B 45 FC E8 EB BE FF FF'; New = 'C7 80 F4 14 00 00 01 00 00 00 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 45 A1 07 00 E8 08 CB FF FF EB 3B 83 FF 06 75 16 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 75 A2 07 00 EB 20 83 FF 07 75 14 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 6A A2 07 00 90 90 90 90 90 90 90' }
                     # stub_pack (pack strings into the 4 slots)
                     @{ Offset = 0x7E640; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF C8 7D 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF 44 23 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB BF 5C 5E 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB 5F 58 C3' }
                     # stub_cw_set (Council Wars strings)
@@ -8510,14 +9157,1657 @@ applied last.
                     @{ Offset = 0x7E6F0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 AA 47 F8 FF' }
                     # tramp_pack_load (stub_pack; jmp 403AA4)
                     @{ Offset = 0x7E700; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 3B FF FF FF E9 9A 47 F8 FF' }
+                    # stub_dc_set (Dark Colony strings)
+                    @{ Offset = 0x7E740; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF 44 23 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB BF 5C 5E 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB 5F 58 C3' }
+                    # tramp_dc_campaign (stub_dc_set; jmp 401C08)
+                    @{ Offset = 0x7E790; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 6E 28 F8 FF' }
+                    # tramp_dc_load (stub_dc_set; jmp 403AA4)
+                    @{ Offset = 0x7E7A0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 FA 46 F8 FF' }
                     # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
                     @{ Offset = 0x7FEB8; Old = '61 6E 69 6D 2E 64 61 74 00 00 00 00'; New = '61 6E 69 6D 6F 7A 69 2E 64 61 74 00' }
-                    # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the absolute operands of the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
+                    # .reloc table, page-0x4000 block: entries 3E8B, 3E90 -> 0000 (the two string pushes of the removed credits TTY create at VA 0x404E8B / 0x404E90 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BCE; Old = '8B 3E 90 3E'; New = '00 00 00 00' }
+                    # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
                     @{ Offset = 0x97BE0; Old = 'DE 30 03 31'; New = '00 00 00 00' }
-                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xD0
-                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'D0 00 00 00' }
-                    # .reloc table: insert 8 HIGHLOW entries (3243, 3254, 3265, 3276, 3293, 32A4, 32B5, 32C6) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DF0 move up by 16, the 16 zero slack bytes 0xA0DF0..0xA0E00 at the end of the section are dropped
-                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 93 32 A4 32 B5 32 C6 32'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D'; SectionEnd = 0xA0E00 }
+                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xD8
+                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'D8 00 00 00' }
+                    # .reloc table: insert 12 HIGHLOW entries (3243, 3254, 3265, 3276, 3293, 32A4, 32B5, 32C6, 3343, 3354, 3365, 3376) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DE8 move up by 24, the 24 zero slack bytes 0xA0DE8..0xA0E00 at the end of the section are dropped
+                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 93 32 A4 32 B5 32 C6 32 43 33 54 33 65 33 76 33'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D F8 3D FC 3D 00 3E 04 3E'; SectionEnd = 0xA0E00 }
+                )
+            }
+
+            # ---- ozi @ 1280x720: DARK COLONY and OZI MISSIONS menu modes (Council Wars only) ---------------------------------------------------------
+            #  Added      : 10 Sep 2026
+            #  Made with  : tools/patch_ozi_menu.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36
+            #  Changes    : 3493 bytes in 23 edits
+            #  Council Wars opens every data file through one helper that prefixes the name with the
+            #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
+            #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
+            #  those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
+            #  and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
+            #  the main menu:
+            #    * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
+            #      stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
+            #      the rest is NOP padding
+            #    * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
+            #      Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
+            #    * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
+            #      section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
+            #    * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
+            #      entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
+            #      size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
+            #      slack at the end of the .reloc section are dropped so the file size stays the same.  The
+            #      two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
+            #    * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+            #      string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+            #      units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+            #      the original exe reads stay untouched.
+            #  The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+            #  doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+            #  the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+            #  the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+            #  holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+            #  Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+            #  SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+            #  itself uses.  Two buttons are added for it:
+            #    * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+            #      6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+            #      them to 19 and 20 and gives the new buttons the plates 21 and 22
+            #    * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+            #      sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+            #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+            #      and their four absolute slot addresses add four more entries to the .reloc insert
+            #    * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+            #      is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+            #      the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+            #      two string operands the call carried become type 0 relocation padding.
+            #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+            #  exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+            #  (exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+            #  relocation entry, this patch is always applied last.
+            @{
+                Id = 'ozi'; Name = 'DARK COLONY and OZI MISSIONS menu modes (Council Wars only)'; Date = '10 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = '1280x720'
+                Tool = 'tools/patch_ozi_menu.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36'
+                Description = @'
+Council Wars opens every data file through one helper that prefixes the name with the
+8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
+folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
+those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
+and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
+the main menu:
+  * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
+    stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
+    the rest is NOP padding
+  * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
+    Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
+  * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
+    section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
+  * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
+    entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
+    size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
+    slack at the end of the .reloc section are dropped so the file size stays the same.  The
+    two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
+  * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+    string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+    units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+    the original exe reads stay untouched.
+The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+itself uses.  Two buttons are added for it:
+  * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+    6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+    them to 19 and 20 and gives the new buttons the plates 21 and 22
+  * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+    sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+    the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+    and their four absolute slot addresses add four more entries to the .reloc insert
+  * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+    is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+    the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+    two string operands the call carried become type 0 relocation padding.
+REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+(exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+relocation entry, this patch is always applied last.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('hdpaths')
+                # data files this fix needs next to the exe (385; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'ozi_ns\alta.gif'
+                    'ozi_ns\alta.rgb'
+                    'ozi_ns\alta.rmp'
+                    'ozi_ns\area52.gif'
+                    'ozi_ns\area52.rgb'
+                    'ozi_ns\area52.rmp'
+                    'ozi_ns\earth.gif'
+                    'ozi_ns\gamestat\BOOMSTAT.TXT'
+                    'ozi_ns\gamestat\gamestat.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'ozi_ns\gamestat\hxscene.txt'
+                    'ozi_ns\gamestat\MBULLET.TXT'
+                    'ozi_ns\gamestat\UNITID.TXT'
+                    'ozi_ns\gamestat\WEAPSTAT.TXT'
+                    'ozi_ns\gatlan.GIF'
+                    'ozi_ns\gatlan.NCY'
+                    'ozi_ns\gatlan.RGB'
+                    'ozi_ns\gatlan.RMP'
+                    'ozi_ns\gjungle.gif'
+                    'ozi_ns\gjungle.rgb'
+                    'ozi_ns\gJUNGLE.RMP'
+                    'ozi_ns\intrf_hd\bintroe'
+                    'ozi_ns\intrf_hd\gxscene.txt'
+                    'ozi_ns\intrf_hd\hxscene.txt'
+                    'ozi_ns\intrf_hd\introe'
+                    'ozi_ns\intrf_hd\shumane'
+                    'ozi_ns\intrface\astory.txt'
+                    'ozi_ns\intrface\credits.txt'
+                    'ozi_ns\intrface\hstory.txt'
+                    'ozi_ns\jubjub.gif'
+                    'ozi_ns\jubjub.rgb'
+                    'ozi_ns\jubjub.rmp'
+                    'ozi_ns\mission\g1.wav'
+                    'ozi_ns\mission\g10.wav'
+                    'ozi_ns\mission\g11.wav'
+                    'ozi_ns\mission\g2.wav'
+                    'ozi_ns\mission\g3.wav'
+                    'ozi_ns\mission\g4.wav'
+                    'ozi_ns\mission\g5.wav'
+                    'ozi_ns\mission\g6.wav'
+                    'ozi_ns\mission\g7.wav'
+                    'ozi_ns\mission\g8.wav'
+                    'ozi_ns\mission\g9.wav'
+                    'ozi_ns\mission\h1.wav'
+                    'ozi_ns\mission\h10.wav'
+                    'ozi_ns\mission\h11.wav'
+                    'ozi_ns\mission\h2.wav'
+                    'ozi_ns\mission\h3.wav'
+                    'ozi_ns\mission\h4.wav'
+                    'ozi_ns\mission\h5.wav'
+                    'ozi_ns\mission\h6.wav'
+                    'ozi_ns\mission\h7.wav'
+                    'ozi_ns\mission\h8.wav'
+                    'ozi_ns\mission\h80.wav'
+                    'ozi_ns\mission\h9.wav'
+                    'ozi_ns\scenario\all.jus'
+                    'ozi_ns\scenario\alta.bts'
+                    'ozi_ns\scenario\area52.bts'
+                    'ozi_ns\scenario\atlantis.bts'
+                    'ozi_ns\scenario\council\scene.txt'
+                    'ozi_ns\scenario\council\tarr01.001'
+                    'ozi_ns\scenario\council\tarr01.002'
+                    'ozi_ns\scenario\council\tarr01.003'
+                    'ozi_ns\scenario\council\tarr01.004'
+                    'ozi_ns\scenario\council\tarr01.map'
+                    'ozi_ns\scenario\council\tarr01.msg'
+                    'ozi_ns\scenario\council\tarr01.mtg'
+                    'ozi_ns\scenario\council\tarr01.ovh'
+                    'ozi_ns\scenario\council\tarr01.pop'
+                    'ozi_ns\scenario\council\tarr01.pth'
+                    'ozi_ns\scenario\council\tarr01.scn'
+                    'ozi_ns\scenario\council\tarr01.tro'
+                    'ozi_ns\scenario\council\tarr01.txt'
+                    'ozi_ns\scenario\council\tarr02.001'
+                    'ozi_ns\scenario\council\tarr02.002'
+                    'ozi_ns\scenario\council\tarr02.map'
+                    'ozi_ns\scenario\council\tarr02.msg'
+                    'ozi_ns\scenario\council\tarr02.mtg'
+                    'ozi_ns\scenario\council\tarr02.ovh'
+                    'ozi_ns\scenario\council\tarr02.pop'
+                    'ozi_ns\scenario\council\tarr02.pth'
+                    'ozi_ns\scenario\council\tarr02.scn'
+                    'ozi_ns\scenario\council\tarr02.tro'
+                    'ozi_ns\scenario\council\tarr02.txt'
+                    'ozi_ns\scenario\council\tarr03.001'
+                    'ozi_ns\scenario\council\tarr03.002'
+                    'ozi_ns\scenario\council\tarr03.map'
+                    'ozi_ns\scenario\council\tarr03.msg'
+                    'ozi_ns\scenario\council\tarr03.mtg'
+                    'ozi_ns\scenario\council\tarr03.ovh'
+                    'ozi_ns\scenario\council\tarr03.pop'
+                    'ozi_ns\scenario\council\tarr03.pth'
+                    'ozi_ns\scenario\council\tarr03.scn'
+                    'ozi_ns\scenario\council\tarr03.tro'
+                    'ozi_ns\scenario\council\tarr03.txt'
+                    'ozi_ns\scenario\council\tarr04.001'
+                    'ozi_ns\scenario\council\tarr04.002'
+                    'ozi_ns\scenario\council\tarr04.map'
+                    'ozi_ns\scenario\council\tarr04.msg'
+                    'ozi_ns\scenario\council\tarr04.mtg'
+                    'ozi_ns\scenario\council\tarr04.ovh'
+                    'ozi_ns\scenario\council\tarr04.pop'
+                    'ozi_ns\scenario\council\tarr04.pth'
+                    'ozi_ns\scenario\council\tarr04.scn'
+                    'ozi_ns\scenario\council\tarr04.tro'
+                    'ozi_ns\scenario\council\tarr04.txt'
+                    'ozi_ns\scenario\council\tarr05.001'
+                    'ozi_ns\scenario\council\tarr05.002'
+                    'ozi_ns\scenario\council\tarr05.map'
+                    'ozi_ns\scenario\council\tarr05.msg'
+                    'ozi_ns\scenario\council\tarr05.mtg'
+                    'ozi_ns\scenario\council\tarr05.ovh'
+                    'ozi_ns\scenario\council\tarr05.pop'
+                    'ozi_ns\scenario\council\tarr05.pth'
+                    'ozi_ns\scenario\council\tarr05.scn'
+                    'ozi_ns\scenario\council\tarr05.tro'
+                    'ozi_ns\scenario\council\tarr05.txt'
+                    'ozi_ns\scenario\council\tarr06.001'
+                    'ozi_ns\scenario\council\tarr06.002'
+                    'ozi_ns\scenario\council\tarr06.003'
+                    'ozi_ns\scenario\council\tarr06.map'
+                    'ozi_ns\scenario\council\tarr06.msg'
+                    'ozi_ns\scenario\council\tarr06.mtg'
+                    'ozi_ns\scenario\council\tarr06.ovh'
+                    'ozi_ns\scenario\council\tarr06.pop'
+                    'ozi_ns\scenario\council\tarr06.pth'
+                    'ozi_ns\scenario\council\tarr06.scn'
+                    'ozi_ns\scenario\council\tarr06.tro'
+                    'ozi_ns\scenario\council\tarr06.txt'
+                    'ozi_ns\scenario\council\tarr07.001'
+                    'ozi_ns\scenario\council\tarr07.002'
+                    'ozi_ns\scenario\council\tarr07.003'
+                    'ozi_ns\scenario\council\tarr07.004'
+                    'ozi_ns\scenario\council\tarr07.map'
+                    'ozi_ns\scenario\council\tarr07.msg'
+                    'ozi_ns\scenario\council\tarr07.mtg'
+                    'ozi_ns\scenario\council\tarr07.ovh'
+                    'ozi_ns\scenario\council\tarr07.pop'
+                    'ozi_ns\scenario\council\tarr07.pth'
+                    'ozi_ns\scenario\council\tarr07.scn'
+                    'ozi_ns\scenario\council\tarr07.tro'
+                    'ozi_ns\scenario\council\tarr07.txt'
+                    'ozi_ns\scenario\council\tarr08.001'
+                    'ozi_ns\scenario\council\tarr08.002'
+                    'ozi_ns\scenario\council\tarr08.003'
+                    'ozi_ns\scenario\council\tarr08.004'
+                    'ozi_ns\scenario\council\tarr08.map'
+                    'ozi_ns\scenario\council\tarr08.msg'
+                    'ozi_ns\scenario\council\tarr08.mtg'
+                    'ozi_ns\scenario\council\tarr08.ovh'
+                    'ozi_ns\scenario\council\tarr08.pop'
+                    'ozi_ns\scenario\council\tarr08.pth'
+                    'ozi_ns\scenario\council\tarr08.scn'
+                    'ozi_ns\scenario\council\tarr08.tro'
+                    'ozi_ns\scenario\council\tarr08.txt'
+                    'ozi_ns\scenario\council\tarr09.001'
+                    'ozi_ns\scenario\council\tarr09.002'
+                    'ozi_ns\scenario\council\tarr09.003'
+                    'ozi_ns\scenario\council\tarr09.map'
+                    'ozi_ns\scenario\council\tarr09.msg'
+                    'ozi_ns\scenario\council\tarr09.mtg'
+                    'ozi_ns\scenario\council\tarr09.ovh'
+                    'ozi_ns\scenario\council\tarr09.pop'
+                    'ozi_ns\scenario\council\tarr09.pth'
+                    'ozi_ns\scenario\council\tarr09.scn'
+                    'ozi_ns\scenario\council\tarr09.tro'
+                    'ozi_ns\scenario\council\tarr09.txt'
+                    'ozi_ns\scenario\council\tarr10.001'
+                    'ozi_ns\scenario\council\tarr10.002'
+                    'ozi_ns\scenario\council\tarr10.003'
+                    'ozi_ns\scenario\council\tarr10.004'
+                    'ozi_ns\scenario\council\tarr10.map'
+                    'ozi_ns\scenario\council\tarr10.MSG'
+                    'ozi_ns\scenario\council\tarr10.mtg'
+                    'ozi_ns\scenario\council\tarr10.ovh'
+                    'ozi_ns\scenario\council\tarr10.pop'
+                    'ozi_ns\scenario\council\tarr10.pth'
+                    'ozi_ns\scenario\council\tarr10.scn'
+                    'ozi_ns\scenario\council\tarr10.tro'
+                    'ozi_ns\scenario\council\tarr10.TXT'
+                    'ozi_ns\scenario\council\tarr11.001'
+                    'ozi_ns\scenario\council\tarr11.002'
+                    'ozi_ns\scenario\council\tarr11.map'
+                    'ozi_ns\scenario\council\tarr11.msg'
+                    'ozi_ns\scenario\council\tarr11.mtg'
+                    'ozi_ns\scenario\council\tarr11.ovh'
+                    'ozi_ns\scenario\council\tarr11.pop'
+                    'ozi_ns\scenario\council\tarr11.pth'
+                    'ozi_ns\scenario\council\tarr11.scn'
+                    'ozi_ns\scenario\council\tarr11.tro'
+                    'ozi_ns\scenario\council\tarr11.txt'
+                    'ozi_ns\scenario\DESERT.BTS'
+                    'ozi_ns\scenario\earth.bts'
+                    'ozi_ns\scenario\gatlan.bts'
+                    'ozi_ns\scenario\GJUNGLE.BTS'
+                    'ozi_ns\scenario\globo\globo01.001'
+                    'ozi_ns\scenario\globo\globo01.002'
+                    'ozi_ns\scenario\globo\globo01.003'
+                    'ozi_ns\scenario\globo\globo01.map'
+                    'ozi_ns\scenario\globo\globo01.msg'
+                    'ozi_ns\scenario\globo\globo01.mtg'
+                    'ozi_ns\scenario\globo\globo01.ovh'
+                    'ozi_ns\scenario\globo\globo01.pop'
+                    'ozi_ns\scenario\globo\globo01.pth'
+                    'ozi_ns\scenario\globo\globo01.scn'
+                    'ozi_ns\scenario\globo\globo01.tro'
+                    'ozi_ns\scenario\globo\globo01.txt'
+                    'ozi_ns\scenario\globo\globo02.001'
+                    'ozi_ns\scenario\globo\globo02.002'
+                    'ozi_ns\scenario\globo\globo02.003'
+                    'ozi_ns\scenario\globo\globo02.map'
+                    'ozi_ns\scenario\globo\globo02.msg'
+                    'ozi_ns\scenario\globo\globo02.mtg'
+                    'ozi_ns\scenario\globo\globo02.ovh'
+                    'ozi_ns\scenario\globo\globo02.pop'
+                    'ozi_ns\scenario\globo\globo02.pth'
+                    'ozi_ns\scenario\globo\globo02.scn'
+                    'ozi_ns\scenario\globo\globo02.tro'
+                    'ozi_ns\scenario\globo\globo02.txt'
+                    'ozi_ns\scenario\globo\globo03.001'
+                    'ozi_ns\scenario\globo\globo03.002'
+                    'ozi_ns\scenario\globo\globo03.003'
+                    'ozi_ns\scenario\globo\globo03.map'
+                    'ozi_ns\scenario\globo\globo03.msg'
+                    'ozi_ns\scenario\globo\globo03.mtg'
+                    'ozi_ns\scenario\globo\globo03.ovh'
+                    'ozi_ns\scenario\globo\globo03.pop'
+                    'ozi_ns\scenario\globo\globo03.pth'
+                    'ozi_ns\scenario\globo\globo03.scn'
+                    'ozi_ns\scenario\globo\globo03.tro'
+                    'ozi_ns\scenario\globo\globo03.txt'
+                    'ozi_ns\scenario\globo\globo04.001'
+                    'ozi_ns\scenario\globo\globo04.002'
+                    'ozi_ns\scenario\globo\globo04.003'
+                    'ozi_ns\scenario\globo\globo04.map'
+                    'ozi_ns\scenario\globo\globo04.msg'
+                    'ozi_ns\scenario\globo\globo04.mtg'
+                    'ozi_ns\scenario\globo\globo04.ovh'
+                    'ozi_ns\scenario\globo\globo04.pop'
+                    'ozi_ns\scenario\globo\globo04.pth'
+                    'ozi_ns\scenario\globo\globo04.scn'
+                    'ozi_ns\scenario\globo\globo04.tro'
+                    'ozi_ns\scenario\globo\globo04.txt'
+                    'ozi_ns\scenario\globo\globo05.001'
+                    'ozi_ns\scenario\globo\globo05.002'
+                    'ozi_ns\scenario\globo\globo05.map'
+                    'ozi_ns\scenario\globo\globo05.msg'
+                    'ozi_ns\scenario\globo\globo05.mtg'
+                    'ozi_ns\scenario\globo\globo05.ovh'
+                    'ozi_ns\scenario\globo\globo05.pop'
+                    'ozi_ns\scenario\globo\globo05.pth'
+                    'ozi_ns\scenario\globo\globo05.scn'
+                    'ozi_ns\scenario\globo\globo05.tro'
+                    'ozi_ns\scenario\globo\globo05.txt'
+                    'ozi_ns\scenario\globo\globo06.001'
+                    'ozi_ns\scenario\globo\globo06.002'
+                    'ozi_ns\scenario\globo\globo06.003'
+                    'ozi_ns\scenario\globo\globo06.map'
+                    'ozi_ns\scenario\globo\globo06.msg'
+                    'ozi_ns\scenario\globo\globo06.mtg'
+                    'ozi_ns\scenario\globo\globo06.ovh'
+                    'ozi_ns\scenario\globo\globo06.pop'
+                    'ozi_ns\scenario\globo\globo06.pth'
+                    'ozi_ns\scenario\globo\globo06.scn'
+                    'ozi_ns\scenario\globo\globo06.tro'
+                    'ozi_ns\scenario\globo\globo06.txt'
+                    'ozi_ns\scenario\globo\globo07.001'
+                    'ozi_ns\scenario\globo\globo07.002'
+                    'ozi_ns\scenario\globo\globo07.003'
+                    'ozi_ns\scenario\globo\globo07.004'
+                    'ozi_ns\scenario\globo\globo07.map'
+                    'ozi_ns\scenario\globo\globo07.msg'
+                    'ozi_ns\scenario\globo\globo07.mtg'
+                    'ozi_ns\scenario\globo\globo07.ovh'
+                    'ozi_ns\scenario\globo\globo07.pop'
+                    'ozi_ns\scenario\globo\globo07.pth'
+                    'ozi_ns\scenario\globo\globo07.scn'
+                    'ozi_ns\scenario\globo\globo07.tro'
+                    'ozi_ns\scenario\globo\globo07.txt'
+                    'ozi_ns\scenario\globo\globo08.001'
+                    'ozi_ns\scenario\globo\globo08.002'
+                    'ozi_ns\scenario\globo\globo08.003'
+                    'ozi_ns\scenario\globo\globo08.map'
+                    'ozi_ns\scenario\globo\globo08.msg'
+                    'ozi_ns\scenario\globo\globo08.mtg'
+                    'ozi_ns\scenario\globo\globo08.ovh'
+                    'ozi_ns\scenario\globo\globo08.pop'
+                    'ozi_ns\scenario\globo\globo08.pth'
+                    'ozi_ns\scenario\globo\globo08.scn'
+                    'ozi_ns\scenario\globo\globo08.tro'
+                    'ozi_ns\scenario\globo\globo08.txt'
+                    'ozi_ns\scenario\globo\globo09.001'
+                    'ozi_ns\scenario\globo\globo09.002'
+                    'ozi_ns\scenario\globo\globo09.003'
+                    'ozi_ns\scenario\globo\globo09.map'
+                    'ozi_ns\scenario\globo\globo09.msg'
+                    'ozi_ns\scenario\globo\globo09.mtg'
+                    'ozi_ns\scenario\globo\globo09.ovh'
+                    'ozi_ns\scenario\globo\globo09.pop'
+                    'ozi_ns\scenario\globo\globo09.pth'
+                    'ozi_ns\scenario\globo\globo09.scn'
+                    'ozi_ns\scenario\globo\globo09.tro'
+                    'ozi_ns\scenario\globo\globo09.txt'
+                    'ozi_ns\scenario\globo\globo10.001'
+                    'ozi_ns\scenario\globo\globo10.002'
+                    'ozi_ns\scenario\globo\globo10.003'
+                    'ozi_ns\scenario\globo\globo10.004'
+                    'ozi_ns\scenario\globo\globo10.map'
+                    'ozi_ns\scenario\globo\globo10.msg'
+                    'ozi_ns\scenario\globo\globo10.mtg'
+                    'ozi_ns\scenario\globo\globo10.ovh'
+                    'ozi_ns\scenario\globo\globo10.pop'
+                    'ozi_ns\scenario\globo\globo10.pth'
+                    'ozi_ns\scenario\globo\globo10.scn'
+                    'ozi_ns\scenario\globo\globo10.tro'
+                    'ozi_ns\scenario\globo\globo10.txt'
+                    'ozi_ns\scenario\globo\globo11.001'
+                    'ozi_ns\scenario\globo\globo11.002'
+                    'ozi_ns\scenario\globo\globo11.003'
+                    'ozi_ns\scenario\globo\globo11.map'
+                    'ozi_ns\scenario\globo\globo11.msg'
+                    'ozi_ns\scenario\globo\globo11.mtg'
+                    'ozi_ns\scenario\globo\globo11.ovh'
+                    'ozi_ns\scenario\globo\globo11.pop'
+                    'ozi_ns\scenario\globo\globo11.pth'
+                    'ozi_ns\scenario\globo\globo11.scn'
+                    'ozi_ns\scenario\globo\globo11.tro'
+                    'ozi_ns\scenario\globo\globo11.txt'
+                    'ozi_ns\scenario\globo\scene.txt'
+                    'ozi_ns\scenario\HTRAIN.BTS'
+                    'ozi_ns\scenario\jubjub.bts'
+                    'ozi_ns\scenario\JUNGLE.BTS'
+                    'ozi_ns\scenario\special.bts'
+                    'ozi_ns\scenario\trainh.bts'
+                    'ozi_ns\scenario\vent.jus'
+                    'ozi_ns\sound\ALIST.DAT'
+                    'ozi_ns\sound\alta.amb'
+                    'ozi_ns\sound\area52.amb'
+                    'ozi_ns\sound\ATLANTIS.AMB'
+                    'ozi_ns\sound\ATLANTIS.DAT'
+                    'ozi_ns\sound\ATRAIN.DAT'
+                    'ozi_ns\sound\birds.wav'
+                    'ozi_ns\sound\cobra.wav'
+                    'ozi_ns\sound\cow.wav'
+                    'ozi_ns\sound\cricket.wav'
+                    'ozi_ns\sound\DALG1DEA.wav'
+                    'ozi_ns\sound\DALG1SEL.wav'
+                    'ozi_ns\sound\DALG2ACK.wav'
+                    'ozi_ns\sound\DALG2SEL.wav'
+                    'ozi_ns\sound\dog.wav'
+                    'ozi_ns\sound\dog2.wav'
+                    'ozi_ns\sound\earth.amb'
+                    'ozi_ns\sound\frog.wav'
+                    'ozi_ns\sound\frogs.wav'
+                    'ozi_ns\sound\gatlan.AMB'
+                    'ozi_ns\sound\gease.wav'
+                    'ozi_ns\sound\GJUNGLE.AMB'
+                    'ozi_ns\sound\GJUNGLE.DAT'
+                    'ozi_ns\sound\jubjub.amb'
+                    'ozi_ns\sound\KOMANDWE.wav'
+                    'ozi_ns\sound\KOMANWEA.wav'
+                    'ozi_ns\sound\mosq.wav'
+                    'ozi_ns\sound\r2bird.wav'
+                    'ozi_ns\sound\SCENESND.DAT'
+                    'ozi_ns\sound\seagull.wav'
+                    'ozi_ns\sound\slist.dat'
+                    'ozi_ns\sound\turkey.wav'
+                    'ozi_ns\sound\water.wav'
+                    'ozi_ns\sound\wolf.wav'
+                    'ozi_ns\special.gif'
+                    'ozi_ns\special.rgb'
+                    'ozi_ns\special.rmp'
+                    'ozisave\ozisave.txt'
+                    'exp\animozi.dat'
+                    'exp\animate\dalg.fin'
+                    'exp\animate\reae.fin'
+                    'exp\animate\spyo.fin'
+                    'exp\animate\tranozi.fin'
+                    'exp\sprites\dalg.spr'
+                    'exp\sprites\reae.spr'
+                    'exp\sprites\spyo.spr'
+                    'exp\sprites\tranozi.spr'
+                    'ozi_ns\gamestat\hxscene.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'dc\intrf_hd\bintroe'
+                )
+                Edits = @(
+                    # PE optional header: base-relocation directory size 0x93CC -> 0x93E4 (+16)
+                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'E4 93 00 00' }
+                    # credits TTY create -> 45 NOPs (the seven-row menu needs the rows)
+                    @{ Offset = 0x4280; Old = '6A 00 6A 00 6A 00 6A 05 6A 02 68 84 21 48 00 68 6C 24 48 00 B9 18 01 00 00 BB 73 01 00 00 6A 44 BA F4 01 00 00 8B 45 FC E8 FB 35 02 00'; New = '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # menu id filter: accept the button ids 6 and 7 (cmp edx,5 -> 7)
+                    @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
+                    # credits TTY destroy count 1 -> 0 (nothing was created)
+                    @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
+                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
+                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 58 A2 07 00' }
+                    # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
+                    @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
+                    # LOAD GAME call -> tramp_cw_load
+                    @{ Offset = 0x44BF; Old = 'E8 E0 E9 FF FF'; New = 'E8 2C A2 07 00' }
+                    # end of the id chain: jne 0040513D -> the Dark Colony handlers
+                    @{ Offset = 0x44DB; Old = '75 60'; New = '75 25' }
+                    # OZI MISSIONS + DARK COLONY handlers (was PLAY INTRO)
+                    @{ Offset = 0x44DD; Old = 'BE F2 46 4A 00 8D BD F0 FE FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD F0 FE FF FF 8D 95 F0 FE FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8B 45 FC E8 EB BE FF FF'; New = 'C7 80 F4 14 00 00 01 00 00 00 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 45 A1 07 00 E8 08 CB FF FF EB 3B 83 FF 06 75 16 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 75 A2 07 00 EB 20 83 FF 07 75 14 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 6A A2 07 00 90 90 90 90 90 90 90' }
+                    # stub_pack (pack strings into the 4 slots)
+                    @{ Offset = 0x7E640; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF C8 7D 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF 44 23 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB BF 5C 5E 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB 5F 58 C3' }
+                    # stub_cw_set (Council Wars strings)
+                    @{ Offset = 0x7E690; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF 44 23 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB BF 5C 5E 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB 5F 58 C3 00 00 00 00' }
+                    # tramp_cw_campaign (stub_cw_set; jmp 401C08)
+                    @{ Offset = 0x7E6E0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 1E 29 F8 FF' }
+                    # tramp_cw_load (stub_cw_set; jmp 403AA4)
+                    @{ Offset = 0x7E6F0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 AA 47 F8 FF' }
+                    # tramp_pack_load (stub_pack; jmp 403AA4)
+                    @{ Offset = 0x7E700; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 3B FF FF FF E9 9A 47 F8 FF' }
+                    # stub_dc_set (Dark Colony strings)
+                    @{ Offset = 0x7E740; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF 44 23 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB BF 5C 5E 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB 5F 58 C3' }
+                    # tramp_dc_campaign (stub_dc_set; jmp 401C08)
+                    @{ Offset = 0x7E790; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 6E 28 F8 FF' }
+                    # tramp_dc_load (stub_dc_set; jmp 403AA4)
+                    @{ Offset = 0x7E7A0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 FA 46 F8 FF' }
+                    # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
+                    @{ Offset = 0x7FEB8; Old = '61 6E 69 6D 2E 64 61 74 00 00 00 00'; New = '61 6E 69 6D 6F 7A 69 2E 64 61 74 00' }
+                    # .reloc table, page-0x4000 block: entries 3E8B, 3E90 -> 0000 (the two string pushes of the removed credits TTY create at VA 0x404E8B / 0x404E90 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BCE; Old = '8B 3E 90 3E'; New = '00 00 00 00' }
+                    # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BE0; Old = 'DE 30 03 31'; New = '00 00 00 00' }
+                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xD8
+                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'D8 00 00 00' }
+                    # .reloc table: insert 12 HIGHLOW entries (3243, 3254, 3265, 3276, 3293, 32A4, 32B5, 32C6, 3343, 3354, 3365, 3376) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DE8 move up by 24, the 24 zero slack bytes 0xA0DE8..0xA0E00 at the end of the section are dropped
+                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 93 32 A4 32 B5 32 C6 32 43 33 54 33 65 33 76 33'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D F8 3D FC 3D 00 3E 04 3E'; SectionEnd = 0xA0E00 }
+                )
+            }
+
+            # ---- ozi @ 1280x800: DARK COLONY and OZI MISSIONS menu modes (Council Wars only) ---------------------------------------------------------
+            #  Added      : 10 Sep 2026
+            #  Made with  : tools/patch_ozi_menu.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36
+            #  Changes    : 3493 bytes in 23 edits
+            #  Council Wars opens every data file through one helper that prefixes the name with the
+            #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
+            #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
+            #  those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
+            #  and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
+            #  the main menu:
+            #    * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
+            #      stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
+            #      the rest is NOP padding
+            #    * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
+            #      Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
+            #    * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
+            #      section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
+            #    * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
+            #      entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
+            #      size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
+            #      slack at the end of the .reloc section are dropped so the file size stays the same.  The
+            #      two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
+            #    * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+            #      string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+            #      units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+            #      the original exe reads stay untouched.
+            #  The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+            #  doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+            #  the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+            #  the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+            #  holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+            #  Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+            #  SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+            #  itself uses.  Two buttons are added for it:
+            #    * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+            #      6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+            #      them to 19 and 20 and gives the new buttons the plates 21 and 22
+            #    * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+            #      sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+            #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+            #      and their four absolute slot addresses add four more entries to the .reloc insert
+            #    * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+            #      is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+            #      the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+            #      two string operands the call carried become type 0 relocation padding.
+            #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+            #  exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+            #  (exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+            #  relocation entry, this patch is always applied last.
+            @{
+                Id = 'ozi'; Name = 'DARK COLONY and OZI MISSIONS menu modes (Council Wars only)'; Date = '10 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = '1280x800'
+                Tool = 'tools/patch_ozi_menu.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36'
+                Description = @'
+Council Wars opens every data file through one helper that prefixes the name with the
+8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
+folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
+those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
+and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
+the main menu:
+  * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
+    stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
+    the rest is NOP padding
+  * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
+    Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
+  * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
+    section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
+  * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
+    entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
+    size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
+    slack at the end of the .reloc section are dropped so the file size stays the same.  The
+    two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
+  * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+    string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+    units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+    the original exe reads stay untouched.
+The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+itself uses.  Two buttons are added for it:
+  * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+    6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+    them to 19 and 20 and gives the new buttons the plates 21 and 22
+  * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+    sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+    the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+    and their four absolute slot addresses add four more entries to the .reloc insert
+  * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+    is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+    the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+    two string operands the call carried become type 0 relocation padding.
+REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+(exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+relocation entry, this patch is always applied last.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('hdpaths')
+                # data files this fix needs next to the exe (385; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'ozi_ns\alta.gif'
+                    'ozi_ns\alta.rgb'
+                    'ozi_ns\alta.rmp'
+                    'ozi_ns\area52.gif'
+                    'ozi_ns\area52.rgb'
+                    'ozi_ns\area52.rmp'
+                    'ozi_ns\earth.gif'
+                    'ozi_ns\gamestat\BOOMSTAT.TXT'
+                    'ozi_ns\gamestat\gamestat.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'ozi_ns\gamestat\hxscene.txt'
+                    'ozi_ns\gamestat\MBULLET.TXT'
+                    'ozi_ns\gamestat\UNITID.TXT'
+                    'ozi_ns\gamestat\WEAPSTAT.TXT'
+                    'ozi_ns\gatlan.GIF'
+                    'ozi_ns\gatlan.NCY'
+                    'ozi_ns\gatlan.RGB'
+                    'ozi_ns\gatlan.RMP'
+                    'ozi_ns\gjungle.gif'
+                    'ozi_ns\gjungle.rgb'
+                    'ozi_ns\gJUNGLE.RMP'
+                    'ozi_ns\intrf_hd\bintroe'
+                    'ozi_ns\intrf_hd\gxscene.txt'
+                    'ozi_ns\intrf_hd\hxscene.txt'
+                    'ozi_ns\intrf_hd\introe'
+                    'ozi_ns\intrf_hd\shumane'
+                    'ozi_ns\intrface\astory.txt'
+                    'ozi_ns\intrface\credits.txt'
+                    'ozi_ns\intrface\hstory.txt'
+                    'ozi_ns\jubjub.gif'
+                    'ozi_ns\jubjub.rgb'
+                    'ozi_ns\jubjub.rmp'
+                    'ozi_ns\mission\g1.wav'
+                    'ozi_ns\mission\g10.wav'
+                    'ozi_ns\mission\g11.wav'
+                    'ozi_ns\mission\g2.wav'
+                    'ozi_ns\mission\g3.wav'
+                    'ozi_ns\mission\g4.wav'
+                    'ozi_ns\mission\g5.wav'
+                    'ozi_ns\mission\g6.wav'
+                    'ozi_ns\mission\g7.wav'
+                    'ozi_ns\mission\g8.wav'
+                    'ozi_ns\mission\g9.wav'
+                    'ozi_ns\mission\h1.wav'
+                    'ozi_ns\mission\h10.wav'
+                    'ozi_ns\mission\h11.wav'
+                    'ozi_ns\mission\h2.wav'
+                    'ozi_ns\mission\h3.wav'
+                    'ozi_ns\mission\h4.wav'
+                    'ozi_ns\mission\h5.wav'
+                    'ozi_ns\mission\h6.wav'
+                    'ozi_ns\mission\h7.wav'
+                    'ozi_ns\mission\h8.wav'
+                    'ozi_ns\mission\h80.wav'
+                    'ozi_ns\mission\h9.wav'
+                    'ozi_ns\scenario\all.jus'
+                    'ozi_ns\scenario\alta.bts'
+                    'ozi_ns\scenario\area52.bts'
+                    'ozi_ns\scenario\atlantis.bts'
+                    'ozi_ns\scenario\council\scene.txt'
+                    'ozi_ns\scenario\council\tarr01.001'
+                    'ozi_ns\scenario\council\tarr01.002'
+                    'ozi_ns\scenario\council\tarr01.003'
+                    'ozi_ns\scenario\council\tarr01.004'
+                    'ozi_ns\scenario\council\tarr01.map'
+                    'ozi_ns\scenario\council\tarr01.msg'
+                    'ozi_ns\scenario\council\tarr01.mtg'
+                    'ozi_ns\scenario\council\tarr01.ovh'
+                    'ozi_ns\scenario\council\tarr01.pop'
+                    'ozi_ns\scenario\council\tarr01.pth'
+                    'ozi_ns\scenario\council\tarr01.scn'
+                    'ozi_ns\scenario\council\tarr01.tro'
+                    'ozi_ns\scenario\council\tarr01.txt'
+                    'ozi_ns\scenario\council\tarr02.001'
+                    'ozi_ns\scenario\council\tarr02.002'
+                    'ozi_ns\scenario\council\tarr02.map'
+                    'ozi_ns\scenario\council\tarr02.msg'
+                    'ozi_ns\scenario\council\tarr02.mtg'
+                    'ozi_ns\scenario\council\tarr02.ovh'
+                    'ozi_ns\scenario\council\tarr02.pop'
+                    'ozi_ns\scenario\council\tarr02.pth'
+                    'ozi_ns\scenario\council\tarr02.scn'
+                    'ozi_ns\scenario\council\tarr02.tro'
+                    'ozi_ns\scenario\council\tarr02.txt'
+                    'ozi_ns\scenario\council\tarr03.001'
+                    'ozi_ns\scenario\council\tarr03.002'
+                    'ozi_ns\scenario\council\tarr03.map'
+                    'ozi_ns\scenario\council\tarr03.msg'
+                    'ozi_ns\scenario\council\tarr03.mtg'
+                    'ozi_ns\scenario\council\tarr03.ovh'
+                    'ozi_ns\scenario\council\tarr03.pop'
+                    'ozi_ns\scenario\council\tarr03.pth'
+                    'ozi_ns\scenario\council\tarr03.scn'
+                    'ozi_ns\scenario\council\tarr03.tro'
+                    'ozi_ns\scenario\council\tarr03.txt'
+                    'ozi_ns\scenario\council\tarr04.001'
+                    'ozi_ns\scenario\council\tarr04.002'
+                    'ozi_ns\scenario\council\tarr04.map'
+                    'ozi_ns\scenario\council\tarr04.msg'
+                    'ozi_ns\scenario\council\tarr04.mtg'
+                    'ozi_ns\scenario\council\tarr04.ovh'
+                    'ozi_ns\scenario\council\tarr04.pop'
+                    'ozi_ns\scenario\council\tarr04.pth'
+                    'ozi_ns\scenario\council\tarr04.scn'
+                    'ozi_ns\scenario\council\tarr04.tro'
+                    'ozi_ns\scenario\council\tarr04.txt'
+                    'ozi_ns\scenario\council\tarr05.001'
+                    'ozi_ns\scenario\council\tarr05.002'
+                    'ozi_ns\scenario\council\tarr05.map'
+                    'ozi_ns\scenario\council\tarr05.msg'
+                    'ozi_ns\scenario\council\tarr05.mtg'
+                    'ozi_ns\scenario\council\tarr05.ovh'
+                    'ozi_ns\scenario\council\tarr05.pop'
+                    'ozi_ns\scenario\council\tarr05.pth'
+                    'ozi_ns\scenario\council\tarr05.scn'
+                    'ozi_ns\scenario\council\tarr05.tro'
+                    'ozi_ns\scenario\council\tarr05.txt'
+                    'ozi_ns\scenario\council\tarr06.001'
+                    'ozi_ns\scenario\council\tarr06.002'
+                    'ozi_ns\scenario\council\tarr06.003'
+                    'ozi_ns\scenario\council\tarr06.map'
+                    'ozi_ns\scenario\council\tarr06.msg'
+                    'ozi_ns\scenario\council\tarr06.mtg'
+                    'ozi_ns\scenario\council\tarr06.ovh'
+                    'ozi_ns\scenario\council\tarr06.pop'
+                    'ozi_ns\scenario\council\tarr06.pth'
+                    'ozi_ns\scenario\council\tarr06.scn'
+                    'ozi_ns\scenario\council\tarr06.tro'
+                    'ozi_ns\scenario\council\tarr06.txt'
+                    'ozi_ns\scenario\council\tarr07.001'
+                    'ozi_ns\scenario\council\tarr07.002'
+                    'ozi_ns\scenario\council\tarr07.003'
+                    'ozi_ns\scenario\council\tarr07.004'
+                    'ozi_ns\scenario\council\tarr07.map'
+                    'ozi_ns\scenario\council\tarr07.msg'
+                    'ozi_ns\scenario\council\tarr07.mtg'
+                    'ozi_ns\scenario\council\tarr07.ovh'
+                    'ozi_ns\scenario\council\tarr07.pop'
+                    'ozi_ns\scenario\council\tarr07.pth'
+                    'ozi_ns\scenario\council\tarr07.scn'
+                    'ozi_ns\scenario\council\tarr07.tro'
+                    'ozi_ns\scenario\council\tarr07.txt'
+                    'ozi_ns\scenario\council\tarr08.001'
+                    'ozi_ns\scenario\council\tarr08.002'
+                    'ozi_ns\scenario\council\tarr08.003'
+                    'ozi_ns\scenario\council\tarr08.004'
+                    'ozi_ns\scenario\council\tarr08.map'
+                    'ozi_ns\scenario\council\tarr08.msg'
+                    'ozi_ns\scenario\council\tarr08.mtg'
+                    'ozi_ns\scenario\council\tarr08.ovh'
+                    'ozi_ns\scenario\council\tarr08.pop'
+                    'ozi_ns\scenario\council\tarr08.pth'
+                    'ozi_ns\scenario\council\tarr08.scn'
+                    'ozi_ns\scenario\council\tarr08.tro'
+                    'ozi_ns\scenario\council\tarr08.txt'
+                    'ozi_ns\scenario\council\tarr09.001'
+                    'ozi_ns\scenario\council\tarr09.002'
+                    'ozi_ns\scenario\council\tarr09.003'
+                    'ozi_ns\scenario\council\tarr09.map'
+                    'ozi_ns\scenario\council\tarr09.msg'
+                    'ozi_ns\scenario\council\tarr09.mtg'
+                    'ozi_ns\scenario\council\tarr09.ovh'
+                    'ozi_ns\scenario\council\tarr09.pop'
+                    'ozi_ns\scenario\council\tarr09.pth'
+                    'ozi_ns\scenario\council\tarr09.scn'
+                    'ozi_ns\scenario\council\tarr09.tro'
+                    'ozi_ns\scenario\council\tarr09.txt'
+                    'ozi_ns\scenario\council\tarr10.001'
+                    'ozi_ns\scenario\council\tarr10.002'
+                    'ozi_ns\scenario\council\tarr10.003'
+                    'ozi_ns\scenario\council\tarr10.004'
+                    'ozi_ns\scenario\council\tarr10.map'
+                    'ozi_ns\scenario\council\tarr10.MSG'
+                    'ozi_ns\scenario\council\tarr10.mtg'
+                    'ozi_ns\scenario\council\tarr10.ovh'
+                    'ozi_ns\scenario\council\tarr10.pop'
+                    'ozi_ns\scenario\council\tarr10.pth'
+                    'ozi_ns\scenario\council\tarr10.scn'
+                    'ozi_ns\scenario\council\tarr10.tro'
+                    'ozi_ns\scenario\council\tarr10.TXT'
+                    'ozi_ns\scenario\council\tarr11.001'
+                    'ozi_ns\scenario\council\tarr11.002'
+                    'ozi_ns\scenario\council\tarr11.map'
+                    'ozi_ns\scenario\council\tarr11.msg'
+                    'ozi_ns\scenario\council\tarr11.mtg'
+                    'ozi_ns\scenario\council\tarr11.ovh'
+                    'ozi_ns\scenario\council\tarr11.pop'
+                    'ozi_ns\scenario\council\tarr11.pth'
+                    'ozi_ns\scenario\council\tarr11.scn'
+                    'ozi_ns\scenario\council\tarr11.tro'
+                    'ozi_ns\scenario\council\tarr11.txt'
+                    'ozi_ns\scenario\DESERT.BTS'
+                    'ozi_ns\scenario\earth.bts'
+                    'ozi_ns\scenario\gatlan.bts'
+                    'ozi_ns\scenario\GJUNGLE.BTS'
+                    'ozi_ns\scenario\globo\globo01.001'
+                    'ozi_ns\scenario\globo\globo01.002'
+                    'ozi_ns\scenario\globo\globo01.003'
+                    'ozi_ns\scenario\globo\globo01.map'
+                    'ozi_ns\scenario\globo\globo01.msg'
+                    'ozi_ns\scenario\globo\globo01.mtg'
+                    'ozi_ns\scenario\globo\globo01.ovh'
+                    'ozi_ns\scenario\globo\globo01.pop'
+                    'ozi_ns\scenario\globo\globo01.pth'
+                    'ozi_ns\scenario\globo\globo01.scn'
+                    'ozi_ns\scenario\globo\globo01.tro'
+                    'ozi_ns\scenario\globo\globo01.txt'
+                    'ozi_ns\scenario\globo\globo02.001'
+                    'ozi_ns\scenario\globo\globo02.002'
+                    'ozi_ns\scenario\globo\globo02.003'
+                    'ozi_ns\scenario\globo\globo02.map'
+                    'ozi_ns\scenario\globo\globo02.msg'
+                    'ozi_ns\scenario\globo\globo02.mtg'
+                    'ozi_ns\scenario\globo\globo02.ovh'
+                    'ozi_ns\scenario\globo\globo02.pop'
+                    'ozi_ns\scenario\globo\globo02.pth'
+                    'ozi_ns\scenario\globo\globo02.scn'
+                    'ozi_ns\scenario\globo\globo02.tro'
+                    'ozi_ns\scenario\globo\globo02.txt'
+                    'ozi_ns\scenario\globo\globo03.001'
+                    'ozi_ns\scenario\globo\globo03.002'
+                    'ozi_ns\scenario\globo\globo03.003'
+                    'ozi_ns\scenario\globo\globo03.map'
+                    'ozi_ns\scenario\globo\globo03.msg'
+                    'ozi_ns\scenario\globo\globo03.mtg'
+                    'ozi_ns\scenario\globo\globo03.ovh'
+                    'ozi_ns\scenario\globo\globo03.pop'
+                    'ozi_ns\scenario\globo\globo03.pth'
+                    'ozi_ns\scenario\globo\globo03.scn'
+                    'ozi_ns\scenario\globo\globo03.tro'
+                    'ozi_ns\scenario\globo\globo03.txt'
+                    'ozi_ns\scenario\globo\globo04.001'
+                    'ozi_ns\scenario\globo\globo04.002'
+                    'ozi_ns\scenario\globo\globo04.003'
+                    'ozi_ns\scenario\globo\globo04.map'
+                    'ozi_ns\scenario\globo\globo04.msg'
+                    'ozi_ns\scenario\globo\globo04.mtg'
+                    'ozi_ns\scenario\globo\globo04.ovh'
+                    'ozi_ns\scenario\globo\globo04.pop'
+                    'ozi_ns\scenario\globo\globo04.pth'
+                    'ozi_ns\scenario\globo\globo04.scn'
+                    'ozi_ns\scenario\globo\globo04.tro'
+                    'ozi_ns\scenario\globo\globo04.txt'
+                    'ozi_ns\scenario\globo\globo05.001'
+                    'ozi_ns\scenario\globo\globo05.002'
+                    'ozi_ns\scenario\globo\globo05.map'
+                    'ozi_ns\scenario\globo\globo05.msg'
+                    'ozi_ns\scenario\globo\globo05.mtg'
+                    'ozi_ns\scenario\globo\globo05.ovh'
+                    'ozi_ns\scenario\globo\globo05.pop'
+                    'ozi_ns\scenario\globo\globo05.pth'
+                    'ozi_ns\scenario\globo\globo05.scn'
+                    'ozi_ns\scenario\globo\globo05.tro'
+                    'ozi_ns\scenario\globo\globo05.txt'
+                    'ozi_ns\scenario\globo\globo06.001'
+                    'ozi_ns\scenario\globo\globo06.002'
+                    'ozi_ns\scenario\globo\globo06.003'
+                    'ozi_ns\scenario\globo\globo06.map'
+                    'ozi_ns\scenario\globo\globo06.msg'
+                    'ozi_ns\scenario\globo\globo06.mtg'
+                    'ozi_ns\scenario\globo\globo06.ovh'
+                    'ozi_ns\scenario\globo\globo06.pop'
+                    'ozi_ns\scenario\globo\globo06.pth'
+                    'ozi_ns\scenario\globo\globo06.scn'
+                    'ozi_ns\scenario\globo\globo06.tro'
+                    'ozi_ns\scenario\globo\globo06.txt'
+                    'ozi_ns\scenario\globo\globo07.001'
+                    'ozi_ns\scenario\globo\globo07.002'
+                    'ozi_ns\scenario\globo\globo07.003'
+                    'ozi_ns\scenario\globo\globo07.004'
+                    'ozi_ns\scenario\globo\globo07.map'
+                    'ozi_ns\scenario\globo\globo07.msg'
+                    'ozi_ns\scenario\globo\globo07.mtg'
+                    'ozi_ns\scenario\globo\globo07.ovh'
+                    'ozi_ns\scenario\globo\globo07.pop'
+                    'ozi_ns\scenario\globo\globo07.pth'
+                    'ozi_ns\scenario\globo\globo07.scn'
+                    'ozi_ns\scenario\globo\globo07.tro'
+                    'ozi_ns\scenario\globo\globo07.txt'
+                    'ozi_ns\scenario\globo\globo08.001'
+                    'ozi_ns\scenario\globo\globo08.002'
+                    'ozi_ns\scenario\globo\globo08.003'
+                    'ozi_ns\scenario\globo\globo08.map'
+                    'ozi_ns\scenario\globo\globo08.msg'
+                    'ozi_ns\scenario\globo\globo08.mtg'
+                    'ozi_ns\scenario\globo\globo08.ovh'
+                    'ozi_ns\scenario\globo\globo08.pop'
+                    'ozi_ns\scenario\globo\globo08.pth'
+                    'ozi_ns\scenario\globo\globo08.scn'
+                    'ozi_ns\scenario\globo\globo08.tro'
+                    'ozi_ns\scenario\globo\globo08.txt'
+                    'ozi_ns\scenario\globo\globo09.001'
+                    'ozi_ns\scenario\globo\globo09.002'
+                    'ozi_ns\scenario\globo\globo09.003'
+                    'ozi_ns\scenario\globo\globo09.map'
+                    'ozi_ns\scenario\globo\globo09.msg'
+                    'ozi_ns\scenario\globo\globo09.mtg'
+                    'ozi_ns\scenario\globo\globo09.ovh'
+                    'ozi_ns\scenario\globo\globo09.pop'
+                    'ozi_ns\scenario\globo\globo09.pth'
+                    'ozi_ns\scenario\globo\globo09.scn'
+                    'ozi_ns\scenario\globo\globo09.tro'
+                    'ozi_ns\scenario\globo\globo09.txt'
+                    'ozi_ns\scenario\globo\globo10.001'
+                    'ozi_ns\scenario\globo\globo10.002'
+                    'ozi_ns\scenario\globo\globo10.003'
+                    'ozi_ns\scenario\globo\globo10.004'
+                    'ozi_ns\scenario\globo\globo10.map'
+                    'ozi_ns\scenario\globo\globo10.msg'
+                    'ozi_ns\scenario\globo\globo10.mtg'
+                    'ozi_ns\scenario\globo\globo10.ovh'
+                    'ozi_ns\scenario\globo\globo10.pop'
+                    'ozi_ns\scenario\globo\globo10.pth'
+                    'ozi_ns\scenario\globo\globo10.scn'
+                    'ozi_ns\scenario\globo\globo10.tro'
+                    'ozi_ns\scenario\globo\globo10.txt'
+                    'ozi_ns\scenario\globo\globo11.001'
+                    'ozi_ns\scenario\globo\globo11.002'
+                    'ozi_ns\scenario\globo\globo11.003'
+                    'ozi_ns\scenario\globo\globo11.map'
+                    'ozi_ns\scenario\globo\globo11.msg'
+                    'ozi_ns\scenario\globo\globo11.mtg'
+                    'ozi_ns\scenario\globo\globo11.ovh'
+                    'ozi_ns\scenario\globo\globo11.pop'
+                    'ozi_ns\scenario\globo\globo11.pth'
+                    'ozi_ns\scenario\globo\globo11.scn'
+                    'ozi_ns\scenario\globo\globo11.tro'
+                    'ozi_ns\scenario\globo\globo11.txt'
+                    'ozi_ns\scenario\globo\scene.txt'
+                    'ozi_ns\scenario\HTRAIN.BTS'
+                    'ozi_ns\scenario\jubjub.bts'
+                    'ozi_ns\scenario\JUNGLE.BTS'
+                    'ozi_ns\scenario\special.bts'
+                    'ozi_ns\scenario\trainh.bts'
+                    'ozi_ns\scenario\vent.jus'
+                    'ozi_ns\sound\ALIST.DAT'
+                    'ozi_ns\sound\alta.amb'
+                    'ozi_ns\sound\area52.amb'
+                    'ozi_ns\sound\ATLANTIS.AMB'
+                    'ozi_ns\sound\ATLANTIS.DAT'
+                    'ozi_ns\sound\ATRAIN.DAT'
+                    'ozi_ns\sound\birds.wav'
+                    'ozi_ns\sound\cobra.wav'
+                    'ozi_ns\sound\cow.wav'
+                    'ozi_ns\sound\cricket.wav'
+                    'ozi_ns\sound\DALG1DEA.wav'
+                    'ozi_ns\sound\DALG1SEL.wav'
+                    'ozi_ns\sound\DALG2ACK.wav'
+                    'ozi_ns\sound\DALG2SEL.wav'
+                    'ozi_ns\sound\dog.wav'
+                    'ozi_ns\sound\dog2.wav'
+                    'ozi_ns\sound\earth.amb'
+                    'ozi_ns\sound\frog.wav'
+                    'ozi_ns\sound\frogs.wav'
+                    'ozi_ns\sound\gatlan.AMB'
+                    'ozi_ns\sound\gease.wav'
+                    'ozi_ns\sound\GJUNGLE.AMB'
+                    'ozi_ns\sound\GJUNGLE.DAT'
+                    'ozi_ns\sound\jubjub.amb'
+                    'ozi_ns\sound\KOMANDWE.wav'
+                    'ozi_ns\sound\KOMANWEA.wav'
+                    'ozi_ns\sound\mosq.wav'
+                    'ozi_ns\sound\r2bird.wav'
+                    'ozi_ns\sound\SCENESND.DAT'
+                    'ozi_ns\sound\seagull.wav'
+                    'ozi_ns\sound\slist.dat'
+                    'ozi_ns\sound\turkey.wav'
+                    'ozi_ns\sound\water.wav'
+                    'ozi_ns\sound\wolf.wav'
+                    'ozi_ns\special.gif'
+                    'ozi_ns\special.rgb'
+                    'ozi_ns\special.rmp'
+                    'ozisave\ozisave.txt'
+                    'exp\animozi.dat'
+                    'exp\animate\dalg.fin'
+                    'exp\animate\reae.fin'
+                    'exp\animate\spyo.fin'
+                    'exp\animate\tranozi.fin'
+                    'exp\sprites\dalg.spr'
+                    'exp\sprites\reae.spr'
+                    'exp\sprites\spyo.spr'
+                    'exp\sprites\tranozi.spr'
+                    'ozi_ns\gamestat\hxscene.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'dc\intrf_hd\bintroe'
+                )
+                Edits = @(
+                    # PE optional header: base-relocation directory size 0x93CC -> 0x93E4 (+16)
+                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'E4 93 00 00' }
+                    # credits TTY create -> 45 NOPs (the seven-row menu needs the rows)
+                    @{ Offset = 0x4280; Old = '6A 00 6A 00 6A 00 6A 05 6A 02 68 84 21 48 00 68 6C 24 48 00 B9 18 01 00 00 BB A4 01 00 00 6A 44 BA F4 01 00 00 8B 45 FC E8 FB 35 02 00'; New = '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # menu id filter: accept the button ids 6 and 7 (cmp edx,5 -> 7)
+                    @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
+                    # credits TTY destroy count 1 -> 0 (nothing was created)
+                    @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
+                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
+                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 58 A2 07 00' }
+                    # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
+                    @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
+                    # LOAD GAME call -> tramp_cw_load
+                    @{ Offset = 0x44BF; Old = 'E8 E0 E9 FF FF'; New = 'E8 2C A2 07 00' }
+                    # end of the id chain: jne 0040513D -> the Dark Colony handlers
+                    @{ Offset = 0x44DB; Old = '75 60'; New = '75 25' }
+                    # OZI MISSIONS + DARK COLONY handlers (was PLAY INTRO)
+                    @{ Offset = 0x44DD; Old = 'BE F2 46 4A 00 8D BD F0 FE FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD F0 FE FF FF 8D 95 F0 FE FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8B 45 FC E8 EB BE FF FF'; New = 'C7 80 F4 14 00 00 01 00 00 00 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 45 A1 07 00 E8 08 CB FF FF EB 3B 83 FF 06 75 16 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 75 A2 07 00 EB 20 83 FF 07 75 14 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 6A A2 07 00 90 90 90 90 90 90 90' }
+                    # stub_pack (pack strings into the 4 slots)
+                    @{ Offset = 0x7E640; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF C8 7D 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF 44 23 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB BF 5C 5E 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB 5F 58 C3' }
+                    # stub_cw_set (Council Wars strings)
+                    @{ Offset = 0x7E690; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF 44 23 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB BF 5C 5E 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB 5F 58 C3 00 00 00 00' }
+                    # tramp_cw_campaign (stub_cw_set; jmp 401C08)
+                    @{ Offset = 0x7E6E0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 1E 29 F8 FF' }
+                    # tramp_cw_load (stub_cw_set; jmp 403AA4)
+                    @{ Offset = 0x7E6F0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 AA 47 F8 FF' }
+                    # tramp_pack_load (stub_pack; jmp 403AA4)
+                    @{ Offset = 0x7E700; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 3B FF FF FF E9 9A 47 F8 FF' }
+                    # stub_dc_set (Dark Colony strings)
+                    @{ Offset = 0x7E740; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF 44 23 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB BF 5C 5E 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB 5F 58 C3' }
+                    # tramp_dc_campaign (stub_dc_set; jmp 401C08)
+                    @{ Offset = 0x7E790; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 6E 28 F8 FF' }
+                    # tramp_dc_load (stub_dc_set; jmp 403AA4)
+                    @{ Offset = 0x7E7A0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 FA 46 F8 FF' }
+                    # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
+                    @{ Offset = 0x7FEB8; Old = '61 6E 69 6D 2E 64 61 74 00 00 00 00'; New = '61 6E 69 6D 6F 7A 69 2E 64 61 74 00' }
+                    # .reloc table, page-0x4000 block: entries 3E8B, 3E90 -> 0000 (the two string pushes of the removed credits TTY create at VA 0x404E8B / 0x404E90 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BCE; Old = '8B 3E 90 3E'; New = '00 00 00 00' }
+                    # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BE0; Old = 'DE 30 03 31'; New = '00 00 00 00' }
+                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xD8
+                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'D8 00 00 00' }
+                    # .reloc table: insert 12 HIGHLOW entries (3243, 3254, 3265, 3276, 3293, 32A4, 32B5, 32C6, 3343, 3354, 3365, 3376) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DE8 move up by 24, the 24 zero slack bytes 0xA0DE8..0xA0E00 at the end of the section are dropped
+                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 93 32 A4 32 B5 32 C6 32 43 33 54 33 65 33 76 33'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D F8 3D FC 3D 00 3E 04 3E'; SectionEnd = 0xA0E00 }
+                )
+            }
+
+            # ---- ozi @ 3840x1080: DARK COLONY and OZI MISSIONS menu modes (Council Wars only) ---------------------------------------------------------
+            #  Added      : 10 Sep 2026
+            #  Made with  : tools/patch_ozi_menu.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36
+            #  Changes    : 3493 bytes in 23 edits
+            #  Council Wars opens every data file through one helper that prefixes the name with the
+            #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
+            #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
+            #  those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
+            #  and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
+            #  the main menu:
+            #    * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
+            #      stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
+            #      the rest is NOP padding
+            #    * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
+            #      Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
+            #    * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
+            #      section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
+            #    * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
+            #      entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
+            #      size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
+            #      slack at the end of the .reloc section are dropped so the file size stays the same.  The
+            #      two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
+            #    * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+            #      string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+            #      units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+            #      the original exe reads stay untouched.
+            #  The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+            #  doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+            #  the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+            #  the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+            #  holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+            #  Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+            #  SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+            #  itself uses.  Two buttons are added for it:
+            #    * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+            #      6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+            #      them to 19 and 20 and gives the new buttons the plates 21 and 22
+            #    * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+            #      sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+            #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+            #      and their four absolute slot addresses add four more entries to the .reloc insert
+            #    * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+            #      is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+            #      the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+            #      two string operands the call carried become type 0 relocation padding.
+            #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+            #  exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+            #  (exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+            #  relocation entry, this patch is always applied last.
+            @{
+                Id = 'ozi'; Name = 'DARK COLONY and OZI MISSIONS menu modes (Council Wars only)'; Date = '10 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = '3840x1080'
+                Tool = 'tools/patch_ozi_menu.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36'
+                Description = @'
+Council Wars opens every data file through one helper that prefixes the name with the
+8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
+folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
+those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
+and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
+the main menu:
+  * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
+    stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
+    the rest is NOP padding
+  * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
+    Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
+  * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
+    section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
+  * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
+    entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
+    size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
+    slack at the end of the .reloc section are dropped so the file size stays the same.  The
+    two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
+  * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+    string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+    units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+    the original exe reads stay untouched.
+The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+itself uses.  Two buttons are added for it:
+  * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+    6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+    them to 19 and 20 and gives the new buttons the plates 21 and 22
+  * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+    sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+    the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+    and their four absolute slot addresses add four more entries to the .reloc insert
+  * the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes -> NOPs, the call
+    is `ret 20h` so the stack balances): the seven-row menu is 217 rows tall and the black band of
+    the 640x480 backdrop between the planet's crescent and the artwork is exactly 217 rows.  The
+    two string operands the call carried become type 0 relocation padding.
+REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+(exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+relocation entry, this patch is always applied last.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('hdpaths')
+                # data files this fix needs next to the exe (385; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'ozi_ns\alta.gif'
+                    'ozi_ns\alta.rgb'
+                    'ozi_ns\alta.rmp'
+                    'ozi_ns\area52.gif'
+                    'ozi_ns\area52.rgb'
+                    'ozi_ns\area52.rmp'
+                    'ozi_ns\earth.gif'
+                    'ozi_ns\gamestat\BOOMSTAT.TXT'
+                    'ozi_ns\gamestat\gamestat.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'ozi_ns\gamestat\hxscene.txt'
+                    'ozi_ns\gamestat\MBULLET.TXT'
+                    'ozi_ns\gamestat\UNITID.TXT'
+                    'ozi_ns\gamestat\WEAPSTAT.TXT'
+                    'ozi_ns\gatlan.GIF'
+                    'ozi_ns\gatlan.NCY'
+                    'ozi_ns\gatlan.RGB'
+                    'ozi_ns\gatlan.RMP'
+                    'ozi_ns\gjungle.gif'
+                    'ozi_ns\gjungle.rgb'
+                    'ozi_ns\gJUNGLE.RMP'
+                    'ozi_ns\intrf_hd\bintroe'
+                    'ozi_ns\intrf_hd\gxscene.txt'
+                    'ozi_ns\intrf_hd\hxscene.txt'
+                    'ozi_ns\intrf_hd\introe'
+                    'ozi_ns\intrf_hd\shumane'
+                    'ozi_ns\intrface\astory.txt'
+                    'ozi_ns\intrface\credits.txt'
+                    'ozi_ns\intrface\hstory.txt'
+                    'ozi_ns\jubjub.gif'
+                    'ozi_ns\jubjub.rgb'
+                    'ozi_ns\jubjub.rmp'
+                    'ozi_ns\mission\g1.wav'
+                    'ozi_ns\mission\g10.wav'
+                    'ozi_ns\mission\g11.wav'
+                    'ozi_ns\mission\g2.wav'
+                    'ozi_ns\mission\g3.wav'
+                    'ozi_ns\mission\g4.wav'
+                    'ozi_ns\mission\g5.wav'
+                    'ozi_ns\mission\g6.wav'
+                    'ozi_ns\mission\g7.wav'
+                    'ozi_ns\mission\g8.wav'
+                    'ozi_ns\mission\g9.wav'
+                    'ozi_ns\mission\h1.wav'
+                    'ozi_ns\mission\h10.wav'
+                    'ozi_ns\mission\h11.wav'
+                    'ozi_ns\mission\h2.wav'
+                    'ozi_ns\mission\h3.wav'
+                    'ozi_ns\mission\h4.wav'
+                    'ozi_ns\mission\h5.wav'
+                    'ozi_ns\mission\h6.wav'
+                    'ozi_ns\mission\h7.wav'
+                    'ozi_ns\mission\h8.wav'
+                    'ozi_ns\mission\h80.wav'
+                    'ozi_ns\mission\h9.wav'
+                    'ozi_ns\scenario\all.jus'
+                    'ozi_ns\scenario\alta.bts'
+                    'ozi_ns\scenario\area52.bts'
+                    'ozi_ns\scenario\atlantis.bts'
+                    'ozi_ns\scenario\council\scene.txt'
+                    'ozi_ns\scenario\council\tarr01.001'
+                    'ozi_ns\scenario\council\tarr01.002'
+                    'ozi_ns\scenario\council\tarr01.003'
+                    'ozi_ns\scenario\council\tarr01.004'
+                    'ozi_ns\scenario\council\tarr01.map'
+                    'ozi_ns\scenario\council\tarr01.msg'
+                    'ozi_ns\scenario\council\tarr01.mtg'
+                    'ozi_ns\scenario\council\tarr01.ovh'
+                    'ozi_ns\scenario\council\tarr01.pop'
+                    'ozi_ns\scenario\council\tarr01.pth'
+                    'ozi_ns\scenario\council\tarr01.scn'
+                    'ozi_ns\scenario\council\tarr01.tro'
+                    'ozi_ns\scenario\council\tarr01.txt'
+                    'ozi_ns\scenario\council\tarr02.001'
+                    'ozi_ns\scenario\council\tarr02.002'
+                    'ozi_ns\scenario\council\tarr02.map'
+                    'ozi_ns\scenario\council\tarr02.msg'
+                    'ozi_ns\scenario\council\tarr02.mtg'
+                    'ozi_ns\scenario\council\tarr02.ovh'
+                    'ozi_ns\scenario\council\tarr02.pop'
+                    'ozi_ns\scenario\council\tarr02.pth'
+                    'ozi_ns\scenario\council\tarr02.scn'
+                    'ozi_ns\scenario\council\tarr02.tro'
+                    'ozi_ns\scenario\council\tarr02.txt'
+                    'ozi_ns\scenario\council\tarr03.001'
+                    'ozi_ns\scenario\council\tarr03.002'
+                    'ozi_ns\scenario\council\tarr03.map'
+                    'ozi_ns\scenario\council\tarr03.msg'
+                    'ozi_ns\scenario\council\tarr03.mtg'
+                    'ozi_ns\scenario\council\tarr03.ovh'
+                    'ozi_ns\scenario\council\tarr03.pop'
+                    'ozi_ns\scenario\council\tarr03.pth'
+                    'ozi_ns\scenario\council\tarr03.scn'
+                    'ozi_ns\scenario\council\tarr03.tro'
+                    'ozi_ns\scenario\council\tarr03.txt'
+                    'ozi_ns\scenario\council\tarr04.001'
+                    'ozi_ns\scenario\council\tarr04.002'
+                    'ozi_ns\scenario\council\tarr04.map'
+                    'ozi_ns\scenario\council\tarr04.msg'
+                    'ozi_ns\scenario\council\tarr04.mtg'
+                    'ozi_ns\scenario\council\tarr04.ovh'
+                    'ozi_ns\scenario\council\tarr04.pop'
+                    'ozi_ns\scenario\council\tarr04.pth'
+                    'ozi_ns\scenario\council\tarr04.scn'
+                    'ozi_ns\scenario\council\tarr04.tro'
+                    'ozi_ns\scenario\council\tarr04.txt'
+                    'ozi_ns\scenario\council\tarr05.001'
+                    'ozi_ns\scenario\council\tarr05.002'
+                    'ozi_ns\scenario\council\tarr05.map'
+                    'ozi_ns\scenario\council\tarr05.msg'
+                    'ozi_ns\scenario\council\tarr05.mtg'
+                    'ozi_ns\scenario\council\tarr05.ovh'
+                    'ozi_ns\scenario\council\tarr05.pop'
+                    'ozi_ns\scenario\council\tarr05.pth'
+                    'ozi_ns\scenario\council\tarr05.scn'
+                    'ozi_ns\scenario\council\tarr05.tro'
+                    'ozi_ns\scenario\council\tarr05.txt'
+                    'ozi_ns\scenario\council\tarr06.001'
+                    'ozi_ns\scenario\council\tarr06.002'
+                    'ozi_ns\scenario\council\tarr06.003'
+                    'ozi_ns\scenario\council\tarr06.map'
+                    'ozi_ns\scenario\council\tarr06.msg'
+                    'ozi_ns\scenario\council\tarr06.mtg'
+                    'ozi_ns\scenario\council\tarr06.ovh'
+                    'ozi_ns\scenario\council\tarr06.pop'
+                    'ozi_ns\scenario\council\tarr06.pth'
+                    'ozi_ns\scenario\council\tarr06.scn'
+                    'ozi_ns\scenario\council\tarr06.tro'
+                    'ozi_ns\scenario\council\tarr06.txt'
+                    'ozi_ns\scenario\council\tarr07.001'
+                    'ozi_ns\scenario\council\tarr07.002'
+                    'ozi_ns\scenario\council\tarr07.003'
+                    'ozi_ns\scenario\council\tarr07.004'
+                    'ozi_ns\scenario\council\tarr07.map'
+                    'ozi_ns\scenario\council\tarr07.msg'
+                    'ozi_ns\scenario\council\tarr07.mtg'
+                    'ozi_ns\scenario\council\tarr07.ovh'
+                    'ozi_ns\scenario\council\tarr07.pop'
+                    'ozi_ns\scenario\council\tarr07.pth'
+                    'ozi_ns\scenario\council\tarr07.scn'
+                    'ozi_ns\scenario\council\tarr07.tro'
+                    'ozi_ns\scenario\council\tarr07.txt'
+                    'ozi_ns\scenario\council\tarr08.001'
+                    'ozi_ns\scenario\council\tarr08.002'
+                    'ozi_ns\scenario\council\tarr08.003'
+                    'ozi_ns\scenario\council\tarr08.004'
+                    'ozi_ns\scenario\council\tarr08.map'
+                    'ozi_ns\scenario\council\tarr08.msg'
+                    'ozi_ns\scenario\council\tarr08.mtg'
+                    'ozi_ns\scenario\council\tarr08.ovh'
+                    'ozi_ns\scenario\council\tarr08.pop'
+                    'ozi_ns\scenario\council\tarr08.pth'
+                    'ozi_ns\scenario\council\tarr08.scn'
+                    'ozi_ns\scenario\council\tarr08.tro'
+                    'ozi_ns\scenario\council\tarr08.txt'
+                    'ozi_ns\scenario\council\tarr09.001'
+                    'ozi_ns\scenario\council\tarr09.002'
+                    'ozi_ns\scenario\council\tarr09.003'
+                    'ozi_ns\scenario\council\tarr09.map'
+                    'ozi_ns\scenario\council\tarr09.msg'
+                    'ozi_ns\scenario\council\tarr09.mtg'
+                    'ozi_ns\scenario\council\tarr09.ovh'
+                    'ozi_ns\scenario\council\tarr09.pop'
+                    'ozi_ns\scenario\council\tarr09.pth'
+                    'ozi_ns\scenario\council\tarr09.scn'
+                    'ozi_ns\scenario\council\tarr09.tro'
+                    'ozi_ns\scenario\council\tarr09.txt'
+                    'ozi_ns\scenario\council\tarr10.001'
+                    'ozi_ns\scenario\council\tarr10.002'
+                    'ozi_ns\scenario\council\tarr10.003'
+                    'ozi_ns\scenario\council\tarr10.004'
+                    'ozi_ns\scenario\council\tarr10.map'
+                    'ozi_ns\scenario\council\tarr10.MSG'
+                    'ozi_ns\scenario\council\tarr10.mtg'
+                    'ozi_ns\scenario\council\tarr10.ovh'
+                    'ozi_ns\scenario\council\tarr10.pop'
+                    'ozi_ns\scenario\council\tarr10.pth'
+                    'ozi_ns\scenario\council\tarr10.scn'
+                    'ozi_ns\scenario\council\tarr10.tro'
+                    'ozi_ns\scenario\council\tarr10.TXT'
+                    'ozi_ns\scenario\council\tarr11.001'
+                    'ozi_ns\scenario\council\tarr11.002'
+                    'ozi_ns\scenario\council\tarr11.map'
+                    'ozi_ns\scenario\council\tarr11.msg'
+                    'ozi_ns\scenario\council\tarr11.mtg'
+                    'ozi_ns\scenario\council\tarr11.ovh'
+                    'ozi_ns\scenario\council\tarr11.pop'
+                    'ozi_ns\scenario\council\tarr11.pth'
+                    'ozi_ns\scenario\council\tarr11.scn'
+                    'ozi_ns\scenario\council\tarr11.tro'
+                    'ozi_ns\scenario\council\tarr11.txt'
+                    'ozi_ns\scenario\DESERT.BTS'
+                    'ozi_ns\scenario\earth.bts'
+                    'ozi_ns\scenario\gatlan.bts'
+                    'ozi_ns\scenario\GJUNGLE.BTS'
+                    'ozi_ns\scenario\globo\globo01.001'
+                    'ozi_ns\scenario\globo\globo01.002'
+                    'ozi_ns\scenario\globo\globo01.003'
+                    'ozi_ns\scenario\globo\globo01.map'
+                    'ozi_ns\scenario\globo\globo01.msg'
+                    'ozi_ns\scenario\globo\globo01.mtg'
+                    'ozi_ns\scenario\globo\globo01.ovh'
+                    'ozi_ns\scenario\globo\globo01.pop'
+                    'ozi_ns\scenario\globo\globo01.pth'
+                    'ozi_ns\scenario\globo\globo01.scn'
+                    'ozi_ns\scenario\globo\globo01.tro'
+                    'ozi_ns\scenario\globo\globo01.txt'
+                    'ozi_ns\scenario\globo\globo02.001'
+                    'ozi_ns\scenario\globo\globo02.002'
+                    'ozi_ns\scenario\globo\globo02.003'
+                    'ozi_ns\scenario\globo\globo02.map'
+                    'ozi_ns\scenario\globo\globo02.msg'
+                    'ozi_ns\scenario\globo\globo02.mtg'
+                    'ozi_ns\scenario\globo\globo02.ovh'
+                    'ozi_ns\scenario\globo\globo02.pop'
+                    'ozi_ns\scenario\globo\globo02.pth'
+                    'ozi_ns\scenario\globo\globo02.scn'
+                    'ozi_ns\scenario\globo\globo02.tro'
+                    'ozi_ns\scenario\globo\globo02.txt'
+                    'ozi_ns\scenario\globo\globo03.001'
+                    'ozi_ns\scenario\globo\globo03.002'
+                    'ozi_ns\scenario\globo\globo03.003'
+                    'ozi_ns\scenario\globo\globo03.map'
+                    'ozi_ns\scenario\globo\globo03.msg'
+                    'ozi_ns\scenario\globo\globo03.mtg'
+                    'ozi_ns\scenario\globo\globo03.ovh'
+                    'ozi_ns\scenario\globo\globo03.pop'
+                    'ozi_ns\scenario\globo\globo03.pth'
+                    'ozi_ns\scenario\globo\globo03.scn'
+                    'ozi_ns\scenario\globo\globo03.tro'
+                    'ozi_ns\scenario\globo\globo03.txt'
+                    'ozi_ns\scenario\globo\globo04.001'
+                    'ozi_ns\scenario\globo\globo04.002'
+                    'ozi_ns\scenario\globo\globo04.003'
+                    'ozi_ns\scenario\globo\globo04.map'
+                    'ozi_ns\scenario\globo\globo04.msg'
+                    'ozi_ns\scenario\globo\globo04.mtg'
+                    'ozi_ns\scenario\globo\globo04.ovh'
+                    'ozi_ns\scenario\globo\globo04.pop'
+                    'ozi_ns\scenario\globo\globo04.pth'
+                    'ozi_ns\scenario\globo\globo04.scn'
+                    'ozi_ns\scenario\globo\globo04.tro'
+                    'ozi_ns\scenario\globo\globo04.txt'
+                    'ozi_ns\scenario\globo\globo05.001'
+                    'ozi_ns\scenario\globo\globo05.002'
+                    'ozi_ns\scenario\globo\globo05.map'
+                    'ozi_ns\scenario\globo\globo05.msg'
+                    'ozi_ns\scenario\globo\globo05.mtg'
+                    'ozi_ns\scenario\globo\globo05.ovh'
+                    'ozi_ns\scenario\globo\globo05.pop'
+                    'ozi_ns\scenario\globo\globo05.pth'
+                    'ozi_ns\scenario\globo\globo05.scn'
+                    'ozi_ns\scenario\globo\globo05.tro'
+                    'ozi_ns\scenario\globo\globo05.txt'
+                    'ozi_ns\scenario\globo\globo06.001'
+                    'ozi_ns\scenario\globo\globo06.002'
+                    'ozi_ns\scenario\globo\globo06.003'
+                    'ozi_ns\scenario\globo\globo06.map'
+                    'ozi_ns\scenario\globo\globo06.msg'
+                    'ozi_ns\scenario\globo\globo06.mtg'
+                    'ozi_ns\scenario\globo\globo06.ovh'
+                    'ozi_ns\scenario\globo\globo06.pop'
+                    'ozi_ns\scenario\globo\globo06.pth'
+                    'ozi_ns\scenario\globo\globo06.scn'
+                    'ozi_ns\scenario\globo\globo06.tro'
+                    'ozi_ns\scenario\globo\globo06.txt'
+                    'ozi_ns\scenario\globo\globo07.001'
+                    'ozi_ns\scenario\globo\globo07.002'
+                    'ozi_ns\scenario\globo\globo07.003'
+                    'ozi_ns\scenario\globo\globo07.004'
+                    'ozi_ns\scenario\globo\globo07.map'
+                    'ozi_ns\scenario\globo\globo07.msg'
+                    'ozi_ns\scenario\globo\globo07.mtg'
+                    'ozi_ns\scenario\globo\globo07.ovh'
+                    'ozi_ns\scenario\globo\globo07.pop'
+                    'ozi_ns\scenario\globo\globo07.pth'
+                    'ozi_ns\scenario\globo\globo07.scn'
+                    'ozi_ns\scenario\globo\globo07.tro'
+                    'ozi_ns\scenario\globo\globo07.txt'
+                    'ozi_ns\scenario\globo\globo08.001'
+                    'ozi_ns\scenario\globo\globo08.002'
+                    'ozi_ns\scenario\globo\globo08.003'
+                    'ozi_ns\scenario\globo\globo08.map'
+                    'ozi_ns\scenario\globo\globo08.msg'
+                    'ozi_ns\scenario\globo\globo08.mtg'
+                    'ozi_ns\scenario\globo\globo08.ovh'
+                    'ozi_ns\scenario\globo\globo08.pop'
+                    'ozi_ns\scenario\globo\globo08.pth'
+                    'ozi_ns\scenario\globo\globo08.scn'
+                    'ozi_ns\scenario\globo\globo08.tro'
+                    'ozi_ns\scenario\globo\globo08.txt'
+                    'ozi_ns\scenario\globo\globo09.001'
+                    'ozi_ns\scenario\globo\globo09.002'
+                    'ozi_ns\scenario\globo\globo09.003'
+                    'ozi_ns\scenario\globo\globo09.map'
+                    'ozi_ns\scenario\globo\globo09.msg'
+                    'ozi_ns\scenario\globo\globo09.mtg'
+                    'ozi_ns\scenario\globo\globo09.ovh'
+                    'ozi_ns\scenario\globo\globo09.pop'
+                    'ozi_ns\scenario\globo\globo09.pth'
+                    'ozi_ns\scenario\globo\globo09.scn'
+                    'ozi_ns\scenario\globo\globo09.tro'
+                    'ozi_ns\scenario\globo\globo09.txt'
+                    'ozi_ns\scenario\globo\globo10.001'
+                    'ozi_ns\scenario\globo\globo10.002'
+                    'ozi_ns\scenario\globo\globo10.003'
+                    'ozi_ns\scenario\globo\globo10.004'
+                    'ozi_ns\scenario\globo\globo10.map'
+                    'ozi_ns\scenario\globo\globo10.msg'
+                    'ozi_ns\scenario\globo\globo10.mtg'
+                    'ozi_ns\scenario\globo\globo10.ovh'
+                    'ozi_ns\scenario\globo\globo10.pop'
+                    'ozi_ns\scenario\globo\globo10.pth'
+                    'ozi_ns\scenario\globo\globo10.scn'
+                    'ozi_ns\scenario\globo\globo10.tro'
+                    'ozi_ns\scenario\globo\globo10.txt'
+                    'ozi_ns\scenario\globo\globo11.001'
+                    'ozi_ns\scenario\globo\globo11.002'
+                    'ozi_ns\scenario\globo\globo11.003'
+                    'ozi_ns\scenario\globo\globo11.map'
+                    'ozi_ns\scenario\globo\globo11.msg'
+                    'ozi_ns\scenario\globo\globo11.mtg'
+                    'ozi_ns\scenario\globo\globo11.ovh'
+                    'ozi_ns\scenario\globo\globo11.pop'
+                    'ozi_ns\scenario\globo\globo11.pth'
+                    'ozi_ns\scenario\globo\globo11.scn'
+                    'ozi_ns\scenario\globo\globo11.tro'
+                    'ozi_ns\scenario\globo\globo11.txt'
+                    'ozi_ns\scenario\globo\scene.txt'
+                    'ozi_ns\scenario\HTRAIN.BTS'
+                    'ozi_ns\scenario\jubjub.bts'
+                    'ozi_ns\scenario\JUNGLE.BTS'
+                    'ozi_ns\scenario\special.bts'
+                    'ozi_ns\scenario\trainh.bts'
+                    'ozi_ns\scenario\vent.jus'
+                    'ozi_ns\sound\ALIST.DAT'
+                    'ozi_ns\sound\alta.amb'
+                    'ozi_ns\sound\area52.amb'
+                    'ozi_ns\sound\ATLANTIS.AMB'
+                    'ozi_ns\sound\ATLANTIS.DAT'
+                    'ozi_ns\sound\ATRAIN.DAT'
+                    'ozi_ns\sound\birds.wav'
+                    'ozi_ns\sound\cobra.wav'
+                    'ozi_ns\sound\cow.wav'
+                    'ozi_ns\sound\cricket.wav'
+                    'ozi_ns\sound\DALG1DEA.wav'
+                    'ozi_ns\sound\DALG1SEL.wav'
+                    'ozi_ns\sound\DALG2ACK.wav'
+                    'ozi_ns\sound\DALG2SEL.wav'
+                    'ozi_ns\sound\dog.wav'
+                    'ozi_ns\sound\dog2.wav'
+                    'ozi_ns\sound\earth.amb'
+                    'ozi_ns\sound\frog.wav'
+                    'ozi_ns\sound\frogs.wav'
+                    'ozi_ns\sound\gatlan.AMB'
+                    'ozi_ns\sound\gease.wav'
+                    'ozi_ns\sound\GJUNGLE.AMB'
+                    'ozi_ns\sound\GJUNGLE.DAT'
+                    'ozi_ns\sound\jubjub.amb'
+                    'ozi_ns\sound\KOMANDWE.wav'
+                    'ozi_ns\sound\KOMANWEA.wav'
+                    'ozi_ns\sound\mosq.wav'
+                    'ozi_ns\sound\r2bird.wav'
+                    'ozi_ns\sound\SCENESND.DAT'
+                    'ozi_ns\sound\seagull.wav'
+                    'ozi_ns\sound\slist.dat'
+                    'ozi_ns\sound\turkey.wav'
+                    'ozi_ns\sound\water.wav'
+                    'ozi_ns\sound\wolf.wav'
+                    'ozi_ns\special.gif'
+                    'ozi_ns\special.rgb'
+                    'ozi_ns\special.rmp'
+                    'ozisave\ozisave.txt'
+                    'exp\animozi.dat'
+                    'exp\animate\dalg.fin'
+                    'exp\animate\reae.fin'
+                    'exp\animate\spyo.fin'
+                    'exp\animate\tranozi.fin'
+                    'exp\sprites\dalg.spr'
+                    'exp\sprites\reae.spr'
+                    'exp\sprites\spyo.spr'
+                    'exp\sprites\tranozi.spr'
+                    'ozi_ns\gamestat\hxscene.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'dc\intrf_hd\bintroe'
+                )
+                Edits = @(
+                    # PE optional header: base-relocation directory size 0x93CC -> 0x93E4 (+16)
+                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'E4 93 00 00' }
+                    # credits TTY create -> 45 NOPs (the seven-row menu needs the rows)
+                    @{ Offset = 0x4280; Old = '6A 00 6A 00 6A 00 6A 05 6A 02 68 84 21 48 00 68 6C 24 48 00 B9 18 01 00 00 BB 51 02 00 00 6A 44 BA F4 06 00 00 8B 45 FC E8 FB 35 02 00'; New = '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # menu id filter: accept the button ids 6 and 7 (cmp edx,5 -> 7)
+                    @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
+                    # credits TTY destroy count 1 -> 0 (nothing was created)
+                    @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
+                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
+                    # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
+                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 58 A2 07 00' }
+                    # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
+                    @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
+                    # LOAD GAME call -> tramp_cw_load
+                    @{ Offset = 0x44BF; Old = 'E8 E0 E9 FF FF'; New = 'E8 2C A2 07 00' }
+                    # end of the id chain: jne 0040513D -> the Dark Colony handlers
+                    @{ Offset = 0x44DB; Old = '75 60'; New = '75 25' }
+                    # OZI MISSIONS + DARK COLONY handlers (was PLAY INTRO)
+                    @{ Offset = 0x44DD; Old = 'BE F2 46 4A 00 8D BD F0 FE FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD F0 FE FF FF 8D 95 F0 FE FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8B 45 FC E8 EB BE FF FF'; New = 'C7 80 F4 14 00 00 01 00 00 00 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 45 A1 07 00 E8 08 CB FF FF EB 3B 83 FF 06 75 16 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 75 A2 07 00 EB 20 83 FF 07 75 14 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 6A A2 07 00 90 90 90 90 90 90 90' }
+                    # stub_pack (pack strings into the 4 slots)
+                    @{ Offset = 0x7E640; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF C8 7D 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF 44 23 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB BF 5C 5E 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB 5F 58 C3' }
+                    # stub_cw_set (Council Wars strings)
+                    @{ Offset = 0x7E690; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF 44 23 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB BF 5C 5E 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB 5F 58 C3 00 00 00 00' }
+                    # tramp_cw_campaign (stub_cw_set; jmp 401C08)
+                    @{ Offset = 0x7E6E0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 1E 29 F8 FF' }
+                    # tramp_cw_load (stub_cw_set; jmp 403AA4)
+                    @{ Offset = 0x7E6F0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 AA 47 F8 FF' }
+                    # tramp_pack_load (stub_pack; jmp 403AA4)
+                    @{ Offset = 0x7E700; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 3B FF FF FF E9 9A 47 F8 FF' }
+                    # stub_dc_set (Dark Colony strings)
+                    @{ Offset = 0x7E740; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF 44 23 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB BF 5C 5E 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB 5F 58 C3' }
+                    # tramp_dc_campaign (stub_dc_set; jmp 401C08)
+                    @{ Offset = 0x7E790; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 6E 28 F8 FF' }
+                    # tramp_dc_load (stub_dc_set; jmp 403AA4)
+                    @{ Offset = 0x7E7A0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 FA 46 F8 FF' }
+                    # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
+                    @{ Offset = 0x7FEB8; Old = '61 6E 69 6D 2E 64 61 74 00 00 00 00'; New = '61 6E 69 6D 6F 7A 69 2E 64 61 74 00' }
+                    # .reloc table, page-0x4000 block: entries 3E8B, 3E90 -> 0000 (the two string pushes of the removed credits TTY create at VA 0x404E8B / 0x404E90 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BCE; Old = '8B 3E 90 3E'; New = '00 00 00 00' }
+                    # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BE0; Old = 'DE 30 03 31'; New = '00 00 00 00' }
+                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xD8
+                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'D8 00 00 00' }
+                    # .reloc table: insert 12 HIGHLOW entries (3243, 3254, 3265, 3276, 3293, 32A4, 32B5, 32C6, 3343, 3354, 3365, 3376) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DE8 move up by 24, the 24 zero slack bytes 0xA0DE8..0xA0E00 at the end of the section are dropped
+                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 93 32 A4 32 B5 32 C6 32 43 33 54 33 65 33 76 33'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D F8 3D FC 3D 00 3E 04 3E'; SectionEnd = 0xA0E00 }
                 )
             }
         )
@@ -9439,29 +11729,68 @@ function Edit-DatList([string] $Text) {
 #     LOAD CW GAME  (2)   ENCYCLOPEDIA     (5)
 #     OZI MISSIONS (16)
 #     LOAD OZI GAME (4)   QUIT            (12)
-#
-# with a gap of half a button height (12 px) after rows 1 and 3, which separates ACADEMY, the two
-# Council Wars entries and the two pack entries, and the same gap between the two columns, after which
-# the block is re-centred on the screen.  It is anchored on the BOTTOM row of the grid in the script -
-# the one row that must not move, since the 640x480 backdrop's artwork starts 3 px below it - so
-# applying this twice changes nothing.  The two row gaps and the fifth row are won at the top, out of
-# the credits box, which moves up and gets shorter: 68 rows at y = 203 through patch_resolution
-# (credits_y(203, 296) plus that build's own height site), and 52 rows at y = 219 at 640x480 through
-# patch_ozi_menu, because the stock backdrop there draws the planet's crescent across rows 198..218.
-# The untouched exe keeps Classic's four-row grid and labels in exp\intrface\bintroe (doc 10.35).
+# The patched Council Wars main menu (doc 10.35 and 10.36), the PowerShell twin of
+# tools/build_ozi_overlay.py menu_layout()/menu_script(): Classic's 2x4 button grid becomes seven
+# rows in the left column - ACADEMY, the two Dark Colony entries, the two Council Wars entries and
+# the two pack entries - with MULTI PLAYER WAR and ENCYCLOPEDIA at the top of the second column and
+# QUIT on its last row, a gap of half a button height (12 px) after rows 1, 3 and 5 and the same
+# gap between the columns, after which the block is re-centred on the screen.  It is anchored on
+# the BOTTOM row of the grid in the script - the one row that must not move, since the 640x480
+# backdrop's artwork starts 3 px below it - so applying this twice changes nothing.  The rows above
+# it are won from the credits box, which the `ozi` fix removes from the exe; at 640x480 the gap
+# shrinks by a pixel so that the first row still clears the planet's crescent (rows 198..217).
+# The two Dark Colony buttons are ids 6 and 7, which the stock script used for the LARGEBUTTON
+# gadgets of buttons 0 and 1; those move to 19 and 20, the new plates are 21 and 22, and `banim`
+# pairs all ten.  The new lines are cloned from the script's own `pushb 16` / `gadget 17` /
+# `textmsg 8` so they keep its field layout.  The untouched exe keeps Classic's 2x4 grid and labels
+# in exp\intrface\bintroe (doc 10.35).
+function Set-ScriptTokens([string] $Line, $Changes) {
+    $toks = @($TOKENS.Matches($Line) | ForEach-Object { $_.Value })
+    $n = 0
+    for ($i = 0; $i -lt $toks.Count; $i++) {
+        if ($toks[$i].Trim().Length -eq 0) { continue }
+        $n++
+        if ($Changes.ContainsKey($n)) { $toks[$i] = [string] $Changes[$n] }
+    }
+    return (-join $toks)
+}
+
+function Get-TextmsgLine([int] $N, [string] $Text) {
+    $num = [string] $N
+    return ('textmsg ' + $num + (' ' * (8 - $num.Length)) + $Text)
+}
+
 function Edit-OziMenu([string] $Text) {
-    $cols = @(@(1, 0, 2, 16, 4), @(3, $null, 5, $null, 12))
-    $gadgetOf = @{ 0 = 6; 1 = 7; 2 = 8; 3 = 9; 4 = 10; 5 = 11; 12 = 13; 16 = 17 }
-    $labels = @{ 1 = 'COUNCIL WARS'; 2 = 'ACADEMY'; 3 = 'LOAD CW GAME'; 5 = 'LOAD OZI GAME'; 8 = 'OZI MISSIONS' }
+    $cols = @(@(1, 6, 7, 0, 2, 16, 4), @(3, 5, $null, $null, $null, $null, 12))
+    $gapAfter = @(1, 3, 5)
+    $stockButtons = @(0, 1, 2, 3, 4, 5, 12, 16)
+    $stockGadgets = @(8, 9, 10, 11, 13, 17)
+    $newButtons = @(6, 7)
+    $renum = @{ 6 = 19; 7 = 20 }
+    $gadgetOf = @{ 0 = 19; 1 = 20; 2 = 8; 3 = 9; 4 = 10; 5 = 11; 6 = 21; 7 = 22; 12 = 13; 16 = 17 }
+    $labelOf = @{ 6 = 9; 7 = 10 }
+    $template = @{ 'pushb' = 16; 'gadget' = 17 }
+    $banimId = 18
+    $banimOrder = @(0, 1, 2, 3, 4, 5, 16, 12, 6, 7)
+    $textTemplate = 8
+    $stockTopLimit = 218
+    $labels = @{ 1 = 'COUNCIL WARS'; 2 = 'ACADEMY'; 3 = 'LOAD CW GAME'; 5 = 'LOAD OZI GAME'
+                 8 = 'OZI MISSIONS'; 9 = 'DARK COLONY'; 10 = 'LOAD DC GAME' }
     $xy = @{}
     foreach ($m in ([regex] '(?m)^\s*pushb\s+(\d+)\s+\d+\s+(\d+)\s+(\d+)\s').Matches($Text)) { $xy[[int]$m.Groups[1].Value] = @([int]$m.Groups[2].Value, [int]$m.Groups[3].Value) }
     $gadgets = @{}
     foreach ($m in ([regex] '(?m)^\s*gadget\s+(\d+)\s').Matches($Text)) { $gadgets[[int]$m.Groups[1].Value] = $true }
     $missing = @()
-    foreach ($need in 0, 1, 2, 3, 4, 5, 12, 16) { if (-not $xy.ContainsKey($need)) { $missing += "pushb $need" } }
-    foreach ($need in 6, 7, 8, 9, 10, 11, 13, 17) { if (-not $gadgets.ContainsKey($need)) { $missing += "gadget $need" } }
+    foreach ($need in $stockButtons) { if (-not $xy.ContainsKey($need)) { $missing += "pushb $need" } }
+    foreach ($need in $stockGadgets) { if (-not $gadgets.ContainsKey($need)) { $missing += "gadget $need" } }
+    # the stock grid has the two plates as 6 and 7, this function's own output as 19 and 20
+    $haveOld = $true; $haveNew = $true
+    foreach ($k in $renum.Keys) { if (-not $gadgets.ContainsKey([int]$k)) { $haveOld = $false } }
+    foreach ($v in $renum.Values) { if (-not $gadgets.ContainsKey([int]$v)) { $haveNew = $false } }
+    if (-not ($haveOld -or $haveNew)) { $missing += 'gadget 6/19, gadget 7/20' }
     $b = ([regex] '(?m)^\s*banim\s+18\s+\d+\s+(\d+)\s+(\d+)\s').Match($Text)
-    if (-not $b.Success -or $b.Groups[1].Value -ne '8' -or $b.Groups[2].Value -ne '8') { $missing += 'banim 18 with 8 pairs' }
+    $pairs = @([string] $stockButtons.Count, [string] ($stockButtons.Count + $newButtons.Count))
+    if (-not $b.Success -or $b.Groups[1].Value -ne $b.Groups[2].Value -or -not ($pairs -contains $b.Groups[1].Value)) { $missing += 'banim 18 with 8 or 10 pairs' }
     if ($missing.Count) { throw ("bintroe: not Classic's 2x4 button grid (missing " + ($missing -join ', ') + ')') }
     $xs = @($xy.Values | ForEach-Object { $_[0] } | Sort-Object -Unique)
     $ys = @($xy.Values | ForEach-Object { $_[1] } | Sort-Object -Unique)
@@ -9469,53 +11798,90 @@ function Edit-OziMenu([string] $Text) {
     $pitch = [int]::MaxValue
     for ($i = 1; $i -lt $ys.Count; $i++) { if ($ys[$i] - $ys[$i - 1] -lt $pitch) { $pitch = $ys[$i] - $ys[$i - 1] } }
     $bottom = $ys[$ys.Count - 1]
-    # the maintainer's grouping: half a button's height after rows 1 and 3, and the same between the
-    # columns, after which the block is re-centred on the screen (25 * 0.5 rounds to 12 in .NET and
-    # in Python alike, so both implementations produce the same bytes)
     $sz = [regex]::Matches($Text, '(?m)^\s*pushb\s+\d+\s+\d+\s+\d+\s+\d+\s+(\d+)\s+(\d+)\s')   # two passes: a
     $bw = ($sz | ForEach-Object { [int]$_.Groups[1].Value } | Measure-Object -Minimum).Minimum      # pipeline flattens
     $bh = ($sz | ForEach-Object { [int]$_.Groups[2].Value } | Measure-Object -Minimum).Minimum      # nested arrays
+    $m4 = $SIZE4.Match($Text); $m2 = $SIZE2.Match($Text)
+    $screenW = if ($m4.Success) { [int]$m4.Groups[5].Value } elseif ($m2.Success) { [int]$m2.Groups[3].Value } else { throw 'bintroe: no size line' }   # SIZE4 = size X Y W H
+    $screenH = if ($m4.Success) { [int]$m4.Groups[6].Value } elseif ($m2.Success) { [int]$m2.Groups[5].Value } else { 0 }
+    # 25 * 0.5 rounds to 12 in .NET and in Python alike, so both implementations produce the same bytes
     $gap = [int][Math]::Round($bh * 0.5)
     $rows = $cols[0].Count
+    $topLimit = if ($screenW -eq 640 -and $screenH -eq 480) { $stockTopLimit } else { 0 }
+    while ($gap -gt 0 -and ($bottom - (($rows - 1) * $pitch + $gap * $gapAfter.Count)) -lt $topLimit) { $gap-- }
     $offs = @()
     for ($k = 0; $k -lt $rows; $k++) {
         $extra = 0
-        foreach ($r in 1, 3) { if ($r -le $k) { $extra += $gap } }
+        foreach ($r in $gapAfter) { if ($r -le $k) { $extra += $gap } }
         $offs += ($k * $pitch + $extra)
     }
-    $m4 = $SIZE4.Match($Text); $m2 = $SIZE2.Match($Text)
-    $screenW = if ($m4.Success) { [int]$m4.Groups[5].Value } elseif ($m2.Success) { [int]$m2.Groups[3].Value } else { throw 'bintroe: no size line' }   # SIZE4 = size X Y W H
-    $left = [int][Math]::Floor(($screenW - (2 * $bw + $gap)) / 2)
-    $colX = @($left, ($left + $bw + $gap))
+    $colGap = [int][Math]::Round($bh * 0.5)
+    $left = [int][Math]::Floor(($screenW - (2 * $bw + $colGap)) / 2)
+    $colX = @($left, ($left + $bw + $colGap))
+    $place = @{}
     $move = @{}
     for ($c = 0; $c -lt $cols.Count; $c++) {
         for ($k = 0; $k -lt $cols[$c].Count; $k++) {
             $id = $cols[$c][$k]
             if ($null -ne $id) {
                 $pos = @($colX[$c], ($bottom - ($offs[$rows - 1] - $offs[$k])))
+                $place[[int]$id] = $pos
                 $move[[int]$id] = $pos
                 $move[[int]$gadgetOf[[int]$id]] = $pos        # the gadget follows its button
             }
         }
     }
+    $dropPushb = @($newButtons)
+    $dropGadget = @($newButtons | ForEach-Object { [int] $gadgetOf[[int]$_] })
+    $dropText = @($newButtons | ForEach-Object { [int] $labelOf[[int]$_] })
     $out = New-Object System.Collections.Generic.List[string]
     foreach ($raw in $Text.Split("`n")) {
         $cr = if ($raw.EndsWith("`r")) { "`r" } else { '' }
         $line = if ($cr) { $raw.Substring(0, $raw.Length - 1) } else { $raw }
         $m = [regex]::Match($line, '^\s*(pushb|gadget)\s+(\d+)\s')
         $t = [regex]::Match($line, '^\s*textmsg\s+(\d+)\s')
-        if ($m.Success -and $move.ContainsKey([int]$m.Groups[2].Value)) {   # button and gadget ids do not overlap
-            $pos = $move[[int]$m.Groups[2].Value]
-            $toks = @($TOKENS.Matches($line) | ForEach-Object { $_.Value })
-            $n = 0
-            for ($i = 0; $i -lt $toks.Count; $i++) {
-                if ($toks[$i].Trim().Length -eq 0) { continue }
-                $n++
-                if ($n -eq 4) { $toks[$i] = [string]$pos[0] } elseif ($n -eq 5) { $toks[$i] = [string]$pos[1]; break }
+        if ($m.Success) {
+            $kind = $m.Groups[1].Value
+            $id = [int] $m.Groups[2].Value
+            if ($kind -eq 'pushb' -and ($dropPushb -contains $id)) { continue }     # re-emitted below
+            if ($kind -eq 'gadget' -and ($dropGadget -contains $id)) { continue }
+            if ($kind -eq 'gadget' -and $renum.ContainsKey($id)) {                  # free ids 6 and 7
+                $line = Set-ScriptTokens $line @{ 2 = [string] $renum[$id] }
+                $id = [int] $renum[$id]
             }
-            $line = -join $toks
-        } elseif ($t.Success -and $labels.ContainsKey([int]$t.Groups[1].Value)) {
-            $line = 'textmsg {0}       {1}' -f [int]$t.Groups[1].Value, $labels[[int]$t.Groups[1].Value]
+            if ($move.ContainsKey($id)) {
+                $pos = $move[$id]
+                $line = Set-ScriptTokens $line @{ 4 = [string] $pos[0]; 5 = [string] $pos[1] }
+            }
+            $out.Add($line + $cr)
+            if ($id -eq $template[$kind]) {
+                foreach ($new in $newButtons) {
+                    $pos = $place[[int]$new]
+                    $ident = if ($kind -eq 'pushb') { [int] $new } else { [int] $gadgetOf[[int]$new] }
+                    $changes = @{ 2 = [string] $ident; 4 = [string] $pos[0]; 5 = [string] $pos[1] }
+                    if ($kind -eq 'pushb') { $changes[12] = [string] $labelOf[[int]$new] }
+                    $out.Add((Set-ScriptTokens $line $changes) + $cr)
+                }
+            }
+            continue
+        }
+        if ($t.Success) {
+            $n = [int] $t.Groups[1].Value
+            if ($dropText -contains $n) { continue }
+            if ($labels.ContainsKey($n)) { $line = Get-TextmsgLine $n $labels[$n] }
+            $out.Add($line + $cr)
+            if ($n -eq $textTemplate) {
+                foreach ($new in $newButtons) {
+                    $lb = [int] $labelOf[[int]$new]
+                    $out.Add((Get-TextmsgLine $lb $labels[$lb]) + $cr)
+                }
+            }
+            continue
+        }
+        if ([regex]::IsMatch($line, '^\s*banim\s+\d+\s')) {
+            $g = @($banimOrder | ForEach-Object { [string] $gadgetOf[[int]$_] })
+            $bt = @($banimOrder | ForEach-Object { [string] $_ })
+            $line = ('banim   {0}  0  {1} {1}' -f $banimId, $banimOrder.Count) + "`t " + ($g -join ' ') + '  ' + ($bt -join ' ')
         }
         $out.Add($line + $cr)
     }
@@ -9621,6 +11987,15 @@ function Write-InterfaceSet([string] $GameDir, [string] $Mode, [bool] $Movies) {
             if ($p) { Write-Latin1 (Join-Path $expHd ([System.IO.Path]::GetFileName($p))) (Edit-SceneList (Read-Latin1 $p) $dx0 $dy0); $expWritten++ }
         }
     }
+    # The DARK COLONY mode's prefix points at dc\, which holds the patched menu and nothing else:
+    # every other file a Classic campaign opens falls through to the Classic data in the game root.
+    $dcWritten = 0
+    $dcSrc = Find-CI $expHd 'bintroe'
+    if ($dcSrc -and $expWritten -gt 0) {
+        $dcHd = Join-Path $GameDir 'dc\intrf_hd'
+        if (-not (Test-Path -LiteralPath $dcHd)) { New-Item -ItemType Directory -Path $dcHd -Force | Out-Null }
+        [System.IO.File]::Copy($dcSrc, (Join-Path $dcHd 'bintroe'), $true); $dcWritten++
+    }
     $oziWritten = 0
     $ozi = Join-Path $GameDir 'ozi_ns'; $oziHd = Join-Path $ozi 'intrf_hd'; $oziG = Join-Path $ozi 'gamestat'
     if ((Test-Path -LiteralPath $ozi) -and $expWritten -gt 0) {
@@ -9633,8 +12008,9 @@ function Write-InterfaceSet([string] $GameDir, [string] $Mode, [bool] $Movies) {
             if ($p) { Write-Latin1 (Join-Path $oziHd $ln) (Edit-SceneList (Read-Latin1 $p) $dx0 $dy0); $oziWritten++ }
         }
     }
-    $lines += ('interface set for {0} written: INTRF_HD\ {1} files{2}{3} ({4:N1} s, GIFs re-encoded by the compiled DcGif codec)' -f $Mode, $written,
-               $(if ($expWritten) { ", exp\intrf_hd\ $expWritten" } else { '' }), $(if ($oziWritten) { ", ozi_ns\intrf_hd\ $oziWritten" } else { '' }), $sw.Elapsed.TotalSeconds)
+    $lines += ('interface set for {0} written: INTRF_HD\ {1} files{2}{3}{4} ({5:N1} s, GIFs re-encoded by the compiled DcGif codec)' -f $Mode, $written,
+               $(if ($expWritten) { ", exp\intrf_hd\ $expWritten" } else { '' }), $(if ($dcWritten) { ", dc\intrf_hd\ $dcWritten" } else { '' }),
+               $(if ($oziWritten) { ", ozi_ns\intrf_hd\ $oziWritten" } else { '' }), $sw.Elapsed.TotalSeconds)
     return $lines
 }
 
@@ -9656,9 +12032,11 @@ function Write-StockOziMenu([string] $GameDir) {
     if (-not $src) { return @('exp\intrface\bintoze NOT written: exp\intrface\bintroe is missing') }
     $t = Edit-OziMenu (Read-Latin1 $src)
     $lines = @()
-    foreach ($dir in 'exp\intrface', 'ozi_ns\intrface') {
+    foreach ($dir in 'exp\intrface', 'ozi_ns\intrface', 'dc\intrface') {
         $d = Join-Path $GameDir $dir
-        if (Test-Path -LiteralPath $d) { Write-Latin1 (Join-Path $d 'bintoze') $t; $lines += ('wrote {0}\bintoze (stock menu, labels OZI MISSIONS / OZI LOAD; the 640x480 exe reads this copy)' -f $dir) }
+        # dc\ is the DARK COLONY mode's overlay and holds only this file, so it is created here
+        if ($dir -eq 'dc\intrface' -and -not (Test-Path -LiteralPath $d)) { New-Item -ItemType Directory -Path $d -Force | Out-Null }
+        if (Test-Path -LiteralPath $d) { Write-Latin1 (Join-Path $d 'bintoze') $t; $lines += ('wrote {0}\bintoze (the patched menu; the 640x480 exe reads this copy)' -f $dir) }
     }
     return $lines
 }
