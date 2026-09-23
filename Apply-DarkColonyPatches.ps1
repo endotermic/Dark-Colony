@@ -3899,13 +3899,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'bb6a1e77aa0aaf888ec6b0fe61c8a553e67b79e64b825799722ca6e35e9e75bd'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '89e33deb41a0ba8e0c2dffd902b4ca06b61cbf066347219b312a9359bf30fe64'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '33449a9c375d16acfa9301b2ad6ff35f8f9fd0189a83a3537e602aa944210f62'; '1024x768' = 'bb6a1e77aa0aaf888ec6b0fe61c8a553e67b79e64b825799722ca6e35e9e75bd'; '1280x1024' = '66792021705e55ddd7cf4db498eafe039aa8b8e3f393c6208b9dc5a7cbcfa7a5'; '1280x720' = '55a807eb6b893e3ca7dc187af074ae5656cf7500364a50aac2606f82dec44f15'; '1280x800' = 'f8d8287709f5ef19a8dfae65045f5fd902049c9307347039da7d26050993c0ec'; '3840x1080' = '71b3666ec3734664038d5a098a0c6eedf68a56e87abc75685e7a585b32fe0f65' }
+        ReferenceSha256 = @{ '640x480' = '33449a9c375d16acfa9301b2ad6ff35f8f9fd0189a83a3537e602aa944210f62'; '1024x768' = '89e33deb41a0ba8e0c2dffd902b4ca06b61cbf066347219b312a9359bf30fe64'; '1280x1024' = 'db5ce1e5222c584db656786fccd12c7ffef74e3d50bce8664a3da960047a2498'; '1280x720' = '12c4206ca644e64899eda7d7135a18fa8b4b8d82f2659f97175905176dafa6cc'; '1280x800' = '57e1ca8e2db4234637bc3767c66f2d0917afca4b523e5fda40eb90a9937bd40a'; '3840x1080' = 'de3680bb226c59dbfdadc893f3eed8fd935a62b85ffd605716445240d05f3b08' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -4278,7 +4278,7 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA DD 02 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB AF 01 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 9E 01 00 00' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA 74 01 00 00' }
                     # menu: network screen globe y 24
@@ -4752,7 +4752,7 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 4F 02 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 3B 02 00 00' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -5252,7 +5252,7 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 90 01 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 80 01 00 00' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -5752,7 +5752,7 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB C3 01 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB B1 01 00 00' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -6252,7 +6252,7 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 08 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 72 02 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 5E 02 00 00' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 06 00 00' }
                     # menu: network screen globe y 24
@@ -9416,67 +9416,30 @@ function Edit-DatList([string] $Text) {
     return ($out -join "`n")
 }
 
-# The 640x480 two-column OZI menu (see Edit-OziMenu): a button and its LARGEBUTTON gadget move together,
-# the commented-out OZI LOAD pair (pushb 4 / gadget 10) is brought back in, texts as at HD sizes.
-function Edit-OziMenu640([string] $Text) {
-    $place = @{ 0 = @(138, 340); 6 = @(138, 340);      # NEW CAMPAIGN
-                2 = @(138, 366); 8 = @(138, 366);      # LOAD GAME
-                16 = @(318, 340); 17 = @(318, 340);    # OZI MISSIONS (the PLAY INTRO row)
-                4 = @(318, 366); 10 = @(318, 366);     # OZI LOAD (the SINGLE PLAYER WAR pair, re-enabled)
-                12 = @(228, 392); 13 = @(228, 392) }   # QUIT, centred below
-    $out = New-Object System.Collections.Generic.List[string]
-    foreach ($raw in $Text.Split("`n")) {
-        $cr = if ($raw.EndsWith("`r")) { "`r" } else { '' }
-        $line = if ($cr) { $raw.Substring(0, $raw.Length - 1) } else { $raw }
-        if ($line -match '^\s*textmsg\s+5\s+') { $line = 'textmsg 5       OZI LOAD' }
-        elseif ($line -match '^\s*textmsg\s+8\s+') { $line = 'textmsg 8       OZI MISSIONS' }
-        elseif ($line -match '^\s*banim\s+18\s+') { $line = "banim   18  0  5 5`t 6 8 17 10 13  0 2 16 4 12" }
-        else {
-            $m = [regex]::Match($line, '^(%?)(\s*)(pushb|gadget)\s+(\d+)\s')
-            if ($m.Success -and $place.ContainsKey([int]$m.Groups[4].Value)) {
-                $xy = $place[[int]$m.Groups[4].Value]
-                $body = $line.Substring($m.Groups[1].Length)          # drop a leading % (pushb 4 / gadget 10)
-                $toks = @($TOKENS.Matches($body) | ForEach-Object { $_.Value })
-                $n = 0
-                for ($t = 0; $t -lt $toks.Count; $t++) {
-                    if ($toks[$t].Trim().Length -eq 0) { continue }
-                    $n++
-                    if ($n -eq 4) { $toks[$t] = [string]$xy[0] } elseif ($n -eq 5) { $toks[$t] = [string]$xy[1]; break }
-                }
-                $line = -join $toks
-            }
-        }
-        $out.Add($line + $cr)
-    }
-    return ($out -join "`n")
-}
-
-# build_ozi_overlay.menu_rows: OZI LOAD and QUIT one and two rows below the PLAY INTRO row, same column.
-# At the stock size (a `size 640 480` script) five rows do not fit between the code-drawn credits box
-# (rows 230..330) and the backdrop's bottom artwork (from row 435), and QUIT sat on the artwork
-# (maintainer report 21 Sep 2026); the stock script's own commented-out two-column plan is used
-# instead: Council Wars buttons at x=138, OZI buttons at x=318 (rows 340/366), QUIT centred at 392.
+# build_ozi_overlay.menu_rows (23 Sep 2026): the menu script carries Classic's 2x4 button grid at every
+# size, so the OZI mode is two label renames in the slots the exe patch rewires - 8 PLAY INTRO ->
+# OZI MISSIONS (bottom left, button 16) and 5 SINGLE PLAYER WAR -> OZI LOAD (middle right, button 4).
+# Until then Council Wars' script had buttons 1, 3, 4, 5 commented out and four rows in one column, and
+# this function re-enabled button 4, moved QUIT down and wrote a five-pair banim (with a two-column
+# special case at 640x480, where five rows did not fit between the credits box and the bottom artwork);
+# the missing widgets crashed the untouched exe when the CD logic greyed them (doc 10.35).
 function Edit-OziMenu([string] $Text) {
-    $m2 = $SIZE2.Match($Text)
-    if ($m2.Success -and [int]$m2.Groups[3].Value -eq 640 -and [int]$m2.Groups[5].Value -eq 480) { return Edit-OziMenu640 $Text }
     $xy = @{}
-    foreach ($m in ([regex] '(?m)^%?\s*pushb\s+(\d+)\s+\d+\s+(\d+)\s+(\d+)\s').Matches($Text)) { $xy[[int]$m.Groups[1].Value] = @([int]$m.Groups[2].Value, [int]$m.Groups[3].Value) }
-    foreach ($need in 0, 2, 16) { if (-not $xy.ContainsKey($need)) { throw "exp\intrf_hd\bintroe: no pushb $need row" } }
-    $x = $xy[0][0]; $pitch = $xy[2][1] - $xy[0][1]
-    $yLoad = $xy[16][1] + $pitch; $yQuit = $yLoad + $pitch
-    $rows = @(
-        @('^%?\s*pushb\s+4\s+.*$',   ('pushb   4       0       {0,-7} {1,-7} 179     25      -11     0        label centre   5 0 - remap 0' -f $x, $yLoad)),
-        @('^%?\s*gadget\s+10\s+.*$', ('gadget  10      0       {0,-7} {1,-7} 179     25      LARGEBUTTON  anim_stopped' -f $x, $yLoad)),
-        @('^\s*pushb\s+12\s+.*$',    ('pushb   12      0       {0,-7} {1,-7} 179     25      -11     0  label centre 7 0 - remap 0' -f $x, $yQuit)),
-        @('^\s*gadget\s+13\s+.*$',   ('gadget  13      0       {0,-7} {1,-7} 179     25      LARGEBUTTON  anim_stopped' -f $x, $yQuit)),
-        @('^\s*banim\s+18\s+.*$',    "banim   18  0  5 5`t 6 8 17 10 13  0 2 16 4 12"),
-        @('^\s*textmsg\s+5\s+.*$',   'textmsg 5       OZI LOAD'),
-        @('^\s*textmsg\s+8\s+.*$',   'textmsg 8       OZI MISSIONS'))
+    foreach ($m in ([regex] '(?m)^\s*pushb\s+(\d+)\s+\d+\s+(\d+)\s+(\d+)\s').Matches($Text)) { $xy[[int]$m.Groups[1].Value] = @([int]$m.Groups[2].Value, [int]$m.Groups[3].Value) }
+    $gadgets = @{}
+    foreach ($m in ([regex] '(?m)^\s*gadget\s+(\d+)\s').Matches($Text)) { $gadgets[[int]$m.Groups[1].Value] = $true }
+    $missing = @()
+    foreach ($need in 0, 1, 2, 3, 4, 5, 12, 16) { if (-not $xy.ContainsKey($need)) { $missing += "pushb $need" } }
+    foreach ($need in 6, 7, 8, 9, 10, 11, 13, 17) { if (-not $gadgets.ContainsKey($need)) { $missing += "gadget $need" } }
+    $b = ([regex] '(?m)^\s*banim\s+18\s+\d+\s+(\d+)\s+(\d+)\s').Match($Text)
+    if (-not $b.Success -or $b.Groups[1].Value -ne '8' -or $b.Groups[2].Value -ne '8') { $missing += 'banim 18 with 8 pairs' }
+    if ($missing.Count) { throw ("bintroe: not Classic's 2x4 button grid (missing " + ($missing -join ', ') + ')') }
     $out = New-Object System.Collections.Generic.List[string]
     foreach ($raw in $Text.Split("`n")) {
         $cr = if ($raw.EndsWith("`r")) { "`r" } else { '' }
         $line = if ($cr) { $raw.Substring(0, $raw.Length - 1) } else { $raw }
-        foreach ($r in $rows) { if ([regex]::IsMatch($line, $r[0])) { $line = $r[1]; break } }
+        if ([regex]::IsMatch($line, '^\s*textmsg\s+5\s+.*$')) { $line = 'textmsg 5       OZI LOAD' }
+        elseif ([regex]::IsMatch($line, '^\s*textmsg\s+8\s+.*$')) { $line = 'textmsg 8       OZI MISSIONS' }
         $out.Add($line + $cr)
     }
     return ($out -join "`n")
@@ -9610,7 +9573,7 @@ function Write-StockEndingLists([string] $GameDir) {
     }
     return $lines
 }
-# ozi @ 640x480: exp\intrface\bintoze (and ozi_ns\intrface\bintoze) = the stock Council Wars menu + OZI rows
+# ozi @ 640x480: exp\intrface\bintoze (and ozi_ns\intrface\bintoze) = the stock menu + the two OZI labels
 function Write-StockOziMenu([string] $GameDir) {
     $src = Find-CI (Join-Path $GameDir 'exp\intrface') 'bintroe'
     if (-not $src) { return @('exp\intrface\bintoze NOT written: exp\intrface\bintroe is missing') }
@@ -9618,7 +9581,7 @@ function Write-StockOziMenu([string] $GameDir) {
     $lines = @()
     foreach ($dir in 'exp\intrface', 'ozi_ns\intrface') {
         $d = Join-Path $GameDir $dir
-        if (Test-Path -LiteralPath $d) { Write-Latin1 (Join-Path $d 'bintoze') $t; $lines += ('wrote {0}\bintoze (stock menu + OZI MISSIONS / OZI LOAD rows; the 640x480 exe reads this copy)' -f $dir) }
+        if (Test-Path -LiteralPath $d) { Write-Latin1 (Join-Path $d 'bintoze') $t; $lines += ('wrote {0}\bintoze (stock menu, labels OZI MISSIONS / OZI LOAD; the 640x480 exe reads this copy)' -f $dir) }
     }
     return $lines
 }
