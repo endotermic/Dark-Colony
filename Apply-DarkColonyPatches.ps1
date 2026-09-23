@@ -3899,13 +3899,13 @@ only, in place, no code and no relocation entry changes.
         OutputName     = 'engexp16new.exe'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '89e33deb41a0ba8e0c2dffd902b4ca06b61cbf066347219b312a9359bf30fe64'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'a4107c2f470014cd34a5dca37078dc63dc8365a86f4ee10bd68684a7ac799ed2'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '33449a9c375d16acfa9301b2ad6ff35f8f9fd0189a83a3537e602aa944210f62'; '1024x768' = '89e33deb41a0ba8e0c2dffd902b4ca06b61cbf066347219b312a9359bf30fe64'; '1280x1024' = 'db5ce1e5222c584db656786fccd12c7ffef74e3d50bce8664a3da960047a2498'; '1280x720' = '12c4206ca644e64899eda7d7135a18fa8b4b8d82f2659f97175905176dafa6cc'; '1280x800' = '57e1ca8e2db4234637bc3767c66f2d0917afca4b523e5fda40eb90a9937bd40a'; '3840x1080' = 'de3680bb226c59dbfdadc893f3eed8fd935a62b85ffd605716445240d05f3b08' }
+        ReferenceSha256 = @{ '640x480' = 'a72235362749a2f595d6a21283c119950e624b34a036b29b1439c8c356e3207b'; '1024x768' = 'a4107c2f470014cd34a5dca37078dc63dc8365a86f4ee10bd68684a7ac799ed2'; '1280x1024' = 'a48ac57d65d998396ffefa4689b69a31690975c46e2c87ff482368db2f1f234e'; '1280x720' = 'cc48e7031510fd8e3c6864c6e51e4c31930ab8d94ed7703a7efd8dd8562d2c36'; '1280x800' = '7c1c96089f5321e5dac7a7aed30e6bf742a2cfe3f9bbdda54c3b85d17b9b8a7d'; '3840x1080' = 'c408d252ac1b1f0d1b7e2c7c13bd0b49941e21836fbeb9804741b47887d63d5f' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -4278,7 +4278,7 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA DD 02 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 9E 01 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 8A 01 00 00' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA 74 01 00 00' }
                     # menu: network screen globe y 24
@@ -4752,7 +4752,7 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 3B 02 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 27 02 00 00' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -5252,7 +5252,7 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 80 01 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 6C 01 00 00' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -5752,7 +5752,7 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB B1 01 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 9D 01 00 00' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -6252,7 +6252,7 @@ the ones in place have another size.
                     # menu: victory medal (re-create) x 541
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 08 00 00' }
                     # menu: intro credits text y 200
-                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 5E 02 00 00' }
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 4A 02 00 00' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 06 00 00' }
                     # menu: network screen globe y 24
@@ -7532,7 +7532,7 @@ Council Wars.  Without a TRACK02 file the game simply stays silent, as it does t
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.13
-            #  Changes    : 3294 bytes in 16 edits
+            #  Changes    : 3295 bytes in 17 edits
             #  Council Wars opens every data file through one helper that prefixes the name with the
             #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
             #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
@@ -7986,6 +7986,8 @@ applied last.
                 Edits = @(
                     # PE optional header: base-relocation directory size 0x93CC -> 0x93DC (+16)
                     @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'DC 93 00 00' }
+                    # credits box y 230 -> 196 (640x480: room for the five-row OZI menu)
+                    @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB C4 00 00 00' }
                     # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
                     # NEW CAMPAIGN/TRAINING call -> tramp_cw_campaign
@@ -9416,14 +9418,25 @@ function Edit-DatList([string] $Text) {
     return ($out -join "`n")
 }
 
-# build_ozi_overlay.menu_rows (23 Sep 2026): the menu script carries Classic's 2x4 button grid at every
-# size, so the OZI mode is two label renames in the slots the exe patch rewires - 8 PLAY INTRO ->
-# OZI MISSIONS (bottom left, button 16) and 5 SINGLE PLAYER WAR -> OZI LOAD (middle right, button 4).
-# Until then Council Wars' script had buttons 1, 3, 4, 5 commented out and four rows in one column, and
-# this function re-enabled button 4, moved QUIT down and wrote a five-pair banim (with a two-column
-# special case at 640x480, where five rows did not fit between the credits box and the bottom artwork);
-# the missing widgets crashed the untouched exe when the CD logic greyed them (doc 10.35).
+# build_ozi_overlay.menu_layout (23 Sep 2026, maintainer's order): the patched Council Wars menu has
+# five rows, the second column only on rows 1, 3 and 5.  The numbers are the exe's button ids, which
+# pick the handler (patch_ozi_menu.py rewires 16 and 4 to the pack), so only positions and labels move:
+#
+#     ACADEMY       (1)   MULTI PLAYER WAR (3)
+#     COUNCIL WARS  (0)
+#     LOAD CW GAME  (2)   ENCYCLOPEDIA     (5)
+#     OZI MISSIONS (16)
+#     LOAD OZI GAME (4)   QUIT            (12)
+#
+# The block is anchored on the BOTTOM row of the grid in the script - the one row that must not move,
+# since the 640x480 backdrop's artwork starts 3 px below it - so applying this twice changes nothing.
+# The fifth row is won at the top, where the code-positioned credits box moves up by one row and a bit
+# (patch_resolution's credits_y(196, 296) at HD sizes, patch_ozi_menu's 640x480 site at the stock size).
+# The untouched exe keeps Classic's four-row grid and labels in exp\intrface\bintroe (doc 10.35).
 function Edit-OziMenu([string] $Text) {
+    $cols = @(@(1, 0, 2, 16, 4), @(3, $null, 5, $null, 12))
+    $gadgetOf = @{ 0 = 6; 1 = 7; 2 = 8; 3 = 9; 4 = 10; 5 = 11; 12 = 13; 16 = 17 }
+    $labels = @{ 1 = 'COUNCIL WARS'; 2 = 'ACADEMY'; 3 = 'LOAD CW GAME'; 5 = 'LOAD OZI GAME'; 8 = 'OZI MISSIONS' }
     $xy = @{}
     foreach ($m in ([regex] '(?m)^\s*pushb\s+(\d+)\s+\d+\s+(\d+)\s+(\d+)\s').Matches($Text)) { $xy[[int]$m.Groups[1].Value] = @([int]$m.Groups[2].Value, [int]$m.Groups[3].Value) }
     $gadgets = @{}
@@ -9434,12 +9447,42 @@ function Edit-OziMenu([string] $Text) {
     $b = ([regex] '(?m)^\s*banim\s+18\s+\d+\s+(\d+)\s+(\d+)\s').Match($Text)
     if (-not $b.Success -or $b.Groups[1].Value -ne '8' -or $b.Groups[2].Value -ne '8') { $missing += 'banim 18 with 8 pairs' }
     if ($missing.Count) { throw ("bintroe: not Classic's 2x4 button grid (missing " + ($missing -join ', ') + ')') }
+    $xs = @($xy.Values | ForEach-Object { $_[0] } | Sort-Object -Unique)
+    $ys = @($xy.Values | ForEach-Object { $_[1] } | Sort-Object -Unique)
+    if ($xs.Count -ne 2 -or $ys.Count -lt 4) { throw ('bintroe: expected two button columns and at least four rows, found {0} x {1}' -f $xs.Count, $ys.Count) }
+    $pitch = [int]::MaxValue
+    for ($i = 1; $i -lt $ys.Count; $i++) { if ($ys[$i] - $ys[$i - 1] -lt $pitch) { $pitch = $ys[$i] - $ys[$i - 1] } }
+    $bottom = $ys[$ys.Count - 1]
+    $move = @{}
+    for ($c = 0; $c -lt $cols.Count; $c++) {
+        for ($k = 0; $k -lt $cols[$c].Count; $k++) {
+            $id = $cols[$c][$k]
+            if ($null -ne $id) {
+                $pos = @($xs[$c], ($bottom - ($cols[$c].Count - 1 - $k) * $pitch))
+                $move[[int]$id] = $pos
+                $move[[int]$gadgetOf[[int]$id]] = $pos        # the gadget follows its button
+            }
+        }
+    }
     $out = New-Object System.Collections.Generic.List[string]
     foreach ($raw in $Text.Split("`n")) {
         $cr = if ($raw.EndsWith("`r")) { "`r" } else { '' }
         $line = if ($cr) { $raw.Substring(0, $raw.Length - 1) } else { $raw }
-        if ([regex]::IsMatch($line, '^\s*textmsg\s+5\s+.*$')) { $line = 'textmsg 5       OZI LOAD' }
-        elseif ([regex]::IsMatch($line, '^\s*textmsg\s+8\s+.*$')) { $line = 'textmsg 8       OZI MISSIONS' }
+        $m = [regex]::Match($line, '^\s*(pushb|gadget)\s+(\d+)\s')
+        $t = [regex]::Match($line, '^\s*textmsg\s+(\d+)\s')
+        if ($m.Success -and $move.ContainsKey([int]$m.Groups[2].Value)) {   # button and gadget ids do not overlap
+            $pos = $move[[int]$m.Groups[2].Value]
+            $toks = @($TOKENS.Matches($line) | ForEach-Object { $_.Value })
+            $n = 0
+            for ($i = 0; $i -lt $toks.Count; $i++) {
+                if ($toks[$i].Trim().Length -eq 0) { continue }
+                $n++
+                if ($n -eq 4) { $toks[$i] = [string]$pos[0] } elseif ($n -eq 5) { $toks[$i] = [string]$pos[1]; break }
+            }
+            $line = -join $toks
+        } elseif ($t.Success -and $labels.ContainsKey([int]$t.Groups[1].Value)) {
+            $line = 'textmsg {0}       {1}' -f [int]$t.Groups[1].Value, $labels[[int]$t.Groups[1].Value]
+        }
         $out.Add($line + $cr)
     }
     return ($out -join "`n")

@@ -11,18 +11,18 @@ colour  erase       0 0 0
 %       number  desc    xpos    ypos    pushed  normal  greyed  flags
 
 pushb   0       0       332     528     179     25      -11     0        label centre   1 0 - remap 0
-pushb   1       0       332     554     179     25      -11     0        label centre   2 0 - remap 0
-pushb   2       0       332     580     179     25      -11     0        label centre   3 0 - remap 0
-pushb   3       0       512     528     179     25      -11     0        label centre   4 0 - remap 0
-pushb   4       0       512     554     179     25      -11     0        label centre   5 0 - remap 0
-pushb   5       0       512     580     179     25      -11     0        label centre   6 0 - remap 0
+pushb   1       0       332     502     179     25      -11     0        label centre   2 0 - remap 0
+pushb   2       0       332     554     179     25      -11     0        label centre   3 0 - remap 0
+pushb   3       0       512     502     179     25      -11     0        label centre   4 0 - remap 0
+pushb   4       0       332     606     179     25      -11     0        label centre   5 0 - remap 0
+pushb   5       0       512     554     179     25      -11     0        label centre   6 0 - remap 0
 
 gadget  6       0       332     528     179     25      LARGEBUTTON  anim_oneoff
-gadget  7       0       332     554     179     25      LARGEBUTTON  anim_stopped
-gadget  8       0       332     580     179     25      LARGEBUTTON  anim_stopped
-gadget  9       0       512     528     179     25      LARGEBUTTON  anim_stopped
-gadget  10      0       512     554     179     25      LARGEBUTTON  anim_stopped
-gadget  11      0       512     580     179     25      LARGEBUTTON  anim_stopped
+gadget  7       0       332     502     179     25      LARGEBUTTON  anim_stopped
+gadget  8       0       332     554     179     25      LARGEBUTTON  anim_stopped
+gadget  9       0       512     502     179     25      LARGEBUTTON  anim_stopped
+gadget  10      0       332     606     179     25      LARGEBUTTON  anim_stopped
+gadget  11      0       512     554     179     25      LARGEBUTTON  anim_stopped
 
 pushb   12      0       512     606     179     25      -11     0  label centre 7 0 - remap 0
 gadget  13      0       512     606     179     25      LARGEBUTTON  anim_stopped
@@ -30,16 +30,16 @@ gadget  13      0       512     606     179     25      LARGEBUTTON  anim_stoppe
 gadget  14      0       357     198       310     120     DCUK       anim_stopped unmask - bg erase
 gadget  15      0       313     357     398     33      DCUT       anim_stopped unmask - bg erase
 
-pushb   16      0       332     606     179     25     -11      0 label centre 8 0  -  remap 0
-gadget  17      0       332     606     179     25      LARGEBUTTON  anim_stopped
+pushb   16      0       332     580     179     25     -11      0 label centre 8 0  -  remap 0
+gadget  17      0       332     580     179     25      LARGEBUTTON  anim_stopped
 
 banim   18  0  8 8	 6 7 8 9 10 11 17 13  0 1 2 3 4 5 16 12
 
-textmsg 1       NEW CAMPAIGN
-textmsg 2       TRAINING
-textmsg 3       LOAD GAME
+textmsg 1       COUNCIL WARS
+textmsg 2       ACADEMY
+textmsg 3       LOAD CW GAME
 textmsg 4       MULTI PLAYER WAR
-textmsg 5       OZI LOAD
+textmsg 5       LOAD OZI GAME
 textmsg 6       ENCYCLOPEDIA
 textmsg 7       QUIT
 textmsg 8       OZI MISSIONS
