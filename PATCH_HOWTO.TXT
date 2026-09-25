@@ -2,33 +2,38 @@
   DARK COLONY / COUNCIL WARS  -  HOW TO PATCH THE GAME YOURSELF
 =====================================================================
 
-This repository ships two kinds of game executables:
+This repository ships two kinds of executables:
 
   * the UNTOUCHED ORIGINALS from 1997/98 (both games run from the
     "DC - Council wars" folder since 15 Sep 2026)
-        DC - Council wars\dc16.exe
-        DC - Council wars\ENGEXP16.EXE
+        DC - Council wars\dc16.exe              Dark Colony
+        DC - Council wars\ENGEXP16.EXE          The Council Wars
+        Dark Colony - Map editor\maped.exe      the map editor
 
-  * the PATCHED ones that you normally play
-        DC - Council wars\dc16new.exe
-        DC - Council wars\engexp16new.exe
-
-  * and the map editor: the original
-        Dark Colony - Map editor\maped.exe
-    and its unlocked build (the greyed-out dialog controls of the
-    original enabled - what the Polish ozi_ns editor did, minus the
-    translation)
-        Dark Colony - Map editor\maped_ozi_ns_v1.2.exe
-    (no CD at all, 1024x768, hidden Windows pointer, 32 MiB memory
-    pool, 150 % default speed, two-monitor fix, ... and for Council
-    Wars the OZI MISSIONS menu)
+  * the PATCHED ones that you normally play (until 25 Sep 2026 they
+    were called dc16new.exe, engexp16new.exe, maped_ozi_ns_v1.2.exe)
+        DC - Council wars\Dark Colony.exe
+        DC - Council wars\Dark Colony Ultimate.exe
+            (Council Wars plus the Dark Colony, OZI and Academy
+            campaigns in its main menu)
+        Dark Colony - Map editor\Dark Colony map editor 1.2.exe
+            (the greyed-out dialog controls of the original enabled -
+            what the Polish ozi_ns editor did, minus the translation)
+    (no CD at all, 1024x768 or another resolution, hidden Windows
+    pointer, 32 MiB memory pool, two-monitor fix, the CD music as
+    MP3, a high-resolution icon, ... and for Council Wars the DARK
+    COLONY and OZI MISSIONS menu modes)
 
 A hand-modified exe cannot be digitally signed, so some antivirus
 programs dislike it and some players do not trust it.  That is why
 the repository contains a PATCHING SCRIPT that lets you build the
-patched exe yourself, from the original, on your own PC:
+patched executables yourself, from the originals, on your own PC:
 
         Apply-DarkColonyPatches.ps1     (in the root of the repository)
+
+and a small starter for it, the file you double-click:
+
+        INSTALL.CMD
 
 What makes it trustworthy:
 
@@ -40,23 +45,34 @@ What makes it trustworthy:
 
      i.e. "at this position in the file, replace this byte with that
      byte".  Nothing is hidden, nothing is downloaded, no network.
+     (One fix, the icon, appends the icon pictures to the exe; those
+     bytes are written as Base64 text with their SHA-256, and the
+     icon itself is DC - Council wars\DC_HD.ICO - open it in any
+     image viewer.)
 
   2) A lot of comments on every step and every line: each fix has a
      description of what it changes in the game and why, and every
      single byte edit has a comment.
 
-  3) The patched executable is ALWAYS created from the original
-     executable.  The original file is never modified.  Before a byte
+  3) The patched executables are ALWAYS created from the original
+     executables.  The originals are never modified.  Before a byte
      is written the script checks that the file still holds the
      documented old byte at that position; if anything does not match,
      nothing is written.  After writing it shows the SHA-256 checksum
-     of the result - with all fixes selected it is byte-identical to
-     the exe published in the repository and the script says so.
+     of every result - with all fixes selected each is byte-identical
+     to the exe published in the repository and the script says so.
 
-  4) Pretty interface and simple usage: a window with a file picker,
-     checkboxes for the fixes, a description panel and an Apply
-     button.  No Python, no extra tools - only what comes with
-     Windows (PowerShell 5.1 or newer).
+  4) Simple usage: one window, all three executables already found and
+     ticked, one button.  Checkboxes for every fix, a description
+     panel.  No Python, no extra tools - only what comes with Windows
+     (Windows PowerShell 5.1, part of Windows 10 and 11).
+
+  5) The starter INSTALL.CMD is a few lines of text too (open it in
+     Notepad): it runs the .ps1 beside it with PowerShell and
+     "-ExecutionPolicy Bypass" for that one run, because Windows
+     refuses to run a downloaded PowerShell script otherwise.  It
+     changes no setting of your PC and installs nothing: the "install"
+     is the three patched exes and their desktop shortcuts.
 
 
 ---------------------------------------------------------------------
@@ -75,104 +91,183 @@ What makes it trustworthy:
    files are not in the target folder is shown as "RESOURCES NOT
    FOUND", cannot be ticked and is left out.
 
-2) Locate the patcher script in the root of the unpacked folder:
+2) In the root of the unpacked folder, DOUBLE-CLICK
 
-        Apply-DarkColonyPatches.ps1
+        INSTALL.CMD
 
-3) Push the RIGHT mouse button on that file to open the submenu.
+   (Windows may hide the ending: it is the one whose type is
+   "Windows Command Script".)  A black console window opens, and a
+   moment later the patcher window.  Leave the console open; it
+   closes by itself when you close the patcher.
 
-4) Select  "Run with PowerShell".
+3) If Windows warns about a file from the internet:
 
-   If Windows only flashes a console window and nothing happens,
-   script execution is disabled on your PC.  Open a PowerShell
-   prompt in the repository folder (Shift + right-click on empty
-   space in the folder -> "Open PowerShell window here") and start
-   the script once with
+   * "Windows protected your PC"  -> click "More info", then
+     "Run anyway";
+   * "Open File - Security Warning"  -> click "Run".
 
-        powershell -ExecutionPolicy Bypass -File .\Apply-DarkColonyPatches.ps1
+   To get rid of the warning for good: right-click INSTALL.CMD ->
+   Properties -> tick "Unblock" -> OK.
 
-   If Windows shows a security warning about a downloaded file,
-   right-click the .ps1 -> Properties -> tick "Unblock" -> OK, then
-   try again.
+4) If something goes wrong before the window appears, the console
+   stays open with the error message and "Press any key to
+   continue".  Read it, press a key, and see "IF IT DOES NOT START"
+   further down.
 
-5) Carefully read and follow the instructions in the window to create
-   your own patched version of the executable:
+5) The installer.  It works like any setup program - pages with
+   "< Back", "Next >" and "Cancel" at the bottom.  In the simplest case
+   you press "Next >" three times and "Patch" once:
 
-   a) "Original exe:"  -> press "Browse..." and pick
+   a) WELCOME.  A greeting, the list of the three originals the script
+      found beside itself ("OK" = the untouched original, its SHA-256
+      checked):
 
-          DC - Council wars\dc16.exe               for Dark Colony
-          DC - Council wars\ENGEXP16.EXE  for Council Wars
-          Dark Colony - Map editor\maped.exe  for the map editor
+          Dark Colony                  DC - Council wars\dc16.exe
+          Dark Colony Ultimate         DC - Council wars\ENGEXP16.EXE
+          Dark Colony map editor 1.2   Dark Colony - Map editor\maped.exe
 
-      The status line tells you which game it is and confirms
-      "SHA-256 ... = the untouched original."
+      and the option "Put a shortcut to each patched executable on the
+      desktop" (ticked): shortcuts named "Dark Colony", "Dark Colony
+      Ultimate" and "Dark Colony map editor 1.2", each starting in its
+      game folder, where the game finds its files (do not copy an exe
+      itself to the desktop).  An older shortcut of the same name is
+      replaced.  Press "Next >".
 
-   b) "Fixes to apply"  -> tick the fixes you want.  The first box,
-      "Select all fixes", ticks every fix; the result is then exactly
-      the exe published in the repository.
+   b) STEP 1 OF 3: DARK COLONY,
+      STEP 2 OF 3: DARK COLONY ULTIMATE,
+      STEP 3 OF 3: DARK COLONY MAP EDITOR 1.2 - one page per executable:
 
-      Click on a fix to read, in the right-hand panel, what it changes
-      and to see its byte edits.  Fixes that only work together are
-      listed as such (for example "1024x768 display" needs
-      "Interface data from INTRF_HD"); the script refuses to write
-      if you select one without the other.
+      * "Patch <name>" (ticked) - untick it to leave that executable
+        alone.
+      * "Original:" the file it is built from, with the status line
+        under it, and a "Browse..." button that picks another copy of
+        THAT original (for example when the script did not find it).
+      * "Screen resolution" (the two game pages only; the sizes that fit
+        your monitor are marked "recommended for your screen" and the
+        largest of them is already chosen).  It is the same for both
+        games - they share the INTRF_HD folder - so changing it on one
+        page changes it on the other.
+      * the fixes of this executable, all ticked, with "Select all
+        fixes".  With all fixes the result is exactly the exe published
+        in the repository.  Click on a fix to read, in the box on the
+        right, what it changes and to see its byte edits.  Fixes that
+        only work together are listed as such (for example "1024x768
+        display" needs "Interface data from INTRF_HD"); the script
+        refuses to write if you select one without the other.
 
-      A fix labelled "[RESOURCES NOT FOUND]" needs data files that
-      are not in the folder you write to (the 1024x768 menus in
-      INTRF_HD\, the Classic movies AVI\DCINTRO.AVI, DCAENDING.AVI,
-      DCHENDING.AVI, the OZI mission pack in ozi_ns\).  It cannot be
-      ticked, "Select all fixes" skips it, and the panel says which
-      files are missing.  Write the exe into the game folder from the
-      repository and the label disappears.
+        A fix labelled "[RESOURCES NOT FOUND]" needs data files that
+        are not in the folder the exe is written to (the 1024x768 menus
+        in INTRF_HD\, the Classic movies AVI\DCINTRO.AVI, DCAENDING.AVI,
+        DCHENDING.AVI, the OZI mission pack in ozi_ns\).  It cannot be
+        ticked, "Select all fixes" skips it, and the box on the right
+        says which files are missing.  Use the complete repository and
+        the label disappears.
 
-      To get the ORIGINAL 640x480 game that just does not ask for the
-      CD, tick only "No CD" (it also stops the game from probing the
-      drive letter recorded at install time, so it works on PCs where
-      drive D: is a card reader, an empty DVD drive or a second hard
-      disk - the original would hang behind a "No Disk" box or stall).
+        To get the ORIGINAL 640x480 game that just does not ask for the
+        CD, choose 640x480 and tick only "No CD" (it also stops the game
+        from probing the drive letter recorded at install time, so it
+        works on PCs where drive D: is a card reader, an empty DVD drive
+        or a second hard disk - the original would hang behind a
+        "No Disk" box or stall).
+      * "Written to:" where the patched exe goes - always next to its
+        original, inside its game folder, where its data files are.  It
+        never writes over an original.
 
-   c) "Written to:" shows where the patched exe goes: always
-      dc16new.exe / engexp16new.exe next to the original, i.e. inside
-      the game folder, where its data files are (the box cannot be
-      edited; the command line's -Output is there for special cases).
-      If the file already exists the script asks before replacing it.
-      It never writes over the original.
+      On the last page "Next >" becomes "Patch".
 
-   d) Press  "Apply selected fixes".
+      A BIG RED BOX instead of the fixes means the original of that page
+      cannot be used: it is missing, it is already patched, it is a
+      changed copy (another size or SHA-256 than the original), or it is
+      no Dark Colony executable at all.  The Welcome page lists every
+      such file in red as well.  The box shows what was found and what
+      is expected (size and SHA-256), and offers:
 
-      A small "Patching in progress" box names each step: fix by fix,
-      then the exe, then - for an HD resolution - the INTRF_HD interface
-      set (that one takes a few seconds).  When it is done a message
-      box tells you whether patching succeeded (the file written, its
-      size, the fixes and the SHA-256; with all fixes selected it reads
-      "byte-identical to the exe published in the repository") or
-      failed (what went wrong, and that nothing was written).  The log
-      at the bottom keeps the same text.
+        * "Select the correct file..." - pick an untouched copy;
+        * "Download from our repository" - opens the file's page on
+          https://github.com/endotermic/Dark-Colony in your browser
+          (the script itself downloads nothing): download it, save it
+          under the name and folder the box names, then select it;
+        * the original disc: the Council Wars CD has EXPENG\ENGEXP16.EXE
+          and the Dark Colony CD has DC\MAPED.EXE, both exactly the
+          right files - but NOT dc16.exe: the CD's DC\DC16.EXE is the
+          August 1997 build, and the fixes need the January 1998 update
+          (659456 bytes), which only the repository has.
 
-   e) Start the game with the file you just wrote.
+      Until the right file is chosen that executable is not patched (its
+      "Patch <name>" box is locked); the other two can still be.
+
+   c) PATCH.  If some of the files already exist the script asks once
+      before replacing them.  A small "Patching in progress" box names
+      each step: executable by executable, fix by fix, then - for an HD
+      resolution - the INTRF_HD interface set (a few seconds).  Then a
+      message box and the FINISHED page list every executable: written
+      (file, size, SHA-256, "byte-identical to the exe published in the
+      repository" with all fixes) or failed (what went wrong, and that
+      nothing was written), and its desktop shortcut.  Press "Close".
+
+   d) Start the games with the desktop shortcuts, or with the files
+      just written.
 
    "Inspect an exe..." checks any Dark Colony executable and tells you
    which build it is and which fixes it already carries - use it on the
-   downloaded dc16new.exe / engexp16new.exe if you want to know what is in it.
+   downloaded "Dark Colony.exe" / "Dark Colony Ultimate.exe" if you want
+   to know what is in them.
 
 
 ---------------------------------------------------------------------
   COMMAND LINE (optional, for the record)
 ---------------------------------------------------------------------
 
-   .\Apply-DarkColonyPatches.ps1 -List                 list the fixes
-   .\Apply-DarkColonyPatches.ps1 -List -Detail         ... with every byte edit
-   .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\dc16.exe" -All
-   .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\dc16.exe" -Patches nocd
-   .\Apply-DarkColonyPatches.ps1 -Verify "DC - Council wars\dc16new.exe"
+   From a command prompt ("cmd") in the repository folder, through the
+   starter:
 
-   Patch ids: nocd, resolution, hdpaths, cursor, pool, speed, clock,
-   ddraw, for Dark Colony only movies (the Classic intro and endings
-   under their DC* names) and sounds (WAV files read from the game
-   root, not from exp\; the Classic briefings) and, for Council Wars only,
-   ozi.  Map editor:
-   blocksets, teams, healer, troopsframe.  -Output sets the target
-   file, -Overwrite allows replacing an existing one.
+   INSTALL.CMD -All -DesktopShortcut      all three executables, like the window
+   INSTALL.CMD -List                      list the fixes
+   INSTALL.CMD -List -Detail              ... with every byte edit
+   INSTALL.CMD -Original "DC - Council wars\dc16.exe" -All
+   INSTALL.CMD -Original "DC - Council wars\dc16.exe" -Patches nocd
+   INSTALL.CMD -Verify "DC - Council wars\Dark Colony.exe"
+
+   From a PowerShell prompt write  .\Apply-DarkColonyPatches.ps1  instead
+   (after  Set-ExecutionPolicy -Scope Process Bypass  if scripts are
+   blocked).  Relative paths are taken from the current folder.
+
+   Patch ids, in the order they are applied:
+     both games      nocd, resolution, hdpaths, cursor, pool, clock,
+                     ddraw, camera, widemap, restore, longpath, music
+     Dark Colony     + movies (the Classic intro and endings under
+                       their DC* names), sounds (WAV files read from
+                       the game root, not from exp\; the Classic
+                       briefings)
+     Council Wars    + ozi (the DARK COLONY and OZI MISSIONS menu
+                       modes)
+     map editor      blocksets, teams, healer, troopsframe
+     all three       + icon (the high-resolution icon; always last)
+   -Resolution WxH picks the screen size (default 1024x768; -List shows
+   the sizes), -Output sets the target file (with -Original only),
+   -Overwrite allows replacing existing files, -DesktopShortcut adds the
+   desktop shortcuts the window's checkbox makes.
+
+
+---------------------------------------------------------------------
+  IF IT DOES NOT START
+---------------------------------------------------------------------
+
+   * Nothing happens / the console flashes and closes: you probably
+     started the .ps1 with "Run with PowerShell".  Windows refuses
+     downloaded scripts that way.  Double-click INSTALL.CMD instead.
+
+   * Without the starter: open a PowerShell prompt in the repository
+     folder (Shift + right-click on empty space in the folder ->
+     "Open PowerShell window here" / "Open in Terminal") and run
+
+        powershell -ExecutionPolicy Bypass -File .\Apply-DarkColonyPatches.ps1
+
+   * "... cannot be loaded because running scripts is disabled" even
+     then: your PC is managed (school or company rules).  Play the
+     patched exes from the repository: they are the bytes the script
+     writes with all fixes at 1024x768 ("Inspect an exe" / -Verify
+     shows it on any PC that can run the script).
 
 
 ---------------------------------------------------------------------

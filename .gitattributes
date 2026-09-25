@@ -1,0 +1,2 @@
+# The patcher starter is a Windows batch file: keep its CRLF line endings in every checkout and ZIP
+*.cmd -text
