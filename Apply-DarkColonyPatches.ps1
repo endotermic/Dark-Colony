@@ -9960,7 +9960,10 @@ function Edit-OziMenu([string] $Text) {
     $labelOf = @{ 6 = 9; 7 = 10 }
     $template = @{ 'pushb' = 16; 'gadget' = 17 }
     $banimId = 18
-    $banimOrder = @(0, 1, 2, 3, 4, 5, 16, 12, 6, 7)
+    # `banim` = the menu's opening wave: the first listed plate carries anim_oneoff, each finished
+    # plate starts the next and reveals its button; the pair order is set below from the layout -
+    # column by column (left first), each from top to bottom (build_ozi_overlay.menu_order)
+    $plateFirst = 'anim_oneoff'; $plateRest = 'anim_stopped'
     $textTemplate = 8
     $stockTopLimit = 218
     $labels = @{ 1 = 'COUNCIL WARS'; 2 = 'ACADEMY'; 3 = 'LOAD CW GAME'; 5 = 'LOAD OZI GAME'
@@ -10030,6 +10033,9 @@ function Edit-OziMenu([string] $Text) {
             }
         }
     }
+    # the wave order: by column x, then by row y (one integer key so 5.1 and 7 sort alike)
+    $banimOrder = @(@($place.Keys) | Sort-Object { $place[[int]$_][0] * 100000 + $place[[int]$_][1] } | ForEach-Object { [int] $_ })
+    $firstPlate = [int] $gadgetOf[[int]$banimOrder[0]]
     $dropPushb = @($newButtons)
     $dropGadget = @($newButtons | ForEach-Object { [int] $gadgetOf[[int]$_] })
     $dropText = @($newButtons | ForEach-Object { [int] $labelOf[[int]$_] })
@@ -10050,7 +10056,9 @@ function Edit-OziMenu([string] $Text) {
             }
             if ($move.ContainsKey($id)) {
                 $pos = $move[$id]
-                $line = Set-ScriptTokens $line @{ 4 = [string] $pos[0]; 5 = [string] $pos[1] }
+                $changes = @{ 4 = [string] $pos[0]; 5 = [string] $pos[1] }
+                if ($kind -eq 'gadget') { $changes[9] = if ($id -eq $firstPlate) { $plateFirst } else { $plateRest } }   # a plate: the wave starts at the first
+                $line = Set-ScriptTokens $line $changes
             }
             $out.Add($line + $cr)
             if ($id -eq $template[$kind]) {
@@ -10059,6 +10067,7 @@ function Edit-OziMenu([string] $Text) {
                     $ident = if ($kind -eq 'pushb') { [int] $new } else { [int] $gadgetOf[[int]$new] }
                     $changes = @{ 2 = [string] $ident; 4 = [string] $pos[0]; 5 = [string] $pos[1] }
                     if ($kind -eq 'pushb') { $changes[12] = [string] $labelOf[[int]$new] }
+                    else { $changes[9] = if ($ident -eq $firstPlate) { $plateFirst } else { $plateRest } }
                     $out.Add((Set-ScriptTokens $line $changes) + $cr)
                 }
             }

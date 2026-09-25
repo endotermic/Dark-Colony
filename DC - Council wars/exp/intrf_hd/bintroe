@@ -17,8 +17,8 @@ pushb   3       0       518     489     179     25      -11     0        label c
 pushb   4       0       327     681     179     25      -11     0        label centre   5 0 - remap 0
 pushb   5       0       518     527     179     25      -11     0        label centre   6 0 - remap 0
 
-gadget  19       0       327     591     179     25      LARGEBUTTON  anim_oneoff
-gadget  20       0       327     489     179     25      LARGEBUTTON  anim_stopped
+gadget  19       0       327     591     179     25      LARGEBUTTON  anim_stopped
+gadget  20       0       327     489     179     25      LARGEBUTTON  anim_oneoff
 gadget  8       0       327     617     179     25      LARGEBUTTON  anim_stopped
 gadget  9       0       518     489     179     25      LARGEBUTTON  anim_stopped
 gadget  10      0       327     681     179     25      LARGEBUTTON  anim_stopped
@@ -37,7 +37,7 @@ gadget  17      0       327     655     179     25      LARGEBUTTON  anim_stoppe
 gadget  21      0       327     527     179     25      LARGEBUTTON  anim_stopped
 gadget  22      0       327     553     179     25      LARGEBUTTON  anim_stopped
 
-banim   18  0  10 10	 19 20 8 9 10 11 17 13 21 22  0 1 2 3 4 5 16 12 6 7
+banim   18  0  10 10	 20 21 22 19 8 17 10 9 11 13  1 6 7 0 2 16 4 3 5 12
 
 textmsg 1       COUNCIL WARS
 textmsg 2       ACADEMY
