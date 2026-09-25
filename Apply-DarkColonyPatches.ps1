@@ -174,13 +174,13 @@ $Builds = @(
         SourceNote     = 'NOT from the Dark Colony CD: its DC\DC16.EXE is the August 1997 build (660480 bytes), which these fixes do not fit - they need dc16.exe of the January 1998 update (659456 bytes), so take it from our repository.'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = 'e9cc0561b8eaa1930c75fbcedae8755079ed1fbb665311776d25329bcaf9e03c'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '89744c454ec31f0f04c1b789ac4f71e35ad9e5172b9addcc404b7fa5f779ad9b'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '13d2b81bc0633043dc51dc43e0dd328144d2d556dc95811c3eb2c167b9202f48'; '1024x768' = 'e9cc0561b8eaa1930c75fbcedae8755079ed1fbb665311776d25329bcaf9e03c'; '1280x1024' = '5afc316905c00c16f69d0d83d502f9acd74dd494a3cde9433b31aba6a4d16592'; '1280x720' = '927223aee6fb6621206a59dda3f5e3aa03b507c2681ca59451cdcf333dae6507'; '1280x800' = 'cff638c1a72afe364ab0bb7958f700425fd58585a2cf3ab78557241f139c916e'; '3840x1080' = 'c6107fa2bd6afe91a851c966e2646ec29d3d5248a725a4565adefe7ab3b2e4e7' }
+        ReferenceSha256 = @{ '640x480' = '444d72f38133b46eee4675e37d8d4f835aa1206e0ca32d087a22f10e39b259f2'; '1024x768' = '89744c454ec31f0f04c1b789ac4f71e35ad9e5172b9addcc404b7fa5f779ad9b'; '1280x1024' = '7396b50eedb2926ce81ba09368ee659f205bcb797bf76f80f13e67780ce1d496'; '1280x720' = '7747d4feb41cc753c722c43a4b140bd1b245222fa1801246cfd03a4a2b54e754'; '1280x800' = '7bc5310848715ee574f4086e26332209c6f80679267475653e243e8df6db0789'; '3840x1080' = '8659388bb7775795cb666a656ac9efb45f520103cc2ff654f07260b0a91fc7a9' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -3535,7 +3535,7 @@ through the linker's import thunks; nothing moves, no relocation entry changes. 
             #  Added      : 22 Sep 2026
             #  Made with  : tools/patch_longpath.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.29
-            #  Changes    : 57 bytes in 4 edits
+            #  Changes    : 58 bytes in 5 edits
             #  Installed in a deep folder (about 128 characters of path and more, e.g. a repository ZIP
             #  extracted under Downloads and then moved into a sub-folder), the game shows "FILE NOT FOUND /
             #  A sound file is missing - see error.log" about five seconds after start and exits; error.log
@@ -3553,7 +3553,13 @@ through the linker's import thunks; nothing moves, no relocation entry changes. 
             #  file that was tried.  Register-relative operands and a call through the import thunk only;
             #  nothing moves, no relocation entry changes; the same four edits at +0x60 in Council Wars.
             #  Verified 22 Sep 2026: from a 161-character game folder path the unfixed Council Wars exe fails
-            #  at 5 s, the fixed one plays on with an empty error.log.
+            #  at 5 s, the fixed one plays on with an empty error.log.  Fifth edit (25 Sep 2026): the name of
+            #  the sound table, "sound\sound2.dat", is the only file name in the whole game written with a
+            #  backslash - every other path uses a forward slash.  A Linux player running the game under Wine
+            #  reported a start-up assert on exactly this file ("FILE Error opening file sound\sound2.dat with
+            #  error num 1", safefunc.c line 290) while every file before it had loaded; the one backslash
+            #  becomes a forward slash (one data byte, no code), so this file is asked for the same way as all
+            #  the others.  Windows treats both separators alike.
             @{
                 Id = 'longpath'; Name = 'Sound files load from any folder depth: the wave loader no longer uses the 128-character OpenFile'; Date = '22 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
@@ -3577,7 +3583,13 @@ handle is what the loader's seek, read and close calls take.  The error message 
 file that was tried.  Register-relative operands and a call through the import thunk only;
 nothing moves, no relocation entry changes; the same four edits at +0x60 in Council Wars.
 Verified 22 Sep 2026: from a 161-character game folder path the unfixed Council Wars exe fails
-at 5 s, the fixed one plays on with an empty error.log.
+at 5 s, the fixed one plays on with an empty error.log.  Fifth edit (25 Sep 2026): the name of
+the sound table, "sound\sound2.dat", is the only file name in the whole game written with a
+backslash - every other path uses a forward slash.  A Linux player running the game under Wine
+reported a start-up assert on exactly this file ("FILE Error opening file sound\sound2.dat with
+error num 1", safefunc.c line 290) while every file before it had loaded; the one backslash
+becomes a forward slash (one data byte, no code), so this file is asked for the same way as all
+the others.  Windows treats both separators alike.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('nocd')
@@ -3594,6 +3606,8 @@ at 5 s, the fixed one plays on with an empty error.log.
                     @{ Offset = 0x51EEF; Old = 'E8 AC 33 FB FF 8D BD F2 FB FF FF 89 C6 57 8A 06 88 07 3C 00 74 10'; New = '6A 00 6A 00 6A 03 6A 00 6A 01 68 00 00 00 80 50 E8 38 C4 02 00 C3' }
                     # error exit fprintf/MessageBox name: lea eax,[ebp-40Eh] (CD buffer, empty since nocd) -> lea eax,[ebp-80Eh] (prefix+name)
                     @{ Offset = 0x51FCD; Old = 'F2 FB FF FF'; New = 'F2 F7 FF FF' }
+                    # sound table name in DGROUP 0x00485ba0, the only backslash-separated path string in the exe: "sound\sound2.dat" -> "sound/sound2.dat", the separator every other path uses (one data byte; a Linux/Wine player's start-up assert on exactly this file, 25 Sep 2026)
+                    @{ Offset = 0x833A5; Old = '5C'; New = '2F' }
                 )
             }
 
@@ -4029,13 +4043,13 @@ directory that lists them); their SHA-256 is checked like every other edit.
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'd1a9b518657b623e707116e184983d21638de261dc7d94154f532e0786e7caba'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '2da5c86ab32394badf62dff2e5b4998ea032aede60908771fcc819c9dbbf9bb7'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '87065403c8bd19d415d0c1dab2acd4394cf397cd9ac92488301225ddc5b955bf'; '1024x768' = 'd1a9b518657b623e707116e184983d21638de261dc7d94154f532e0786e7caba'; '1280x1024' = '2a4da9e046b0072de0d3bea428b6dded81962bb317954d94c9a0ba20aaf0c511'; '1280x720' = '6d10c74ff9c47408a9bcacbac4851fda5e1f6c5e68edf6ada23a6bc06cb24206'; '1280x800' = 'a686df37394b64a8bd6d2dd664c849dd5a5727b34d1c3e2ce99111c98df11a8e'; '3840x1080' = '5f7232ef16dc340a79b2ea3ee5754e4f9277b48652df4d5d81672d033cc91835' }
+        ReferenceSha256 = @{ '640x480' = 'a5152be41ea5ec328bbf3aee8c8c902474f6ac93daca94062967cdda92f3ce36'; '1024x768' = '2da5c86ab32394badf62dff2e5b4998ea032aede60908771fcc819c9dbbf9bb7'; '1280x1024' = '42b8c0bbdc32ce50aae6c7d21411f6746a2180c2c9ff78a33ca0f480acd386a4'; '1280x720' = 'f59287540096d568fadbb64a13d451907c8f36ec57a6c474360ac6132a327ab1'; '1280x800' = '99478cf30eaa699854cb72085702fd2a7d65a6d537781296925c0bd98162eb1f'; '3840x1080' = '62cdf2db48bd20724e5c977b055a36f51787cc5f08b2535f6d68500e31056286' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -7438,7 +7452,7 @@ through the linker's import thunks; nothing moves, no relocation entry changes. 
             #  Added      : 22 Sep 2026
             #  Made with  : tools/patch_longpath.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.29
-            #  Changes    : 57 bytes in 4 edits
+            #  Changes    : 58 bytes in 5 edits
             #  Installed in a deep folder (about 128 characters of path and more, e.g. a repository ZIP
             #  extracted under Downloads and then moved into a sub-folder), the game shows "FILE NOT FOUND /
             #  A sound file is missing - see error.log" about five seconds after start and exits; error.log
@@ -7456,7 +7470,13 @@ through the linker's import thunks; nothing moves, no relocation entry changes. 
             #  file that was tried.  Register-relative operands and a call through the import thunk only;
             #  nothing moves, no relocation entry changes; the same four edits at +0x60 in Council Wars.
             #  Verified 22 Sep 2026: from a 161-character game folder path the unfixed Council Wars exe fails
-            #  at 5 s, the fixed one plays on with an empty error.log.
+            #  at 5 s, the fixed one plays on with an empty error.log.  Fifth edit (25 Sep 2026): the name of
+            #  the sound table, "sound\sound2.dat", is the only file name in the whole game written with a
+            #  backslash - every other path uses a forward slash.  A Linux player running the game under Wine
+            #  reported a start-up assert on exactly this file ("FILE Error opening file sound\sound2.dat with
+            #  error num 1", safefunc.c line 290) while every file before it had loaded; the one backslash
+            #  becomes a forward slash (one data byte, no code), so this file is asked for the same way as all
+            #  the others.  Windows treats both separators alike.
             @{
                 Id = 'longpath'; Name = 'Sound files load from any folder depth: the wave loader no longer uses the 128-character OpenFile'; Date = '22 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
@@ -7480,7 +7500,13 @@ handle is what the loader's seek, read and close calls take.  The error message 
 file that was tried.  Register-relative operands and a call through the import thunk only;
 nothing moves, no relocation entry changes; the same four edits at +0x60 in Council Wars.
 Verified 22 Sep 2026: from a 161-character game folder path the unfixed Council Wars exe fails
-at 5 s, the fixed one plays on with an empty error.log.
+at 5 s, the fixed one plays on with an empty error.log.  Fifth edit (25 Sep 2026): the name of
+the sound table, "sound\sound2.dat", is the only file name in the whole game written with a
+backslash - every other path uses a forward slash.  A Linux player running the game under Wine
+reported a start-up assert on exactly this file ("FILE Error opening file sound\sound2.dat with
+error num 1", safefunc.c line 290) while every file before it had loaded; the one backslash
+becomes a forward slash (one data byte, no code), so this file is asked for the same way as all
+the others.  Windows treats both separators alike.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('nocd')
@@ -7497,6 +7523,8 @@ at 5 s, the fixed one plays on with an empty error.log.
                     @{ Offset = 0x51F4F; Old = 'E8 2C 33 FB FF 8D BD F2 FB FF FF 89 C6 57 8A 06 88 07 3C 00 74 10'; New = '6A 00 6A 00 6A 03 6A 00 6A 01 68 00 00 00 80 50 E8 38 C4 02 00 C3' }
                     # error exit fprintf/MessageBox name: lea eax,[ebp-40Eh] (CD buffer, empty since nocd) -> lea eax,[ebp-80Eh] (prefix+name)
                     @{ Offset = 0x5202D; Old = 'F2 FB FF FF'; New = 'F2 F7 FF FF' }
+                    # sound table name in DGROUP 0x00485ba8, the only backslash-separated path string in the exe: "sound\sound2.dat" -> "sound/sound2.dat", the separator every other path uses (one data byte; a Linux/Wine player's start-up assert on exactly this file, 25 Sep 2026)
+                    @{ Offset = 0x835AD; Old = '5C'; New = '2F' }
                 )
             }
 
@@ -8026,7 +8054,7 @@ relocation entry, this patch is always applied last.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
-                # data files this fix needs next to the exe (387; listed from the repository when this
+                # data files this fix needs next to the exe (388; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'ozi_ns\alta.gif'
@@ -8054,6 +8082,7 @@ relocation entry, this patch is always applied last.
                     'ozi_ns\intrf_hd\gxscene.txt'
                     'ozi_ns\intrf_hd\hxscene.txt'
                     'ozi_ns\intrf_hd\introe'
+                    'ozi_ns\intrf_hd\lopte'
                     'ozi_ns\intrf_hd\shumane'
                     'ozi_ns\intrface\astory.txt'
                     'ozi_ns\intrface\credits.txt'
@@ -8609,7 +8638,7 @@ relocation entry, this patch is always applied last.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (386; listed from the repository when this
+                # data files this fix needs next to the exe (387; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'ozi_ns\alta.gif'
@@ -8637,6 +8666,7 @@ relocation entry, this patch is always applied last.
                     'ozi_ns\intrf_hd\gxscene.txt'
                     'ozi_ns\intrf_hd\hxscene.txt'
                     'ozi_ns\intrf_hd\introe'
+                    'ozi_ns\intrf_hd\lopte'
                     'ozi_ns\intrf_hd\shumane'
                     'ozi_ns\intrface\astory.txt'
                     'ozi_ns\intrface\credits.txt'
