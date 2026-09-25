@@ -44,7 +44,7 @@ The purpose of this repository is to make this old game better by some assembly 
 2) (DONE) remove the CD check to play campaign
    - (DONE 10 Sep 2026) the Windows pointer no longer flickers over the game cursor (arrow on the loading screen, block on the menu and in battle): `patch_cursor.py`, 4 code sites + 7 relocation entries per exe, both repository exes patched - doc section 10.12
 3) (TODO) increase quality of movies
-4) (DONE) tweak multiplayer to be modern and online: see project [Dark-Colony-Server](https://github.com/endotermic/Dark-Colony-Server)
+4) (DONE) tweak multiplayer to be modern and online: see project [Dark-Colony-Server](https://github.com/endotermic/Dark-Colony-Server). Dark Colony Ultimate (MULTI PLAYER WAR) is the same network program as Dark Colony; since the patcher of 25 Sep 2026 the two also simulate identically, so they can share a battle (not yet tried in a real game). Older Ultimate builds and the untouched ENGEXP16.EXE go out of sync when a Gray commander rallies his troops.
 5) (DONE) fix original map editor
 6) etc.
 

@@ -4005,13 +4005,13 @@ directory that lists them); their SHA-256 is checked like every other edit.
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'dcd973eb04bdbc36c8f8e7fcd204426a7500e656faaf081adf084944bbf625aa'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '7f5e53225a63d7040adb889205098c9c22b7bdef60fdb0feb38b23c854462903'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = 'faa3511edba7de99f58af7aeaf0608b07650db18fcc0523ade32244092015d3e'; '1024x768' = 'dcd973eb04bdbc36c8f8e7fcd204426a7500e656faaf081adf084944bbf625aa'; '1280x1024' = '1d292691152d498320e9f87b3feb7315c703b9d7e12c1fa0c25307bc96d5cf00'; '1280x720' = '830fb089ab2d0240e755487efbc0df890e848aec8439f8b336c9118cf4e40fe1'; '1280x800' = '1859fa0a7803015618d3fc923f925e927a6add3ca40022ea25b355953c6ab497'; '3840x1080' = '44749428594f4621b7ee7d08faf1fdc2356a4b2bd56266ed51e964d013fb2c9a' }
+        ReferenceSha256 = @{ '640x480' = 'e6f375e8fc7f9ae1c3c9b0a71a22b86b777c56c2f5f5dae87c99868ce959e4ab'; '1024x768' = '7f5e53225a63d7040adb889205098c9c22b7bdef60fdb0feb38b23c854462903'; '1280x1024' = '816da807905def1624a79e510b92aafc7d3e97515a61c16923637069accdc81f'; '1280x720' = '2082442a3306a11abd22b5e47d90bdc32df6ceb506f042d5a1d7b3d58a420cb7'; '1280x800' = '2b430a8f7a47be46504644b8a7b36e884955661e2de7f869715de7ff31e7cc2d'; '3840x1080' = 'c06a5e9d4009a61d12d6af967c9ff4ce3bca8a9c2484e1cb7fe115e730ba0599' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -7642,7 +7642,7 @@ Council Wars.  Without a TRACK02 file the game simply stays silent, as it does t
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36
-            #  Changes    : 3495 bytes in 24 edits
+            #  Changes    : 3508 bytes in 26 edits
             #  Council Wars opens every data file through one helper that prefixes the name with the
             #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
             #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
@@ -7681,6 +7681,15 @@ Council Wars.  Without a TRACK02 file the game simply stays silent, as it does t
             #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
             #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
             #      and their four absolute slot addresses add four more entries to the .reloc insert
+            #    * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
+            #      VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
+            #      it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
+            #      The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
+            #      went out of sync against every other player.  For the same reason exp/animozi.dat no longer
+            #      lists grrr.fin and troo.fin, the deploy poses of the Gray and Security Trooper sprites: Classic
+            #      has neither, and a Gray commander's rally waited 28 ticks for that animation in Council Wars
+            #      against 2 in Classic - a mixed network game went out of sync at the first Gray rally.  The
+            #      commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
             #    * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
             #      -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
             #      the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
@@ -7739,6 +7748,15 @@ itself uses.  Two buttons are added for it:
     LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
     the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
     and their four absolute slot addresses add four more entries to the .reloc insert
+  * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
+    VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
+    it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
+    The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
+    went out of sync against every other player.  For the same reason exp/animozi.dat no longer
+    lists grrr.fin and troo.fin, the deploy poses of the Gray and Security Trooper sprites: Classic
+    has neither, and a Gray commander's rally waited 28 ticks for that animation in Council Wars
+    against 2 in Classic - a mixed network game went out of sync at the first Gray rally.  The
+    commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
   * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
     -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
     the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
@@ -8159,6 +8177,8 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
                     # ACADEMY (TRAINING) call -> tramp_dc_campaign
                     @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 08 A3 07 00' }
+                    # MULTI PLAYER WAR call -> tramp_dc_net
+                    @{ Offset = 0x4497; Old = 'E8 84 0B 00 00'; New = 'E8 14 A3 07 00' }
                     # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
                     @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
                     # LOAD GAME call -> tramp_cw_load
@@ -8183,6 +8203,8 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x7E790; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 6E 28 F8 FF' }
                     # tramp_dc_load (stub_dc_set; jmp 403AA4)
                     @{ Offset = 0x7E7A0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 FA 46 F8 FF' }
+                    # tramp_dc_net (stub_dc_set; jmp 405C20)
+                    @{ Offset = 0x7E7B0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 8B FF FF FF E9 66 68 F8 FF' }
                     # main menu script "intrface/bintro" -> "intrface/bintoz" (640x480: exp/intrface/bintoze = stock menu + OZI rows, written by the patcher)
                     @{ Offset = 0x7FE98; Old = '69 6E 74 72 66 61 63 65 2F 62 69 6E 74 72 6F 00'; New = '69 6E 74 72 66 61 63 65 2F 62 69 6E 74 6F 7A 00' }
                     # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
@@ -8202,7 +8224,7 @@ relocation entry, this patch is always applied last.
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36
-            #  Changes    : 3443 bytes in 20 edits
+            #  Changes    : 3456 bytes in 22 edits
             #  Council Wars opens every data file through one helper that prefixes the name with the
             #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
             #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
@@ -8241,6 +8263,15 @@ relocation entry, this patch is always applied last.
             #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
             #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
             #      and their four absolute slot addresses add four more entries to the .reloc insert
+            #    * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
+            #      VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
+            #      it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
+            #      The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
+            #      went out of sync against every other player.  For the same reason exp/animozi.dat no longer
+            #      lists grrr.fin and troo.fin, the deploy poses of the Gray and Security Trooper sprites: Classic
+            #      has neither, and a Gray commander's rally waited 28 ticks for that animation in Council Wars
+            #      against 2 in Classic - a mixed network game went out of sync at the first Gray rally.  The
+            #      commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
             #    * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
             #      -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
             #      the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
@@ -8299,6 +8330,15 @@ itself uses.  Two buttons are added for it:
     LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
     the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
     and their four absolute slot addresses add four more entries to the .reloc insert
+  * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
+    VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
+    it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
+    The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
+    went out of sync against every other player.  For the same reason exp/animozi.dat no longer
+    lists grrr.fin and troo.fin, the deploy poses of the Gray and Security Trooper sprites: Classic
+    has neither, and a Gray commander's rally waited 28 ticks for that animation in Council Wars
+    against 2 in Classic - a mixed network game went out of sync at the first Gray rally.  The
+    commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
   * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
     -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
     the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
@@ -8714,6 +8754,8 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
                     # ACADEMY (TRAINING) call -> tramp_dc_campaign
                     @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 08 A3 07 00' }
+                    # MULTI PLAYER WAR call -> tramp_dc_net
+                    @{ Offset = 0x4497; Old = 'E8 84 0B 00 00'; New = 'E8 14 A3 07 00' }
                     # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
                     @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
                     # LOAD GAME call -> tramp_cw_load
@@ -8738,6 +8780,8 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x7E790; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 6E 28 F8 FF' }
                     # tramp_dc_load (stub_dc_set; jmp 403AA4)
                     @{ Offset = 0x7E7A0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 FA 46 F8 FF' }
+                    # tramp_dc_net (stub_dc_set; jmp 405C20)
+                    @{ Offset = 0x7E7B0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 8B FF FF FF E9 66 68 F8 FF' }
                     # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
                     @{ Offset = 0x7FEB8; Old = '61 6E 69 6D 2E 64 61 74 00 00 00 00'; New = '61 6E 69 6D 6F 7A 69 2E 64 61 74 00' }
                     # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
