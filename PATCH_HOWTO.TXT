@@ -16,7 +16,7 @@ This repository ships two kinds of executables:
         DC - Council wars\Dark Colony Ultimate.exe
             (Council Wars plus the Dark Colony, OZI and Academy
             campaigns in its main menu)
-        Dark Colony - Map editor\Dark Colony map editor 1.2.exe
+        Dark Colony - Map editor\Dark Colony Map Editor.exe
             (the greyed-out dialog controls of the original enabled -
             what the Polish ozi_ns editor did, minus the translation)
     (no CD at all, 1024x768 or another resolution, hidden Windows
@@ -124,18 +124,18 @@ What makes it trustworthy:
 
           Dark Colony                  DC - Council wars\dc16.exe
           Dark Colony Ultimate         DC - Council wars\ENGEXP16.EXE
-          Dark Colony map editor 1.2   Dark Colony - Map editor\maped.exe
+          Dark Colony Map Editor   Dark Colony - Map editor\maped.exe
 
       and the option "Put a shortcut to each patched executable on the
       desktop" (ticked): shortcuts named "Dark Colony", "Dark Colony
-      Ultimate" and "Dark Colony map editor 1.2", each starting in its
+      Ultimate" and "Dark Colony Map Editor", each starting in its
       game folder, where the game finds its files (do not copy an exe
       itself to the desktop).  An older shortcut of the same name is
       replaced.  Press "Next >".
 
    b) STEP 1 OF 3: DARK COLONY,
       STEP 2 OF 3: DARK COLONY ULTIMATE,
-      STEP 3 OF 3: DARK COLONY MAP EDITOR 1.2 - one page per executable:
+      STEP 3 OF 3: DARK COLONY MAP EDITOR - one page per executable:
 
       * "Patch <name>" (ticked) - untick it to leave that executable
         alone.

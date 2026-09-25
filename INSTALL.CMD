@@ -13,7 +13,7 @@ rem
 rem  Double-click: the installer opens (Welcome, one page each for Dark Colony, Dark Colony Ultimate
 rem  and the map editor, Finished).  All three originals of this folder (dc16.exe, ENGEXP16.EXE,
 rem  maped.exe) are ticked with all their fixes: Next, Next, Next, Patch writes "Dark Colony.exe",
-rem  "Dark Colony Ultimate.exe" and "Dark Colony map editor 1.2.exe" beside them and a desktop
+rem  "Dark Colony Ultimate.exe" and "Dark Colony Map Editor.exe" beside them and a desktop
 rem  shortcut of the same name to each.
 rem  Nothing else is installed.  From a command prompt the command-line options work too:
 rem     INSTALL.CMD -All -DesktopShortcut          (all three, like the window)

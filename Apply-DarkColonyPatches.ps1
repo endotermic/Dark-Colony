@@ -12,7 +12,7 @@
       * run without arguments it opens a window: the three originals beside this script (Dark Colony,
         Council Wars, the map editor) are found and ticked with all their fixes, and one press of
         "Patch selected executables" writes "Dark Colony.exe", "Dark Colony Ultimate.exe" and
-        "Dark Colony map editor 1.2.exe" with a shortcut of the same name on the desktop; untick what
+        "Dark Colony Map Editor.exe" with a shortcut of the same name on the desktop; untick what
         you do not want - or drive it from the command line, see the examples
       * it never touches the input file; it writes a new file
       * every patch is a list of (file offset, old bytes, new bytes, reason) in plain text below
@@ -48,7 +48,7 @@
     The third build is the map editor "Dark Colony - Map editor\maped.exe" (the original from the Dark
     Colony CD): its fixes clear the "disabled" flag on dialog controls the original greyed out - the
     functional part of the ozi_ns editor, without the Polish translation - and write
-    "Dark Colony map editor 1.2.exe".  (Until 25 Sep 2026 the three were dc16new.exe, engexp16new.exe
+    "Dark Colony Map Editor.exe".  (Until 25 Sep 2026 the three were dc16new.exe, engexp16new.exe
     and maped_ozi_ns_v1.2.exe.)
 
     The script is complete in itself: it uses nothing but the .NET classes that ship with Windows
@@ -70,7 +70,7 @@
 
 .PARAMETER Output
     Where to write the patched copy (only together with -Original).  Default: "Dark Colony.exe" /
-    "Dark Colony Ultimate.exe" / "Dark Colony map editor 1.2.exe" next to the original.
+    "Dark Colony Ultimate.exe" / "Dark Colony Map Editor.exe" next to the original.
     An existing file is not overwritten unless -Overwrite is given.
 
 .PARAMETER Resolution
@@ -96,7 +96,7 @@
 
 .PARAMETER DesktopShortcut
     After a successful write, put a shortcut to the patched exe on the desktop ("Dark Colony",
-    "Dark Colony - Council Wars" or "Dark Colony map editor"; start folder = the game folder, which
+    "Dark Colony - Council Wars" or "Dark Colony Map Editor"; start folder = the game folder, which
     the game needs to find its data).  An existing shortcut of that name is replaced.  The window
     does the same with its "Desktop shortcut" checkbox (ticked by default).
 
@@ -113,7 +113,7 @@
     .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\dc16.exe" -Patches nocd,resolution,hdpaths,pool
     .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\ENGEXP16.EXE" -All -DesktopShortcut
     .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\dc16.exe" -All -Resolution 1280x800
-    .\Apply-DarkColonyPatches.ps1 -Original "Dark Colony - Map editor\maped.exe" -All     (-> "Dark Colony map editor 1.2.exe")
+    .\Apply-DarkColonyPatches.ps1 -Original "Dark Colony - Map editor\maped.exe" -All     (-> "Dark Colony Map Editor.exe")
     .\Apply-DarkColonyPatches.ps1 -Verify "DC - Council wars\Dark Colony.exe"
 
 .NOTES
@@ -3621,9 +3621,21 @@ at 5 s, the fixed one plays on with an empty error.log.
             #  relocation entries of the old code's absolute operands are re-pointed at the new ones and the
             #  rest become padding; nothing moves.
             #
+            #  Dark Colony Ultimate (since 25 Sep 2026) plays both discs and lets you choose: its battlefield
+            #  options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
+            #  values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
+            #  order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
+            #  COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+            #  dialog changes it at any time, with the music switching at once.  Two small in-place edits route
+            #  the dialog's new buttons and value text into the rewritten routines; the dialog script with the
+            #  new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
+            #  of intrf_hd\lopte - at 640x480 intrface\lopme, because the exe would otherwise read the
+            #  original's own exp\intrface\lopte).
+            #
             #  REQUIRES the eight tracks from the repository (encoded from the CD images at 192 kbit/s, 32 MB):
             #  MUSIC\TRACK02.MP3 .. TRACK05.MP3 for Dark Colony, exp\music\track02.mp3 .. track05.mp3 for
-            #  Council Wars.  Without a TRACK02 file the game simply stays silent, as it does today.
+            #  Council Wars (Dark Colony Ultimate needs both sets).  Without a TRACK02 file the game simply stays
+            #  silent, as it does today.
             @{
                 Id = 'music'; Name = 'Original CD soundtrack from MP3 files (MUSIC\TRACK02-05.MP3 / exp\music\track02-05.mp3)'; Date = '22 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
@@ -3649,9 +3661,21 @@ the two discs have different music.  Everything inside the two rewritten routine
 relocation entries of the old code's absolute operands are re-pointed at the new ones and the
 rest become padding; nothing moves.
 
+Dark Colony Ultimate (since 25 Sep 2026) plays both discs and lets you choose: its battlefield
+options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
+values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
+order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
+COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+dialog changes it at any time, with the music switching at once.  Two small in-place edits route
+the dialog's new buttons and value text into the rewritten routines; the dialog script with the
+new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
+of intrf_hd\lopte - at 640x480 intrface\lopme, because the exe would otherwise read the
+original's own exp\intrface\lopte).
+
 REQUIRES the eight tracks from the repository (encoded from the CD images at 192 kbit/s, 32 MB):
 MUSIC\TRACK02.MP3 .. TRACK05.MP3 for Dark Colony, exp\music\track02.mp3 .. track05.mp3 for
-Council Wars.  Without a TRACK02 file the game simply stays silent, as it does today.
+Council Wars (Dark Colony Ultimate needs both sets).  Without a TRACK02 file the game simply stays
+silent, as it does today.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
@@ -4005,13 +4029,13 @@ directory that lists them); their SHA-256 is checked like every other edit.
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '7f5e53225a63d7040adb889205098c9c22b7bdef60fdb0feb38b23c854462903'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'd1a9b518657b623e707116e184983d21638de261dc7d94154f532e0786e7caba'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = 'e6f375e8fc7f9ae1c3c9b0a71a22b86b777c56c2f5f5dae87c99868ce959e4ab'; '1024x768' = '7f5e53225a63d7040adb889205098c9c22b7bdef60fdb0feb38b23c854462903'; '1280x1024' = '816da807905def1624a79e510b92aafc7d3e97515a61c16923637069accdc81f'; '1280x720' = '2082442a3306a11abd22b5e47d90bdc32df6ceb506f042d5a1d7b3d58a420cb7'; '1280x800' = '2b430a8f7a47be46504644b8a7b36e884955661e2de7f869715de7ff31e7cc2d'; '3840x1080' = 'c06a5e9d4009a61d12d6af967c9ff4ce3bca8a9c2484e1cb7fe115e730ba0599' }
+        ReferenceSha256 = @{ '640x480' = '87065403c8bd19d415d0c1dab2acd4394cf397cd9ac92488301225ddc5b955bf'; '1024x768' = 'd1a9b518657b623e707116e184983d21638de261dc7d94154f532e0786e7caba'; '1280x1024' = '2a4da9e046b0072de0d3bea428b6dded81962bb317954d94c9a0ba20aaf0c511'; '1280x720' = '6d10c74ff9c47408a9bcacbac4851fda5e1f6c5e68edf6ada23a6bc06cb24206'; '1280x800' = 'a686df37394b64a8bd6d2dd664c849dd5a5727b34d1c3e2ce99111c98df11a8e'; '3840x1080' = '5f7232ef16dc340a79b2ea3ee5754e4f9277b48652df4d5d81672d033cc91835' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -7476,11 +7500,11 @@ at 5 s, the fixed one plays on with an empty error.log.
                 )
             }
 
-            # ---- music: Original CD soundtrack from MP3 files (MUSIC\TRACK02-05.MP3 / exp\music\track02-05.mp3) ---------------------------------------------------------
+            # ---- music @ 640x480: Original CD soundtrack from MP3 files (MUSIC\TRACK02-05.MP3 / exp\music\track02-05.mp3) ---------------------------------------------------------
             #  Added      : 22 Sep 2026
             #  Made with  : tools/patch_music.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.31
-            #  Changes    : 1794 bytes in 46 edits
+            #  Changes    : 1856 bytes in 49 edits
             #  The soundtrack of both games was never a file: the CDs are mixed-mode discs with the music as
             #  audio tracks 2-5 after the data track, and the game plays them through Windows' CD-audio
             #  interface (MCI "cdaudio") - at the start of every battle it seeks to track 2 and plays the disc to
@@ -7500,13 +7524,25 @@ at 5 s, the fixed one plays on with an empty error.log.
             #  relocation entries of the old code's absolute operands are re-pointed at the new ones and the
             #  rest become padding; nothing moves.
             #
+            #  Dark Colony Ultimate (since 25 Sep 2026) plays both discs and lets you choose: its battlefield
+            #  options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
+            #  values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
+            #  order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
+            #  COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+            #  dialog changes it at any time, with the music switching at once.  Two small in-place edits route
+            #  the dialog's new buttons and value text into the rewritten routines; the dialog script with the
+            #  new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
+            #  of intrf_hd\lopte - at 640x480 intrface\lopme, because the exe would otherwise read the
+            #  original's own exp\intrface\lopte).
+            #
             #  REQUIRES the eight tracks from the repository (encoded from the CD images at 192 kbit/s, 32 MB):
             #  MUSIC\TRACK02.MP3 .. TRACK05.MP3 for Dark Colony, exp\music\track02.mp3 .. track05.mp3 for
-            #  Council Wars.  Without a TRACK02 file the game simply stays silent, as it does today.
+            #  Council Wars (Dark Colony Ultimate needs both sets).  Without a TRACK02 file the game simply stays
+            #  silent, as it does today.
             @{
                 Id = 'music'; Name = 'Original CD soundtrack from MP3 files (MUSIC\TRACK02-05.MP3 / exp\music\track02-05.mp3)'; Date = '22 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
-                Mode = $null
+                Mode = '640x480'
                 Tool = 'tools/patch_music.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.31'
                 Description = @'
 The soundtrack of both games was never a file: the CDs are mixed-mode discs with the music as
@@ -7528,69 +7564,285 @@ the two discs have different music.  Everything inside the two rewritten routine
 relocation entries of the old code's absolute operands are re-pointed at the new ones and the
 rest become padding; nothing moves.
 
+Dark Colony Ultimate (since 25 Sep 2026) plays both discs and lets you choose: its battlefield
+options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
+values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
+order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
+COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+dialog changes it at any time, with the music switching at once.  Two small in-place edits route
+the dialog's new buttons and value text into the rewritten routines; the dialog script with the
+new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
+of intrf_hd\lopte - at 640x480 intrface\lopme, because the exe would otherwise read the
+original's own exp\intrface\lopte).
+
 REQUIRES the eight tracks from the repository (encoded from the CD images at 192 kbit/s, 32 MB):
 MUSIC\TRACK02.MP3 .. TRACK05.MP3 for Dark Colony, exp\music\track02.mp3 .. track05.mp3 for
-Council Wars.  Without a TRACK02 file the game simply stays silent, as it does today.
+Council Wars (Dark Colony Ultimate needs both sets).  Without a TRACK02 file the game simply stays
+silent, as it does today.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
-                # data files this fix needs next to the exe (4; listed from the repository when this
+                # data files this fix needs next to the exe (8; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
+                    'MUSIC\TRACK02.MP3'
+                    'MUSIC\TRACK03.MP3'
+                    'MUSIC\TRACK04.MP3'
+                    'MUSIC\TRACK05.MP3'
                     'exp\music\track02.mp3'
                     'exp\music\track03.mp3'
                     'exp\music\track04.mp3'
                     'exp\music\track05.mp3'
                 )
                 Edits = @(
-                    # cdaudio module -> MP3 player on MCI mpegvideo (seven entry points kept: cd_open +0, play_from_here +0x3C, close +0x88, stop +0xB8, tracks +0x338, seek_track +0x4E8, mode +0x6E0; helpers, "mpegvideo" and the path template "exp\\music\\track0?.mp3" inside; the rest zero)
-                    @{ Offset = 0x50530; Old = '51 52 55 89 E5 83 EC 14 8D 45 EC 50 68 00 21 00 00 68 03 08 00 00 31 D2 B9 24 7C 48 00 52 89 55 F0 89 4D F4 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F0 89 EC 5D 5A 59 C3 53 51 52 55 89 E5 83 EC 18 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 0A 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 75 15 8D 45 E8 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 5B C3 51 52 55 89 E5 6A 00 6A 00 68 04 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 06 31 C0 5D 5A 59 C3 B8 01 00 00 00 5D 5A 59 C3 8B C0 51 52 55 89 E5 83 EC 04 8D 55 FC 52 6A 00 68 08 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 C3 53 51 52 55 89 E5 83 EC 20 8D 5D E0 53 68 00 01 00 00 31 DB 68 14 08 00 00 66 89 C3 BA 04 00 00 00 53 89 55 E8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 4E 81 7D E4 0D 02 00 00 75 20 8D 45 F0 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 29 31 C0 89 EC 5D 5A 59 5B C3 8D 45 FC 50 6A 00 68 09 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5A 59 5B C3 B8 01 00 00 00 89 EC 5D 5A 59 5B C3 8D 40 00 53 51 52 56 57 55 89 E5 83 EC 28 89 C3 8D 45 D8 50 68 00 01 00 00 31 F6 68 14 08 00 00 66 89 DE BA 08 00 00 00 56 89 55 E0 2E FF 15 70 05 48 00 85 C0 74 07 31 C0 E9 A7 00 00 00 8B 45 DC 89 45 FC 8D 45 D8 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 56 89 4D E0 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8B 75 FC 8B 7D DC 46 BA 08 00 00 00 39 FE 76 0C B8 02 00 00 00 BE 01 00 00 00 EB 0A 8A 45 FC FE C0 25 FF 00 00 00 89 45 F8 8D 45 F4 50 52 68 07 08 00 00 81 E3 FF FF 00 00 53 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8D 45 E8 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 89 F0 89 EC 5D 5F 5E 5A 59 5B C3 90 53 51 52 56 57 55 89 E5 83 EC 24 89 C6 8D 45 DC 50 68 00 01 00 00 31 FF 68 14 08 00 00 66 89 F7 BA 08 00 00 00 57 89 55 E4 2E FF 15 70 05 48 00 85 C0 74 07 31 C0 E9 9A 00 00 00 8D 45 DC 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 57 8B 5D E0 89 4D E4 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 BF 08 00 00 00 83 FB 01 75 08 8A 45 E0 8B 5D E0 EB 0A 88 D8 FE C8 25 FF 00 00 00 4B 89 45 FC 8D 45 F8 50 57 68 07 08 00 00 81 E6 FF FF 00 00 56 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8D 45 EC 50 6A 00 68 06 08 00 00 56 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 89 D8 89 EC 5D 5F 5E 5A 59 5B C3 8B C0 51 52 55 89 E5 83 EC 10 C7 45 F8 03 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F4 89 EC 5D 5A 59 C3 90 51 52 55 89 E5 83 EC 10 C7 45 F8 08 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F4 89 EC 5D 5A 59 C3 90 53 51 52 55 89 E5 83 EC 1C 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 0A 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 2E 8D 45 E4 50 68 00 01 00 00 68 14 08 00 00 B9 02 00 00 00 53 89 4D EC 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5A 59 5B C3 8B 45 E8 89 EC 5D 5A 59 5B C3 8D 40 00 53 51 52 56 55 89 E5 83 EC 1C 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 02 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 5B 8D 45 E4 50 68 00 01 00 00 68 14 08 00 00 B9 02 00 00 00 53 89 4D EC 2E FF 15 70 05 48 00 85 C0 74 0A 31 C0 89 EC 5D 5E 5A 59 5B C3 8D 45 F4 50 68 00 04 00 00 68 0D 08 00 00 BE 0A 00 00 00 53 89 75 F8 2E FF 15 70 05 48 00 85 C0 74 0A 31 C0 89 EC 5D 5E 5A 59 5B C3 8B 45 E8 89 EC 5D 5E 5A 59 5B C3 51 52 55 89 E5 83 EC 0C 8D 55 F4 52 68 00 01 00 00 68 0D 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 C3 90 55 89 E5 5D C3 8D 40 00 53 51 56 55 89 E5 83 EC 20 88 D3 8D 75 EC 56 68 00 04 00 00 31 F6 68 0D 08 00 00 66 89 C6 BA 0A 00 00 00 56 89 55 F0 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 4E 88 D8 89 45 FC 8D 45 F8 50 6A 08 68 07 08 00 00 81 E3 FF 00 00 00 56 43 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5E 59 5B C3 8D 45 E0 50 6A 00 68 06 08 00 00 56 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5E 59 5B C3 89 D8 89 EC 5D 5E 59 5B C3 90 55 89 E5 31 C0 5D C3 90 53 51 52 56 57 55 89 E5 83 EC 20 89 C6 8D 45 F0 50 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 F3 BA 02 00 00 00 53 89 55 F4 2E FF 15 70 05 48 00 89 C7 85 C0 74 18 6A 00 6A 00 68 04 08 00 00 53 2E FF 15 70 05 48 00 89 F8 E9 EF 00 00 00 8D 45 E0 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 53 89 4D E8 2E FF 15 70 05 48 00 89 C7 85 C0 74 1C 6A 00 6A 00 68 04 08 00 00 53 2E FF 15 70 05 48 00 89 F8 89 EC 5D 5F 5E 5A 59 5B C3 8B 45 E4 A3 0C 28 53 00 83 F8 14 7C 05 B8 14 00 00 00 BB 01 00 00 00 A3 0C 28 53 00 3B 1D 0C 28 53 00 0F 8F 85 00 00 00 C7 45 E8 02 00 00 00 8D 45 E0 50 68 10 01 00 00 31 C0 68 14 08 00 00 66 89 F0 50 89 5D EC 89 45 FC 2E FF 15 70 05 48 00 89 C7 85 C0 74 1F 6A 00 6A 00 68 04 08 00 00 8B 4D FC 51 2E FF 15 70 05 48 00 89 F8 89 EC 5D 5F 5E 5A 59 5B C3 8D 7B FF 8D 04 BD 00 00 00 00 29 F8 89 C7 8A 45 E4 88 87 D0 27 53 00 31 C0 66 8B 45 E4 C1 F8 08 88 87 D1 27 53 00 8B 45 E4 C1 E8 10 43 88 87 D2 27 53 00 E9 6F FF FF FF 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8B C0 55 89 E5 25 FF FF 00 00 E8 A3 FC FF FF 39 D0 76 07 B8 01 00 00 00 5D C3 31 C0 5D C3 51 52 55 89 E5 83 EC 10 C7 45 F8 04 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 07 B8 04 00 00 00 EB 36 8B 4D F4 81 F9 12 02 00 00 75 0B B8 01 00 00 00 89 EC 5D 5A 59 C3 81 F9 0C 02 00 00 75 0B B8 02 00 00 00 89 EC 5D 5A 59 C3 81 F9 0D 02 00 00 75 05 B8 03 00 00 00 89 EC 5D 5A 59 C3'; New = 'E8 DB 00 00 00 A1 10 8E 48 00 6B C0 64 A3 D8 27 53 00 B8 02 00 00 00 E8 F4 00 00 00 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 C0 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 EB 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 A1 D0 27 53 00 85 C0 74 10 6A 00 6A 00 68 08 08 00 00 50 FF 15 70 05 48 00 31 C0 5A 59 C3 00 00 00 00 00 00 00 00 51 52 A1 D0 27 53 00 85 C0 74 17 6A 00 6A 00 68 04 08 00 00 50 FF 15 70 05 48 00 31 C0 A3 D0 27 53 00 5A 59 C3 00 00 00 00 00 00 00 00 00 00 00 51 52 56 57 55 89 E5 83 EC 14 89 C2 BE 0C 13 45 00 BF DC 27 53 00 B9 06 00 00 00 F3 A5 04 30 A2 EC 27 53 00 89 15 D4 27 53 00 31 C0 89 45 EC 89 45 F0 C7 45 F4 00 13 45 00 C7 45 F8 DC 27 53 00 89 45 FC 8D 45 EC 50 68 02 22 00 00 68 03 08 00 00 6A 00 FF 15 70 05 48 00 85 C0 75 1A 8B 45 F0 A3 D0 27 53 00 8B 0D D8 27 53 00 E8 80 00 00 00 A1 D0 27 53 00 EB 02 31 C0 89 EC 5D 5F 5E 5A 59 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 55 89 E5 83 EC 0C 31 D2 89 55 F4 89 55 F8 89 55 FC 8D 55 F4 52 6A 00 68 06 08 00 00 50 FF 15 70 05 48 00 89 EC 5D 5A 59 C3 00 00 00 00 00 6D 70 65 67 76 69 64 65 6F 00 00 00 65 78 70 5C 6D 75 73 69 63 5C 74 72 61 63 6B 30 3F 2E 6D 70 33 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 55 89 E5 83 EC 18 31 D2 89 55 E8 C7 45 EC 02 40 00 00 89 4D F0 89 55 F4 89 55 F8 89 55 FC 8D 55 E8 52 68 00 00 80 01 68 73 08 00 00 50 FF 15 70 05 48 00 89 EC 5D 5A 59 C3 00 00 00 00 00 51 52 55 89 E5 83 EC 10 A1 D0 27 53 00 85 C0 74 66 31 D2 89 55 F0 89 55 F4 C7 45 F8 04 00 00 00 89 55 FC 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 50 FF 15 70 05 48 00 85 C0 75 3B 81 7D F4 0D 02 00 00 75 2A 8B 15 D4 27 53 00 42 E8 4F FE FF FF 89 D0 E8 78 FE FF FF 85 C0 75 0E B8 02 00 00 00 E8 6A FE FF FF 85 C0 74 0D E8 F1 FE FF FF 31 C0 89 EC 5D 5A 59 C3 B8 04 00 00 00 EB F3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 C0 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 52 E8 F2 FB FF FF 0F B6 C2 E8 1A FC FF FF 85 C0 74 0B E8 A1 FC FF FF 0F B6 C2 40 5A C3 31 C0 5A C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E9 5B FB FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
+                    # options refresh epilogue -> jmp opt_refresh_tail (in_text 73 = DC / CW / ALL when the dialog has it)
+                    @{ Offset = 0x320D6; Old = '8D A5 FE 00 00 00 5D 5E 5A 59 5B C3'; New = '8D A5 FE 00 00 00 E9 6F E8 01 00 90' }
+                    # options handler: events other than a button press skip the tail (jne tail -> jne epilogue; the original tail only tested the press-set close flag)
+                    @{ Offset = 0x32102; Old = '0F 85 18 02 00 00'; New = '0F 85 23 02 00 00' }
+                    # options handler tail -> call opt_tail (buttons 71 / 72 cycle the music source, then the original close)
+                    @{ Offset = 0x32320; Old = '84 DB 74 07 89 F0 E8 59 F6 FF FF'; New = '89 F0 8B 55 F8 E8 C6 E5 01 00 90' }
+                    # cdaudio module -> MP3 player on MCI mpegvideo with a music source DC / CW / ALL (seven entry points kept: cd_open +0, play_from_here +0x3C, close +0x88, stop +0xB8, tracks +0x338, seek_track +0x4E8, mode +0x6E0; helpers, the options-dialog code opt_tail +0x3C0 / opt_refresh_tail +0x420, "mpegvideo" and the two path templates music\\track0?.mp3 / exp\\music\\track0?.mp3 inside; the rest zero)
+                    @{ Offset = 0x50530; Old = '51 52 55 89 E5 83 EC 14 8D 45 EC 50 68 00 21 00 00 68 03 08 00 00 31 D2 B9 24 7C 48 00 52 89 55 F0 89 4D F4 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F0 89 EC 5D 5A 59 C3 53 51 52 55 89 E5 83 EC 18 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 0A 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 75 15 8D 45 E8 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 5B C3 51 52 55 89 E5 6A 00 6A 00 68 04 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 06 31 C0 5D 5A 59 C3 B8 01 00 00 00 5D 5A 59 C3 8B C0 51 52 55 89 E5 83 EC 04 8D 55 FC 52 6A 00 68 08 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 C3 53 51 52 55 89 E5 83 EC 20 8D 5D E0 53 68 00 01 00 00 31 DB 68 14 08 00 00 66 89 C3 BA 04 00 00 00 53 89 55 E8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 4E 81 7D E4 0D 02 00 00 75 20 8D 45 F0 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 29 31 C0 89 EC 5D 5A 59 5B C3 8D 45 FC 50 6A 00 68 09 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5A 59 5B C3 B8 01 00 00 00 89 EC 5D 5A 59 5B C3 8D 40 00 53 51 52 56 57 55 89 E5 83 EC 28 89 C3 8D 45 D8 50 68 00 01 00 00 31 F6 68 14 08 00 00 66 89 DE BA 08 00 00 00 56 89 55 E0 2E FF 15 70 05 48 00 85 C0 74 07 31 C0 E9 A7 00 00 00 8B 45 DC 89 45 FC 8D 45 D8 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 56 89 4D E0 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8B 75 FC 8B 7D DC 46 BA 08 00 00 00 39 FE 76 0C B8 02 00 00 00 BE 01 00 00 00 EB 0A 8A 45 FC FE C0 25 FF 00 00 00 89 45 F8 8D 45 F4 50 52 68 07 08 00 00 81 E3 FF FF 00 00 53 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8D 45 E8 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 89 F0 89 EC 5D 5F 5E 5A 59 5B C3 90 53 51 52 56 57 55 89 E5 83 EC 24 89 C6 8D 45 DC 50 68 00 01 00 00 31 FF 68 14 08 00 00 66 89 F7 BA 08 00 00 00 57 89 55 E4 2E FF 15 70 05 48 00 85 C0 74 07 31 C0 E9 9A 00 00 00 8D 45 DC 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 57 8B 5D E0 89 4D E4 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 BF 08 00 00 00 83 FB 01 75 08 8A 45 E0 8B 5D E0 EB 0A 88 D8 FE C8 25 FF 00 00 00 4B 89 45 FC 8D 45 F8 50 57 68 07 08 00 00 81 E6 FF FF 00 00 56 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8D 45 EC 50 6A 00 68 06 08 00 00 56 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 89 D8 89 EC 5D 5F 5E 5A 59 5B C3 8B C0 51 52 55 89 E5 83 EC 10 C7 45 F8 03 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F4 89 EC 5D 5A 59 C3 90 51 52 55 89 E5 83 EC 10 C7 45 F8 08 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F4 89 EC 5D 5A 59 C3 90 53 51 52 55 89 E5 83 EC 1C 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 0A 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 2E 8D 45 E4 50 68 00 01 00 00 68 14 08 00 00 B9 02 00 00 00 53 89 4D EC 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5A 59 5B C3 8B 45 E8 89 EC 5D 5A 59 5B C3 8D 40 00 53 51 52 56 55 89 E5 83 EC 1C 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 02 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 5B 8D 45 E4 50 68 00 01 00 00 68 14 08 00 00 B9 02 00 00 00 53 89 4D EC 2E FF 15 70 05 48 00 85 C0 74 0A 31 C0 89 EC 5D 5E 5A 59 5B C3 8D 45 F4 50 68 00 04 00 00 68 0D 08 00 00 BE 0A 00 00 00 53 89 75 F8 2E FF 15 70 05 48 00 85 C0 74 0A 31 C0 89 EC 5D 5E 5A 59 5B C3 8B 45 E8 89 EC 5D 5E 5A 59 5B C3 51 52 55 89 E5 83 EC 0C 8D 55 F4 52 68 00 01 00 00 68 0D 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 C3 90 55 89 E5 5D C3 8D 40 00 53 51 56 55 89 E5 83 EC 20 88 D3 8D 75 EC 56 68 00 04 00 00 31 F6 68 0D 08 00 00 66 89 C6 BA 0A 00 00 00 56 89 55 F0 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 4E 88 D8 89 45 FC 8D 45 F8 50 6A 08 68 07 08 00 00 81 E3 FF 00 00 00 56 43 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5E 59 5B C3 8D 45 E0 50 6A 00 68 06 08 00 00 56 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5E 59 5B C3 89 D8 89 EC 5D 5E 59 5B C3 90 55 89 E5 31 C0 5D C3 90 53 51 52 56 57 55 89 E5 83 EC 20 89 C6 8D 45 F0 50 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 F3 BA 02 00 00 00 53 89 55 F4 2E FF 15 70 05 48 00 89 C7 85 C0 74 18 6A 00 6A 00 68 04 08 00 00 53 2E FF 15 70 05 48 00 89 F8 E9 EF 00 00 00 8D 45 E0 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 53 89 4D E8 2E FF 15 70 05 48 00 89 C7 85 C0 74 1C 6A 00 6A 00 68 04 08 00 00 53 2E FF 15 70 05 48 00 89 F8 89 EC 5D 5F 5E 5A 59 5B C3 8B 45 E4 A3 0C 28 53 00 83 F8 14 7C 05 B8 14 00 00 00 BB 01 00 00 00 A3 0C 28 53 00 3B 1D 0C 28 53 00 0F 8F 85 00 00 00 C7 45 E8 02 00 00 00 8D 45 E0 50 68 10 01 00 00 31 C0 68 14 08 00 00 66 89 F0 50 89 5D EC 89 45 FC 2E FF 15 70 05 48 00 89 C7 85 C0 74 1F 6A 00 6A 00 68 04 08 00 00 8B 4D FC 51 2E FF 15 70 05 48 00 89 F8 89 EC 5D 5F 5E 5A 59 5B C3 8D 7B FF 8D 04 BD 00 00 00 00 29 F8 89 C7 8A 45 E4 88 87 D0 27 53 00 31 C0 66 8B 45 E4 C1 F8 08 88 87 D1 27 53 00 8B 45 E4 C1 E8 10 43 88 87 D2 27 53 00 E9 6F FF FF FF 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8B C0 55 89 E5 25 FF FF 00 00 E8 A3 FC FF FF 39 D0 76 07 B8 01 00 00 00 5D C3 31 C0 5D C3 51 52 55 89 E5 83 EC 10 C7 45 F8 04 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 07 B8 04 00 00 00 EB 36 8B 4D F4 81 F9 12 02 00 00 75 0B B8 01 00 00 00 89 EC 5D 5A 59 C3 81 F9 0C 02 00 00 75 0B B8 02 00 00 00 89 EC 5D 5A 59 C3 81 F9 0D 02 00 00 75 05 B8 03 00 00 00 89 EC 5D 5A 59 C3'; New = '52 56 E8 D9 00 00 00 A1 10 8E 48 00 6B C0 64 BE D0 27 53 00 89 46 08 0F 31 31 D0 83 C8 01 89 46 30 C6 46 25 00 E8 B6 02 00 00 E8 E1 00 00 00 5E 5A C3 00 00 00 00 00 00 00 00 00 00 31 C0 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 EB 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 56 BE D0 27 53 00 8B 06 85 C0 74 10 6A 00 6A 00 68 08 08 00 00 50 FF 15 70 05 48 00 31 C0 5E 5A 59 C3 00 00 00 00 51 52 56 BE D0 27 53 00 8B 06 85 C0 74 14 6A 00 6A 00 68 04 08 00 00 50 FF 15 70 05 48 00 31 C0 89 06 5E 5A 59 C3 00 00 00 00 00 00 00 00 00 00 51 52 56 57 55 89 E5 83 EC 14 89 C2 BE 0C 13 45 00 B9 0C 00 00 00 F6 C2 04 74 0A BE F0 13 45 00 B9 10 00 00 00 BF D0 27 53 00 83 C7 0C 57 51 B9 06 00 00 00 F3 A5 59 5F 89 D0 83 E0 03 04 32 88 04 0F 89 FE 83 EE 0C 89 56 04 31 C0 89 45 EC 89 45 F0 C7 45 F4 00 13 45 00 89 7D F8 89 45 FC 8D 45 EC 50 68 02 22 00 00 68 03 08 00 00 6A 00 FF 15 70 05 48 00 85 C0 75 11 8B 45 F0 89 06 8B 4E 08 E8 6A 00 00 00 8B 06 EB 02 31 C0 89 EC 5D 5F 5E 5A 59 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 6D 70 65 67 76 69 64 65 6F 00 00 00 6D 75 73 69 63 5C 74 72 61 63 6B 30 3F 2E 6D 70 33 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 55 89 E5 83 EC 18 31 D2 89 55 E8 C7 45 EC 02 40 00 00 89 4D F0 89 55 F4 89 55 F8 89 55 FC 8D 55 E8 52 68 00 00 80 01 68 73 08 00 00 50 FF 15 70 05 48 00 89 EC 5D 5A 59 C3 00 00 00 00 00 51 52 56 55 89 E5 83 EC 10 BE D0 27 53 00 8B 06 85 C0 74 57 31 D2 89 55 F0 89 55 F4 C7 45 F8 04 00 00 00 89 55 FC 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 50 FF 15 70 05 48 00 85 C0 75 2C 81 7D F4 0D 02 00 00 75 1A E8 F3 01 00 00 50 E8 4D FE FF FF 58 E8 77 FE FF FF 85 C0 74 0E E8 AE 01 00 00 31 C0 89 EC 5D 5E 5A 59 C3 B8 04 00 00 00 EB F2 00 00 00 00 00 00 00 00 00 00 00 00 00 00 65 78 70 5C 6D 75 73 69 63 5C 74 72 61 63 6B 30 3F 2E 6D 70 33 00 00 00 00 00 00 00 00 00 00 00 56 BE D0 27 53 00 0F B6 46 24 3C 02 73 05 C1 E0 02 EB 0D E8 48 00 00 00 C6 46 25 00 0F B6 46 26 5E C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 C0 C3 00 00 00 00 00 50 51 52 57 31 C9 88 4C 0E 26 41 83 F9 08 72 F6 B9 07 00 00 00 8B 46 30 69 C0 6D 4E C6 41 05 39 30 00 00 89 46 30 C1 E8 10 31 D2 8D 79 01 F7 F7 8A 44 0E 26 8A 64 16 26 88 64 0E 26 88 44 16 26 49 75 D2 8A 46 26 3A 46 04 75 09 8A 66 27 88 66 26 88 46 27 5F 5A 59 58 C3 00 00 00 00 00 00 00 E8 3B FD FF FF E8 36 FF FF FF E8 61 FD FF FF 85 C0 74 0A E8 98 00 00 00 A1 D0 27 53 00 C3 00 00 51 52 56 57 89 C7 BE D0 27 53 00 83 FA 47 74 0C 83 FA 48 75 31 0F B6 46 24 40 EB 07 0F B6 46 24 83 C0 02 3C 03 72 02 2C 03 88 46 24 83 3D 70 97 48 00 00 75 0A 83 3E 00 74 05 E8 A1 FF FF FF 89 F8 E8 F2 16 FE FF 84 DB 74 07 89 F8 E8 43 10 FE FF 5F 5E 5A 59 C3 00 00 00 00 00 00 00 00 00 00 80 B9 5D 0F 00 00 04 75 21 BE D0 27 53 00 0F B6 56 24 83 C2 14 89 C8 E8 AC 11 FD FF 89 C3 BA 49 00 00 00 89 C8 E8 5A 29 FD FF 5D 5E 5A 59 5B C3 51 52 55 89 E5 83 EC 0C 31 D2 89 55 F4 89 55 F8 89 55 FC 8D 55 F4 52 6A 00 68 06 08 00 00 50 FF 15 70 05 48 00 89 EC 5D 5A 59 C3 00 00 00 00 00 51 56 BE D0 27 53 00 0F B6 4E 24 80 F9 02 73 0E 8B 46 04 40 83 E0 03 C1 E1 02 09 C8 EB 18 0F B6 46 25 40 3C 08 72 07 E8 94 FE FF FF 31 C0 88 46 25 0F B6 44 06 26 5E 59 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 52 E8 B2 FE FF FF 85 C0 74 05 B8 01 00 00 00 5A C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E9 5B FB FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
                     # set_volume method 0: aux CD-audio device walk -> store level*100, MCI_SETAUDIO volume on the open element (the rest zero)
                     @{ Offset = 0x51CD0; Old = '53 51 52 56 57 55 89 E5 83 EC 34 89 C7 2E FF 15 68 05 48 00 89 45 FC 31 F6 3B 75 FC 73 47 BB 30 00 00 00 8D 45 CC 31 D2 E8 AF 97 02 00 6A 30 8D 45 CC 50 56 2E FF 15 64 05 48 00 85 C0 75 23 66 83 7D F4 01 75 1C 8D 04 BD 00 00 00 00 29 F8 C1 E0 0B 89 C2 C1 E2 10 09 D0 50 56 2E FF 15 6C 05 48 00 46 EB B4 89 EC 5D 5F 5E 5A 59 5B C3'; New = '51 6B C8 64 89 0D D8 27 53 00 A1 D0 27 53 00 85 C0 74 05 E8 48 EA FF FF 59 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
-                    # .reloc table: entry 3149 -> 3136: the absolute operand moved from page offset 0x149 to 0x136, entry follows it
-                    @{ Offset = 0x9C072; Old = '49 31'; New = '36 31' }
-                    # .reloc table: entry 3157 -> 313E: the absolute operand moved from page offset 0x157 to 0x13E, entry follows it
-                    @{ Offset = 0x9C074; Old = '57 31'; New = '3E 31' }
-                    # .reloc table: entry 3194 -> 31EB: the absolute operand moved from page offset 0x194 to 0x1EB, entry follows it
-                    @{ Offset = 0x9C076; Old = '94 31'; New = 'EB 31' }
-                    # .reloc table: entry 31AB -> 31FF: the absolute operand moved from page offset 0x1AB to 0x1FF, entry follows it
-                    @{ Offset = 0x9C078; Old = 'AB 31'; New = 'FF 31' }
-                    # .reloc table: entry 31CF -> 3213: the absolute operand moved from page offset 0x1CF to 0x213, entry follows it
-                    @{ Offset = 0x9C07A; Old = 'CF 31'; New = '13 32' }
-                    # .reloc table: entry 3204 -> 3227: the absolute operand moved from page offset 0x204 to 0x227, entry follows it
-                    @{ Offset = 0x9C07C; Old = '04 32'; New = '27 32' }
-                    # .reloc table: entry 3238 -> 322E: the absolute operand moved from page offset 0x238 to 0x22E, entry follows it
-                    @{ Offset = 0x9C07E; Old = '38 32'; New = '2E 32' }
-                    # .reloc table: entry 325C -> 324D: the absolute operand moved from page offset 0x25C to 0x24D, entry follows it
-                    @{ Offset = 0x9C080; Old = '5C 32'; New = '4D 32' }
-                    # .reloc table: entry 327C -> 3252: the absolute operand moved from page offset 0x27C to 0x252, entry follows it
-                    @{ Offset = 0x9C082; Old = '7C 32'; New = '52 32' }
-                    # .reloc table: entry 32C8 -> 3260: the absolute operand moved from page offset 0x2C8 to 0x260, entry follows it
-                    @{ Offset = 0x9C084; Old = 'C8 32'; New = '60 32' }
-                    # .reloc table: entry 32F7 -> 3266: the absolute operand moved from page offset 0x2F7 to 0x266, entry follows it
-                    @{ Offset = 0x9C086; Old = 'F7 32'; New = '66 32' }
-                    # .reloc table: entry 3347 -> 3275: the absolute operand moved from page offset 0x347 to 0x275, entry follows it
-                    @{ Offset = 0x9C088; Old = '47 33'; New = '75 32' }
-                    # .reloc table: entry 3369 -> 327C: the absolute operand moved from page offset 0x369 to 0x27C, entry follows it
-                    @{ Offset = 0x9C08A; Old = '69 33'; New = '7C 32' }
-                    # .reloc table: entry 33B4 -> 3295: the absolute operand moved from page offset 0x3B4 to 0x295, entry follows it
-                    @{ Offset = 0x9C08C; Old = 'B4 33'; New = '95 32' }
-                    # .reloc table: entry 33E0 -> 32A1: the absolute operand moved from page offset 0x3E0 to 0x2A1, entry follows it
-                    @{ Offset = 0x9C08E; Old = 'E0 33'; New = 'A1 32' }
-                    # .reloc table: entry 3426 -> 32A7: the absolute operand moved from page offset 0x426 to 0x2A7, entry follows it
-                    @{ Offset = 0x9C090; Old = '26 34'; New = 'A7 32' }
-                    # .reloc table: entry 3448 -> 32B1: the absolute operand moved from page offset 0x448 to 0x2B1, entry follows it
-                    @{ Offset = 0x9C092; Old = '48 34'; New = 'B1 32' }
-                    # .reloc table: entry 348E -> 32F1: the absolute operand moved from page offset 0x48E to 0x2F1, entry follows it
-                    @{ Offset = 0x9C094; Old = '8E 34'; New = 'F1 32' }
-                    # .reloc table: entry 34CA -> 3361: the absolute operand moved from page offset 0x4CA to 0x361, entry follows it
-                    @{ Offset = 0x9C096; Old = 'CA 34'; New = '61 33' }
-                    # .reloc table: entry 3508 -> 3379: the absolute operand moved from page offset 0x508 to 0x379, entry follows it
-                    @{ Offset = 0x9C098; Old = '08 35'; New = '79 33' }
-                    # .reloc table: entry 352E -> 33A4: the absolute operand moved from page offset 0x52E to 0x3A4, entry follows it
-                    @{ Offset = 0x9C09A; Old = '2E 35'; New = 'A4 33' }
-                    # .reloc table: entry 3575 -> 33B7: the absolute operand moved from page offset 0x575 to 0x3B7, entry follows it
-                    @{ Offset = 0x9C09C; Old = '75 35'; New = 'B7 33' }
+                    # options dialog script name "intrface/lopt" -> "intrface/lopm" (640x480: the exe reads exp/intrface/lopme, the stock dialog with the MUSIC row, written by apply / the patcher; the original exe keeps its file)
+                    @{ Offset = 0x8393C; Old = '69 6E 74 72 66 61 63 65 2F 6C 6F 70 74 00'; New = '69 6E 74 72 66 61 63 65 2F 6C 6F 70 6D 00' }
+                    # .reloc table: entry 3149 -> 3138: the absolute operand moved from page offset 0x149 to 0x138, entry follows it
+                    @{ Offset = 0x9C072; Old = '49 31'; New = '38 31' }
+                    # .reloc table: entry 3157 -> 3140: the absolute operand moved from page offset 0x157 to 0x140, entry follows it
+                    @{ Offset = 0x9C074; Old = '57 31'; New = '40 31' }
+                    # .reloc table: entry 3194 -> 31EC: the absolute operand moved from page offset 0x194 to 0x1EC, entry follows it
+                    @{ Offset = 0x9C076; Old = '94 31'; New = 'EC 31' }
+                    # .reloc table: entry 31AB -> 3202: the absolute operand moved from page offset 0x1AB to 0x202, entry follows it
+                    @{ Offset = 0x9C078; Old = 'AB 31'; New = '02 32' }
+                    # .reloc table: entry 31CF -> 3214: the absolute operand moved from page offset 0x1CF to 0x214, entry follows it
+                    @{ Offset = 0x9C07A; Old = 'CF 31'; New = '14 32' }
+                    # .reloc table: entry 3204 -> 322A: the absolute operand moved from page offset 0x204 to 0x22A, entry follows it
+                    @{ Offset = 0x9C07C; Old = '04 32'; New = '2A 32' }
+                    # .reloc table: entry 3238 -> 324D: the absolute operand moved from page offset 0x238 to 0x24D, entry follows it
+                    @{ Offset = 0x9C07E; Old = '38 32'; New = '4D 32' }
+                    # .reloc table: entry 327C -> 3266: the absolute operand moved from page offset 0x27C to 0x266, entry follows it
+                    @{ Offset = 0x9C082; Old = '7C 32'; New = '66 32' }
+                    # .reloc table: entry 32C8 -> 3295: the absolute operand moved from page offset 0x2C8 to 0x295, entry follows it
+                    @{ Offset = 0x9C084; Old = 'C8 32'; New = '95 32' }
+                    # .reloc table: entry 32F7 -> 32B1: the absolute operand moved from page offset 0x2F7 to 0x2B1, entry follows it
+                    @{ Offset = 0x9C086; Old = 'F7 32'; New = 'B1 32' }
+                    # .reloc table: entry 3347 -> 3361: the absolute operand moved from page offset 0x347 to 0x361, entry follows it
+                    @{ Offset = 0x9C088; Old = '47 33'; New = '61 33' }
+                    # .reloc table: entry 3369 -> 337A: the absolute operand moved from page offset 0x369 to 0x37A, entry follows it
+                    @{ Offset = 0x9C08A; Old = '69 33'; New = '7A 33' }
+                    # .reloc table: entry 33B4 -> 33A7: the absolute operand moved from page offset 0x3B4 to 0x3A7, entry follows it
+                    @{ Offset = 0x9C08C; Old = 'B4 33'; New = 'A7 33' }
+                    # .reloc table: entry 33E0 -> 3412: the absolute operand moved from page offset 0x3E0 to 0x412, entry follows it
+                    @{ Offset = 0x9C08E; Old = 'E0 33'; New = '12 34' }
+                    # .reloc table: entry 3426 -> 34E9: the absolute operand moved from page offset 0x426 to 0x4E9, entry follows it
+                    @{ Offset = 0x9C090; Old = '26 34'; New = 'E9 34' }
+                    # .reloc table: entry 3448 -> 34F7: the absolute operand moved from page offset 0x448 to 0x4F7, entry follows it
+                    @{ Offset = 0x9C092; Old = '48 34'; New = 'F7 34' }
+                    # .reloc table: entry 348E -> 351E: the absolute operand moved from page offset 0x48E to 0x51E, entry follows it
+                    @{ Offset = 0x9C094; Old = '8E 34'; New = '1E 35' }
+                    # .reloc table: entry 34CA -> 355A: the absolute operand moved from page offset 0x4CA to 0x55A, entry follows it
+                    @{ Offset = 0x9C096; Old = 'CA 34'; New = '5A 35' }
+                    # .reloc table: entry 3508 -> 35A1: the absolute operand moved from page offset 0x508 to 0x5A1, entry follows it
+                    @{ Offset = 0x9C098; Old = '08 35'; New = 'A1 35' }
+                    # .reloc table: entry 352E -> 35B3: the absolute operand moved from page offset 0x52E to 0x5B3, entry follows it
+                    @{ Offset = 0x9C09A; Old = '2E 35'; New = 'B3 35' }
+                    # .reloc table: entry 3575 (type 3 HIGHLOW, page offset 0x575) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C09C; Old = '75 35'; New = '00 00' }
+                    # .reloc table: entry 359B (type 3 HIGHLOW, page offset 0x59B) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C09E; Old = '9B 35'; New = '00 00' }
+                    # .reloc table: entry 35C7 (type 3 HIGHLOW, page offset 0x5C7) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0A0; Old = 'C7 35'; New = '00 00' }
+                    # .reloc table: entry 3603 (type 3 HIGHLOW, page offset 0x603) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0A2; Old = '03 36'; New = '00 00' }
+                    # .reloc table: entry 3642 (type 3 HIGHLOW, page offset 0x642) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0A4; Old = '42 36'; New = '00 00' }
+                    # .reloc table: entry 3669 (type 3 HIGHLOW, page offset 0x669) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0A6; Old = '69 36'; New = '00 00' }
+                    # .reloc table: entry 3689 (type 3 HIGHLOW, page offset 0x689) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0A8; Old = '89 36'; New = '00 00' }
+                    # .reloc table: entry 36D8 (type 3 HIGHLOW, page offset 0x6D8) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0AA; Old = 'D8 36'; New = '00 00' }
+                    # .reloc table: entry 36EF (type 3 HIGHLOW, page offset 0x6EF) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0AC; Old = 'EF 36'; New = '00 00' }
+                    # .reloc table: entry 3714 (type 3 HIGHLOW, page offset 0x714) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0AE; Old = '14 37'; New = '00 00' }
+                    # .reloc table: entry 372B (type 3 HIGHLOW, page offset 0x72B) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0B0; Old = '2B 37'; New = '00 00' }
+                    # .reloc table: entry 373E (type 3 HIGHLOW, page offset 0x73E) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0B2; Old = '3E 37'; New = '00 00' }
+                    # .reloc table: entry 3752 (type 3 HIGHLOW, page offset 0x752) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0B4; Old = '52 37'; New = '00 00' }
+                    # .reloc table: entry 3758 (type 3 HIGHLOW, page offset 0x758) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0B6; Old = '58 37'; New = '00 00' }
+                    # .reloc table: entry 3786 (type 3 HIGHLOW, page offset 0x786) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0B8; Old = '86 37'; New = '00 00' }
+                    # .reloc table: entry 37A0 (type 3 HIGHLOW, page offset 0x7A0) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0BA; Old = 'A0 37'; New = '00 00' }
+                    # .reloc table: entry 37C2 (type 3 HIGHLOW, page offset 0x7C2) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0BC; Old = 'C2 37'; New = '00 00' }
+                    # .reloc table: entry 37D1 (type 3 HIGHLOW, page offset 0x7D1) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0BE; Old = 'D1 37'; New = '00 00' }
+                    # .reloc table: entry 37DE (type 3 HIGHLOW, page offset 0x7DE) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0C0; Old = 'DE 37'; New = '00 00' }
+                    # .reloc table: entry 3836 (type 3 HIGHLOW, page offset 0x836) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C0C2; Old = '36 38'; New = '00 00' }
+                    # .reloc table: entry 38E0 -> 38D6: the absolute operand moved from page offset 0x8E0 to 0x8D6, entry follows it
+                    @{ Offset = 0x9C2F0; Old = 'E0 38'; New = 'D6 38' }
+                    # .reloc table: entry 3907 -> 38DB: the absolute operand moved from page offset 0x907 to 0x8DB, entry follows it
+                    @{ Offset = 0x9C2F2; Old = '07 39'; New = 'DB 38' }
+                    # .reloc table: entry 392E (type 3 HIGHLOW, page offset 0x92E) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2F4; Old = '2E 39'; New = '00 00' }
+                )
+            }
+
+            # ---- music: Original CD soundtrack from MP3 files (MUSIC\TRACK02-05.MP3 / exp\music\track02-05.mp3) ---------------------------------------------------------
+            #  Added      : 22 Sep 2026
+            #  Made with  : tools/patch_music.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.31
+            #  Changes    : 1855 bytes in 48 edits
+            #  The soundtrack of both games was never a file: the CDs are mixed-mode discs with the music as
+            #  audio tracks 2-5 after the data track, and the game plays them through Windows' CD-audio
+            #  interface (MCI "cdaudio") - at the start of every battle it seeks to track 2 and plays the disc to
+            #  its end, checks every five seconds whether the disc has stopped and then starts over at track 2,
+            #  and stops the disc when the battle ends.  Without a CD-ROM drive that interface fails at start-up
+            #  and the game is silent for good; the music slider of the options screen sets a "CD line" volume
+            #  that modern sound drivers no longer have.
+            #
+            #  This fix rewrites the CD-audio routines in place (the seven entry points the music code calls
+            #  keep their addresses) as an MP3 player on Windows' own MCI "mpegvideo" device (mciqtz32.dll,
+            #  part of every Windows since 98; the exe imports nothing new): at battle start it opens and plays
+            #  MUSIC\TRACK02.MP3, the five-second check plays the next file when one has ended and TRACK02
+            #  again after the last one - the original "whole disc, repeat" - and the music slider now sets the
+            #  volume of the playing file (the saved level is applied to every track).  Dark Colony reads
+            #  MUSIC\TRACK0N.MP3, Council Wars exp\music\track0N.mp3, because both exes share one folder and
+            #  the two discs have different music.  Everything inside the two rewritten routines; the
+            #  relocation entries of the old code's absolute operands are re-pointed at the new ones and the
+            #  rest become padding; nothing moves.
+            #
+            #  Dark Colony Ultimate (since 25 Sep 2026) plays both discs and lets you choose: its battlefield
+            #  options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
+            #  values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
+            #  order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
+            #  COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+            #  dialog changes it at any time, with the music switching at once.  Two small in-place edits route
+            #  the dialog's new buttons and value text into the rewritten routines; the dialog script with the
+            #  new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
+            #  of intrf_hd\lopte - at 640x480 intrface\lopme, because the exe would otherwise read the
+            #  original's own exp\intrface\lopte).
+            #
+            #  REQUIRES the eight tracks from the repository (encoded from the CD images at 192 kbit/s, 32 MB):
+            #  MUSIC\TRACK02.MP3 .. TRACK05.MP3 for Dark Colony, exp\music\track02.mp3 .. track05.mp3 for
+            #  Council Wars (Dark Colony Ultimate needs both sets).  Without a TRACK02 file the game simply stays
+            #  silent, as it does today.
+            @{
+                Id = 'music'; Name = 'Original CD soundtrack from MP3 files (MUSIC\TRACK02-05.MP3 / exp\music\track02-05.mp3)'; Date = '22 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = 'hd'
+                Tool = 'tools/patch_music.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.31'
+                Description = @'
+The soundtrack of both games was never a file: the CDs are mixed-mode discs with the music as
+audio tracks 2-5 after the data track, and the game plays them through Windows' CD-audio
+interface (MCI "cdaudio") - at the start of every battle it seeks to track 2 and plays the disc to
+its end, checks every five seconds whether the disc has stopped and then starts over at track 2,
+and stops the disc when the battle ends.  Without a CD-ROM drive that interface fails at start-up
+and the game is silent for good; the music slider of the options screen sets a "CD line" volume
+that modern sound drivers no longer have.
+
+This fix rewrites the CD-audio routines in place (the seven entry points the music code calls
+keep their addresses) as an MP3 player on Windows' own MCI "mpegvideo" device (mciqtz32.dll,
+part of every Windows since 98; the exe imports nothing new): at battle start it opens and plays
+MUSIC\TRACK02.MP3, the five-second check plays the next file when one has ended and TRACK02
+again after the last one - the original "whole disc, repeat" - and the music slider now sets the
+volume of the playing file (the saved level is applied to every track).  Dark Colony reads
+MUSIC\TRACK0N.MP3, Council Wars exp\music\track0N.mp3, because both exes share one folder and
+the two discs have different music.  Everything inside the two rewritten routines; the
+relocation entries of the old code's absolute operands are re-pointed at the new ones and the
+rest become padding; nothing moves.
+
+Dark Colony Ultimate (since 25 Sep 2026) plays both discs and lets you choose: its battlefield
+options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
+values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
+order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
+COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+dialog changes it at any time, with the music switching at once.  Two small in-place edits route
+the dialog's new buttons and value text into the rewritten routines; the dialog script with the
+new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
+of intrf_hd\lopte - at 640x480 intrface\lopme, because the exe would otherwise read the
+original's own exp\intrface\lopte).
+
+REQUIRES the eight tracks from the repository (encoded from the CD images at 192 kbit/s, 32 MB):
+MUSIC\TRACK02.MP3 .. TRACK05.MP3 for Dark Colony, exp\music\track02.mp3 .. track05.mp3 for
+Council Wars (Dark Colony Ultimate needs both sets).  Without a TRACK02 file the game simply stays
+silent, as it does today.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (8; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'MUSIC\TRACK02.MP3'
+                    'MUSIC\TRACK03.MP3'
+                    'MUSIC\TRACK04.MP3'
+                    'MUSIC\TRACK05.MP3'
+                    'exp\music\track02.mp3'
+                    'exp\music\track03.mp3'
+                    'exp\music\track04.mp3'
+                    'exp\music\track05.mp3'
+                )
+                Edits = @(
+                    # options refresh epilogue -> jmp opt_refresh_tail (in_text 73 = DC / CW / ALL when the dialog has it)
+                    @{ Offset = 0x320D6; Old = '8D A5 FE 00 00 00 5D 5E 5A 59 5B C3'; New = '8D A5 FE 00 00 00 E9 6F E8 01 00 90' }
+                    # options handler: events other than a button press skip the tail (jne tail -> jne epilogue; the original tail only tested the press-set close flag)
+                    @{ Offset = 0x32102; Old = '0F 85 18 02 00 00'; New = '0F 85 23 02 00 00' }
+                    # options handler tail -> call opt_tail (buttons 71 / 72 cycle the music source, then the original close)
+                    @{ Offset = 0x32320; Old = '84 DB 74 07 89 F0 E8 59 F6 FF FF'; New = '89 F0 8B 55 F8 E8 C6 E5 01 00 90' }
+                    # cdaudio module -> MP3 player on MCI mpegvideo with a music source DC / CW / ALL (seven entry points kept: cd_open +0, play_from_here +0x3C, close +0x88, stop +0xB8, tracks +0x338, seek_track +0x4E8, mode +0x6E0; helpers, the options-dialog code opt_tail +0x3C0 / opt_refresh_tail +0x420, "mpegvideo" and the two path templates music\\track0?.mp3 / exp\\music\\track0?.mp3 inside; the rest zero)
+                    @{ Offset = 0x50530; Old = '51 52 55 89 E5 83 EC 14 8D 45 EC 50 68 00 21 00 00 68 03 08 00 00 31 D2 B9 24 7C 48 00 52 89 55 F0 89 4D F4 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F0 89 EC 5D 5A 59 C3 53 51 52 55 89 E5 83 EC 18 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 0A 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 75 15 8D 45 E8 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 5B C3 51 52 55 89 E5 6A 00 6A 00 68 04 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 06 31 C0 5D 5A 59 C3 B8 01 00 00 00 5D 5A 59 C3 8B C0 51 52 55 89 E5 83 EC 04 8D 55 FC 52 6A 00 68 08 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 C3 53 51 52 55 89 E5 83 EC 20 8D 5D E0 53 68 00 01 00 00 31 DB 68 14 08 00 00 66 89 C3 BA 04 00 00 00 53 89 55 E8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 4E 81 7D E4 0D 02 00 00 75 20 8D 45 F0 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 29 31 C0 89 EC 5D 5A 59 5B C3 8D 45 FC 50 6A 00 68 09 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5A 59 5B C3 B8 01 00 00 00 89 EC 5D 5A 59 5B C3 8D 40 00 53 51 52 56 57 55 89 E5 83 EC 28 89 C3 8D 45 D8 50 68 00 01 00 00 31 F6 68 14 08 00 00 66 89 DE BA 08 00 00 00 56 89 55 E0 2E FF 15 70 05 48 00 85 C0 74 07 31 C0 E9 A7 00 00 00 8B 45 DC 89 45 FC 8D 45 D8 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 56 89 4D E0 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8B 75 FC 8B 7D DC 46 BA 08 00 00 00 39 FE 76 0C B8 02 00 00 00 BE 01 00 00 00 EB 0A 8A 45 FC FE C0 25 FF 00 00 00 89 45 F8 8D 45 F4 50 52 68 07 08 00 00 81 E3 FF FF 00 00 53 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8D 45 E8 50 6A 00 68 06 08 00 00 53 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 89 F0 89 EC 5D 5F 5E 5A 59 5B C3 90 53 51 52 56 57 55 89 E5 83 EC 24 89 C6 8D 45 DC 50 68 00 01 00 00 31 FF 68 14 08 00 00 66 89 F7 BA 08 00 00 00 57 89 55 E4 2E FF 15 70 05 48 00 85 C0 74 07 31 C0 E9 9A 00 00 00 8D 45 DC 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 57 8B 5D E0 89 4D E4 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 BF 08 00 00 00 83 FB 01 75 08 8A 45 E0 8B 5D E0 EB 0A 88 D8 FE C8 25 FF 00 00 00 4B 89 45 FC 8D 45 F8 50 57 68 07 08 00 00 81 E6 FF FF 00 00 56 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8D 45 EC 50 6A 00 68 06 08 00 00 56 2E FF 15 70 05 48 00 85 C0 74 0B 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 89 D8 89 EC 5D 5F 5E 5A 59 5B C3 8B C0 51 52 55 89 E5 83 EC 10 C7 45 F8 03 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F4 89 EC 5D 5A 59 C3 90 51 52 55 89 E5 83 EC 10 C7 45 F8 08 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 03 8B 45 F4 89 EC 5D 5A 59 C3 90 53 51 52 55 89 E5 83 EC 1C 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 0A 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 2E 8D 45 E4 50 68 00 01 00 00 68 14 08 00 00 B9 02 00 00 00 53 89 4D EC 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5A 59 5B C3 8B 45 E8 89 EC 5D 5A 59 5B C3 8D 40 00 53 51 52 56 55 89 E5 83 EC 1C 8D 5D F4 53 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 C3 BA 02 00 00 00 53 89 55 F8 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 5B 8D 45 E4 50 68 00 01 00 00 68 14 08 00 00 B9 02 00 00 00 53 89 4D EC 2E FF 15 70 05 48 00 85 C0 74 0A 31 C0 89 EC 5D 5E 5A 59 5B C3 8D 45 F4 50 68 00 04 00 00 68 0D 08 00 00 BE 0A 00 00 00 53 89 75 F8 2E FF 15 70 05 48 00 85 C0 74 0A 31 C0 89 EC 5D 5E 5A 59 5B C3 8B 45 E8 89 EC 5D 5E 5A 59 5B C3 51 52 55 89 E5 83 EC 0C 8D 55 F4 52 68 00 01 00 00 68 0D 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 89 EC 5D 5A 59 C3 90 55 89 E5 5D C3 8D 40 00 53 51 56 55 89 E5 83 EC 20 88 D3 8D 75 EC 56 68 00 04 00 00 31 F6 68 0D 08 00 00 66 89 C6 BA 0A 00 00 00 56 89 55 F0 2E FF 15 70 05 48 00 85 C0 74 04 31 C0 EB 4E 88 D8 89 45 FC 8D 45 F8 50 6A 08 68 07 08 00 00 81 E3 FF 00 00 00 56 43 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5E 59 5B C3 8D 45 E0 50 6A 00 68 06 08 00 00 56 2E FF 15 70 05 48 00 85 C0 74 09 31 C0 89 EC 5D 5E 59 5B C3 89 D8 89 EC 5D 5E 59 5B C3 90 55 89 E5 31 C0 5D C3 90 53 51 52 56 57 55 89 E5 83 EC 20 89 C6 8D 45 F0 50 68 00 04 00 00 31 DB 68 0D 08 00 00 66 89 F3 BA 02 00 00 00 53 89 55 F4 2E FF 15 70 05 48 00 89 C7 85 C0 74 18 6A 00 6A 00 68 04 08 00 00 53 2E FF 15 70 05 48 00 89 F8 E9 EF 00 00 00 8D 45 E0 50 68 00 01 00 00 68 14 08 00 00 B9 03 00 00 00 53 89 4D E8 2E FF 15 70 05 48 00 89 C7 85 C0 74 1C 6A 00 6A 00 68 04 08 00 00 53 2E FF 15 70 05 48 00 89 F8 89 EC 5D 5F 5E 5A 59 5B C3 8B 45 E4 A3 0C 28 53 00 83 F8 14 7C 05 B8 14 00 00 00 BB 01 00 00 00 A3 0C 28 53 00 3B 1D 0C 28 53 00 0F 8F 85 00 00 00 C7 45 E8 02 00 00 00 8D 45 E0 50 68 10 01 00 00 31 C0 68 14 08 00 00 66 89 F0 50 89 5D EC 89 45 FC 2E FF 15 70 05 48 00 89 C7 85 C0 74 1F 6A 00 6A 00 68 04 08 00 00 8B 4D FC 51 2E FF 15 70 05 48 00 89 F8 89 EC 5D 5F 5E 5A 59 5B C3 8D 7B FF 8D 04 BD 00 00 00 00 29 F8 89 C7 8A 45 E4 88 87 D0 27 53 00 31 C0 66 8B 45 E4 C1 F8 08 88 87 D1 27 53 00 8B 45 E4 C1 E8 10 43 88 87 D2 27 53 00 E9 6F FF FF FF 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8B C0 55 89 E5 25 FF FF 00 00 E8 A3 FC FF FF 39 D0 76 07 B8 01 00 00 00 5D C3 31 C0 5D C3 51 52 55 89 E5 83 EC 10 C7 45 F8 04 00 00 00 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 25 FF FF 00 00 50 2E FF 15 70 05 48 00 85 C0 74 07 B8 04 00 00 00 EB 36 8B 4D F4 81 F9 12 02 00 00 75 0B B8 01 00 00 00 89 EC 5D 5A 59 C3 81 F9 0C 02 00 00 75 0B B8 02 00 00 00 89 EC 5D 5A 59 C3 81 F9 0D 02 00 00 75 05 B8 03 00 00 00 89 EC 5D 5A 59 C3'; New = '52 56 E8 D9 00 00 00 A1 10 8E 48 00 6B C0 64 BE D0 27 53 00 89 46 08 0F 31 31 D0 83 C8 01 89 46 30 C6 46 25 00 E8 B6 02 00 00 E8 E1 00 00 00 5E 5A C3 00 00 00 00 00 00 00 00 00 00 31 C0 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 EB 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 56 BE D0 27 53 00 8B 06 85 C0 74 10 6A 00 6A 00 68 08 08 00 00 50 FF 15 70 05 48 00 31 C0 5E 5A 59 C3 00 00 00 00 51 52 56 BE D0 27 53 00 8B 06 85 C0 74 14 6A 00 6A 00 68 04 08 00 00 50 FF 15 70 05 48 00 31 C0 89 06 5E 5A 59 C3 00 00 00 00 00 00 00 00 00 00 51 52 56 57 55 89 E5 83 EC 14 89 C2 BE 0C 13 45 00 B9 0C 00 00 00 F6 C2 04 74 0A BE F0 13 45 00 B9 10 00 00 00 BF D0 27 53 00 83 C7 0C 57 51 B9 06 00 00 00 F3 A5 59 5F 89 D0 83 E0 03 04 32 88 04 0F 89 FE 83 EE 0C 89 56 04 31 C0 89 45 EC 89 45 F0 C7 45 F4 00 13 45 00 89 7D F8 89 45 FC 8D 45 EC 50 68 02 22 00 00 68 03 08 00 00 6A 00 FF 15 70 05 48 00 85 C0 75 11 8B 45 F0 89 06 8B 4E 08 E8 6A 00 00 00 8B 06 EB 02 31 C0 89 EC 5D 5F 5E 5A 59 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 6D 70 65 67 76 69 64 65 6F 00 00 00 6D 75 73 69 63 5C 74 72 61 63 6B 30 3F 2E 6D 70 33 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 51 52 55 89 E5 83 EC 18 31 D2 89 55 E8 C7 45 EC 02 40 00 00 89 4D F0 89 55 F4 89 55 F8 89 55 FC 8D 55 E8 52 68 00 00 80 01 68 73 08 00 00 50 FF 15 70 05 48 00 89 EC 5D 5A 59 C3 00 00 00 00 00 51 52 56 55 89 E5 83 EC 10 BE D0 27 53 00 8B 06 85 C0 74 57 31 D2 89 55 F0 89 55 F4 C7 45 F8 04 00 00 00 89 55 FC 8D 55 F0 52 68 00 01 00 00 68 14 08 00 00 50 FF 15 70 05 48 00 85 C0 75 2C 81 7D F4 0D 02 00 00 75 1A E8 F3 01 00 00 50 E8 4D FE FF FF 58 E8 77 FE FF FF 85 C0 74 0E E8 AE 01 00 00 31 C0 89 EC 5D 5E 5A 59 C3 B8 04 00 00 00 EB F2 00 00 00 00 00 00 00 00 00 00 00 00 00 00 65 78 70 5C 6D 75 73 69 63 5C 74 72 61 63 6B 30 3F 2E 6D 70 33 00 00 00 00 00 00 00 00 00 00 00 56 BE D0 27 53 00 0F B6 46 24 3C 02 73 05 C1 E0 02 EB 0D E8 48 00 00 00 C6 46 25 00 0F B6 46 26 5E C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 C0 C3 00 00 00 00 00 50 51 52 57 31 C9 88 4C 0E 26 41 83 F9 08 72 F6 B9 07 00 00 00 8B 46 30 69 C0 6D 4E C6 41 05 39 30 00 00 89 46 30 C1 E8 10 31 D2 8D 79 01 F7 F7 8A 44 0E 26 8A 64 16 26 88 64 0E 26 88 44 16 26 49 75 D2 8A 46 26 3A 46 04 75 09 8A 66 27 88 66 26 88 46 27 5F 5A 59 58 C3 00 00 00 00 00 00 00 E8 3B FD FF FF E8 36 FF FF FF E8 61 FD FF FF 85 C0 74 0A E8 98 00 00 00 A1 D0 27 53 00 C3 00 00 51 52 56 57 89 C7 BE D0 27 53 00 83 FA 47 74 0C 83 FA 48 75 31 0F B6 46 24 40 EB 07 0F B6 46 24 83 C0 02 3C 03 72 02 2C 03 88 46 24 83 3D 70 97 48 00 00 75 0A 83 3E 00 74 05 E8 A1 FF FF FF 89 F8 E8 F2 16 FE FF 84 DB 74 07 89 F8 E8 43 10 FE FF 5F 5E 5A 59 C3 00 00 00 00 00 00 00 00 00 00 80 B9 5D 0F 00 00 04 75 21 BE D0 27 53 00 0F B6 56 24 83 C2 14 89 C8 E8 AC 11 FD FF 89 C3 BA 49 00 00 00 89 C8 E8 5A 29 FD FF 5D 5E 5A 59 5B C3 51 52 55 89 E5 83 EC 0C 31 D2 89 55 F4 89 55 F8 89 55 FC 8D 55 F4 52 6A 00 68 06 08 00 00 50 FF 15 70 05 48 00 89 EC 5D 5A 59 C3 00 00 00 00 00 51 56 BE D0 27 53 00 0F B6 4E 24 80 F9 02 73 0E 8B 46 04 40 83 E0 03 C1 E1 02 09 C8 EB 18 0F B6 46 25 40 3C 08 72 07 E8 94 FE FF FF 31 C0 88 46 25 0F B6 44 06 26 5E 59 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 52 E8 B2 FE FF FF 85 C0 74 05 B8 01 00 00 00 5A C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E9 5B FB FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
+                    # set_volume method 0: aux CD-audio device walk -> store level*100, MCI_SETAUDIO volume on the open element (the rest zero)
+                    @{ Offset = 0x51CD0; Old = '53 51 52 56 57 55 89 E5 83 EC 34 89 C7 2E FF 15 68 05 48 00 89 45 FC 31 F6 3B 75 FC 73 47 BB 30 00 00 00 8D 45 CC 31 D2 E8 AF 97 02 00 6A 30 8D 45 CC 50 56 2E FF 15 64 05 48 00 85 C0 75 23 66 83 7D F4 01 75 1C 8D 04 BD 00 00 00 00 29 F8 C1 E0 0B 89 C2 C1 E2 10 09 D0 50 56 2E FF 15 6C 05 48 00 46 EB B4 89 EC 5D 5F 5E 5A 59 5B C3'; New = '51 6B C8 64 89 0D D8 27 53 00 A1 D0 27 53 00 85 C0 74 05 E8 48 EA FF FF 59 C3 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
+                    # .reloc table: entry 3149 -> 3138: the absolute operand moved from page offset 0x149 to 0x138, entry follows it
+                    @{ Offset = 0x9C072; Old = '49 31'; New = '38 31' }
+                    # .reloc table: entry 3157 -> 3140: the absolute operand moved from page offset 0x157 to 0x140, entry follows it
+                    @{ Offset = 0x9C074; Old = '57 31'; New = '40 31' }
+                    # .reloc table: entry 3194 -> 31EC: the absolute operand moved from page offset 0x194 to 0x1EC, entry follows it
+                    @{ Offset = 0x9C076; Old = '94 31'; New = 'EC 31' }
+                    # .reloc table: entry 31AB -> 3202: the absolute operand moved from page offset 0x1AB to 0x202, entry follows it
+                    @{ Offset = 0x9C078; Old = 'AB 31'; New = '02 32' }
+                    # .reloc table: entry 31CF -> 3214: the absolute operand moved from page offset 0x1CF to 0x214, entry follows it
+                    @{ Offset = 0x9C07A; Old = 'CF 31'; New = '14 32' }
+                    # .reloc table: entry 3204 -> 322A: the absolute operand moved from page offset 0x204 to 0x22A, entry follows it
+                    @{ Offset = 0x9C07C; Old = '04 32'; New = '2A 32' }
+                    # .reloc table: entry 3238 -> 324D: the absolute operand moved from page offset 0x238 to 0x24D, entry follows it
+                    @{ Offset = 0x9C07E; Old = '38 32'; New = '4D 32' }
+                    # .reloc table: entry 327C -> 3266: the absolute operand moved from page offset 0x27C to 0x266, entry follows it
+                    @{ Offset = 0x9C082; Old = '7C 32'; New = '66 32' }
+                    # .reloc table: entry 32C8 -> 3295: the absolute operand moved from page offset 0x2C8 to 0x295, entry follows it
+                    @{ Offset = 0x9C084; Old = 'C8 32'; New = '95 32' }
+                    # .reloc table: entry 32F7 -> 32B1: the absolute operand moved from page offset 0x2F7 to 0x2B1, entry follows it
+                    @{ Offset = 0x9C086; Old = 'F7 32'; New = 'B1 32' }
+                    # .reloc table: entry 3347 -> 3361: the absolute operand moved from page offset 0x347 to 0x361, entry follows it
+                    @{ Offset = 0x9C088; Old = '47 33'; New = '61 33' }
+                    # .reloc table: entry 3369 -> 337A: the absolute operand moved from page offset 0x369 to 0x37A, entry follows it
+                    @{ Offset = 0x9C08A; Old = '69 33'; New = '7A 33' }
+                    # .reloc table: entry 33B4 -> 33A7: the absolute operand moved from page offset 0x3B4 to 0x3A7, entry follows it
+                    @{ Offset = 0x9C08C; Old = 'B4 33'; New = 'A7 33' }
+                    # .reloc table: entry 33E0 -> 3412: the absolute operand moved from page offset 0x3E0 to 0x412, entry follows it
+                    @{ Offset = 0x9C08E; Old = 'E0 33'; New = '12 34' }
+                    # .reloc table: entry 3426 -> 34E9: the absolute operand moved from page offset 0x426 to 0x4E9, entry follows it
+                    @{ Offset = 0x9C090; Old = '26 34'; New = 'E9 34' }
+                    # .reloc table: entry 3448 -> 34F7: the absolute operand moved from page offset 0x448 to 0x4F7, entry follows it
+                    @{ Offset = 0x9C092; Old = '48 34'; New = 'F7 34' }
+                    # .reloc table: entry 348E -> 351E: the absolute operand moved from page offset 0x48E to 0x51E, entry follows it
+                    @{ Offset = 0x9C094; Old = '8E 34'; New = '1E 35' }
+                    # .reloc table: entry 34CA -> 355A: the absolute operand moved from page offset 0x4CA to 0x55A, entry follows it
+                    @{ Offset = 0x9C096; Old = 'CA 34'; New = '5A 35' }
+                    # .reloc table: entry 3508 -> 35A1: the absolute operand moved from page offset 0x508 to 0x5A1, entry follows it
+                    @{ Offset = 0x9C098; Old = '08 35'; New = 'A1 35' }
+                    # .reloc table: entry 352E -> 35B3: the absolute operand moved from page offset 0x52E to 0x5B3, entry follows it
+                    @{ Offset = 0x9C09A; Old = '2E 35'; New = 'B3 35' }
+                    # .reloc table: entry 3575 (type 3 HIGHLOW, page offset 0x575) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C09C; Old = '75 35'; New = '00 00' }
                     # .reloc table: entry 359B (type 3 HIGHLOW, page offset 0x59B) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
                     @{ Offset = 0x9C09E; Old = '9B 35'; New = '00 00' }
                     # .reloc table: entry 35C7 (type 3 HIGHLOW, page offset 0x5C7) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
@@ -7642,7 +7894,7 @@ Council Wars.  Without a TRACK02 file the game simply stays silent, as it does t
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36
-            #  Changes    : 3508 bytes in 26 edits
+            #  Changes    : 3584 bytes in 26 edits
             #  Council Wars opens every data file through one helper that prefixes the name with the
             #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
             #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
@@ -7774,6 +8026,589 @@ relocation entry, this patch is always applied last.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
+                # data files this fix needs next to the exe (387; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                    'ozi_ns\alta.gif'
+                    'ozi_ns\alta.rgb'
+                    'ozi_ns\alta.rmp'
+                    'ozi_ns\area52.gif'
+                    'ozi_ns\area52.rgb'
+                    'ozi_ns\area52.rmp'
+                    'ozi_ns\earth.gif'
+                    'ozi_ns\gamestat\BOOMSTAT.TXT'
+                    'ozi_ns\gamestat\gamestat.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'ozi_ns\gamestat\hxscene.txt'
+                    'ozi_ns\gamestat\MBULLET.TXT'
+                    'ozi_ns\gamestat\UNITID.TXT'
+                    'ozi_ns\gamestat\WEAPSTAT.TXT'
+                    'ozi_ns\gatlan.GIF'
+                    'ozi_ns\gatlan.NCY'
+                    'ozi_ns\gatlan.RGB'
+                    'ozi_ns\gatlan.RMP'
+                    'ozi_ns\gjungle.gif'
+                    'ozi_ns\gjungle.rgb'
+                    'ozi_ns\gJUNGLE.RMP'
+                    'ozi_ns\intrf_hd\bintroe'
+                    'ozi_ns\intrf_hd\gxscene.txt'
+                    'ozi_ns\intrf_hd\hxscene.txt'
+                    'ozi_ns\intrf_hd\introe'
+                    'ozi_ns\intrf_hd\shumane'
+                    'ozi_ns\intrface\astory.txt'
+                    'ozi_ns\intrface\credits.txt'
+                    'ozi_ns\intrface\hstory.txt'
+                    'ozi_ns\jubjub.gif'
+                    'ozi_ns\jubjub.rgb'
+                    'ozi_ns\jubjub.rmp'
+                    'ozi_ns\mission\g1.wav'
+                    'ozi_ns\mission\g10.wav'
+                    'ozi_ns\mission\g11.wav'
+                    'ozi_ns\mission\g2.wav'
+                    'ozi_ns\mission\g3.wav'
+                    'ozi_ns\mission\g4.wav'
+                    'ozi_ns\mission\g5.wav'
+                    'ozi_ns\mission\g6.wav'
+                    'ozi_ns\mission\g7.wav'
+                    'ozi_ns\mission\g8.wav'
+                    'ozi_ns\mission\g9.wav'
+                    'ozi_ns\mission\h1.wav'
+                    'ozi_ns\mission\h10.wav'
+                    'ozi_ns\mission\h11.wav'
+                    'ozi_ns\mission\h2.wav'
+                    'ozi_ns\mission\h3.wav'
+                    'ozi_ns\mission\h4.wav'
+                    'ozi_ns\mission\h5.wav'
+                    'ozi_ns\mission\h6.wav'
+                    'ozi_ns\mission\h7.wav'
+                    'ozi_ns\mission\h8.wav'
+                    'ozi_ns\mission\h80.wav'
+                    'ozi_ns\mission\h9.wav'
+                    'ozi_ns\scenario\all.jus'
+                    'ozi_ns\scenario\alta.bts'
+                    'ozi_ns\scenario\area52.bts'
+                    'ozi_ns\scenario\atlantis.bts'
+                    'ozi_ns\scenario\council\scene.txt'
+                    'ozi_ns\scenario\council\tarr01.001'
+                    'ozi_ns\scenario\council\tarr01.002'
+                    'ozi_ns\scenario\council\tarr01.003'
+                    'ozi_ns\scenario\council\tarr01.004'
+                    'ozi_ns\scenario\council\tarr01.map'
+                    'ozi_ns\scenario\council\tarr01.msg'
+                    'ozi_ns\scenario\council\tarr01.mtg'
+                    'ozi_ns\scenario\council\tarr01.ovh'
+                    'ozi_ns\scenario\council\tarr01.pop'
+                    'ozi_ns\scenario\council\tarr01.pth'
+                    'ozi_ns\scenario\council\tarr01.scn'
+                    'ozi_ns\scenario\council\tarr01.tro'
+                    'ozi_ns\scenario\council\tarr01.txt'
+                    'ozi_ns\scenario\council\tarr02.001'
+                    'ozi_ns\scenario\council\tarr02.002'
+                    'ozi_ns\scenario\council\tarr02.map'
+                    'ozi_ns\scenario\council\tarr02.msg'
+                    'ozi_ns\scenario\council\tarr02.mtg'
+                    'ozi_ns\scenario\council\tarr02.ovh'
+                    'ozi_ns\scenario\council\tarr02.pop'
+                    'ozi_ns\scenario\council\tarr02.pth'
+                    'ozi_ns\scenario\council\tarr02.scn'
+                    'ozi_ns\scenario\council\tarr02.tro'
+                    'ozi_ns\scenario\council\tarr02.txt'
+                    'ozi_ns\scenario\council\tarr03.001'
+                    'ozi_ns\scenario\council\tarr03.002'
+                    'ozi_ns\scenario\council\tarr03.map'
+                    'ozi_ns\scenario\council\tarr03.msg'
+                    'ozi_ns\scenario\council\tarr03.mtg'
+                    'ozi_ns\scenario\council\tarr03.ovh'
+                    'ozi_ns\scenario\council\tarr03.pop'
+                    'ozi_ns\scenario\council\tarr03.pth'
+                    'ozi_ns\scenario\council\tarr03.scn'
+                    'ozi_ns\scenario\council\tarr03.tro'
+                    'ozi_ns\scenario\council\tarr03.txt'
+                    'ozi_ns\scenario\council\tarr04.001'
+                    'ozi_ns\scenario\council\tarr04.002'
+                    'ozi_ns\scenario\council\tarr04.map'
+                    'ozi_ns\scenario\council\tarr04.msg'
+                    'ozi_ns\scenario\council\tarr04.mtg'
+                    'ozi_ns\scenario\council\tarr04.ovh'
+                    'ozi_ns\scenario\council\tarr04.pop'
+                    'ozi_ns\scenario\council\tarr04.pth'
+                    'ozi_ns\scenario\council\tarr04.scn'
+                    'ozi_ns\scenario\council\tarr04.tro'
+                    'ozi_ns\scenario\council\tarr04.txt'
+                    'ozi_ns\scenario\council\tarr05.001'
+                    'ozi_ns\scenario\council\tarr05.002'
+                    'ozi_ns\scenario\council\tarr05.map'
+                    'ozi_ns\scenario\council\tarr05.msg'
+                    'ozi_ns\scenario\council\tarr05.mtg'
+                    'ozi_ns\scenario\council\tarr05.ovh'
+                    'ozi_ns\scenario\council\tarr05.pop'
+                    'ozi_ns\scenario\council\tarr05.pth'
+                    'ozi_ns\scenario\council\tarr05.scn'
+                    'ozi_ns\scenario\council\tarr05.tro'
+                    'ozi_ns\scenario\council\tarr05.txt'
+                    'ozi_ns\scenario\council\tarr06.001'
+                    'ozi_ns\scenario\council\tarr06.002'
+                    'ozi_ns\scenario\council\tarr06.003'
+                    'ozi_ns\scenario\council\tarr06.map'
+                    'ozi_ns\scenario\council\tarr06.msg'
+                    'ozi_ns\scenario\council\tarr06.mtg'
+                    'ozi_ns\scenario\council\tarr06.ovh'
+                    'ozi_ns\scenario\council\tarr06.pop'
+                    'ozi_ns\scenario\council\tarr06.pth'
+                    'ozi_ns\scenario\council\tarr06.scn'
+                    'ozi_ns\scenario\council\tarr06.tro'
+                    'ozi_ns\scenario\council\tarr06.txt'
+                    'ozi_ns\scenario\council\tarr07.001'
+                    'ozi_ns\scenario\council\tarr07.002'
+                    'ozi_ns\scenario\council\tarr07.003'
+                    'ozi_ns\scenario\council\tarr07.004'
+                    'ozi_ns\scenario\council\tarr07.map'
+                    'ozi_ns\scenario\council\tarr07.msg'
+                    'ozi_ns\scenario\council\tarr07.mtg'
+                    'ozi_ns\scenario\council\tarr07.ovh'
+                    'ozi_ns\scenario\council\tarr07.pop'
+                    'ozi_ns\scenario\council\tarr07.pth'
+                    'ozi_ns\scenario\council\tarr07.scn'
+                    'ozi_ns\scenario\council\tarr07.tro'
+                    'ozi_ns\scenario\council\tarr07.txt'
+                    'ozi_ns\scenario\council\tarr08.001'
+                    'ozi_ns\scenario\council\tarr08.002'
+                    'ozi_ns\scenario\council\tarr08.003'
+                    'ozi_ns\scenario\council\tarr08.004'
+                    'ozi_ns\scenario\council\tarr08.map'
+                    'ozi_ns\scenario\council\tarr08.msg'
+                    'ozi_ns\scenario\council\tarr08.mtg'
+                    'ozi_ns\scenario\council\tarr08.ovh'
+                    'ozi_ns\scenario\council\tarr08.pop'
+                    'ozi_ns\scenario\council\tarr08.pth'
+                    'ozi_ns\scenario\council\tarr08.scn'
+                    'ozi_ns\scenario\council\tarr08.tro'
+                    'ozi_ns\scenario\council\tarr08.txt'
+                    'ozi_ns\scenario\council\tarr09.001'
+                    'ozi_ns\scenario\council\tarr09.002'
+                    'ozi_ns\scenario\council\tarr09.003'
+                    'ozi_ns\scenario\council\tarr09.map'
+                    'ozi_ns\scenario\council\tarr09.msg'
+                    'ozi_ns\scenario\council\tarr09.mtg'
+                    'ozi_ns\scenario\council\tarr09.ovh'
+                    'ozi_ns\scenario\council\tarr09.pop'
+                    'ozi_ns\scenario\council\tarr09.pth'
+                    'ozi_ns\scenario\council\tarr09.scn'
+                    'ozi_ns\scenario\council\tarr09.tro'
+                    'ozi_ns\scenario\council\tarr09.txt'
+                    'ozi_ns\scenario\council\tarr10.001'
+                    'ozi_ns\scenario\council\tarr10.002'
+                    'ozi_ns\scenario\council\tarr10.003'
+                    'ozi_ns\scenario\council\tarr10.004'
+                    'ozi_ns\scenario\council\tarr10.map'
+                    'ozi_ns\scenario\council\tarr10.MSG'
+                    'ozi_ns\scenario\council\tarr10.mtg'
+                    'ozi_ns\scenario\council\tarr10.ovh'
+                    'ozi_ns\scenario\council\tarr10.pop'
+                    'ozi_ns\scenario\council\tarr10.pth'
+                    'ozi_ns\scenario\council\tarr10.scn'
+                    'ozi_ns\scenario\council\tarr10.tro'
+                    'ozi_ns\scenario\council\tarr10.TXT'
+                    'ozi_ns\scenario\council\tarr11.001'
+                    'ozi_ns\scenario\council\tarr11.002'
+                    'ozi_ns\scenario\council\tarr11.map'
+                    'ozi_ns\scenario\council\tarr11.msg'
+                    'ozi_ns\scenario\council\tarr11.mtg'
+                    'ozi_ns\scenario\council\tarr11.ovh'
+                    'ozi_ns\scenario\council\tarr11.pop'
+                    'ozi_ns\scenario\council\tarr11.pth'
+                    'ozi_ns\scenario\council\tarr11.scn'
+                    'ozi_ns\scenario\council\tarr11.tro'
+                    'ozi_ns\scenario\council\tarr11.txt'
+                    'ozi_ns\scenario\DESERT.BTS'
+                    'ozi_ns\scenario\earth.bts'
+                    'ozi_ns\scenario\gatlan.bts'
+                    'ozi_ns\scenario\GJUNGLE.BTS'
+                    'ozi_ns\scenario\globo\globo01.001'
+                    'ozi_ns\scenario\globo\globo01.002'
+                    'ozi_ns\scenario\globo\globo01.003'
+                    'ozi_ns\scenario\globo\globo01.map'
+                    'ozi_ns\scenario\globo\globo01.msg'
+                    'ozi_ns\scenario\globo\globo01.mtg'
+                    'ozi_ns\scenario\globo\globo01.ovh'
+                    'ozi_ns\scenario\globo\globo01.pop'
+                    'ozi_ns\scenario\globo\globo01.pth'
+                    'ozi_ns\scenario\globo\globo01.scn'
+                    'ozi_ns\scenario\globo\globo01.tro'
+                    'ozi_ns\scenario\globo\globo01.txt'
+                    'ozi_ns\scenario\globo\globo02.001'
+                    'ozi_ns\scenario\globo\globo02.002'
+                    'ozi_ns\scenario\globo\globo02.003'
+                    'ozi_ns\scenario\globo\globo02.map'
+                    'ozi_ns\scenario\globo\globo02.msg'
+                    'ozi_ns\scenario\globo\globo02.mtg'
+                    'ozi_ns\scenario\globo\globo02.ovh'
+                    'ozi_ns\scenario\globo\globo02.pop'
+                    'ozi_ns\scenario\globo\globo02.pth'
+                    'ozi_ns\scenario\globo\globo02.scn'
+                    'ozi_ns\scenario\globo\globo02.tro'
+                    'ozi_ns\scenario\globo\globo02.txt'
+                    'ozi_ns\scenario\globo\globo03.001'
+                    'ozi_ns\scenario\globo\globo03.002'
+                    'ozi_ns\scenario\globo\globo03.003'
+                    'ozi_ns\scenario\globo\globo03.map'
+                    'ozi_ns\scenario\globo\globo03.msg'
+                    'ozi_ns\scenario\globo\globo03.mtg'
+                    'ozi_ns\scenario\globo\globo03.ovh'
+                    'ozi_ns\scenario\globo\globo03.pop'
+                    'ozi_ns\scenario\globo\globo03.pth'
+                    'ozi_ns\scenario\globo\globo03.scn'
+                    'ozi_ns\scenario\globo\globo03.tro'
+                    'ozi_ns\scenario\globo\globo03.txt'
+                    'ozi_ns\scenario\globo\globo04.001'
+                    'ozi_ns\scenario\globo\globo04.002'
+                    'ozi_ns\scenario\globo\globo04.003'
+                    'ozi_ns\scenario\globo\globo04.map'
+                    'ozi_ns\scenario\globo\globo04.msg'
+                    'ozi_ns\scenario\globo\globo04.mtg'
+                    'ozi_ns\scenario\globo\globo04.ovh'
+                    'ozi_ns\scenario\globo\globo04.pop'
+                    'ozi_ns\scenario\globo\globo04.pth'
+                    'ozi_ns\scenario\globo\globo04.scn'
+                    'ozi_ns\scenario\globo\globo04.tro'
+                    'ozi_ns\scenario\globo\globo04.txt'
+                    'ozi_ns\scenario\globo\globo05.001'
+                    'ozi_ns\scenario\globo\globo05.002'
+                    'ozi_ns\scenario\globo\globo05.map'
+                    'ozi_ns\scenario\globo\globo05.msg'
+                    'ozi_ns\scenario\globo\globo05.mtg'
+                    'ozi_ns\scenario\globo\globo05.ovh'
+                    'ozi_ns\scenario\globo\globo05.pop'
+                    'ozi_ns\scenario\globo\globo05.pth'
+                    'ozi_ns\scenario\globo\globo05.scn'
+                    'ozi_ns\scenario\globo\globo05.tro'
+                    'ozi_ns\scenario\globo\globo05.txt'
+                    'ozi_ns\scenario\globo\globo06.001'
+                    'ozi_ns\scenario\globo\globo06.002'
+                    'ozi_ns\scenario\globo\globo06.003'
+                    'ozi_ns\scenario\globo\globo06.map'
+                    'ozi_ns\scenario\globo\globo06.msg'
+                    'ozi_ns\scenario\globo\globo06.mtg'
+                    'ozi_ns\scenario\globo\globo06.ovh'
+                    'ozi_ns\scenario\globo\globo06.pop'
+                    'ozi_ns\scenario\globo\globo06.pth'
+                    'ozi_ns\scenario\globo\globo06.scn'
+                    'ozi_ns\scenario\globo\globo06.tro'
+                    'ozi_ns\scenario\globo\globo06.txt'
+                    'ozi_ns\scenario\globo\globo07.001'
+                    'ozi_ns\scenario\globo\globo07.002'
+                    'ozi_ns\scenario\globo\globo07.003'
+                    'ozi_ns\scenario\globo\globo07.004'
+                    'ozi_ns\scenario\globo\globo07.map'
+                    'ozi_ns\scenario\globo\globo07.msg'
+                    'ozi_ns\scenario\globo\globo07.mtg'
+                    'ozi_ns\scenario\globo\globo07.ovh'
+                    'ozi_ns\scenario\globo\globo07.pop'
+                    'ozi_ns\scenario\globo\globo07.pth'
+                    'ozi_ns\scenario\globo\globo07.scn'
+                    'ozi_ns\scenario\globo\globo07.tro'
+                    'ozi_ns\scenario\globo\globo07.txt'
+                    'ozi_ns\scenario\globo\globo08.001'
+                    'ozi_ns\scenario\globo\globo08.002'
+                    'ozi_ns\scenario\globo\globo08.003'
+                    'ozi_ns\scenario\globo\globo08.map'
+                    'ozi_ns\scenario\globo\globo08.msg'
+                    'ozi_ns\scenario\globo\globo08.mtg'
+                    'ozi_ns\scenario\globo\globo08.ovh'
+                    'ozi_ns\scenario\globo\globo08.pop'
+                    'ozi_ns\scenario\globo\globo08.pth'
+                    'ozi_ns\scenario\globo\globo08.scn'
+                    'ozi_ns\scenario\globo\globo08.tro'
+                    'ozi_ns\scenario\globo\globo08.txt'
+                    'ozi_ns\scenario\globo\globo09.001'
+                    'ozi_ns\scenario\globo\globo09.002'
+                    'ozi_ns\scenario\globo\globo09.003'
+                    'ozi_ns\scenario\globo\globo09.map'
+                    'ozi_ns\scenario\globo\globo09.msg'
+                    'ozi_ns\scenario\globo\globo09.mtg'
+                    'ozi_ns\scenario\globo\globo09.ovh'
+                    'ozi_ns\scenario\globo\globo09.pop'
+                    'ozi_ns\scenario\globo\globo09.pth'
+                    'ozi_ns\scenario\globo\globo09.scn'
+                    'ozi_ns\scenario\globo\globo09.tro'
+                    'ozi_ns\scenario\globo\globo09.txt'
+                    'ozi_ns\scenario\globo\globo10.001'
+                    'ozi_ns\scenario\globo\globo10.002'
+                    'ozi_ns\scenario\globo\globo10.003'
+                    'ozi_ns\scenario\globo\globo10.004'
+                    'ozi_ns\scenario\globo\globo10.map'
+                    'ozi_ns\scenario\globo\globo10.msg'
+                    'ozi_ns\scenario\globo\globo10.mtg'
+                    'ozi_ns\scenario\globo\globo10.ovh'
+                    'ozi_ns\scenario\globo\globo10.pop'
+                    'ozi_ns\scenario\globo\globo10.pth'
+                    'ozi_ns\scenario\globo\globo10.scn'
+                    'ozi_ns\scenario\globo\globo10.tro'
+                    'ozi_ns\scenario\globo\globo10.txt'
+                    'ozi_ns\scenario\globo\globo11.001'
+                    'ozi_ns\scenario\globo\globo11.002'
+                    'ozi_ns\scenario\globo\globo11.003'
+                    'ozi_ns\scenario\globo\globo11.map'
+                    'ozi_ns\scenario\globo\globo11.msg'
+                    'ozi_ns\scenario\globo\globo11.mtg'
+                    'ozi_ns\scenario\globo\globo11.ovh'
+                    'ozi_ns\scenario\globo\globo11.pop'
+                    'ozi_ns\scenario\globo\globo11.pth'
+                    'ozi_ns\scenario\globo\globo11.scn'
+                    'ozi_ns\scenario\globo\globo11.tro'
+                    'ozi_ns\scenario\globo\globo11.txt'
+                    'ozi_ns\scenario\globo\scene.txt'
+                    'ozi_ns\scenario\HTRAIN.BTS'
+                    'ozi_ns\scenario\jubjub.bts'
+                    'ozi_ns\scenario\JUNGLE.BTS'
+                    'ozi_ns\scenario\special.bts'
+                    'ozi_ns\scenario\trainh.bts'
+                    'ozi_ns\scenario\vent.jus'
+                    'ozi_ns\sound\ALIST.DAT'
+                    'ozi_ns\sound\alta.amb'
+                    'ozi_ns\sound\area52.amb'
+                    'ozi_ns\sound\ATLANTIS.AMB'
+                    'ozi_ns\sound\ATLANTIS.DAT'
+                    'ozi_ns\sound\ATRAIN.DAT'
+                    'ozi_ns\sound\birds.wav'
+                    'ozi_ns\sound\cobra.wav'
+                    'ozi_ns\sound\cow.wav'
+                    'ozi_ns\sound\cricket.wav'
+                    'ozi_ns\sound\DALG1DEA.wav'
+                    'ozi_ns\sound\DALG1SEL.wav'
+                    'ozi_ns\sound\DALG2ACK.wav'
+                    'ozi_ns\sound\DALG2SEL.wav'
+                    'ozi_ns\sound\dog.wav'
+                    'ozi_ns\sound\dog2.wav'
+                    'ozi_ns\sound\earth.amb'
+                    'ozi_ns\sound\frog.wav'
+                    'ozi_ns\sound\frogs.wav'
+                    'ozi_ns\sound\gatlan.AMB'
+                    'ozi_ns\sound\gease.wav'
+                    'ozi_ns\sound\GJUNGLE.AMB'
+                    'ozi_ns\sound\GJUNGLE.DAT'
+                    'ozi_ns\sound\jubjub.amb'
+                    'ozi_ns\sound\KOMANDWE.wav'
+                    'ozi_ns\sound\KOMANWEA.wav'
+                    'ozi_ns\sound\mosq.wav'
+                    'ozi_ns\sound\r2bird.wav'
+                    'ozi_ns\sound\SCENESND.DAT'
+                    'ozi_ns\sound\seagull.wav'
+                    'ozi_ns\sound\slist.dat'
+                    'ozi_ns\sound\turkey.wav'
+                    'ozi_ns\sound\water.wav'
+                    'ozi_ns\sound\wolf.wav'
+                    'ozi_ns\special.gif'
+                    'ozi_ns\special.rgb'
+                    'ozi_ns\special.rmp'
+                    'ozisave\ozisave.txt'
+                    'exp\animozi.dat'
+                    'exp\animate\dalg.fin'
+                    'exp\animate\reae.fin'
+                    'exp\animate\spyo.fin'
+                    'exp\animate\tranozi.fin'
+                    'exp\sprites\dalg.spr'
+                    'exp\sprites\reae.spr'
+                    'exp\sprites\spyo.spr'
+                    'exp\sprites\tranozi.spr'
+                    'ozi_ns\gamestat\hxscene.txt'
+                    'ozi_ns\gamestat\gxscene.txt'
+                    'dc\intrf_hd\bintroe'
+                    'dc\intrface\credits.txt'
+                    'exp\intrface\bintroe'
+                )
+                Edits = @(
+                    # PE optional header: base-relocation directory size 0x93CC -> 0x93EC (+32)
+                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'EC 93 00 00' }
+                    # credits TTY create -> 45 NOPs (640x480: the seven-row menu needs the rows)
+                    @{ Offset = 0x4280; Old = '6A 00 6A 00 6A 00 6A 05 6A 02 68 84 21 48 00 68 6C 24 48 00 B9 18 01 00 00 BB E6 00 00 00 6A 64 BA B2 00 00 00 8B 45 FC E8 FB 35 02 00'; New = '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # menu id filter: accept the button ids 6 and 7 (cmp edx,5 -> 7)
+                    @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
+                    # credits TTY destroy count 1 -> 0 (nothing was created)
+                    @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
+                    # NEW CAMPAIGN call -> tramp_cw_campaign
+                    @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
+                    # ACADEMY (TRAINING) call -> tramp_dc_campaign
+                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 08 A3 07 00' }
+                    # MULTI PLAYER WAR call -> tramp_dc_net
+                    @{ Offset = 0x4497; Old = 'E8 84 0B 00 00'; New = 'E8 14 A3 07 00' }
+                    # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
+                    @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
+                    # LOAD GAME call -> tramp_cw_load
+                    @{ Offset = 0x44BF; Old = 'E8 E0 E9 FF FF'; New = 'E8 2C A2 07 00' }
+                    # end of the id chain: jne 0040513D -> the Dark Colony handlers
+                    @{ Offset = 0x44DB; Old = '75 60'; New = '75 25' }
+                    # OZI MISSIONS + DARK COLONY handlers (was PLAY INTRO)
+                    @{ Offset = 0x44DD; Old = 'BE F2 46 4A 00 8D BD F0 FE FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD F0 FE FF FF 8D 95 F0 FE FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8B 45 FC E8 EB BE FF FF'; New = 'C7 80 F4 14 00 00 01 00 00 00 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 45 A1 07 00 E8 08 CB FF FF EB 3B 83 FF 06 75 16 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 75 A2 07 00 EB 20 83 FF 07 75 14 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 6A A2 07 00 90 90 90 90 90 90 90' }
+                    # stub_pack (pack strings into the 4 slots, music source ALL)
+                    @{ Offset = 0x7E640; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF C8 7D 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF 44 23 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB BF 5C 5E 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB 5F 58 C6 05 F4 27 53 00 02 C3' }
+                    # stub_cw_set (Council Wars strings, music source CW)
+                    @{ Offset = 0x7E690; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF 44 23 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB BF 5C 5E 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB 5F 58 C6 05 F4 27 53 00 01 C3' }
+                    # tramp_cw_campaign (stub_cw_set; jmp 401C08)
+                    @{ Offset = 0x7E6E0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 1E 29 F8 FF' }
+                    # tramp_cw_load (stub_cw_set; jmp 403AA4)
+                    @{ Offset = 0x7E6F0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 AA 47 F8 FF' }
+                    # tramp_pack_load (stub_pack; jmp 403AA4)
+                    @{ Offset = 0x7E700; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 3B FF FF FF E9 9A 47 F8 FF' }
+                    # stub_dc_set (Dark Colony strings, music source DC)
+                    @{ Offset = 0x7E740; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF 44 23 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB BF 5C 5E 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB 5F 58 C6 05 F4 27 53 00 00 C3' }
+                    # tramp_dc_campaign (stub_dc_set; jmp 401C08)
+                    @{ Offset = 0x7E790; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 6E 28 F8 FF' }
+                    # tramp_dc_load (stub_dc_set; jmp 403AA4)
+                    @{ Offset = 0x7E7A0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 FA 46 F8 FF' }
+                    # tramp_dc_net (stub_dc_set; music source ALL; jmp 405C20)
+                    @{ Offset = 0x7E7B0; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = 'E8 8B FF FF FF C6 05 F4 27 53 00 02 E9 5F 68 F8 FF' }
+                    # main menu script "intrface/bintro" -> "intrface/bintoz" (640x480: exp/intrface/bintoze = stock menu + OZI rows, written by the patcher)
+                    @{ Offset = 0x7FE98; Old = '69 6E 74 72 66 61 63 65 2F 62 69 6E 74 72 6F 00'; New = '69 6E 74 72 66 61 63 65 2F 62 69 6E 74 6F 7A 00' }
+                    # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
+                    @{ Offset = 0x7FEB8; Old = '61 6E 69 6D 2E 64 61 74 00 00 00 00'; New = '61 6E 69 6D 6F 7A 69 2E 64 61 74 00' }
+                    # .reloc table, page-0x4000 block: entries 3E8B, 3E90 -> 0000 (the two string pushes of the removed credits TTY create at VA 0x404E8B / 0x404E90 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BCE; Old = '8B 3E 90 3E'; New = '00 00 00 00' }
+                    # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
+                    @{ Offset = 0x97BE0; Old = 'DE 30 03 31'; New = '00 00 00 00' }
+                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xE0
+                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'E0 00 00 00' }
+                    # .reloc table: insert 16 HIGHLOW entries (3243, 3254, 3265, 3276, 328A, 3293, 32A4, 32B5, 32C6, 32DA, 3343, 3354, 3365, 3376, 338A, 33B7) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DE0 move up by 32, the 32 zero slack bytes 0xA0DE0..0xA0E00 at the end of the section are dropped
+                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 8A 32 93 32 A4 32 B5 32 C6 32 DA 32 43 33 54 33 65 33 76 33 8A 33 B7 33'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D F8 3D FC 3D 00 3E 04 3E 48 3E 50 3E 58 3E 60 3E'; SectionEnd = 0xA0E00 }
+                )
+            }
+
+            # ---- ozi: DARK COLONY and OZI MISSIONS menu modes (Council Wars only) ---------------------------------------------------------
+            #  Added      : 10 Sep 2026
+            #  Made with  : tools/patch_ozi_menu.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36
+            #  Changes    : 3532 bytes in 22 edits
+            #  Council Wars opens every data file through one helper that prefixes the name with the
+            #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
+            #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
+            #  those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
+            #  and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
+            #  the main menu:
+            #    * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
+            #      stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
+            #      the rest is NOP padding
+            #    * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
+            #      Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
+            #    * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
+            #      section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
+            #    * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
+            #      entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
+            #      size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
+            #      slack at the end of the .reloc section are dropped so the file size stays the same.  The
+            #      two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
+            #    * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+            #      string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+            #      units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+            #      the original exe reads stay untouched.
+            #  The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+            #  doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+            #  the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+            #  the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+            #  holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+            #  Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+            #  SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+            #  itself uses.  Two buttons are added for it:
+            #    * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+            #      6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+            #      them to 19 and 20 and gives the new buttons the plates 21 and 22
+            #    * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+            #      sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+            #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+            #      and their four absolute slot addresses add four more entries to the .reloc insert
+            #    * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
+            #      VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
+            #      it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
+            #      The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
+            #      went out of sync against every other player.  For the same reason exp/animozi.dat no longer
+            #      lists grrr.fin and troo.fin, the deploy poses of the Gray and Security Trooper sprites: Classic
+            #      has neither, and a Gray commander's rally waited 28 ticks for that animation in Council Wars
+            #      against 2 in Classic - a mixed network game went out of sync at the first Gray rally.  The
+            #      commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
+            #    * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
+            #      -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
+            #      the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
+            #      planet's crescent and the artwork is exactly 217 rows.  The two string operands the call
+            #      carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026): the
+            #      menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
+            #      or as low as H-72 allows, and the `resolution` fix writes the box's height (94 rows at
+            #      1024x768, 76 at 1280x720, the stock 100 from 1280x800 up).  The whole Council Wars menu
+            #      cluster - logo, title, box, buttons - sits 15 rows higher than the letterbox rule at the HD
+            #      sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
+            #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+            #  exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+            #  (exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+            #  relocation entry, this patch is always applied last.
+            @{
+                Id = 'ozi'; Name = 'DARK COLONY and OZI MISSIONS menu modes (Council Wars only)'; Date = '10 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = 'hd'
+                Tool = 'tools/patch_ozi_menu.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36'
+                Description = @'
+Council Wars opens every data file through one helper that prefixes the name with the
+8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
+folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
+those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
+and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
+the main menu:
+  * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
+    stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
+    the rest is NOP padding
+  * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
+    Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
+  * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
+    section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
+  * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
+    entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
+    size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
+    slack at the end of the .reloc section are dropped so the file size stays the same.  The
+    two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
+  * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
+    string in the data section): exp/animozi.dat is the stock list plus the pack's three new
+    units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
+    the original exe reads stay untouched.
+The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
+doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
+the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
+the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
+holds only the patched menu script) makes every file a Classic campaign opens fall through to the
+Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
+SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
+itself uses.  Two buttons are added for it:
+  * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
+    6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
+    them to 19 and 20 and gives the new buttons the plates 21 and 22
+  * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
+    sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
+    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+    the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
+    and their four absolute slot addresses add four more entries to the .reloc insert
+  * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
+    VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
+    it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
+    The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
+    went out of sync against every other player.  For the same reason exp/animozi.dat no longer
+    lists grrr.fin and troo.fin, the deploy poses of the Gray and Security Trooper sprites: Classic
+    has neither, and a Gray commander's rally waited 28 ticks for that animation in Council Wars
+    against 2 in Classic - a mixed network game went out of sync at the first Gray rally.  The
+    commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
+  * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
+    -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
+    the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
+    planet's crescent and the artwork is exactly 217 rows.  The two string operands the call
+    carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026): the
+    menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
+    or as low as H-72 allows, and the `resolution` fix writes the box's height (94 rows at
+    1024x768, 76 at 1280x720, the stock 100 from 1280x800 up).  The whole Council Wars menu
+    cluster - logo, title, box, buttons - sits 15 rows higher than the letterbox rule at the HD
+    sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
+REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
+exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
+(exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
+relocation entry, this patch is always applied last.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('hdpaths')
                 # data files this fix needs next to the exe (386; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
@@ -8162,592 +8997,11 @@ relocation entry, this patch is always applied last.
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
                     'dc\intrf_hd\bintroe'
-                    'exp\intrface\bintroe'
+                    'dc\intrface\credits.txt'
                 )
                 Edits = @(
-                    # PE optional header: base-relocation directory size 0x93CC -> 0x93E4 (+16)
-                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'E4 93 00 00' }
-                    # credits TTY create -> 45 NOPs (640x480: the seven-row menu needs the rows)
-                    @{ Offset = 0x4280; Old = '6A 00 6A 00 6A 00 6A 05 6A 02 68 84 21 48 00 68 6C 24 48 00 B9 18 01 00 00 BB E6 00 00 00 6A 64 BA B2 00 00 00 8B 45 FC E8 FB 35 02 00'; New = '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
-                    # menu id filter: accept the button ids 6 and 7 (cmp edx,5 -> 7)
-                    @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
-                    # credits TTY destroy count 1 -> 0 (nothing was created)
-                    @{ Offset = 0x4408; Old = 'BA 01 00 00 00'; New = 'BA 00 00 00 00' }
-                    # NEW CAMPAIGN call -> tramp_cw_campaign
-                    @{ Offset = 0x4465; Old = 'E8 9E CB FF FF'; New = 'E8 76 A2 07 00' }
-                    # ACADEMY (TRAINING) call -> tramp_dc_campaign
-                    @{ Offset = 0x4483; Old = 'E8 80 CB FF FF'; New = 'E8 08 A3 07 00' }
-                    # MULTI PLAYER WAR call -> tramp_dc_net
-                    @{ Offset = 0x4497; Old = 'E8 84 0B 00 00'; New = 'E8 14 A3 07 00' }
-                    # OZI LOAD (was SINGLE PLAYER WAR) call -> tramp_pack_load
-                    @{ Offset = 0x44AB; Old = 'E8 34 0A 00 00'; New = 'E8 50 A2 07 00' }
-                    # LOAD GAME call -> tramp_cw_load
-                    @{ Offset = 0x44BF; Old = 'E8 E0 E9 FF FF'; New = 'E8 2C A2 07 00' }
-                    # end of the id chain: jne 0040513D -> the Dark Colony handlers
-                    @{ Offset = 0x44DB; Old = '75 60'; New = '75 25' }
-                    # OZI MISSIONS + DARK COLONY handlers (was PLAY INTRO)
-                    @{ Offset = 0x44DD; Old = 'BE F2 46 4A 00 8D BD F0 FE FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD F0 FE FF FF 8D 95 F0 FE FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8B 45 FC E8 EB BE FF FF'; New = 'C7 80 F4 14 00 00 01 00 00 00 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 45 A1 07 00 E8 08 CB FF FF EB 3B 83 FF 06 75 16 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 75 A2 07 00 EB 20 83 FF 07 75 14 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 6A A2 07 00 90 90 90 90 90 90 90' }
-                    # stub_pack (pack strings into the 4 slots)
-                    @{ Offset = 0x7E640; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF C8 7D 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF 44 23 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB BF 5C 5E 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB 5F 58 C3' }
-                    # stub_cw_set (Council Wars strings)
-                    @{ Offset = 0x7E690; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF 44 23 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB BF 5C 5E 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB 5F 58 C3 00 00 00 00' }
-                    # tramp_cw_campaign (stub_cw_set; jmp 401C08)
-                    @{ Offset = 0x7E6E0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 1E 29 F8 FF' }
-                    # tramp_cw_load (stub_cw_set; jmp 403AA4)
-                    @{ Offset = 0x7E6F0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 AA 47 F8 FF' }
-                    # tramp_pack_load (stub_pack; jmp 403AA4)
-                    @{ Offset = 0x7E700; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 3B FF FF FF E9 9A 47 F8 FF' }
-                    # stub_dc_set (Dark Colony strings)
-                    @{ Offset = 0x7E740; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF 44 23 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB BF 5C 5E 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB 5F 58 C3' }
-                    # tramp_dc_campaign (stub_dc_set; jmp 401C08)
-                    @{ Offset = 0x7E790; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 6E 28 F8 FF' }
-                    # tramp_dc_load (stub_dc_set; jmp 403AA4)
-                    @{ Offset = 0x7E7A0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 FA 46 F8 FF' }
-                    # tramp_dc_net (stub_dc_set; jmp 405C20)
-                    @{ Offset = 0x7E7B0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 8B FF FF FF E9 66 68 F8 FF' }
-                    # main menu script "intrface/bintro" -> "intrface/bintoz" (640x480: exp/intrface/bintoze = stock menu + OZI rows, written by the patcher)
-                    @{ Offset = 0x7FE98; Old = '69 6E 74 72 66 61 63 65 2F 62 69 6E 74 72 6F 00'; New = '69 6E 74 72 66 61 63 65 2F 62 69 6E 74 6F 7A 00' }
-                    # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
-                    @{ Offset = 0x7FEB8; Old = '61 6E 69 6D 2E 64 61 74 00 00 00 00'; New = '61 6E 69 6D 6F 7A 69 2E 64 61 74 00' }
-                    # .reloc table, page-0x4000 block: entries 3E8B, 3E90 -> 0000 (the two string pushes of the removed credits TTY create at VA 0x404E8B / 0x404E90 no longer exist; type 0 ABSOLUTE padding)
-                    @{ Offset = 0x97BCE; Old = '8B 3E 90 3E'; New = '00 00 00 00' }
-                    # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
-                    @{ Offset = 0x97BE0; Old = 'DE 30 03 31'; New = '00 00 00 00' }
-                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xD8
-                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'D8 00 00 00' }
-                    # .reloc table: insert 12 HIGHLOW entries (3243, 3254, 3265, 3276, 3293, 32A4, 32B5, 32C6, 3343, 3354, 3365, 3376) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DE8 move up by 24, the 24 zero slack bytes 0xA0DE8..0xA0E00 at the end of the section are dropped
-                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 93 32 A4 32 B5 32 C6 32 43 33 54 33 65 33 76 33'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D F8 3D FC 3D 00 3E 04 3E'; SectionEnd = 0xA0E00 }
-                )
-            }
-
-            # ---- ozi: DARK COLONY and OZI MISSIONS menu modes (Council Wars only) ---------------------------------------------------------
-            #  Added      : 10 Sep 2026
-            #  Made with  : tools/patch_ozi_menu.py
-            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36
-            #  Changes    : 3456 bytes in 22 edits
-            #  Council Wars opens every data file through one helper that prefixes the name with the
-            #  8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
-            #  folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
-            #  those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
-            #  and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
-            #  the main menu:
-            #    * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
-            #      stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
-            #      the rest is NOP padding
-            #    * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
-            #      Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
-            #    * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
-            #      section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
-            #    * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
-            #      entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
-            #      size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
-            #      slack at the end of the .reloc section are dropped so the file size stays the same.  The
-            #      two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
-            #    * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
-            #      string in the data section): exp/animozi.dat is the stock list plus the pack's three new
-            #      units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
-            #      the original exe reads stay untouched.
-            #  The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
-            #  doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
-            #  the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
-            #  the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
-            #  holds only the patched menu script) makes every file a Classic campaign opens fall through to the
-            #  Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
-            #  SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
-            #  itself uses.  Two buttons are added for it:
-            #    * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
-            #      6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
-            #      them to 19 and 20 and gives the new buttons the plates 21 and 22
-            #    * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
-            #      sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
-            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
-            #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
-            #      and their four absolute slot addresses add four more entries to the .reloc insert
-            #    * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
-            #      VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
-            #      it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
-            #      The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
-            #      went out of sync against every other player.  For the same reason exp/animozi.dat no longer
-            #      lists grrr.fin and troo.fin, the deploy poses of the Gray and Security Trooper sprites: Classic
-            #      has neither, and a Gray commander's rally waited 28 ticks for that animation in Council Wars
-            #      against 2 in Classic - a mixed network game went out of sync at the first Gray rally.  The
-            #      commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
-            #    * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
-            #      -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
-            #      the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
-            #      planet's crescent and the artwork is exactly 217 rows.  The two string operands the call
-            #      carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026): the
-            #      menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
-            #      or as low as H-72 allows, and the `resolution` fix writes the box's height (94 rows at
-            #      1024x768, 76 at 1280x720, the stock 100 from 1280x800 up).  The whole Council Wars menu
-            #      cluster - logo, title, box, buttons - sits 15 rows higher than the letterbox rule at the HD
-            #      sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
-            #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
-            #  exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
-            #  (exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
-            #  relocation entry, this patch is always applied last.
-            @{
-                Id = 'ozi'; Name = 'DARK COLONY and OZI MISSIONS menu modes (Council Wars only)'; Date = '10 Sep 2026'
-                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
-                Mode = 'hd'
-                Tool = 'tools/patch_ozi_menu.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.13 and 10.36'
-                Description = @'
-Council Wars opens every data file through one helper that prefixes the name with the
-8-byte string at DGROUP 0x4826D0 ("exp/"); the wave loader has its own copy and the save
-folder name "esave" sits in two more slots.  A campaign *mode* is therefore the content of
-those four writable slots.  This patch turns the unused PLAY INTRO button into OZI MISSIONS
-and SINGLE PLAYER WAR into OZI LOAD, so the 2010 ozi_ns mission pack (22 missions) plays from
-the main menu:
-  * the PLAY INTRO handler body (96 bytes) becomes: set the two campaign flags, call
-    stub_pack (writes "ozi_ns/" / "ozisave" into the four slots), enter the campaign runner;
-    the rest is NOP padding
-  * NEW CAMPAIGN / TRAINING / LOAD GAME go through trampolines that first write the Council
-    Wars strings back ("exp/" / "esave"), OZI LOAD through one that writes the pack strings
-  * the two 73-byte stubs and three 10-byte trampolines live in the zero tail of the code
-    section (VA 0x47F240..0x47F30A) - bytes that were zero and already inside the section
-  * the eight "mov edi,imm32" slot addresses in the stubs are absolute, so eight HIGHLOW
-    entries are appended to the .reloc block of page 0x7F000: 16 bytes inserted, the block's
-    size field and the PE base-relocation directory size grow by 16, and 16 zero bytes of
-    slack at the end of the .reloc section are dropped so the file size stays the same.  The
-    two absolute operands that vanished with the old PLAY INTRO body become type 0 padding.
-  * the start-up animation list is opened as "animozi.dat" instead of "anim.dat" (one 12-byte
-    string in the data section): exp/animozi.dat is the stock list plus the pack's three new
-    units and its transport as "tranozi", so the stock exp/anim.dat, tran.fin and tran.spr that
-    the original exe reads stay untouched.
-The same mechanism gives the expansion build the ORIGINAL Dark Colony campaign (23 Sep 2026,
-doc 10.36).  The Council Wars executable is the same program as dc16.exe - the Classic campaign,
-the training missions and the encyclopedia are all compiled in - and the Council Wars folder is
-the complete Classic data set, so a fourth mode with a prefix that matches nothing ("dc/", which
-holds only the patched menu script) makes every file a Classic campaign opens fall through to the
-Classic data in the game root: the 106-type GAMESTAT/GAMESTAT.TXT, the briefings in MISSION/,
-SCENARIO/HUMAN and ALIEN, INTRF_HD/HSCENE.TXT and GSCENE.TXT and the SAVE/ folder the Classic exe
-itself uses.  Two buttons are added for it:
-  * the menu's accepted-id filter (`cmp edx,5`) becomes `cmp edx,7`, which admits the button ids
-    6 and 7 - the first free ids; the main-menu script moves the two LARGEBUTTON plates that used
-    them to 19 and 20 and gives the new buttons the plates 21 and 22
-  * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
-    sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
-    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
-    the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
-    and their four absolute slot addresses add four more entries to the .reloc insert
-  * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
-    VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
-    it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
-    The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
-    went out of sync against every other player.  For the same reason exp/animozi.dat no longer
-    lists grrr.fin and troo.fin, the deploy poses of the Gray and Security Trooper sprites: Classic
-    has neither, and a Gray commander's rally waited 28 ticks for that animation in Council Wars
-    against 2 in Classic - a mixed network game went out of sync at the first Gray rally.  The
-    commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
-  * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
-    -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
-    the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
-    planet's crescent and the artwork is exactly 217 rows.  The two string operands the call
-    carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026): the
-    menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
-    or as low as H-72 allows, and the `resolution` fix writes the box's height (94 rows at
-    1024x768, 76 at 1280x720, the stock 100 from 1280x800 up).  The whole Council Wars menu
-    cluster - logo, title, box, buttons - sits 15 rows higher than the letterbox rule at the HD
-    sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
-REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
-exp/sprites/tranozi.spr, dc/intrf_hd/bintroe and the rewritten main-menu script
-(exp/intrf_hd/bintroe) from the repository.  Because the .reloc insert shifts every later
-relocation entry, this patch is always applied last.
-'@
-                # fixes that must be applied together with this one (the exe would not work otherwise)
-                Requires = @('hdpaths')
-                # data files this fix needs next to the exe (385; listed from the repository when this
-                # script was generated) - the patcher refuses to write when any of them is missing
-                Data = @(
-                    'ozi_ns\alta.gif'
-                    'ozi_ns\alta.rgb'
-                    'ozi_ns\alta.rmp'
-                    'ozi_ns\area52.gif'
-                    'ozi_ns\area52.rgb'
-                    'ozi_ns\area52.rmp'
-                    'ozi_ns\earth.gif'
-                    'ozi_ns\gamestat\BOOMSTAT.TXT'
-                    'ozi_ns\gamestat\gamestat.txt'
-                    'ozi_ns\gamestat\gxscene.txt'
-                    'ozi_ns\gamestat\hxscene.txt'
-                    'ozi_ns\gamestat\MBULLET.TXT'
-                    'ozi_ns\gamestat\UNITID.TXT'
-                    'ozi_ns\gamestat\WEAPSTAT.TXT'
-                    'ozi_ns\gatlan.GIF'
-                    'ozi_ns\gatlan.NCY'
-                    'ozi_ns\gatlan.RGB'
-                    'ozi_ns\gatlan.RMP'
-                    'ozi_ns\gjungle.gif'
-                    'ozi_ns\gjungle.rgb'
-                    'ozi_ns\gJUNGLE.RMP'
-                    'ozi_ns\intrf_hd\bintroe'
-                    'ozi_ns\intrf_hd\gxscene.txt'
-                    'ozi_ns\intrf_hd\hxscene.txt'
-                    'ozi_ns\intrf_hd\introe'
-                    'ozi_ns\intrf_hd\shumane'
-                    'ozi_ns\intrface\astory.txt'
-                    'ozi_ns\intrface\credits.txt'
-                    'ozi_ns\intrface\hstory.txt'
-                    'ozi_ns\jubjub.gif'
-                    'ozi_ns\jubjub.rgb'
-                    'ozi_ns\jubjub.rmp'
-                    'ozi_ns\mission\g1.wav'
-                    'ozi_ns\mission\g10.wav'
-                    'ozi_ns\mission\g11.wav'
-                    'ozi_ns\mission\g2.wav'
-                    'ozi_ns\mission\g3.wav'
-                    'ozi_ns\mission\g4.wav'
-                    'ozi_ns\mission\g5.wav'
-                    'ozi_ns\mission\g6.wav'
-                    'ozi_ns\mission\g7.wav'
-                    'ozi_ns\mission\g8.wav'
-                    'ozi_ns\mission\g9.wav'
-                    'ozi_ns\mission\h1.wav'
-                    'ozi_ns\mission\h10.wav'
-                    'ozi_ns\mission\h11.wav'
-                    'ozi_ns\mission\h2.wav'
-                    'ozi_ns\mission\h3.wav'
-                    'ozi_ns\mission\h4.wav'
-                    'ozi_ns\mission\h5.wav'
-                    'ozi_ns\mission\h6.wav'
-                    'ozi_ns\mission\h7.wav'
-                    'ozi_ns\mission\h8.wav'
-                    'ozi_ns\mission\h80.wav'
-                    'ozi_ns\mission\h9.wav'
-                    'ozi_ns\scenario\all.jus'
-                    'ozi_ns\scenario\alta.bts'
-                    'ozi_ns\scenario\area52.bts'
-                    'ozi_ns\scenario\atlantis.bts'
-                    'ozi_ns\scenario\council\scene.txt'
-                    'ozi_ns\scenario\council\tarr01.001'
-                    'ozi_ns\scenario\council\tarr01.002'
-                    'ozi_ns\scenario\council\tarr01.003'
-                    'ozi_ns\scenario\council\tarr01.004'
-                    'ozi_ns\scenario\council\tarr01.map'
-                    'ozi_ns\scenario\council\tarr01.msg'
-                    'ozi_ns\scenario\council\tarr01.mtg'
-                    'ozi_ns\scenario\council\tarr01.ovh'
-                    'ozi_ns\scenario\council\tarr01.pop'
-                    'ozi_ns\scenario\council\tarr01.pth'
-                    'ozi_ns\scenario\council\tarr01.scn'
-                    'ozi_ns\scenario\council\tarr01.tro'
-                    'ozi_ns\scenario\council\tarr01.txt'
-                    'ozi_ns\scenario\council\tarr02.001'
-                    'ozi_ns\scenario\council\tarr02.002'
-                    'ozi_ns\scenario\council\tarr02.map'
-                    'ozi_ns\scenario\council\tarr02.msg'
-                    'ozi_ns\scenario\council\tarr02.mtg'
-                    'ozi_ns\scenario\council\tarr02.ovh'
-                    'ozi_ns\scenario\council\tarr02.pop'
-                    'ozi_ns\scenario\council\tarr02.pth'
-                    'ozi_ns\scenario\council\tarr02.scn'
-                    'ozi_ns\scenario\council\tarr02.tro'
-                    'ozi_ns\scenario\council\tarr02.txt'
-                    'ozi_ns\scenario\council\tarr03.001'
-                    'ozi_ns\scenario\council\tarr03.002'
-                    'ozi_ns\scenario\council\tarr03.map'
-                    'ozi_ns\scenario\council\tarr03.msg'
-                    'ozi_ns\scenario\council\tarr03.mtg'
-                    'ozi_ns\scenario\council\tarr03.ovh'
-                    'ozi_ns\scenario\council\tarr03.pop'
-                    'ozi_ns\scenario\council\tarr03.pth'
-                    'ozi_ns\scenario\council\tarr03.scn'
-                    'ozi_ns\scenario\council\tarr03.tro'
-                    'ozi_ns\scenario\council\tarr03.txt'
-                    'ozi_ns\scenario\council\tarr04.001'
-                    'ozi_ns\scenario\council\tarr04.002'
-                    'ozi_ns\scenario\council\tarr04.map'
-                    'ozi_ns\scenario\council\tarr04.msg'
-                    'ozi_ns\scenario\council\tarr04.mtg'
-                    'ozi_ns\scenario\council\tarr04.ovh'
-                    'ozi_ns\scenario\council\tarr04.pop'
-                    'ozi_ns\scenario\council\tarr04.pth'
-                    'ozi_ns\scenario\council\tarr04.scn'
-                    'ozi_ns\scenario\council\tarr04.tro'
-                    'ozi_ns\scenario\council\tarr04.txt'
-                    'ozi_ns\scenario\council\tarr05.001'
-                    'ozi_ns\scenario\council\tarr05.002'
-                    'ozi_ns\scenario\council\tarr05.map'
-                    'ozi_ns\scenario\council\tarr05.msg'
-                    'ozi_ns\scenario\council\tarr05.mtg'
-                    'ozi_ns\scenario\council\tarr05.ovh'
-                    'ozi_ns\scenario\council\tarr05.pop'
-                    'ozi_ns\scenario\council\tarr05.pth'
-                    'ozi_ns\scenario\council\tarr05.scn'
-                    'ozi_ns\scenario\council\tarr05.tro'
-                    'ozi_ns\scenario\council\tarr05.txt'
-                    'ozi_ns\scenario\council\tarr06.001'
-                    'ozi_ns\scenario\council\tarr06.002'
-                    'ozi_ns\scenario\council\tarr06.003'
-                    'ozi_ns\scenario\council\tarr06.map'
-                    'ozi_ns\scenario\council\tarr06.msg'
-                    'ozi_ns\scenario\council\tarr06.mtg'
-                    'ozi_ns\scenario\council\tarr06.ovh'
-                    'ozi_ns\scenario\council\tarr06.pop'
-                    'ozi_ns\scenario\council\tarr06.pth'
-                    'ozi_ns\scenario\council\tarr06.scn'
-                    'ozi_ns\scenario\council\tarr06.tro'
-                    'ozi_ns\scenario\council\tarr06.txt'
-                    'ozi_ns\scenario\council\tarr07.001'
-                    'ozi_ns\scenario\council\tarr07.002'
-                    'ozi_ns\scenario\council\tarr07.003'
-                    'ozi_ns\scenario\council\tarr07.004'
-                    'ozi_ns\scenario\council\tarr07.map'
-                    'ozi_ns\scenario\council\tarr07.msg'
-                    'ozi_ns\scenario\council\tarr07.mtg'
-                    'ozi_ns\scenario\council\tarr07.ovh'
-                    'ozi_ns\scenario\council\tarr07.pop'
-                    'ozi_ns\scenario\council\tarr07.pth'
-                    'ozi_ns\scenario\council\tarr07.scn'
-                    'ozi_ns\scenario\council\tarr07.tro'
-                    'ozi_ns\scenario\council\tarr07.txt'
-                    'ozi_ns\scenario\council\tarr08.001'
-                    'ozi_ns\scenario\council\tarr08.002'
-                    'ozi_ns\scenario\council\tarr08.003'
-                    'ozi_ns\scenario\council\tarr08.004'
-                    'ozi_ns\scenario\council\tarr08.map'
-                    'ozi_ns\scenario\council\tarr08.msg'
-                    'ozi_ns\scenario\council\tarr08.mtg'
-                    'ozi_ns\scenario\council\tarr08.ovh'
-                    'ozi_ns\scenario\council\tarr08.pop'
-                    'ozi_ns\scenario\council\tarr08.pth'
-                    'ozi_ns\scenario\council\tarr08.scn'
-                    'ozi_ns\scenario\council\tarr08.tro'
-                    'ozi_ns\scenario\council\tarr08.txt'
-                    'ozi_ns\scenario\council\tarr09.001'
-                    'ozi_ns\scenario\council\tarr09.002'
-                    'ozi_ns\scenario\council\tarr09.003'
-                    'ozi_ns\scenario\council\tarr09.map'
-                    'ozi_ns\scenario\council\tarr09.msg'
-                    'ozi_ns\scenario\council\tarr09.mtg'
-                    'ozi_ns\scenario\council\tarr09.ovh'
-                    'ozi_ns\scenario\council\tarr09.pop'
-                    'ozi_ns\scenario\council\tarr09.pth'
-                    'ozi_ns\scenario\council\tarr09.scn'
-                    'ozi_ns\scenario\council\tarr09.tro'
-                    'ozi_ns\scenario\council\tarr09.txt'
-                    'ozi_ns\scenario\council\tarr10.001'
-                    'ozi_ns\scenario\council\tarr10.002'
-                    'ozi_ns\scenario\council\tarr10.003'
-                    'ozi_ns\scenario\council\tarr10.004'
-                    'ozi_ns\scenario\council\tarr10.map'
-                    'ozi_ns\scenario\council\tarr10.MSG'
-                    'ozi_ns\scenario\council\tarr10.mtg'
-                    'ozi_ns\scenario\council\tarr10.ovh'
-                    'ozi_ns\scenario\council\tarr10.pop'
-                    'ozi_ns\scenario\council\tarr10.pth'
-                    'ozi_ns\scenario\council\tarr10.scn'
-                    'ozi_ns\scenario\council\tarr10.tro'
-                    'ozi_ns\scenario\council\tarr10.TXT'
-                    'ozi_ns\scenario\council\tarr11.001'
-                    'ozi_ns\scenario\council\tarr11.002'
-                    'ozi_ns\scenario\council\tarr11.map'
-                    'ozi_ns\scenario\council\tarr11.msg'
-                    'ozi_ns\scenario\council\tarr11.mtg'
-                    'ozi_ns\scenario\council\tarr11.ovh'
-                    'ozi_ns\scenario\council\tarr11.pop'
-                    'ozi_ns\scenario\council\tarr11.pth'
-                    'ozi_ns\scenario\council\tarr11.scn'
-                    'ozi_ns\scenario\council\tarr11.tro'
-                    'ozi_ns\scenario\council\tarr11.txt'
-                    'ozi_ns\scenario\DESERT.BTS'
-                    'ozi_ns\scenario\earth.bts'
-                    'ozi_ns\scenario\gatlan.bts'
-                    'ozi_ns\scenario\GJUNGLE.BTS'
-                    'ozi_ns\scenario\globo\globo01.001'
-                    'ozi_ns\scenario\globo\globo01.002'
-                    'ozi_ns\scenario\globo\globo01.003'
-                    'ozi_ns\scenario\globo\globo01.map'
-                    'ozi_ns\scenario\globo\globo01.msg'
-                    'ozi_ns\scenario\globo\globo01.mtg'
-                    'ozi_ns\scenario\globo\globo01.ovh'
-                    'ozi_ns\scenario\globo\globo01.pop'
-                    'ozi_ns\scenario\globo\globo01.pth'
-                    'ozi_ns\scenario\globo\globo01.scn'
-                    'ozi_ns\scenario\globo\globo01.tro'
-                    'ozi_ns\scenario\globo\globo01.txt'
-                    'ozi_ns\scenario\globo\globo02.001'
-                    'ozi_ns\scenario\globo\globo02.002'
-                    'ozi_ns\scenario\globo\globo02.003'
-                    'ozi_ns\scenario\globo\globo02.map'
-                    'ozi_ns\scenario\globo\globo02.msg'
-                    'ozi_ns\scenario\globo\globo02.mtg'
-                    'ozi_ns\scenario\globo\globo02.ovh'
-                    'ozi_ns\scenario\globo\globo02.pop'
-                    'ozi_ns\scenario\globo\globo02.pth'
-                    'ozi_ns\scenario\globo\globo02.scn'
-                    'ozi_ns\scenario\globo\globo02.tro'
-                    'ozi_ns\scenario\globo\globo02.txt'
-                    'ozi_ns\scenario\globo\globo03.001'
-                    'ozi_ns\scenario\globo\globo03.002'
-                    'ozi_ns\scenario\globo\globo03.003'
-                    'ozi_ns\scenario\globo\globo03.map'
-                    'ozi_ns\scenario\globo\globo03.msg'
-                    'ozi_ns\scenario\globo\globo03.mtg'
-                    'ozi_ns\scenario\globo\globo03.ovh'
-                    'ozi_ns\scenario\globo\globo03.pop'
-                    'ozi_ns\scenario\globo\globo03.pth'
-                    'ozi_ns\scenario\globo\globo03.scn'
-                    'ozi_ns\scenario\globo\globo03.tro'
-                    'ozi_ns\scenario\globo\globo03.txt'
-                    'ozi_ns\scenario\globo\globo04.001'
-                    'ozi_ns\scenario\globo\globo04.002'
-                    'ozi_ns\scenario\globo\globo04.003'
-                    'ozi_ns\scenario\globo\globo04.map'
-                    'ozi_ns\scenario\globo\globo04.msg'
-                    'ozi_ns\scenario\globo\globo04.mtg'
-                    'ozi_ns\scenario\globo\globo04.ovh'
-                    'ozi_ns\scenario\globo\globo04.pop'
-                    'ozi_ns\scenario\globo\globo04.pth'
-                    'ozi_ns\scenario\globo\globo04.scn'
-                    'ozi_ns\scenario\globo\globo04.tro'
-                    'ozi_ns\scenario\globo\globo04.txt'
-                    'ozi_ns\scenario\globo\globo05.001'
-                    'ozi_ns\scenario\globo\globo05.002'
-                    'ozi_ns\scenario\globo\globo05.map'
-                    'ozi_ns\scenario\globo\globo05.msg'
-                    'ozi_ns\scenario\globo\globo05.mtg'
-                    'ozi_ns\scenario\globo\globo05.ovh'
-                    'ozi_ns\scenario\globo\globo05.pop'
-                    'ozi_ns\scenario\globo\globo05.pth'
-                    'ozi_ns\scenario\globo\globo05.scn'
-                    'ozi_ns\scenario\globo\globo05.tro'
-                    'ozi_ns\scenario\globo\globo05.txt'
-                    'ozi_ns\scenario\globo\globo06.001'
-                    'ozi_ns\scenario\globo\globo06.002'
-                    'ozi_ns\scenario\globo\globo06.003'
-                    'ozi_ns\scenario\globo\globo06.map'
-                    'ozi_ns\scenario\globo\globo06.msg'
-                    'ozi_ns\scenario\globo\globo06.mtg'
-                    'ozi_ns\scenario\globo\globo06.ovh'
-                    'ozi_ns\scenario\globo\globo06.pop'
-                    'ozi_ns\scenario\globo\globo06.pth'
-                    'ozi_ns\scenario\globo\globo06.scn'
-                    'ozi_ns\scenario\globo\globo06.tro'
-                    'ozi_ns\scenario\globo\globo06.txt'
-                    'ozi_ns\scenario\globo\globo07.001'
-                    'ozi_ns\scenario\globo\globo07.002'
-                    'ozi_ns\scenario\globo\globo07.003'
-                    'ozi_ns\scenario\globo\globo07.004'
-                    'ozi_ns\scenario\globo\globo07.map'
-                    'ozi_ns\scenario\globo\globo07.msg'
-                    'ozi_ns\scenario\globo\globo07.mtg'
-                    'ozi_ns\scenario\globo\globo07.ovh'
-                    'ozi_ns\scenario\globo\globo07.pop'
-                    'ozi_ns\scenario\globo\globo07.pth'
-                    'ozi_ns\scenario\globo\globo07.scn'
-                    'ozi_ns\scenario\globo\globo07.tro'
-                    'ozi_ns\scenario\globo\globo07.txt'
-                    'ozi_ns\scenario\globo\globo08.001'
-                    'ozi_ns\scenario\globo\globo08.002'
-                    'ozi_ns\scenario\globo\globo08.003'
-                    'ozi_ns\scenario\globo\globo08.map'
-                    'ozi_ns\scenario\globo\globo08.msg'
-                    'ozi_ns\scenario\globo\globo08.mtg'
-                    'ozi_ns\scenario\globo\globo08.ovh'
-                    'ozi_ns\scenario\globo\globo08.pop'
-                    'ozi_ns\scenario\globo\globo08.pth'
-                    'ozi_ns\scenario\globo\globo08.scn'
-                    'ozi_ns\scenario\globo\globo08.tro'
-                    'ozi_ns\scenario\globo\globo08.txt'
-                    'ozi_ns\scenario\globo\globo09.001'
-                    'ozi_ns\scenario\globo\globo09.002'
-                    'ozi_ns\scenario\globo\globo09.003'
-                    'ozi_ns\scenario\globo\globo09.map'
-                    'ozi_ns\scenario\globo\globo09.msg'
-                    'ozi_ns\scenario\globo\globo09.mtg'
-                    'ozi_ns\scenario\globo\globo09.ovh'
-                    'ozi_ns\scenario\globo\globo09.pop'
-                    'ozi_ns\scenario\globo\globo09.pth'
-                    'ozi_ns\scenario\globo\globo09.scn'
-                    'ozi_ns\scenario\globo\globo09.tro'
-                    'ozi_ns\scenario\globo\globo09.txt'
-                    'ozi_ns\scenario\globo\globo10.001'
-                    'ozi_ns\scenario\globo\globo10.002'
-                    'ozi_ns\scenario\globo\globo10.003'
-                    'ozi_ns\scenario\globo\globo10.004'
-                    'ozi_ns\scenario\globo\globo10.map'
-                    'ozi_ns\scenario\globo\globo10.msg'
-                    'ozi_ns\scenario\globo\globo10.mtg'
-                    'ozi_ns\scenario\globo\globo10.ovh'
-                    'ozi_ns\scenario\globo\globo10.pop'
-                    'ozi_ns\scenario\globo\globo10.pth'
-                    'ozi_ns\scenario\globo\globo10.scn'
-                    'ozi_ns\scenario\globo\globo10.tro'
-                    'ozi_ns\scenario\globo\globo10.txt'
-                    'ozi_ns\scenario\globo\globo11.001'
-                    'ozi_ns\scenario\globo\globo11.002'
-                    'ozi_ns\scenario\globo\globo11.003'
-                    'ozi_ns\scenario\globo\globo11.map'
-                    'ozi_ns\scenario\globo\globo11.msg'
-                    'ozi_ns\scenario\globo\globo11.mtg'
-                    'ozi_ns\scenario\globo\globo11.ovh'
-                    'ozi_ns\scenario\globo\globo11.pop'
-                    'ozi_ns\scenario\globo\globo11.pth'
-                    'ozi_ns\scenario\globo\globo11.scn'
-                    'ozi_ns\scenario\globo\globo11.tro'
-                    'ozi_ns\scenario\globo\globo11.txt'
-                    'ozi_ns\scenario\globo\scene.txt'
-                    'ozi_ns\scenario\HTRAIN.BTS'
-                    'ozi_ns\scenario\jubjub.bts'
-                    'ozi_ns\scenario\JUNGLE.BTS'
-                    'ozi_ns\scenario\special.bts'
-                    'ozi_ns\scenario\trainh.bts'
-                    'ozi_ns\scenario\vent.jus'
-                    'ozi_ns\sound\ALIST.DAT'
-                    'ozi_ns\sound\alta.amb'
-                    'ozi_ns\sound\area52.amb'
-                    'ozi_ns\sound\ATLANTIS.AMB'
-                    'ozi_ns\sound\ATLANTIS.DAT'
-                    'ozi_ns\sound\ATRAIN.DAT'
-                    'ozi_ns\sound\birds.wav'
-                    'ozi_ns\sound\cobra.wav'
-                    'ozi_ns\sound\cow.wav'
-                    'ozi_ns\sound\cricket.wav'
-                    'ozi_ns\sound\DALG1DEA.wav'
-                    'ozi_ns\sound\DALG1SEL.wav'
-                    'ozi_ns\sound\DALG2ACK.wav'
-                    'ozi_ns\sound\DALG2SEL.wav'
-                    'ozi_ns\sound\dog.wav'
-                    'ozi_ns\sound\dog2.wav'
-                    'ozi_ns\sound\earth.amb'
-                    'ozi_ns\sound\frog.wav'
-                    'ozi_ns\sound\frogs.wav'
-                    'ozi_ns\sound\gatlan.AMB'
-                    'ozi_ns\sound\gease.wav'
-                    'ozi_ns\sound\GJUNGLE.AMB'
-                    'ozi_ns\sound\GJUNGLE.DAT'
-                    'ozi_ns\sound\jubjub.amb'
-                    'ozi_ns\sound\KOMANDWE.wav'
-                    'ozi_ns\sound\KOMANWEA.wav'
-                    'ozi_ns\sound\mosq.wav'
-                    'ozi_ns\sound\r2bird.wav'
-                    'ozi_ns\sound\SCENESND.DAT'
-                    'ozi_ns\sound\seagull.wav'
-                    'ozi_ns\sound\slist.dat'
-                    'ozi_ns\sound\turkey.wav'
-                    'ozi_ns\sound\water.wav'
-                    'ozi_ns\sound\wolf.wav'
-                    'ozi_ns\special.gif'
-                    'ozi_ns\special.rgb'
-                    'ozi_ns\special.rmp'
-                    'ozisave\ozisave.txt'
-                    'exp\animozi.dat'
-                    'exp\animate\dalg.fin'
-                    'exp\animate\reae.fin'
-                    'exp\animate\spyo.fin'
-                    'exp\animate\tranozi.fin'
-                    'exp\sprites\dalg.spr'
-                    'exp\sprites\reae.spr'
-                    'exp\sprites\spyo.spr'
-                    'exp\sprites\tranozi.spr'
-                    'ozi_ns\gamestat\hxscene.txt'
-                    'ozi_ns\gamestat\gxscene.txt'
-                    'dc\intrf_hd\bintroe'
-                )
-                Edits = @(
-                    # PE optional header: base-relocation directory size 0x93CC -> 0x93E4 (+16)
-                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'E4 93 00 00' }
+                    # PE optional header: base-relocation directory size 0x93CC -> 0x93EC (+32)
+                    @{ Offset = 0x124; Old = 'CC 93 00 00'; New = 'EC 93 00 00' }
                     # menu id filter: accept the button ids 6 and 7 (cmp edx,5 -> 7)
                     @{ Offset = 0x439E; Old = '83 FA 05'; New = '83 FA 07' }
                     # NEW CAMPAIGN call -> tramp_cw_campaign
@@ -8764,32 +9018,32 @@ relocation entry, this patch is always applied last.
                     @{ Offset = 0x44DB; Old = '75 60'; New = '75 25' }
                     # OZI MISSIONS + DARK COLONY handlers (was PLAY INTRO)
                     @{ Offset = 0x44DD; Old = 'BE F2 46 4A 00 8D BD F0 FE FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD F0 FE FF FF 8D 95 F0 FE FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8B 45 FC E8 EB BE FF FF'; New = 'C7 80 F4 14 00 00 01 00 00 00 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 45 A1 07 00 E8 08 CB FF FF EB 3B 83 FF 06 75 16 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 75 A2 07 00 EB 20 83 FF 07 75 14 C7 80 F0 14 00 00 00 00 00 00 89 C2 8B 45 FC E8 6A A2 07 00 90 90 90 90 90 90 90' }
-                    # stub_pack (pack strings into the 4 slots)
-                    @{ Offset = 0x7E640; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF C8 7D 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF 44 23 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB BF 5C 5E 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB 5F 58 C3' }
-                    # stub_cw_set (Council Wars strings)
-                    @{ Offset = 0x7E690; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF 44 23 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB BF 5C 5E 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB 5F 58 C3 00 00 00 00' }
+                    # stub_pack (pack strings into the 4 slots, music source ALL)
+                    @{ Offset = 0x7E640; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF C8 7D 48 00 B8 6F 7A 69 5F AB B8 6E 73 2F 00 AB BF 44 23 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB BF 5C 5E 48 00 B8 6F 7A 69 73 AB B8 61 76 65 00 AB 5F 58 C6 05 F4 27 53 00 02 C3' }
+                    # stub_cw_set (Council Wars strings, music source CW)
+                    @{ Offset = 0x7E690; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 65 78 70 2F AB B8 00 00 00 00 AB BF 44 23 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB BF 5C 5E 48 00 B8 65 73 61 76 AB B8 65 00 00 00 AB 5F 58 C6 05 F4 27 53 00 01 C3' }
                     # tramp_cw_campaign (stub_cw_set; jmp 401C08)
                     @{ Offset = 0x7E6E0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 1E 29 F8 FF' }
                     # tramp_cw_load (stub_cw_set; jmp 403AA4)
                     @{ Offset = 0x7E6F0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 AA 47 F8 FF' }
                     # tramp_pack_load (stub_pack; jmp 403AA4)
                     @{ Offset = 0x7E700; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 3B FF FF FF E9 9A 47 F8 FF' }
-                    # stub_dc_set (Dark Colony strings)
-                    @{ Offset = 0x7E740; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF 44 23 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB BF 5C 5E 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB 5F 58 C3' }
+                    # stub_dc_set (Dark Colony strings, music source DC)
+                    @{ Offset = 0x7E740; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '50 57 BF D0 26 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF C8 7D 48 00 B8 64 63 2F 00 AB B8 00 00 00 00 AB BF 44 23 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB BF 5C 5E 48 00 B8 73 61 76 65 AB B8 00 00 00 00 AB 5F 58 C6 05 F4 27 53 00 00 C3' }
                     # tramp_dc_campaign (stub_dc_set; jmp 401C08)
                     @{ Offset = 0x7E790; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 AB FF FF FF E9 6E 28 F8 FF' }
                     # tramp_dc_load (stub_dc_set; jmp 403AA4)
                     @{ Offset = 0x7E7A0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 9B FF FF FF E9 FA 46 F8 FF' }
-                    # tramp_dc_net (stub_dc_set; jmp 405C20)
-                    @{ Offset = 0x7E7B0; Old = '00 00 00 00 00 00 00 00 00 00'; New = 'E8 8B FF FF FF E9 66 68 F8 FF' }
+                    # tramp_dc_net (stub_dc_set; music source ALL; jmp 405C20)
+                    @{ Offset = 0x7E7B0; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = 'E8 8B FF FF FF C6 05 F4 27 53 00 02 E9 5F 68 F8 FF' }
                     # start-up animation list "anim.dat" -> "animozi.dat" (exp/animozi.dat = stock list + pack units)
                     @{ Offset = 0x7FEB8; Old = '61 6E 69 6D 2E 64 61 74 00 00 00 00'; New = '61 6E 69 6D 6F 7A 69 2E 64 61 74 00' }
                     # .reloc table, page-0x5000 block: entries 30DE, 3103 -> 0000 (the removed PLAY INTRO body at VA 0x4050DE / 0x405103 no longer exist; type 0 ABSOLUTE padding)
                     @{ Offset = 0x97BE0; Old = 'DE 30 03 31'; New = '00 00 00 00' }
-                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xD8
-                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'D8 00 00 00' }
-                    # .reloc table: insert 12 HIGHLOW entries (3243, 3254, 3265, 3276, 3293, 32A4, 32B5, 32C6, 3343, 3354, 3365, 3376) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DE8 move up by 24, the 24 zero slack bytes 0xA0DE8..0xA0E00 at the end of the section are dropped
-                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 93 32 A4 32 B5 32 C6 32 43 33 54 33 65 33 76 33'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D F8 3D FC 3D 00 3E 04 3E'; SectionEnd = 0xA0E00 }
+                    # .reloc block for page 0x7F000 (header at 0xA002C): SizeOfBlock 0xC0 -> 0xE0
+                    @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'E0 00 00 00' }
+                    # .reloc table: insert 16 HIGHLOW entries (3243, 3254, 3265, 3276, 328A, 3293, 32A4, 32B5, 32C6, 32DA, 3343, 3354, 3365, 3376, 338A, 33B7) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DE0 move up by 32, the 32 zero slack bytes 0xA0DE0..0xA0E00 at the end of the section are dropped
+                    @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 8A 32 93 32 A4 32 B5 32 C6 32 DA 32 43 33 54 33 65 33 76 33 8A 33 B7 33'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D F8 3D FC 3D 00 3E 04 3E 48 3E 50 3E 58 3E 60 3E'; SectionEnd = 0xA0E00 }
                 )
             }
 
@@ -8869,14 +9123,14 @@ directory that lists them); their SHA-256 is checked like every other edit.
         )
     }
     # ---------------------------------------------------------------------------------------------
-    #  Dark Colony map editor maped.exe (Aug 1997, Borland C++), 336424 bytes (unlocked build: "Dark Colony map editor 1.2.exe", until 25 Sep 2026 maped_ozi_ns_v1.2.exe)
+    #  Dark Colony map editor maped.exe (Aug 1997, Borland C++), 336424 bytes (unlocked build: "Dark Colony Map Editor.exe", until 25 Sep 2026 maped_ozi_ns_v1.2.exe)
     # ---------------------------------------------------------------------------------------------
     @{
         Id             = 'MapEditor'
-        Title          = 'Dark Colony map editor maped.exe (Aug 1997, Borland C++), 336424 bytes (unlocked build: "Dark Colony map editor 1.2.exe", until 25 Sep 2026 maped_ozi_ns_v1.2.exe)'
+        Title          = 'Dark Colony map editor maped.exe (Aug 1997, Borland C++), 336424 bytes (unlocked build: "Dark Colony Map Editor.exe", until 25 Sep 2026 maped_ozi_ns_v1.2.exe)'
         OriginalName   = 'maped.exe'
-        OutputName     = 'Dark Colony map editor 1.2.exe'
-        ProductName    = 'Dark Colony map editor 1.2'      # the desktop shortcut's name
+        OutputName     = 'Dark Colony Map Editor.exe'
+        ProductName    = 'Dark Colony Map Editor'      # the desktop shortcut's name
         OriginalPath   = 'Dark Colony - Map editor\maped.exe'      # where the window looks for the original, relative to this script
         # where a player gets the original when theirs is missing or not the original (the window's red box)
         RepoUrl        = 'https://github.com/endotermic/Dark-Colony/blob/main/Dark%20Colony%20-%20Map%20editor/maped.exe'
@@ -10249,6 +10503,72 @@ function Write-StockOziMenu([string] $GameDir) {
     return $lines
 }
 
+# The battlefield options dialog with the MUSIC row (Dark Colony Ultimate, fix `music`, doc 10.41): the port of
+# patch_music.music_row(), byte-identical.  The GAME DETAIL row (pushb 44/45, in_text 48, label 63, cell picture
+# 19), the bottom frame cell (picture 15) and the OK / cancel buttons (55/56) move down one row (32 px); the new
+# row takes GAME DETAIL's old place with pushb 71 "-" / 72 "+", in_text 73, label 74 (textmsg 6 MUSIC) and cell
+# picture 22; two middle frame cells (pictures 20/21) fill the gap; textmsg 20/21/22 = DC / CW / ALL; the erase
+# rect grows by a row.  Idempotent; each line keeps its own line ending.
+function Edit-MusicDialog([string] $Text) {
+    if ([regex]::IsMatch($Text, '(?m)^\s*pushb\s+71\s')) { return $Text }
+    $move = @('pushb 44', 'pushb 45', 'in_text 48', 'label 63', 'picture 19', 'picture 15', 'pushb 55', 'pushb 56')
+    $clone = @{ 'pushb 44' = @{ 2 = '71' }; 'pushb 45' = @{ 2 = '72' }; 'in_text 48' = @{ 2 = '73' }
+                'label 63' = @{ 2 = '74'; 9 = '6' }; 'picture 19' = @{ 2 = '22' } }
+    $out = New-Object System.Collections.Generic.List[string]
+    $frame14 = $null
+    foreach ($raw in $Text.Split("`n")) {
+        $cr = if ($raw.EndsWith("`r")) { "`r" } else { '' }
+        $line = if ($cr) { $raw.Substring(0, $raw.Length - 1) } else { $raw }
+        $m = [regex]::Match($line, '^\s*(pushb|in_text|label|picture|textmsg|size)\s+(\d+)\s')
+        if (-not $m.Success) { $out.Add($line + $cr); continue }
+        $kind = $m.Groups[1].Value; $n = [int] $m.Groups[2].Value; $key = "$kind $n"
+        if ($kind -eq 'size') {
+            $toks = @([regex]::Matches($line, '\S+') | ForEach-Object { $_.Value })
+            $ch = @{}; $ch[$toks.Count] = [string] ([int] $toks[$toks.Count - 1] + 32)
+            $out.Add((Set-ScriptTokens $line $ch) + $cr); continue
+        }
+        if ($kind -eq 'picture' -and $n -eq 14) { $frame14 = $line }
+        if ($clone.ContainsKey($key)) { $out.Add((Set-ScriptTokens $line $clone[$key]) + $cr) }
+        if ($move -contains $key) {
+            $y = [int] @([regex]::Matches($line, '\S+') | ForEach-Object { $_.Value })[4]
+            $line = Set-ScriptTokens $line @{ 5 = [string] ($y + 32) }
+        }
+        if ($kind -eq 'picture' -and $n -eq 15 -and $null -ne $frame14) {
+            $y14 = [int] @([regex]::Matches($frame14, '\S+') | ForEach-Object { $_.Value })[4]
+            $out.Add((Set-ScriptTokens $frame14 @{ 2 = '20'; 5 = [string] ($y14 + 16) }) + $cr)
+            $out.Add((Set-ScriptTokens $frame14 @{ 2 = '21'; 5 = [string] ($y14 + 32) }) + $cr)
+        }
+        $out.Add($line + $cr)
+        if ($kind -eq 'textmsg' -and $n -eq 12) {
+            foreach ($pair in @(@(6, 'MUSIC'), @(20, 'DC'), @(21, 'CW'), @(22, 'ALL'))) { $out.Add(('textmsg {0} {1}' -f $pair[0], $pair[1]) + $cr) }
+        }
+    }
+    return ($out -join "`n")
+}
+
+# The copies of that dialog the Dark Colony Ultimate exe reads in its three campaign modes: HD sizes
+# exp\intrf_hd\lopte, dc\intrf_hd\lopte, ozi_ns\intrf_hd\lopte from INTRF_HD\LOPTE (the set just written);
+# 640x480 exp\intrface\lopme, dc\intrface\lopme, ozi_ns\intrface\lopme from the stock INTRFACE\LOPTE (the exe's
+# script name is "intrface/lopm" there, so the original exe's exp\intrface\lopte is never touched).  dc\ is the
+# DARK COLONY mode's overlay and is created if needed; ozi_ns\ only when the OZI data is there.
+function Write-MusicDialogs([string] $GameDir, [string] $Mode) {
+    $stock = ($Mode -eq '640x480')
+    $src = if ($stock) { Find-CI (Join-Path $GameDir 'INTRFACE') 'LOPTE' } else { Find-CI (Join-Path $GameDir 'INTRF_HD') 'LOPTE' }
+    if (-not $src) { return @('options dialog copies NOT written: LOPTE is missing') }
+    $t = Edit-MusicDialog (Read-Latin1 $src)
+    $name = if ($stock) { 'lopme' } else { 'lopte' }
+    $sub = if ($stock) { 'intrface' } else { 'intrf_hd' }
+    $lines = @()
+    foreach ($root in 'exp', 'dc', 'ozi_ns') {
+        if ($root -eq 'ozi_ns' -and -not (Test-Path -LiteralPath (Join-Path $GameDir $root))) { continue }
+        $d = Join-Path $GameDir (Join-Path $root $sub)
+        if (-not (Test-Path -LiteralPath $d)) { New-Item -ItemType Directory -Path $d -Force | Out-Null }
+        Write-Latin1 (Join-Path $d $name) $t
+        $lines += ('wrote {0}\{1}\{2} (the battlefield options dialog with the MUSIC row)' -f $root, $sub, $name)
+    }
+    return $lines
+}
+
 # Desktop shortcut to a patched exe (the window's "Desktop shortcut" checkbox, -DesktopShortcut on the
 # command line).  The game opens its data files relative to its working folder, so the shortcut's
 # "Start in" is the game folder - a COPY of the exe on the desktop would not find anything.  Made with
@@ -10256,7 +10576,7 @@ function Write-StockOziMenu([string] $GameDir) {
 # replaced.  $script:DesktopFolder lets a test write somewhere else than the real desktop.
 $script:DesktopFolder = $null
 function New-GameShortcut([string] $ExePath, $Build) {
-    $name = $Build.ProductName          # "Dark Colony", "Dark Colony Ultimate", "Dark Colony map editor 1.2"
+    $name = $Build.ProductName          # "Dark Colony", "Dark Colony Ultimate", "Dark Colony Map Editor"
     $desktop = if ($script:DesktopFolder) { $script:DesktopFolder } else { [Environment]::GetFolderPath('Desktop') }
     if (-not $desktop -or -not (Test-Path -LiteralPath $desktop)) { throw 'this user has no desktop folder' }
     $exe = Get-AbsolutePath $ExePath
@@ -10310,6 +10630,11 @@ function Invoke-PatchRun([string] $OriginalPath, $Build, [object[]] $Chosen, [st
         $dir = Split-Path -Parent ([System.IO.Path]::GetFullPath($OutputPath))
         if ($ordered | Where-Object { $_.Id -eq 'movies' }) { try { $generated += Write-StockEndingLists $dir } catch { $generated += 'GAMESTAT lists NOT written: ' + $_.Exception.Message } }
         if ($ordered | Where-Object { $_.Id -eq 'ozi' })    { try { $generated += Write-StockOziMenu $dir } catch { $generated += 'bintoze NOT written: ' + $_.Exception.Message } }
+    }
+    # Dark Colony Ultimate's `music` fix: the options dialog with the MUSIC row for its three campaign modes
+    if ($Mode -and $Build.Id -eq 'CouncilWars' -and ($ordered | Where-Object { $_.Id -eq 'music' })) {
+        $dir = Split-Path -Parent ([System.IO.Path]::GetFullPath($OutputPath))
+        try { $generated += Write-MusicDialogs $dir $Mode } catch { $generated += 'options dialog copies NOT written: ' + $_.Exception.Message }
     }
     return @{
         Generated = $generated
@@ -10503,7 +10828,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
         '    Dark Colony                  dc16.exe      ->  Dark Colony.exe',
         '    Dark Colony Ultimate         ENGEXP16.EXE  ->  Dark Colony Ultimate.exe   (Council Wars plus the Dark Colony,',
         '                                                                               OZI and Academy campaigns)',
-        '    Dark Colony map editor 1.2   maped.exe     ->  Dark Colony map editor 1.2.exe',
+        '    Dark Colony Map Editor       maped.exe     ->  Dark Colony Map Editor.exe',
         '',
         'The next three pages show the fixes of each executable - all of them are selected; you only have to',
         'press Next three times and then Patch.  Nothing is downloaded, the originals are never changed, and every',
@@ -10517,7 +10842,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $chkLnk.Checked = $true; $chkLnk.Font = $bold
     $lblLnk = New-Object System.Windows.Forms.Label
     $lblLnk.Location = '44,330'; $lblLnk.Size = '900,36'
-    $lblLnk.Text = 'Named "Dark Colony", "Dark Colony Ultimate" and "Dark Colony map editor 1.2"; each starts in its game folder, where the game finds its files.  An older shortcut of the same name is replaced.'
+    $lblLnk.Text = 'Named "Dark Colony", "Dark Colony Ultimate" and "Dark Colony Map Editor"; each starts in its game folder, where the game finds its files.  An older shortcut of the same name is replaced.'
     $lblNext = New-Object System.Windows.Forms.Label
     $lblNext.Location = '24,540'; $lblNext.Size = '936,20'; $lblNext.Text = 'Press Next to continue.'
     # a missing or wrong original: a big red banner here, the details and the remedies on its page
@@ -11163,7 +11488,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $c.Done.Visible = ($step -eq $n + 1)
         if ($step -eq 0) {
             $c.Title.Text = 'Welcome to the Dark Colony patcher'
-            $c.Sub.Text = 'Builds Dark Colony, Dark Colony Ultimate and the map editor 1.2 from the untouched originals in this folder.'
+            $c.Sub.Text = 'Builds Dark Colony, Dark Colony Ultimate and the Map Editor from the untouched originals in this folder.'
         } elseif ($step -le $n) {
             $b = $g.Items[$step - 1].Build
             $c.Title.Text = "Step $step of ${n}: $($b.ProductName)"
