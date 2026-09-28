@@ -174,13 +174,13 @@ $Builds = @(
         SourceNote     = 'NOT from the Dark Colony CD: its DC\DC16.EXE is the August 1997 build (660480 bytes), which these fixes do not fit - they need dc16.exe of the January 1998 update (659456 bytes), so take it from our repository.'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = 'bd86e63e34f435acebd577a60f2956ead8ccd72b3d0661745128b7e665051a02'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '88f59c1daeec2f7e10ae24b96c13d26c65924cf0464075f9da220f13a282e5b3'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '1920x1080', '1920x1200', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '81003349675b77fbe187bed925d82b677021ca53798fff0556a42a48b5af5755'; '1024x768' = 'bd86e63e34f435acebd577a60f2956ead8ccd72b3d0661745128b7e665051a02'; '1280x1024' = '1d57d68a292982fd8e2d456fb23419c0877d17345dda7744b6e7057d459fb6cd'; '1280x720' = 'a995a416ba5b6ff185c94b213bdec26c206a5efca2e43375b1a75c70150fd7f4'; '1280x800' = 'c2913f20e33664a2b24c92fb42474653018eeffa9d5e65f224547746a7892236'; '1920x1080' = 'd6ed0ed94d8ba87a8cd2f5893c142ca49403cdd0ca019db1dd8478de9503d0c0'; '1920x1200' = '9d2c60a50e5f4f4e32259c6197bf032ba41d63151eae87a2f840c8a095f6a283'; '3840x1080' = 'd3af3035f960bb730890538e4d29994045f1463de1fcd245008788f8d461f6eb' }
+        ReferenceSha256 = @{ '640x480' = '81003349675b77fbe187bed925d82b677021ca53798fff0556a42a48b5af5755'; '1024x768' = '88f59c1daeec2f7e10ae24b96c13d26c65924cf0464075f9da220f13a282e5b3'; '1280x1024' = '6bbb02c591dc9b52292aa62f8613cab4aa6160568a315078554b51af0bd2f4c2'; '1280x720' = '0dfb4b999d2d2129b6ec3550ff1c24edc01219f97c6af30712c80cc90ffa2009'; '1280x800' = 'c548da2b81c9589886210583bc18c502ef5fcb4b65e7b0631403006fd15b28ff'; '1920x1080' = '85cc4ff9db880081ed474cd0842da9dc70ee9c1aded2fb3659ddb65965e6ec91'; '1920x1200' = 'c75052580fad42877196439f434ea9c867793c542d1f0ce40c5ed8f7200d4527'; '3840x1080' = '4bd7d5ca1cbc004dfd8756fa5f89f37ea49d67d74e4c51ec04c3ed331eace106' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -390,7 +390,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (60; listed from the repository when this
+                # data files this fix needs next to the exe (63; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -419,6 +419,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -428,6 +429,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -450,6 +452,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'INTRF_HD\1024x768\INTRG.GIF'
                     'INTRF_HD\1024x768\INTRO.GIF'
                     'INTRF_HD\1024x768\INTRFACE.GIF'
@@ -857,7 +860,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (60; listed from the repository when this
+                # data files this fix needs next to the exe (63; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -886,6 +889,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -895,6 +899,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -917,6 +922,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'INTRF_HD\1280x1024\INTRG.GIF'
                     'INTRF_HD\1280x1024\INTRO.GIF'
                     'INTRF_HD\1280x1024\INTRFACE.GIF'
@@ -1350,7 +1356,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (60; listed from the repository when this
+                # data files this fix needs next to the exe (63; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -1379,6 +1385,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -1388,6 +1395,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -1410,6 +1418,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'INTRF_HD\1280x720\INTRG.GIF'
                     'INTRF_HD\1280x720\INTRO.GIF'
                     'INTRF_HD\1280x720\INTRFACE.GIF'
@@ -1843,7 +1852,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (60; listed from the repository when this
+                # data files this fix needs next to the exe (63; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -1872,6 +1881,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -1881,6 +1891,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -1903,6 +1914,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'INTRF_HD\1280x800\INTRG.GIF'
                     'INTRF_HD\1280x800\INTRO.GIF'
                     'INTRF_HD\1280x800\INTRFACE.GIF'
@@ -2336,7 +2348,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (60; listed from the repository when this
+                # data files this fix needs next to the exe (63; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -2365,6 +2377,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -2374,6 +2387,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -2396,6 +2410,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'INTRF_HD\1920x1080\INTRG.GIF'
                     'INTRF_HD\1920x1080\INTRO.GIF'
                     'INTRF_HD\1920x1080\INTRFACE.GIF'
@@ -2829,7 +2844,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (60; listed from the repository when this
+                # data files this fix needs next to the exe (63; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -2858,6 +2873,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -2867,6 +2883,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -2889,6 +2906,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'INTRF_HD\1920x1200\INTRG.GIF'
                     'INTRF_HD\1920x1200\INTRO.GIF'
                     'INTRF_HD\1920x1200\INTRFACE.GIF'
@@ -3322,7 +3340,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (60; listed from the repository when this
+                # data files this fix needs next to the exe (63; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -3351,6 +3369,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -3360,6 +3379,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -3382,6 +3402,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'INTRF_HD\3840x1080\INTRG.GIF'
                     'INTRF_HD\3840x1080\INTRO.GIF'
                     'INTRF_HD\3840x1080\INTRFACE.GIF'
@@ -3790,7 +3811,7 @@ resolution (one folder for every size, maintainer decision 21 Sep 2026).
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('resolution')
-                # data files this fix needs next to the exe (57; listed from the repository when this
+                # data files this fix needs next to the exe (60; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -3819,6 +3840,7 @@ resolution (one folder for every size, maintainer decision 21 Sep 2026).
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -3828,6 +3850,7 @@ resolution (one folder for every size, maintainer decision 21 Sep 2026).
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -3850,6 +3873,7 @@ resolution (one folder for every size, maintainer decision 21 Sep 2026).
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                 )
                 Edits = @(
                     # DGROUP string "intrface/newgame" -> "intrf_hd/newgame": new-game / mission-selection script NEWGAMEE
@@ -4027,7 +4051,7 @@ headers are 32-bit and the size check unsigned, so nothing else changes.
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 4 bytes in 2 edits
+            #  Changes    : 5 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1024x768 that point lies inside the enlarged map view and the
@@ -4056,6 +4080,8 @@ HUD frame has the clock face.  Only meaningful together with the 1024x768 displa
                     @{ Offset = 0x3A0A3; Old = 'C2 01 00 00'; New = 'E2 02 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 992 (0x3E0)
                     @{ Offset = 0x3A0B6; Old = '60 02 00 00'; New = 'E0 03 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83C68; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -4063,7 +4089,7 @@ HUD frame has the clock face.  Only meaningful together with the 1024x768 displa
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 4 bytes in 2 edits
+            #  Changes    : 5 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1280x1024 that point lies inside the enlarged map view and the
@@ -4092,6 +4118,8 @@ HUD frame has the clock face.  Only meaningful together with the 1280x1024 displ
                     @{ Offset = 0x3A0A3; Old = 'C2 01 00 00'; New = 'E2 03 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 1248 (0x4E0)
                     @{ Offset = 0x3A0B6; Old = '60 02 00 00'; New = 'E0 04 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83C68; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -4099,7 +4127,7 @@ HUD frame has the clock face.  Only meaningful together with the 1280x1024 displ
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 4 bytes in 2 edits
+            #  Changes    : 5 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1280x720 that point lies inside the enlarged map view and the
@@ -4128,6 +4156,8 @@ HUD frame has the clock face.  Only meaningful together with the 1280x720 displa
                     @{ Offset = 0x3A0A3; Old = 'C2 01 00 00'; New = 'B2 02 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 1248 (0x4E0)
                     @{ Offset = 0x3A0B6; Old = '60 02 00 00'; New = 'E0 04 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83C68; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -4135,7 +4165,7 @@ HUD frame has the clock face.  Only meaningful together with the 1280x720 displa
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 4 bytes in 2 edits
+            #  Changes    : 5 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1280x800 that point lies inside the enlarged map view and the
@@ -4164,6 +4194,8 @@ HUD frame has the clock face.  Only meaningful together with the 1280x800 displa
                     @{ Offset = 0x3A0A3; Old = 'C2 01 00 00'; New = '02 03 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 1248 (0x4E0)
                     @{ Offset = 0x3A0B6; Old = '60 02 00 00'; New = 'E0 04 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83C68; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -4171,7 +4203,7 @@ HUD frame has the clock face.  Only meaningful together with the 1280x800 displa
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 3 bytes in 2 edits
+            #  Changes    : 4 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1920x1080 that point lies inside the enlarged map view and the
@@ -4200,6 +4232,8 @@ HUD frame has the clock face.  Only meaningful together with the 1920x1080 displ
                     @{ Offset = 0x3A0A3; Old = 'C2 01 00 00'; New = '1A 04 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 1888 (0x760)
                     @{ Offset = 0x3A0B6; Old = '60 02 00 00'; New = '60 07 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83C68; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -4207,7 +4241,7 @@ HUD frame has the clock face.  Only meaningful together with the 1920x1080 displ
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 3 bytes in 2 edits
+            #  Changes    : 4 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1920x1200 that point lies inside the enlarged map view and the
@@ -4236,6 +4270,8 @@ HUD frame has the clock face.  Only meaningful together with the 1920x1200 displ
                     @{ Offset = 0x3A0A3; Old = 'C2 01 00 00'; New = '92 04 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 1888 (0x760)
                     @{ Offset = 0x3A0B6; Old = '60 02 00 00'; New = '60 07 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83C68; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -4243,7 +4279,7 @@ HUD frame has the clock face.  Only meaningful together with the 1920x1200 displ
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 4 bytes in 2 edits
+            #  Changes    : 5 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 3840x1080 that point lies inside the enlarged map view and the
@@ -4272,6 +4308,8 @@ HUD frame has the clock face.  Only meaningful together with the 3840x1080 displ
                     @{ Offset = 0x3A0A3; Old = 'C2 01 00 00'; New = '1A 04 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 3808 (0xEE0)
                     @{ Offset = 0x3A0B6; Old = '60 02 00 00'; New = 'E0 0E 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83C68; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -5297,13 +5335,13 @@ and the directory that lists them); their SHA-256 is checked like every other ed
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '5acee874d60b69d214c627e44132358dc68ee9d25f60b8b876231d91c38a19cb'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '63ccbe887834fd50452484db15ba1c66b89835475f46c91e0f2064c96b068edf'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '1920x1080', '1920x1200', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '3705574efca7a70b09cafbc8820cad967b183da4199b2cbe40b197a0254fbaaa'; '1024x768' = '5acee874d60b69d214c627e44132358dc68ee9d25f60b8b876231d91c38a19cb'; '1280x1024' = '66021f2cfdbda6779cdf5a1ece257f40eef6e02aa71895939d7442fa83372a7e'; '1280x720' = '361ead3561be5bffc6c41704ae6f6f41a3e5681d3d9dc522f9a01ce056b42d9b'; '1280x800' = 'e462bbef3648c89a5ad19a823d4d2abd0cc5fc378ddcf6b7da07319e52fe67fa'; '1920x1080' = '0feb957f087ac4aa66ce8018833192dab970287e63d6973bff88f43267e392cd'; '1920x1200' = '2dec194fd44c5d3b2d1def3e29952c40a3b4c4e46e209262b69203633b23532f'; '3840x1080' = 'af695afc91d0ad39cdef89fecf1d986930126a9ea3dc3d8f1d26cd06ab63a10e' }
+        ReferenceSha256 = @{ '640x480' = '3705574efca7a70b09cafbc8820cad967b183da4199b2cbe40b197a0254fbaaa'; '1024x768' = '63ccbe887834fd50452484db15ba1c66b89835475f46c91e0f2064c96b068edf'; '1280x1024' = '96bbb1590df6cab7ef9e010b1d1fad2c8f60e477ea8157eaf9d7001cc0e11226'; '1280x720' = '2cd586fb02a8c386eb7fc3fa09cba8adc16fc355b0cc80130b505c13cd14695e'; '1280x800' = '28b77afe7c70dbeb01991f333c5bac67eaf77bc04807066394f863c4f74067c9'; '1920x1080' = '309802211bcc86c6ca67731c66da3c18e5382ca749c7aa980910d4daf115019b'; '1920x1200' = 'cdac7ca1b504a6550004d15a1557be108c86a70680c133a628288212657df413'; '3840x1080' = '8de138a00c97bd8be55287c86164b5440fdbb788b9634fb500616b83be58deca' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -5515,7 +5553,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (67; listed from the repository when this
+                # data files this fix needs next to the exe (70; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -5544,6 +5582,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -5553,6 +5592,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -5575,6 +5615,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'exp\intrface\bintroe'
                     'exp\intrface\introe'
                     'exp\intrface\shumane'
@@ -5991,7 +6032,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (67; listed from the repository when this
+                # data files this fix needs next to the exe (70; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -6020,6 +6061,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -6029,6 +6071,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -6051,6 +6094,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'exp\intrface\bintroe'
                     'exp\intrface\introe'
                     'exp\intrface\shumane'
@@ -6491,7 +6535,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (67; listed from the repository when this
+                # data files this fix needs next to the exe (70; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -6520,6 +6564,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -6529,6 +6574,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -6551,6 +6597,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'exp\intrface\bintroe'
                     'exp\intrface\introe'
                     'exp\intrface\shumane'
@@ -6993,7 +7040,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (67; listed from the repository when this
+                # data files this fix needs next to the exe (70; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -7022,6 +7069,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -7031,6 +7079,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -7053,6 +7102,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'exp\intrface\bintroe'
                     'exp\intrface\introe'
                     'exp\intrface\shumane'
@@ -7493,7 +7543,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (67; listed from the repository when this
+                # data files this fix needs next to the exe (70; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -7522,6 +7572,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -7531,6 +7582,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -7553,6 +7605,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'exp\intrface\bintroe'
                     'exp\intrface\introe'
                     'exp\intrface\shumane'
@@ -7993,7 +8046,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (67; listed from the repository when this
+                # data files this fix needs next to the exe (70; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -8022,6 +8075,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -8031,6 +8085,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -8053,6 +8108,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'exp\intrface\bintroe'
                     'exp\intrface\introe'
                     'exp\intrface\shumane'
@@ -8493,7 +8549,7 @@ the ones in place have another size.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('hdpaths')
-                # data files this fix needs next to the exe (67; listed from the repository when this
+                # data files this fix needs next to the exe (70; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -8522,6 +8578,7 @@ the ones in place have another size.
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -8531,6 +8588,7 @@ the ones in place have another size.
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -8553,6 +8611,7 @@ the ones in place have another size.
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'exp\intrface\bintroe'
                     'exp\intrface\introe'
                     'exp\intrface\shumane'
@@ -8968,7 +9027,7 @@ resolution (one folder for every size, maintainer decision 21 Sep 2026).
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('resolution')
-                # data files this fix needs next to the exe (64; listed from the repository when this
+                # data files this fix needs next to the exe (67; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'INTRFACE\BINTROE'
@@ -8997,6 +9056,7 @@ resolution (one folder for every size, maintainer decision 21 Sep 2026).
                     'INTRFACE\LOSTE'
                     'INTRFACE\LQCE'
                     'INTRFACE\LSGE'
+                    'INTRF_HD\MAINBUT.SPR'
                     'INTRFACE\MAINE'
                     'INTRFACE\METAE'
                     'INTRFACE\MULTIE'
@@ -9006,6 +9066,7 @@ resolution (one folder for every size, maintainer decision 21 Sep 2026).
                     'INTRFACE\NET.GIF'
                     'INTRFACE\NETOPTE'
                     'INTRFACE\NEWGAMEE'
+                    'INTRF_HD\POPP.SPR'
                     'INTRFACE\SERVER.GIF'
                     'INTRFACE\SHUMAN.GIF'
                     'INTRFACE\SHUMANE'
@@ -9028,6 +9089,7 @@ resolution (one folder for every size, maintainer decision 21 Sep 2026).
                     'ANIMATE\DCSS_HD.FIN'
                     'ANIMATE\DCUK_HD.FIN'
                     'ANIMATE\DCUT_HD.FIN'
+                    'SPRITES\CLOCK.SPR'
                     'exp\intrface\bintroe'
                     'exp\intrface\introe'
                     'exp\intrface\shumane'
@@ -9212,7 +9274,7 @@ headers are 32-bit and the size check unsigned, so nothing else changes.
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 4 bytes in 2 edits
+            #  Changes    : 5 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1024x768 that point lies inside the enlarged map view and the
@@ -9241,6 +9303,8 @@ HUD frame has the clock face.  Only meaningful together with the 1024x768 displa
                     @{ Offset = 0x3A103; Old = 'C2 01 00 00'; New = 'E2 02 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 992 (0x3E0)
                     @{ Offset = 0x3A116; Old = '60 02 00 00'; New = 'E0 03 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83E70; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -9248,7 +9312,7 @@ HUD frame has the clock face.  Only meaningful together with the 1024x768 displa
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 4 bytes in 2 edits
+            #  Changes    : 5 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1280x1024 that point lies inside the enlarged map view and the
@@ -9277,6 +9341,8 @@ HUD frame has the clock face.  Only meaningful together with the 1280x1024 displ
                     @{ Offset = 0x3A103; Old = 'C2 01 00 00'; New = 'E2 03 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 1248 (0x4E0)
                     @{ Offset = 0x3A116; Old = '60 02 00 00'; New = 'E0 04 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83E70; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -9284,7 +9350,7 @@ HUD frame has the clock face.  Only meaningful together with the 1280x1024 displ
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 4 bytes in 2 edits
+            #  Changes    : 5 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1280x720 that point lies inside the enlarged map view and the
@@ -9313,6 +9379,8 @@ HUD frame has the clock face.  Only meaningful together with the 1280x720 displa
                     @{ Offset = 0x3A103; Old = 'C2 01 00 00'; New = 'B2 02 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 1248 (0x4E0)
                     @{ Offset = 0x3A116; Old = '60 02 00 00'; New = 'E0 04 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83E70; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -9320,7 +9388,7 @@ HUD frame has the clock face.  Only meaningful together with the 1280x720 displa
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 4 bytes in 2 edits
+            #  Changes    : 5 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1280x800 that point lies inside the enlarged map view and the
@@ -9349,6 +9417,8 @@ HUD frame has the clock face.  Only meaningful together with the 1280x800 displa
                     @{ Offset = 0x3A103; Old = 'C2 01 00 00'; New = '02 03 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 1248 (0x4E0)
                     @{ Offset = 0x3A116; Old = '60 02 00 00'; New = 'E0 04 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83E70; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -9356,7 +9426,7 @@ HUD frame has the clock face.  Only meaningful together with the 1280x800 displa
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 3 bytes in 2 edits
+            #  Changes    : 4 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1920x1080 that point lies inside the enlarged map view and the
@@ -9385,6 +9455,8 @@ HUD frame has the clock face.  Only meaningful together with the 1920x1080 displ
                     @{ Offset = 0x3A103; Old = 'C2 01 00 00'; New = '1A 04 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 1888 (0x760)
                     @{ Offset = 0x3A116; Old = '60 02 00 00'; New = '60 07 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83E70; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -9392,7 +9464,7 @@ HUD frame has the clock face.  Only meaningful together with the 1920x1080 displ
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 3 bytes in 2 edits
+            #  Changes    : 4 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 1920x1200 that point lies inside the enlarged map view and the
@@ -9421,6 +9493,8 @@ HUD frame has the clock face.  Only meaningful together with the 1920x1200 displ
                     @{ Offset = 0x3A103; Old = 'C2 01 00 00'; New = '92 04 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 1888 (0x760)
                     @{ Offset = 0x3A116; Old = '60 02 00 00'; New = '60 07 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83E70; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -9428,7 +9502,7 @@ HUD frame has the clock face.  Only meaningful together with the 1920x1200 displ
             #  Added      : 13 Sep 2026
             #  Made with  : tools/patch_clock.py
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.15
-            #  Changes    : 4 bytes in 2 edits
+            #  Changes    : 5 bytes in 3 edits
             #  The HUD's day/night hand is a sprite cell that clock.c blits by code with its bottom-right
             #  corner at (608,450) - two plain immediates that are neither 640 nor 480, so the resolution
             #  sweep did not touch them.  At 3840x1080 that point lies inside the enlarged map view and the
@@ -9457,6 +9531,8 @@ HUD frame has the clock face.  Only meaningful together with the 3840x1080 displ
                     @{ Offset = 0x3A103; Old = 'C2 01 00 00'; New = '1A 04 00 00' }
                     # clock_draw: imm32 of mov eax,ANCHOR_X - bottom-right anchor x 608 (0x260) -> 3808 (0xEE0)
                     @{ Offset = 0x3A116; Old = '60 02 00 00'; New = 'E0 0E 00 00' }
+                    # DGROUP string "sprites/cloc" -> "sprites/clock": the hand cells carry the dial face, SPRITES\CLOCK.SPR is the face redrawn in the menu style (doc 10.49); the stock SPRITES\CLOC.SPR stays for the original exe
+                    @{ Offset = 0x83E70; Old = '73 70 72 69 74 65 73 2F 63 6C 6F 63 00 00'; New = '73 70 72 69 74 65 73 2F 63 6C 6F 63 6B 00' }
                 )
             }
 
@@ -12569,6 +12645,8 @@ $SIZE2 = [regex] '(?m)^([ \t]*)size([ \t]+)(\d+)([ \t]+)(\d+)([ \t]*\r?)$'
 $SIZE4 = [regex] '(?m)^([ \t]*)size([ \t]+)(\d+)[ \t]+(\d+)[ \t]+(\d+)[ \t]+(\d+)([ \t]*\r?)$'
 $BACKGROUND = [regex] '(?im)^[ \t]*background[ \t]+(?:intrface/|intrf_hd/)?(\S+)'
 $BG_RETARGET = [regex] '(?im)^([ \t]*background[ \t]+)intrface/(\S+)'
+$PIC_RETARGET = [regex] '(?im)^([ \t]*pictures[ \t]+)intrface/(mainbut|popp)\b'          # the console-style banks INTRF_HD\MAINBUT.SPR / POPP.SPR (doc 10.49)
+$TAB_STRIP = [regex] '(?m)^(picture[ \t]+[3456][ \t]+0[ \t]+)(\d+)([ \t]+)96([ \t]+)110([ \t]+)12(?=\s)'
 $FRAME_XY = [regex] '^([ \t]*)(\d+)([ \t]+)(\d+)([ \t]+)(\d+)([ \t]*\r?)$'
 $TOKENS = [regex] '\S+|[ \t]+'
 $POSITIONED = @('pushb', 'checkb', 'in_text', 'picture', 'list', 'scroll', 'gadget', 'label', 'count', 'scount')   # pad_background / paint_intro
@@ -12693,6 +12771,10 @@ function Edit-HudScript([string] $Text, [int] $W, [int] $H) {
               if ($nx -eq $x -and $ny -eq $y) { return $null }
               return @($nx, $ny) }
     $t = Add-ChatLines (Edit-Widgets $Text $move $HUD_KINDS)
+    # hud_console.edit_hud_script (28 Sep 2026, console-style HUD, doc 10.49): the three tab strips
+    # `picture 3..6` (stock 110x12 at x 521) are the 124x16 BUTTON.SPR strips at the panel's left edge
+    $tx = [string](516 + $dx)
+    $t = $TAB_STRIP.Replace($t, { param($m) $m.Groups[1].Value + $tx + $m.Groups[3].Value + '96' + $m.Groups[4].Value + '124' + $m.Groups[5].Value + '16' })
     $m = $SIZE2.Match($t)
     if ($m.Success) { $t = $t.Substring(0, $m.Index) + ('{0}size{1}{2} {3}{4}' -f $m.Groups[1].Value, $m.Groups[2].Value, $W, $H, $m.Groups[6].Value) + $t.Substring($m.Index + $m.Length) }
     return $t
@@ -12751,7 +12833,9 @@ function Edit-SceneList([string] $Text, [int] $dx, [int] $dy) {
 }
 
 # split_hd_data: `background intrface/<gif>` -> `intrf_hd/<gif>` (every background of a generated script moved)
-function Set-BackgroundHd([string] $Text) { return $BG_RETARGET.Replace($Text, '$1intrf_hd/$2') }
+# hud_console.apply: MAINE's `pictures intrface/mainbut` and the four battlefield dialogs' `pictures intrface/popp`
+# -> `intrf_hd/...`, the console-style banks that ship in INTRF_HD (the stock banks stay for the original exe)
+function Set-BackgroundHd([string] $Text) { return $PIC_RETARGET.Replace($BG_RETARGET.Replace($Text, '$1intrf_hd/$2'), '$1intrf_hd/$2') }
 
 # split_hd_data.rename_dat_list: the per-screen FIN lists name the re-baked logo banks
 function Edit-DatList([string] $Text) {
@@ -12987,8 +13071,8 @@ function Write-InterfaceSet([string] $GameDir, [string] $Mode, [bool] $Movies) {
         if ($m4.Success -and -not $bg.Success) {
             $x = [int]$m4.Groups[3].Value; $y = [int]$m4.Groups[4].Value
             if ($x -eq 0 -and $y -eq 0) { continue }
-            # a sub-window dialog: rect and widgets +(dx,dy)
-            Write-Latin1 (Join-Path $hd $name) (Edit-PaddedScript $text $dx0 $dy0 @(($x + $dx0), ($y + $dy0), [int]$m4.Groups[5].Value, [int]$m4.Groups[6].Value)); $written++
+            # a sub-window dialog: rect and widgets +(dx,dy); `pictures intrface/popp` -> the console plates in INTRF_HD
+            Write-Latin1 (Join-Path $hd $name) (Set-BackgroundHd (Edit-PaddedScript $text $dx0 $dy0 @(($x + $dx0), ($y + $dy0), [int]$m4.Groups[5].Value, [int]$m4.Groups[6].Value))); $written++
             continue
         }
         if ($m4.Success -or -not $m2.Success -or -not $bg.Success) { continue }

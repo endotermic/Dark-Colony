@@ -1,5 +1,5 @@
 size 1024 768
-pictures intrface/mainbut
+pictures intrf_hd/mainbut
 font 0 intrface/mfonto7
 font_offset 0 31
 background intrf_hd/intrface
@@ -18,10 +18,10 @@ textmsg 1       Research Tab
 pushb   1       1       941     92      41      20      -1      -1
 textmsg 2       Game Option Tab
 pushb   2       2       982     92      40      20      -1      -1
-picture 3       0       905     96      110     12      77              
-picture 4       0       905     96      110     12      78              
-picture 5       0       905     96      110     12      79              
-picture 6       0       905     96      110     12      77              
+picture 3       0       900     96      124     16      77              
+picture 4       0       900     96      124     16      78              
+picture 5       0       900     96      124     16      79              
+picture 6       0       900     96      124     16      77              
 
 % Build button
 textmsg 19      Push to build
