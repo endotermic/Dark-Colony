@@ -174,13 +174,13 @@ $Builds = @(
         SourceNote     = 'NOT from the Dark Colony CD: its DC\DC16.EXE is the August 1997 build (660480 bytes), which these fixes do not fit - they need dc16.exe of the January 1998 update (659456 bytes), so take it from our repository.'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '866ad0f5f94243b61fc9b5fee59f9adfe881118b79e7c67fcc4fe44c2992fb59'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '86a06e6957c188deed2599678f6f00fce46dd2eca8f117969414d7108387e0b1'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '1920x1080', '1920x1200', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '7713cab13c50822b09d537e83d59722332dbbeacb7aa84df1eb82c196a937743'; '1024x768' = '866ad0f5f94243b61fc9b5fee59f9adfe881118b79e7c67fcc4fe44c2992fb59'; '1280x1024' = 'fd0b401ace447535fd6b2dca117c13776f00cc62f9f78d39d78c997bab30adab'; '1280x720' = '15f710aa7707c29e99054aca431e3899f1d5bd15f0c12a91f0932c80bc85a83d'; '1280x800' = 'dc1134bb1e42fe14baa7ef3810c808a7aa83e1e930c66f9eda894b0dc0abfa89'; '1920x1080' = '58522e460cf5a8931ca87de571a0d7c014f99347aa5fe579cef19afecbb4bd44'; '1920x1200' = '4b6b37315d64d875edc48ead1ef6623403f4de3e4bab18121928df8e0e6fd341'; '3840x1080' = '8fc24e73943fec90bffb620b318051e297de68832532aca20b7d75e32b811416' }
+        ReferenceSha256 = @{ '640x480' = '2589bc47b87299c37a45e633aa93e6146b58f1b40607b1067b38d14db65a9e8d'; '1024x768' = '86a06e6957c188deed2599678f6f00fce46dd2eca8f117969414d7108387e0b1'; '1280x1024' = '6487579ee38cf664ca6e473910121a1f2946bde2f0b36cc86eeb8d96f7d1e068'; '1280x720' = '8b21fd64c49be94c2b1a0bbaad11b945301757c0ff2c57297e37d05c06ab94a9'; '1280x800' = 'cf01e1fb63973b48eda4be961821f8896f3e53ec2aa4bd889dd2277c40ed6755'; '1920x1080' = 'c5ac20191dad309cbe85c54fa2b35bdc20d74dfa4a58b4eb966d8d4901e0af71'; '1920x1200' = '069414a4143b876afe00bff2cadce0f9f4a820f3f752edb39c2f3cc3ae5a71df'; '3840x1080' = 'a49f7db2bd2c9089faacf6688bba770a1fa539ef43ee2a9c1f6380d515fe5ceb' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -4855,6 +4855,66 @@ silent, as it does today.
                 )
             }
 
+            # ---- menuorder: Main menu opens in order: DC logo, DARK COLONY title, buttons, credits ---------------------------------------------------------
+            #  Added      : 28 Sep 2026
+            #  Made with  : tools/patch_menu_order.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.47
+            #  Changes    : 185 bytes in 3 edits
+            #  When the main menu opens, the original runs the button wave first (the plates fly in one after
+            #  another and each label appears as its plate settles), then shows every button, then plays the DC
+            #  logo animation and, when the logo is nearly done, the DARK COLONY title; the credits box scrolls
+            #  from the first pass of the menu loop.  So the player sees buttons, logo, title, credits - the brand
+            #  mark last.  This fix reorders the opening the way title screens are normally staged: the DC logo
+            #  plays first, the title follows when the logo has finished, the button wave runs as soon as the
+            #  title shows its second frame (top to bottom, labels as the plates settle, the plate sound per plate
+            #  as before), and the credits box appears after the wave.  Everything is rewritten in place in the
+            #  menu's own set-up code: the wave, the button show and the logo start move into the room left by the
+            #  six "grey the buttons when no CD is found" calls (dead code since the "No CD" fix, which is
+            #  therefore required) and the loop's "start the title at logo frame 10" check, which the new order
+            #  makes pointless, becomes the tail that runs the wave.  The menu script's first plate (marked
+            #  anim_oneoff so the wave has something to chain from) is put back to its first frame before the
+            #  first screen update and started again when the wave begins, so the interface files need no change
+            #  and an older exe with the same files behaves as before.  Relative calls and register-relative
+            #  operands only; nothing moves, no relocation entry changes; the same three blocks in both games.
+            @{
+                Id = 'menuorder'; Name = 'Main menu opens in order: DC logo, DARK COLONY title, buttons, credits'; Date = '28 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_menu_order.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.47'
+                Description = @'
+When the main menu opens, the original runs the button wave first (the plates fly in one after
+another and each label appears as its plate settles), then shows every button, then plays the DC
+logo animation and, when the logo is nearly done, the DARK COLONY title; the credits box scrolls
+from the first pass of the menu loop.  So the player sees buttons, logo, title, credits - the brand
+mark last.  This fix reorders the opening the way title screens are normally staged: the DC logo
+plays first, the title follows when the logo has finished, the button wave runs as soon as the
+title shows its second frame (top to bottom, labels as the plates settle, the plate sound per plate
+as before), and the credits box appears after the wave.  Everything is rewritten in place in the
+menu's own set-up code: the wave, the button show and the logo start move into the room left by the
+six "grey the buttons when no CD is found" calls (dead code since the "No CD" fix, which is
+therefore required) and the loop's "start the title at logo frame 10" check, which the new order
+makes pointless, becomes the tail that runs the wave.  The menu script's first plate (marked
+anim_oneoff so the wave has something to chain from) is put back to its first frame before the
+first screen update and started again when the wave begins, so the interface files need no change
+and an older exe with the same files behaves as before.  Relative calls and register-relative
+operands only; nothing moves, no relocation entry changes; the same three blocks in both games.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('nocd')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # menu open: stop the first button plate, jump to the logo start: the wave, the button show and the logo start move to the new blocks; the CD flag read (dead since fix nocd) goes; the banim widget (id 18) is read and its first plate - the script's anim_oneoff one - is parked at frame 0 in the stopped state with start_anim(ip, plate, 2) (animation modes: 0 loop, 1 one-shot, 2 stopped/finished), so it neither flies in alone during the logo nor is finished when the wave needs it; a script without a banim there is left alone (edi = -1); ends with a short jump over fix nocd's jmp at 0x00404F1F
+                    @{ Offset = 0x42F6; Old = '8B 45 F0 BB 01 00 00 00 E8 E1 2B 02 00 8B 45 F0 BA 0E 00 00 00 E8 60 F8 01 00 8B 45 F0 E8 4C 02 02 00 E8 6F 0F 00 00 84 C0'; New = '8B 75 F0 83 CF FF 80 BE 31 04 00 00 0C 75 17 8B 86 58 04 00 00 8B 40 08 8B 38 6A 02 5B 89 FA 89 F0 E8 48 02 02 00 EB 03 90' }
+                    # logo first, then the title: run in place of the dead CD-less greying calls: start_anim(ip, 14, 1) plays the DC logo one-shot; the interface is pumped (0x00424294) until the logo's animation state is 2 = finished; then title_prepare(ip, 15, 0) + start_anim(ip, 15, 1) as the stock loop did at logo frame 10; pumped until the title shows frame 2; then jump to the tail in the third block
+                    @{ Offset = 0x4321; Old = 'BB 01 00 00 00 8B 45 F0 31 D2 E8 E4 F5 01 00 BB 01 00 00 00 8B 45 F0 89 DA E8 D5 F5 01 00 BB 01 00 00 00 BA 10 00 00 00 8B 45 F0 E8 C3 F5 01 00 BB 01 00 00 00 BA 04 00 00 00 8B 45 F0 E8 B1 F5 01 00 BB 01 00 00 00 BA 02 00 00 00 8B 45 F0 E8 9F F5 01 00 BB 01 00 00 00 BA 05 00 00 00 8B 45 F0 E8 8D F5 01 00'; New = '6A 01 5B 6A 0E 5A 89 F0 E8 36 02 02 00 8D 55 F4 89 F0 E8 5C F3 01 00 6A 0E 5A 89 F0 E8 8A 01 02 00 83 F8 02 75 E7 31 DB 6A 0F 5A 89 F0 E8 2D 00 02 00 6A 01 5B 6A 0F 5A 89 F0 E8 04 02 02 00 8D 55 F4 89 F0 E8 2A F3 01 00 6A 0F 5A 89 F0 E8 C0 00 02 00 83 F8 02 7C E7 EB 37 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # then the button wave, then the credits: the loop's frame-10 check becomes the one-time tail: first two bytes: jmp to the loop's else path (the credits/TTY update) so the loop behaves as before; the tail entered from the second block starts the first plate (start_anim(ip, plate, 1), skipped when none was found), runs the wave (run_banims 0x00427AE4: plates one after another, each label revealed as its plate settles), shows every button (0x00424770) and jumps to the loop head 0x00404F87, whose first pass paints the credits box
+                    @{ Offset = 0x43B0; Old = 'BA 0E 00 00 00 8B 45 F0 E8 77 00 02 00 83 F8 0A 75 21 BA 0F 00 00 00 8B 45 F0 31 DB E8 AF FF 01 00 BB 01 00 00 00 BA 0F 00 00 00 8B 45 F0 E8 81 01 02 00'; New = 'EB 31 85 FF 78 0C 6A 01 5B 89 FA 89 F0 E8 A2 01 02 00 89 F0 E8 1B 2B 02 00 89 F0 E8 A0 F7 01 00 EB B5 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                )
+            }
+
             # ---- movies @ 640x480: Classic movies under their own names: DCINTRO / DCAENDING / DCHENDING (Dark Colony only) ---------------------------------------------------------
             #  Added      : 15 Sep 2026
             #  Made with  : tools/patch_movies.py
@@ -5117,13 +5177,13 @@ and the directory that lists them); their SHA-256 is checked like every other ed
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '7abb952a364fd17501b985f8d73c4c47f7ff0c610788b64f56a9a78c940e878d'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '95da6d5309f3d4853a9ac7a114039f8a82491372c8001fe064ca448f187d0cff'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '1920x1080', '1920x1200', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = 'ed4bc7d7e082e3b9728f64e9b240adfd5f474953d773129ca90c09233bac4015'; '1024x768' = '7abb952a364fd17501b985f8d73c4c47f7ff0c610788b64f56a9a78c940e878d'; '1280x1024' = '5776ab278f4bee86c1f4dbe4c92c6f021bb7a3c1f4f85181e2b05d0e65aaad6f'; '1280x720' = '07da3e8f3e573da0d2bdf5a831c70f7b0c412cbb5e4f9c8b97ff60952e89f6f7'; '1280x800' = 'f0d9a6cd3d6e80b942776badb8b80f1436fdbbb64a01324834e597dd052f3516'; '1920x1080' = '5e296d043d8688634a0f672e87d0441ff14ad773b087db98f5dd9632fd0e7570'; '1920x1200' = 'a2d7c6bda5cffa68fd7306443a82e2e79fae7cdfcef123615b9e00dc0ac97cc3'; '3840x1080' = '2669a40c5fc272ca08e170d06b7845e0ed31d623da2ac7e581721237ff14f3c5' }
+        ReferenceSha256 = @{ '640x480' = '9355f64092a4eb2659cdc41269e8158453be31ade32e235c71c9776871ac99b5'; '1024x768' = '95da6d5309f3d4853a9ac7a114039f8a82491372c8001fe064ca448f187d0cff'; '1280x1024' = '9ffe1723595993b9ed709cd429efface43b3adc17563eb2a9e2fe3de5ce5fe63'; '1280x720' = '1808734b157ef6e77115549fd374a67035f55d63c4a7c6448bdff3b0ec568c5b'; '1280x800' = 'f80235039b6feed5ad4ac52d0943e9e04ebec8a0f1bed9c72c0f8d3e782c8b6c'; '1920x1080' = '0058c72cc3b626e59cb934c2fc4f6e1c7cc9e334c0f838eead70be87f5fbd6a1'; '1920x1200' = '475af1f315b523aa7b2778b763f6d3d891b1a0987ac2c942a2b1a952007122a2'; '3840x1080' = '2b316915915a5cbeb241fbc98e396eae5be02d5c58b97fe790fb58267a617b49' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -10061,6 +10121,66 @@ silent, as it does today.
                     @{ Offset = 0x9C2F2; Old = '07 39'; New = 'DB 38' }
                     # .reloc table: entry 392E (type 3 HIGHLOW, page offset 0x92E) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
                     @{ Offset = 0x9C2F4; Old = '2E 39'; New = '00 00' }
+                )
+            }
+
+            # ---- menuorder: Main menu opens in order: DC logo, DARK COLONY title, buttons, credits ---------------------------------------------------------
+            #  Added      : 28 Sep 2026
+            #  Made with  : tools/patch_menu_order.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.47
+            #  Changes    : 185 bytes in 3 edits
+            #  When the main menu opens, the original runs the button wave first (the plates fly in one after
+            #  another and each label appears as its plate settles), then shows every button, then plays the DC
+            #  logo animation and, when the logo is nearly done, the DARK COLONY title; the credits box scrolls
+            #  from the first pass of the menu loop.  So the player sees buttons, logo, title, credits - the brand
+            #  mark last.  This fix reorders the opening the way title screens are normally staged: the DC logo
+            #  plays first, the title follows when the logo has finished, the button wave runs as soon as the
+            #  title shows its second frame (top to bottom, labels as the plates settle, the plate sound per plate
+            #  as before), and the credits box appears after the wave.  Everything is rewritten in place in the
+            #  menu's own set-up code: the wave, the button show and the logo start move into the room left by the
+            #  six "grey the buttons when no CD is found" calls (dead code since the "No CD" fix, which is
+            #  therefore required) and the loop's "start the title at logo frame 10" check, which the new order
+            #  makes pointless, becomes the tail that runs the wave.  The menu script's first plate (marked
+            #  anim_oneoff so the wave has something to chain from) is put back to its first frame before the
+            #  first screen update and started again when the wave begins, so the interface files need no change
+            #  and an older exe with the same files behaves as before.  Relative calls and register-relative
+            #  operands only; nothing moves, no relocation entry changes; the same three blocks in both games.
+            @{
+                Id = 'menuorder'; Name = 'Main menu opens in order: DC logo, DARK COLONY title, buttons, credits'; Date = '28 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_menu_order.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.47'
+                Description = @'
+When the main menu opens, the original runs the button wave first (the plates fly in one after
+another and each label appears as its plate settles), then shows every button, then plays the DC
+logo animation and, when the logo is nearly done, the DARK COLONY title; the credits box scrolls
+from the first pass of the menu loop.  So the player sees buttons, logo, title, credits - the brand
+mark last.  This fix reorders the opening the way title screens are normally staged: the DC logo
+plays first, the title follows when the logo has finished, the button wave runs as soon as the
+title shows its second frame (top to bottom, labels as the plates settle, the plate sound per plate
+as before), and the credits box appears after the wave.  Everything is rewritten in place in the
+menu's own set-up code: the wave, the button show and the logo start move into the room left by the
+six "grey the buttons when no CD is found" calls (dead code since the "No CD" fix, which is
+therefore required) and the loop's "start the title at logo frame 10" check, which the new order
+makes pointless, becomes the tail that runs the wave.  The menu script's first plate (marked
+anim_oneoff so the wave has something to chain from) is put back to its first frame before the
+first screen update and started again when the wave begins, so the interface files need no change
+and an older exe with the same files behaves as before.  Relative calls and register-relative
+operands only; nothing moves, no relocation entry changes; the same three blocks in both games.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('nocd')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # menu open: stop the first button plate, jump to the logo start: the wave, the button show and the logo start move to the new blocks; the CD flag read (dead since fix nocd) goes; the banim widget (id 18) is read and its first plate - the script's anim_oneoff one - is parked at frame 0 in the stopped state with start_anim(ip, plate, 2) (animation modes: 0 loop, 1 one-shot, 2 stopped/finished), so it neither flies in alone during the logo nor is finished when the wave needs it; a script without a banim there is left alone (edi = -1); ends with a short jump over fix nocd's jmp at 0x00404F1F
+                    @{ Offset = 0x42F6; Old = '8B 45 F0 BB 01 00 00 00 E8 41 2C 02 00 8B 45 F0 BA 0E 00 00 00 E8 C0 F8 01 00 8B 45 F0 E8 AC 02 02 00 E8 4F 0F 00 00 84 C0'; New = '8B 75 F0 83 CF FF 80 BE 31 04 00 00 0C 75 17 8B 86 58 04 00 00 8B 40 08 8B 38 6A 02 5B 89 FA 89 F0 E8 A8 02 02 00 EB 03 90' }
+                    # logo first, then the title: run in place of the dead CD-less greying calls: start_anim(ip, 14, 1) plays the DC logo one-shot; the interface is pumped (0x004242F4) until the logo's animation state is 2 = finished; then title_prepare(ip, 15, 0) + start_anim(ip, 15, 1) as the stock loop did at logo frame 10; pumped until the title shows frame 2; then jump to the tail in the third block
+                    @{ Offset = 0x4321; Old = 'BB 01 00 00 00 8B 45 F0 31 D2 E8 44 F6 01 00 BB 01 00 00 00 8B 45 F0 89 DA E8 35 F6 01 00 BB 01 00 00 00 BA 10 00 00 00 8B 45 F0 E8 23 F6 01 00 BB 01 00 00 00 BA 04 00 00 00 8B 45 F0 E8 11 F6 01 00 BB 01 00 00 00 BA 02 00 00 00 8B 45 F0 E8 FF F5 01 00 BB 01 00 00 00 BA 05 00 00 00 8B 45 F0 E8 ED F5 01 00'; New = '6A 01 5B 6A 0E 5A 89 F0 E8 96 02 02 00 8D 55 F4 89 F0 E8 BC F3 01 00 6A 0E 5A 89 F0 E8 EA 01 02 00 83 F8 02 75 E7 31 DB 6A 0F 5A 89 F0 E8 8D 00 02 00 6A 01 5B 6A 0F 5A 89 F0 E8 64 02 02 00 8D 55 F4 89 F0 E8 8A F3 01 00 6A 0F 5A 89 F0 E8 20 01 02 00 83 F8 02 7C E7 EB 37 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # then the button wave, then the credits: the loop's frame-10 check becomes the one-time tail: first two bytes: jmp to the loop's else path (the credits/TTY update) so the loop behaves as before; the tail entered from the second block starts the first plate (start_anim(ip, plate, 1), skipped when none was found), runs the wave (run_banims 0x00427B44: plates one after another, each label revealed as its plate settles), shows every button (0x004247D0) and jumps to the loop head 0x00404F87, whose first pass paints the credits box
+                    @{ Offset = 0x43B0; Old = 'BA 0E 00 00 00 8B 45 F0 E8 D7 00 02 00 83 F8 0A 75 21 BA 0F 00 00 00 8B 45 F0 31 DB E8 0F 00 02 00 BB 01 00 00 00 BA 0F 00 00 00 8B 45 F0 E8 E1 01 02 00'; New = 'EB 31 85 FF 78 0C 6A 01 5B 89 FA 89 F0 E8 02 02 02 00 89 F0 E8 7B 2B 02 00 89 F0 E8 00 F8 01 00 EB B5 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
                 )
             }
 

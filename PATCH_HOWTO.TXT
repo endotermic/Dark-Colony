@@ -234,7 +234,9 @@ What makes it trustworthy:
 
    Patch ids, in the order they are applied:
      both games      nocd, resolution, hdpaths, cursor, pool, clock,
-                     ddraw, camera, widemap, restore, longpath, music
+                     ddraw, camera, widemap, restore, longpath, music,
+                     menuorder (the menu opens logo, title, buttons,
+                       credits instead of buttons first)
      Dark Colony     + movies (the Classic intro and endings under
                        their DC* names), sounds (WAV files read from
                        the game root, not from exp\; the Classic
