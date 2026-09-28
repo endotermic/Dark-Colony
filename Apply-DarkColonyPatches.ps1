@@ -174,13 +174,13 @@ $Builds = @(
         SourceNote     = 'NOT from the Dark Colony CD: its DC\DC16.EXE is the August 1997 build (660480 bytes), which these fixes do not fit - they need dc16.exe of the January 1998 update (659456 bytes), so take it from our repository.'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '86a06e6957c188deed2599678f6f00fce46dd2eca8f117969414d7108387e0b1'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '2357ca77fc0a1384f3c719d622d3d87986a5d7a119cb46c323b4a8040ef594ef'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '1920x1080', '1920x1200', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '2589bc47b87299c37a45e633aa93e6146b58f1b40607b1067b38d14db65a9e8d'; '1024x768' = '86a06e6957c188deed2599678f6f00fce46dd2eca8f117969414d7108387e0b1'; '1280x1024' = '6487579ee38cf664ca6e473910121a1f2946bde2f0b36cc86eeb8d96f7d1e068'; '1280x720' = '8b21fd64c49be94c2b1a0bbaad11b945301757c0ff2c57297e37d05c06ab94a9'; '1280x800' = 'cf01e1fb63973b48eda4be961821f8896f3e53ec2aa4bd889dd2277c40ed6755'; '1920x1080' = 'c5ac20191dad309cbe85c54fa2b35bdc20d74dfa4a58b4eb966d8d4901e0af71'; '1920x1200' = '069414a4143b876afe00bff2cadce0f9f4a820f3f752edb39c2f3cc3ae5a71df'; '3840x1080' = 'a49f7db2bd2c9089faacf6688bba770a1fa539ef43ee2a9c1f6380d515fe5ceb' }
+        ReferenceSha256 = @{ '640x480' = '30fcb22579ba7941ccc731b9684a722f5020913ba938bd60e1ac8efeb56f5e5c'; '1024x768' = '2357ca77fc0a1384f3c719d622d3d87986a5d7a119cb46c323b4a8040ef594ef'; '1280x1024' = '6643174c310aa368d6ec184369ba76dc2efdb211681597fe429a1268a0b67678'; '1280x720' = 'ae6298f525390b710a842ada3566998b6db8626a83b4cbd64f1462d6066b431c'; '1280x800' = '35962c7aa9657c6cc8a41c94cc0dbb94c3a95e588e9ba1abd91a7c80d00de5d2'; '1920x1080' = '0648f58a583b2518b6c607991511812d13f0443ffcab52de4da6b022a069e7ca'; '1920x1200' = '3367fb53ee83875a1d44e9a52b9acfeaac2398ed6a9fa892b25dc38a7716fa9e'; '3840x1080' = '05815d35bea2faa0f49eb5e5786f10ee9a54e0dfca6ebb2e925aff32e7fdd16f' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -4327,6 +4327,68 @@ absolute pointers, so their .reloc entries become type 0 ABSOLUTE padding.
                 )
             }
 
+            # ---- palette: Fast screen loads: the palette conversion no longer makes 512 surface round trips ---------------------------------------------------------
+            #  Added      : 28 Sep 2026
+            #  Made with  : tools/patch_palette.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.46
+            #  Changes    : 164 bytes in 7 edits
+            #  Every screen the game shows (each menu, the briefings, the multiplayer hall, the battle load,
+            #  twice at start-up) ends in the palette conversion of ddex4.c, which turns the 256 palette entries
+            #  into 16-bit pixels the portable 1997 way: for every entry GetDC on the back buffer, SetPixel,
+            #  ReleaseDC, then Lock the whole surface, read the pixel back, Unlock.  On Windows 11 DirectDraw is
+            #  emulated over Direct3D 9 and ReleaseDC and Unlock each copy the WHOLE surface, so the loop costs
+            #  512 full-screen transfers per screen change: measured 1.4-1.5 s at 1024x768 and 3.2-3.5 s at
+            #  1920x1200 - the reason every menu loads slower the larger the resolution.  The value read back is
+            #  nothing but the RGB bytes truncated to the surface's 5-6-5 (or 5-5-5) bit fields, verified for all
+            #  256 entries in the running game.  The fix computes exactly that in place (58 bytes of shifts and
+            #  ors, a short jump, NOP padding) and turns the now pointless Unlock into a jump to the next entry;
+            #  the five .reloc entries of the overwritten absolute operands become type 0 ABSOLUTE padding.  The
+            #  three "skip on failure" jumps of the two-monitor fix inside the same loop become dead code and stay
+            #  harmless.  Nothing else in a screen load takes more than a fraction of a second.
+            @{
+                Id = 'palette'; Name = 'Fast screen loads: the palette conversion no longer makes 512 surface round trips'; Date = '28 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_palette.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.46'
+                Description = @'
+Every screen the game shows (each menu, the briefings, the multiplayer hall, the battle load,
+twice at start-up) ends in the palette conversion of ddex4.c, which turns the 256 palette entries
+into 16-bit pixels the portable 1997 way: for every entry GetDC on the back buffer, SetPixel,
+ReleaseDC, then Lock the whole surface, read the pixel back, Unlock.  On Windows 11 DirectDraw is
+emulated over Direct3D 9 and ReleaseDC and Unlock each copy the WHOLE surface, so the loop costs
+512 full-screen transfers per screen change: measured 1.4-1.5 s at 1024x768 and 3.2-3.5 s at
+1920x1200 - the reason every menu loads slower the larger the resolution.  The value read back is
+nothing but the RGB bytes truncated to the surface's 5-6-5 (or 5-5-5) bit fields, verified for all
+256 entries in the running game.  The fix computes exactly that in place (58 bytes of shifts and
+ors, a short jump, NOP padding) and turns the now pointless Unlock into a jump to the next entry;
+the five .reloc entries of the overwritten absolute operands become type 0 ABSOLUTE padding.  The
+three "skip on failure" jumps of the two-monitor fix inside the same loop become dead code and stay
+harmless.  Nothing else in a screen load takes more than a fraction of a second.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # remap: Unlock of the read-back -> skipped
+                    @{ Offset = 0x2E77C; Old = '6A 00 A1 1C 97 48 00 50 8B 08 FF 91 80 00 00 00 85 C0 0F 84 F2 00 00 00'; New = 'E9 05 01 00 00 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # remap: pixel read-back -> arithmetic
+                    @{ Offset = 0x2E8C7; Old = '51 89 45 72 A1 1C 97 48 00 50 8B 18 FF 53 44 85 C0 0F 85 60 FF FF FF 31 C9 8A 45 6E 8A 4D 6A C1 E0 08 09 C1 31 C0 8A 45 72 C1 E0 10 09 C8 50 6A 00 6A 00 8B 4D 76 51 2E FF 15 A8 03 48 00 8B 5D 76 A1 1C 97 48 00 53 8B 08 50 FF 51 68 6A 00 6A 01 8D 4D FE B8 6C 00 00 00 51 89 45 FE A1 1C 97 48 00 6A 00 8B 18 50 FF 53 64 85 C0 0F 85 BC FE FF FF 8D 0C 36 8B 47 18 01 C1 8B 45 22 66 8B 00 66 89 81 02 06 00 00'; New = '89 C3 C1 EB 03 8B 45 6A C1 E8 03 8B 4D 6E 81 7F 14 35 02 00 00 75 0B C1 E0 0B C1 E9 02 C1 E1 05 EB 09 C1 E0 0A C1 E9 03 C1 E1 05 09 C8 09 D8 8B 4F 18 66 89 84 71 02 06 00 00 EB 4B 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # .reloc table: entry 337F (type 3 HIGHLOW, page offset 0x37F) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x99FF2; Old = '7F 33'; New = '7F 03' }
+                    # .reloc table: entry 34CC (type 3 HIGHLOW, page offset 0x4CC) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A022; Old = 'CC 34'; New = 'CC 04' }
+                    # .reloc table: entry 3501 (type 3 HIGHLOW, page offset 0x501) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A024; Old = '01 35'; New = '01 05' }
+                    # .reloc table: entry 3509 (type 3 HIGHLOW, page offset 0x509) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A026; Old = '09 35'; New = '09 05' }
+                    # .reloc table: entry 3525 (type 3 HIGHLOW, page offset 0x525) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A028; Old = '25 35'; New = '25 05' }
+                )
+            }
+
             # ---- camera: Camera clamped at battle start: no crash when the start position is near the map edge ---------------------------------------------------------
             #  Added      : 21 Sep 2026
             #  Made with  : tools/patch_camera.py
@@ -5177,13 +5239,13 @@ and the directory that lists them); their SHA-256 is checked like every other ed
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '95da6d5309f3d4853a9ac7a114039f8a82491372c8001fe064ca448f187d0cff'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'fa03709d44633f0eb8be22ef38c684e12e6f9c9f07263000e2c3bb2bb8e6bbdb'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '1920x1080', '1920x1200', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '9355f64092a4eb2659cdc41269e8158453be31ade32e235c71c9776871ac99b5'; '1024x768' = '95da6d5309f3d4853a9ac7a114039f8a82491372c8001fe064ca448f187d0cff'; '1280x1024' = '9ffe1723595993b9ed709cd429efface43b3adc17563eb2a9e2fe3de5ce5fe63'; '1280x720' = '1808734b157ef6e77115549fd374a67035f55d63c4a7c6448bdff3b0ec568c5b'; '1280x800' = 'f80235039b6feed5ad4ac52d0943e9e04ebec8a0f1bed9c72c0f8d3e782c8b6c'; '1920x1080' = '0058c72cc3b626e59cb934c2fc4f6e1c7cc9e334c0f838eead70be87f5fbd6a1'; '1920x1200' = '475af1f315b523aa7b2778b763f6d3d891b1a0987ac2c942a2b1a952007122a2'; '3840x1080' = '2b316915915a5cbeb241fbc98e396eae5be02d5c58b97fe790fb58267a617b49' }
+        ReferenceSha256 = @{ '640x480' = '978421c6dd68da1ea169fdf7ec0e50b3139e4b463c0f13e9b0d31a40cb3259e0'; '1024x768' = 'fa03709d44633f0eb8be22ef38c684e12e6f9c9f07263000e2c3bb2bb8e6bbdb'; '1280x1024' = 'b184f36f537841fbd799e2f59e4933103049e666527a50037784b1557a019f27'; '1280x720' = '23d8beba310b4e63eaab8eadc55ceb04298b84a76db7ff20cc4e2e026ab9e4ca'; '1280x800' = '0ff5141bd910ca6852098c3c403b81c8f7b42f7743de83fc213fb8a867e8070d'; '1920x1080' = '3442b1f3a1b88a7d0dfaa8fd5a3981d9039125314e4127f2c84df9990572f3cc'; '1920x1200' = '65ce242fca6b94b0b6ea6e9cbdb28821ad83c6a95d364aafbe9ab978909e7d2a'; '3840x1080' = '02af376a3db3b66d05b70b09d925412dd5401e873c9fc988f95d17cd6050a33c' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -9389,6 +9451,68 @@ absolute pointers, so their .reloc entries become type 0 ABSOLUTE padding.
                     @{ Offset = 0x9A202; Old = '56 34'; New = '56 04' }
                     # .reloc table: entry 349F (type 3 HIGHLOW, page offset 0x49F) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
                     @{ Offset = 0x9A210; Old = '9F 34'; New = '9F 04' }
+                )
+            }
+
+            # ---- palette: Fast screen loads: the palette conversion no longer makes 512 surface round trips ---------------------------------------------------------
+            #  Added      : 28 Sep 2026
+            #  Made with  : tools/patch_palette.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.46
+            #  Changes    : 164 bytes in 7 edits
+            #  Every screen the game shows (each menu, the briefings, the multiplayer hall, the battle load,
+            #  twice at start-up) ends in the palette conversion of ddex4.c, which turns the 256 palette entries
+            #  into 16-bit pixels the portable 1997 way: for every entry GetDC on the back buffer, SetPixel,
+            #  ReleaseDC, then Lock the whole surface, read the pixel back, Unlock.  On Windows 11 DirectDraw is
+            #  emulated over Direct3D 9 and ReleaseDC and Unlock each copy the WHOLE surface, so the loop costs
+            #  512 full-screen transfers per screen change: measured 1.4-1.5 s at 1024x768 and 3.2-3.5 s at
+            #  1920x1200 - the reason every menu loads slower the larger the resolution.  The value read back is
+            #  nothing but the RGB bytes truncated to the surface's 5-6-5 (or 5-5-5) bit fields, verified for all
+            #  256 entries in the running game.  The fix computes exactly that in place (58 bytes of shifts and
+            #  ors, a short jump, NOP padding) and turns the now pointless Unlock into a jump to the next entry;
+            #  the five .reloc entries of the overwritten absolute operands become type 0 ABSOLUTE padding.  The
+            #  three "skip on failure" jumps of the two-monitor fix inside the same loop become dead code and stay
+            #  harmless.  Nothing else in a screen load takes more than a fraction of a second.
+            @{
+                Id = 'palette'; Name = 'Fast screen loads: the palette conversion no longer makes 512 surface round trips'; Date = '28 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_palette.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.46'
+                Description = @'
+Every screen the game shows (each menu, the briefings, the multiplayer hall, the battle load,
+twice at start-up) ends in the palette conversion of ddex4.c, which turns the 256 palette entries
+into 16-bit pixels the portable 1997 way: for every entry GetDC on the back buffer, SetPixel,
+ReleaseDC, then Lock the whole surface, read the pixel back, Unlock.  On Windows 11 DirectDraw is
+emulated over Direct3D 9 and ReleaseDC and Unlock each copy the WHOLE surface, so the loop costs
+512 full-screen transfers per screen change: measured 1.4-1.5 s at 1024x768 and 3.2-3.5 s at
+1920x1200 - the reason every menu loads slower the larger the resolution.  The value read back is
+nothing but the RGB bytes truncated to the surface's 5-6-5 (or 5-5-5) bit fields, verified for all
+256 entries in the running game.  The fix computes exactly that in place (58 bytes of shifts and
+ors, a short jump, NOP padding) and turns the now pointless Unlock into a jump to the next entry;
+the five .reloc entries of the overwritten absolute operands become type 0 ABSOLUTE padding.  The
+three "skip on failure" jumps of the two-monitor fix inside the same loop become dead code and stay
+harmless.  Nothing else in a screen load takes more than a fraction of a second.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # remap: Unlock of the read-back -> skipped
+                    @{ Offset = 0x2E7DC; Old = '6A 00 A1 44 97 48 00 50 8B 08 FF 91 80 00 00 00 85 C0 0F 84 F2 00 00 00'; New = 'E9 05 01 00 00 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # remap: pixel read-back -> arithmetic
+                    @{ Offset = 0x2E927; Old = '51 89 45 72 A1 44 97 48 00 50 8B 18 FF 53 44 85 C0 0F 85 60 FF FF FF 31 C9 8A 45 6E 8A 4D 6A C1 E0 08 09 C1 31 C0 8A 45 72 C1 E0 10 09 C8 50 6A 00 6A 00 8B 4D 76 51 2E FF 15 A8 03 48 00 8B 5D 76 A1 44 97 48 00 53 8B 08 50 FF 51 68 6A 00 6A 01 8D 4D FE B8 6C 00 00 00 51 89 45 FE A1 44 97 48 00 6A 00 8B 18 50 FF 53 64 85 C0 0F 85 BC FE FF FF 8D 0C 36 8B 47 18 01 C1 8B 45 22 66 8B 00 66 89 81 02 06 00 00'; New = '89 C3 C1 EB 03 8B 45 6A C1 E8 03 8B 4D 6E 81 7F 14 35 02 00 00 75 0B C1 E0 0B C1 E9 02 C1 E1 05 EB 09 C1 E0 0A C1 E9 03 C1 E1 05 09 C8 09 D8 8B 4F 18 66 89 84 71 02 06 00 00 EB 4B 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # .reloc table: entry 33DF (type 3 HIGHLOW, page offset 0x3DF) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A1EE; Old = 'DF 33'; New = 'DF 03' }
+                    # .reloc table: entry 352C (type 3 HIGHLOW, page offset 0x52C) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A21E; Old = '2C 35'; New = '2C 05' }
+                    # .reloc table: entry 3561 (type 3 HIGHLOW, page offset 0x561) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A220; Old = '61 35'; New = '61 05' }
+                    # .reloc table: entry 3569 (type 3 HIGHLOW, page offset 0x569) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A222; Old = '69 35'; New = '69 05' }
+                    # .reloc table: entry 3585 (type 3 HIGHLOW, page offset 0x585) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A224; Old = '85 35'; New = '85 05' }
                 )
             }
 
