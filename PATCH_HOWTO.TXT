@@ -247,7 +247,8 @@ What makes it trustworthy:
                        modes)
      map editor      blocksets, teams, healer, troopsframe
      all three       + icon (the high-resolution icon; for the games also
-                       the DPI-aware manifest; always last)
+                       the per-monitor DPI-aware manifest, so Windows never
+                       scales the full-screen picture; always last)
    -Resolution WxH picks the screen size (default 1024x768; -List shows
    the sizes), -Output sets the target file (with -Original only),
    -Overwrite allows replacing existing files, -DesktopShortcut adds the
