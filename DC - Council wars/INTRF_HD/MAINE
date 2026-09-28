@@ -294,6 +294,10 @@ in_text 79      0       904     692     15      1   0    - read_only  bg erase  
 in_text 148     0       50      750     61      1   0    - read_only  bg erase  remap 2  intens 31
 in_text 204     0       10      713     72      1   0  mask  - read_only  remap 2  intens 31
 in_text 203     0       10      728     72      1   0  mask  - read_only  remap 2  intens 31
+in_text 207     0       10      698     72      1   0  mask  - read_only  remap 2  intens 31
+in_text 208     0       10      683     72      1   0  mask  - read_only  remap 2  intens 31
+in_text 209     0       10      668     72      1   0  mask  - read_only  remap 2  intens 31
+in_text 210     0       10      653     72      1   0  mask  - read_only  remap 2  intens 31
 
 % Human building group
 

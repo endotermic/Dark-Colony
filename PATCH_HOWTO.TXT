@@ -236,7 +236,9 @@ What makes it trustworthy:
      both games      nocd, resolution, hdpaths, cursor, pool, clock,
                      ddraw, camera, widemap, restore, longpath, music,
                      menuorder (the menu opens logo, title, buttons,
-                       credits instead of buttons first)
+                       credits instead of buttons first),
+                     chat (six battlefield chat lines instead of two,
+                       each new line plays the mission-message sound)
      Dark Colony     + movies (the Classic intro and endings under
                        their DC* names), sounds (WAV files read from
                        the game root, not from exp\; the Classic

@@ -174,13 +174,13 @@ $Builds = @(
         SourceNote     = 'NOT from the Dark Colony CD: its DC\DC16.EXE is the August 1997 build (660480 bytes), which these fixes do not fit - they need dc16.exe of the January 1998 update (659456 bytes), so take it from our repository.'
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '2357ca77fc0a1384f3c719d622d3d87986a5d7a119cb46c323b4a8040ef594ef'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'bd86e63e34f435acebd577a60f2956ead8ccd72b3d0661745128b7e665051a02'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '1920x1080', '1920x1200', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '30fcb22579ba7941ccc731b9684a722f5020913ba938bd60e1ac8efeb56f5e5c'; '1024x768' = '2357ca77fc0a1384f3c719d622d3d87986a5d7a119cb46c323b4a8040ef594ef'; '1280x1024' = '6643174c310aa368d6ec184369ba76dc2efdb211681597fe429a1268a0b67678'; '1280x720' = 'ae6298f525390b710a842ada3566998b6db8626a83b4cbd64f1462d6066b431c'; '1280x800' = '35962c7aa9657c6cc8a41c94cc0dbb94c3a95e588e9ba1abd91a7c80d00de5d2'; '1920x1080' = '0648f58a583b2518b6c607991511812d13f0443ffcab52de4da6b022a069e7ca'; '1920x1200' = '3367fb53ee83875a1d44e9a52b9acfeaac2398ed6a9fa892b25dc38a7716fa9e'; '3840x1080' = '05815d35bea2faa0f49eb5e5786f10ee9a54e0dfca6ebb2e925aff32e7fdd16f' }
+        ReferenceSha256 = @{ '640x480' = '81003349675b77fbe187bed925d82b677021ca53798fff0556a42a48b5af5755'; '1024x768' = 'bd86e63e34f435acebd577a60f2956ead8ccd72b3d0661745128b7e665051a02'; '1280x1024' = '1d57d68a292982fd8e2d456fb23419c0877d17345dda7744b6e7057d459fb6cd'; '1280x720' = 'a995a416ba5b6ff185c94b213bdec26c206a5efca2e43375b1a75c70150fd7f4'; '1280x800' = 'c2913f20e33664a2b24c92fb42474653018eeffa9d5e65f224547746a7892236'; '1920x1080' = 'd6ed0ed94d8ba87a8cd2f5893c142ca49403cdd0ca019db1dd8478de9503d0c0'; '1920x1200' = '9d2c60a50e5f4f4e32259c6197bf032ba41d63151eae87a2f840c8a095f6a283'; '3840x1080' = 'd3af3035f960bb730890538e4d29994045f1463de1fcd245008788f8d461f6eb' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -4977,6 +4977,64 @@ operands only; nothing moves, no relocation entry changes; the same three blocks
                 )
             }
 
+            # ---- chat: Battlefield chat: six lines, each new line announced with the mission-message sound ---------------------------------------------------------
+            #  Added      : 28 Sep 2026
+            #  Made with  : tools/patch_chat.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.48
+            #  Changes    : 316 bytes in 3 edits
+            #  In a network battle the chat lines of the other players (and the relay's bots) appear on the last
+            #  rows of the map view, above the bottom bar.  The original shows only the two newest lines and shows
+            #  them silently, while a mission message in a single-player game announces itself with a sound
+            #  (SOUND\MSG.WAV, entry 187 of the sound table).  This fix makes the battlefield chat behave like the
+            #  mission messages: every line that arrives plays that sound, and up to SIX lines stay on screen (the
+            #  oldest one leaves 7.5 seconds after the previous one left, as before).  The chat display of the
+            #  client is rewritten in place (276 bytes: the newest-line cap goes from 2 to 6 lines, line 3-6 use
+            #  the HUD script's new widgets 207-210, and a line is drawn only if its widget exists, so a HUD
+            #  script with the stock two lines still works and shows two); the chat handler's "count the queued
+            #  line" instruction becomes a call to a 17-byte stub that also leaves a "new line" mark, and a
+            #  34-byte helper plays the sound when the display finds that mark.  Stub and helper live in the 75
+            #  bytes the "fast screen loads" fix (palette) frees inside the palette conversion, which is
+            #  therefore required.  No absolute addresses are written, so the .reloc table is unchanged.  The six
+            #  lines themselves are data: the HUD script INTRF_HD\MAINE written with the display fix gets
+            #  in_text 207..210 above the two stock chat lines (15 rows apart); the stock 640x480 MAINE keeps two.
+            @{
+                Id = 'chat'; Name = 'Battlefield chat: six lines, each new line announced with the mission-message sound'; Date = '28 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_chat.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.48'
+                Description = @'
+In a network battle the chat lines of the other players (and the relay's bots) appear on the last
+rows of the map view, above the bottom bar.  The original shows only the two newest lines and shows
+them silently, while a mission message in a single-player game announces itself with a sound
+(SOUND\MSG.WAV, entry 187 of the sound table).  This fix makes the battlefield chat behave like the
+mission messages: every line that arrives plays that sound, and up to SIX lines stay on screen (the
+oldest one leaves 7.5 seconds after the previous one left, as before).  The chat display of the
+client is rewritten in place (276 bytes: the newest-line cap goes from 2 to 6 lines, line 3-6 use
+the HUD script's new widgets 207-210, and a line is drawn only if its widget exists, so a HUD
+script with the stock two lines still works and shows two); the chat handler's "count the queued
+line" instruction becomes a call to a 17-byte stub that also leaves a "new line" mark, and a
+34-byte helper plays the sound when the display finds that mark.  Stub and helper live in the 75
+bytes the "fast screen loads" fix (palette) frees inside the palette conversion, which is
+therefore required.  No absolute addresses are written, so the .reloc table is unchanged.  The six
+lines themselves are data: the HUD script INTRF_HD\MAINE written with the display fix gets
+in_text 207..210 above the two stock chat lines (15 rows apart); the stock 640x480 MAINE keeps two.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('palette')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # client.c chat display: 6 lines, type check, sound on a new line: the 276-byte display of the chat ring rewritten in place: call helper (marker -> sound 187), newest index capped at 5, line i -> widget 203+i (i<2) / 205+i, drawn only if objects[id].type == 4, drain 7.5 s per oldest line
+                    @{ Offset = 0xA50D; Old = '8B B8 10 03 00 00 85 FF 0F 8E 7E 00 00 00 8B 55 F8 8B 8A 9C 46 00 00 85 C9 75 0D E8 03 03 00 00 89 82 9C 46 00 00 EB 36 83 FF 02 7E 07 BA C4 09 00 00 EB 05 BA 4C 1D 00 00 8B 4D F8 E8 E2 02 00 00 2B 81 9C 46 00 00 39 D0 76 13 8B 41 0C E8 F0 27 01 00 E8 CB 02 00 00 89 81 9C 46 00 00 8B 45 F8 8B 40 0C 8B 90 10 03 00 00 4A 89 90 14 03 00 00 8B 45 F8 8B 40 0C 83 B8 14 03 00 00 01 7E 19 C7 80 14 03 00 00 01 00 00 00 EB 0D 8B 45 F8 C7 80 9C 46 00 00 00 00 00 00 31 F6 EB 65 8D 04 8D 00 00 00 00 29 C8 C1 E0 02 29 C8 8D BA 18 03 00 00 C1 E0 03 01 C7 69 47 50 34 0E 00 00 8D 8E CB 00 00 00 8B 9C 02 9C 0C 00 00 8B 45 F8 89 CA 8B 80 F4 07 00 00 E8 F5 8D 01 00 8B 45 F8 89 FB 89 CA 8B 80 F4 07 00 00 E8 7B 8C 01 00 8B 45 F8 89 CA 8B 80 F4 07 00 00 46 E8 9A 68 01 00 83 FE 02 7D 12 8B 55 F8 8B 52 0C 8B 8A 14 03 00 00 29 F1 85 C9 7D 89'; New = 'E8 02 44 02 00 8B B8 10 03 00 00 85 FF 7E 5B 8B 4D F8 8B 91 9C 46 00 00 85 D2 75 0D E8 02 03 00 00 89 81 9C 46 00 00 EB 25 E8 F5 02 00 00 2B 81 9C 46 00 00 3D 4C 1D 00 00 76 13 8B 41 0C E8 00 28 01 00 E8 DB 02 00 00 89 81 9C 46 00 00 8B 41 0C 8B 90 10 03 00 00 4A 83 FA 05 7E 05 BA 05 00 00 00 89 90 14 03 00 00 EB 0D 8B 45 F8 C7 80 9C 46 00 00 00 00 00 00 8B 45 F8 FF B0 F4 07 00 00 31 F6 EB 5C 6B F9 58 8D BC 3A 18 03 00 00 8D 8E CB 00 00 00 83 FE 02 7C 03 83 C1 02 8B 04 24 6B D9 34 80 BC 18 89 00 00 00 04 75 2E 69 47 50 34 0E 00 00 8B 9C 02 9C 0C 00 00 8B 04 24 89 CA E8 0B 8E 01 00 8B 04 24 89 FB 89 CA E8 97 8C 01 00 8B 04 24 89 CA E8 BD 68 01 00 46 83 FE 06 7D 12 8B 55 F8 8B 52 0C 8B 8A 14 03 00 00 29 F1 85 C9 7D 92 58 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # chat handler: inc count -> call stub: the queued line is counted by the stub, which also leaves the new-line marker 7FFFFFFF in the ring index
+                    @{ Offset = 0x1CF0F; Old = 'FF 86 10 03 00 00'; New = 'E8 EF 19 01 00 90' }
+                    # stub + helper in the palette NOP room: stub: inc [esi+310h]; mov [esi+314h],7FFFFFFF; ret.  helper: if marker, display->play_sound(187 = sound\msg.wav, 1); ret
+                    @{ Offset = 0x2E903; Old = '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90'; New = 'FF 86 10 03 00 00 C7 86 14 03 00 00 FF FF FF 7F C3 81 B8 14 03 00 00 FF FF FF 7F 75 15 8B 5D F8 8B 5B 08 50 B8 BB 00 00 00 BA 01 00 00 00 FF 53 7C 58 C3' }
+                )
+            }
+
             # ---- movies @ 640x480: Classic movies under their own names: DCINTRO / DCAENDING / DCHENDING (Dark Colony only) ---------------------------------------------------------
             #  Added      : 15 Sep 2026
             #  Made with  : tools/patch_movies.py
@@ -5239,13 +5297,13 @@ and the directory that lists them); their SHA-256 is checked like every other ed
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'fa03709d44633f0eb8be22ef38c684e12e6f9c9f07263000e2c3bb2bb8e6bbdb'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = '5acee874d60b69d214c627e44132358dc68ee9d25f60b8b876231d91c38a19cb'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '1920x1080', '1920x1200', '3840x1080')
         DefaultMode    = '1024x768'
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '640x480' = '978421c6dd68da1ea169fdf7ec0e50b3139e4b463c0f13e9b0d31a40cb3259e0'; '1024x768' = 'fa03709d44633f0eb8be22ef38c684e12e6f9c9f07263000e2c3bb2bb8e6bbdb'; '1280x1024' = 'b184f36f537841fbd799e2f59e4933103049e666527a50037784b1557a019f27'; '1280x720' = '23d8beba310b4e63eaab8eadc55ceb04298b84a76db7ff20cc4e2e026ab9e4ca'; '1280x800' = '0ff5141bd910ca6852098c3c403b81c8f7b42f7743de83fc213fb8a867e8070d'; '1920x1080' = '3442b1f3a1b88a7d0dfaa8fd5a3981d9039125314e4127f2c84df9990572f3cc'; '1920x1200' = '65ce242fca6b94b0b6ea6e9cbdb28821ad83c6a95d364aafbe9ab978909e7d2a'; '3840x1080' = '02af376a3db3b66d05b70b09d925412dd5401e873c9fc988f95d17cd6050a33c' }
+        ReferenceSha256 = @{ '640x480' = '3705574efca7a70b09cafbc8820cad967b183da4199b2cbe40b197a0254fbaaa'; '1024x768' = '5acee874d60b69d214c627e44132358dc68ee9d25f60b8b876231d91c38a19cb'; '1280x1024' = '66021f2cfdbda6779cdf5a1ece257f40eef6e02aa71895939d7442fa83372a7e'; '1280x720' = '361ead3561be5bffc6c41704ae6f6f41a3e5681d3d9dc522f9a01ce056b42d9b'; '1280x800' = 'e462bbef3648c89a5ad19a823d4d2abd0cc5fc378ddcf6b7da07319e52fe67fa'; '1920x1080' = '0feb957f087ac4aa66ce8018833192dab970287e63d6973bff88f43267e392cd'; '1920x1200' = '2dec194fd44c5d3b2d1def3e29952c40a3b4c4e46e209262b69203633b23532f'; '3840x1080' = 'af695afc91d0ad39cdef89fecf1d986930126a9ea3dc3d8f1d26cd06ab63a10e' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -10308,6 +10366,64 @@ operands only; nothing moves, no relocation entry changes; the same three blocks
                 )
             }
 
+            # ---- chat: Battlefield chat: six lines, each new line announced with the mission-message sound ---------------------------------------------------------
+            #  Added      : 28 Sep 2026
+            #  Made with  : tools/patch_chat.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.48
+            #  Changes    : 316 bytes in 3 edits
+            #  In a network battle the chat lines of the other players (and the relay's bots) appear on the last
+            #  rows of the map view, above the bottom bar.  The original shows only the two newest lines and shows
+            #  them silently, while a mission message in a single-player game announces itself with a sound
+            #  (SOUND\MSG.WAV, entry 187 of the sound table).  This fix makes the battlefield chat behave like the
+            #  mission messages: every line that arrives plays that sound, and up to SIX lines stay on screen (the
+            #  oldest one leaves 7.5 seconds after the previous one left, as before).  The chat display of the
+            #  client is rewritten in place (276 bytes: the newest-line cap goes from 2 to 6 lines, line 3-6 use
+            #  the HUD script's new widgets 207-210, and a line is drawn only if its widget exists, so a HUD
+            #  script with the stock two lines still works and shows two); the chat handler's "count the queued
+            #  line" instruction becomes a call to a 17-byte stub that also leaves a "new line" mark, and a
+            #  34-byte helper plays the sound when the display finds that mark.  Stub and helper live in the 75
+            #  bytes the "fast screen loads" fix (palette) frees inside the palette conversion, which is
+            #  therefore required.  No absolute addresses are written, so the .reloc table is unchanged.  The six
+            #  lines themselves are data: the HUD script INTRF_HD\MAINE written with the display fix gets
+            #  in_text 207..210 above the two stock chat lines (15 rows apart); the stock 640x480 MAINE keeps two.
+            @{
+                Id = 'chat'; Name = 'Battlefield chat: six lines, each new line announced with the mission-message sound'; Date = '28 Sep 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_chat.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.48'
+                Description = @'
+In a network battle the chat lines of the other players (and the relay's bots) appear on the last
+rows of the map view, above the bottom bar.  The original shows only the two newest lines and shows
+them silently, while a mission message in a single-player game announces itself with a sound
+(SOUND\MSG.WAV, entry 187 of the sound table).  This fix makes the battlefield chat behave like the
+mission messages: every line that arrives plays that sound, and up to SIX lines stay on screen (the
+oldest one leaves 7.5 seconds after the previous one left, as before).  The chat display of the
+client is rewritten in place (276 bytes: the newest-line cap goes from 2 to 6 lines, line 3-6 use
+the HUD script's new widgets 207-210, and a line is drawn only if its widget exists, so a HUD
+script with the stock two lines still works and shows two); the chat handler's "count the queued
+line" instruction becomes a call to a 17-byte stub that also leaves a "new line" mark, and a
+34-byte helper plays the sound when the display finds that mark.  Stub and helper live in the 75
+bytes the "fast screen loads" fix (palette) frees inside the palette conversion, which is
+therefore required.  No absolute addresses are written, so the .reloc table is unchanged.  The six
+lines themselves are data: the HUD script INTRF_HD\MAINE written with the display fix gets
+in_text 207..210 above the two stock chat lines (15 rows apart); the stock 640x480 MAINE keeps two.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('palette')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # client.c chat display: 6 lines, type check, sound on a new line: the 276-byte display of the chat ring rewritten in place: call helper (marker -> sound 187), newest index capped at 5, line i -> widget 203+i (i<2) / 205+i, drawn only if objects[id].type == 4, drain 7.5 s per oldest line
+                    @{ Offset = 0xA56D; Old = '8B B8 10 03 00 00 85 FF 0F 8E 7E 00 00 00 8B 55 F8 8B 8A 9C 46 00 00 85 C9 75 0D E8 03 03 00 00 89 82 9C 46 00 00 EB 36 83 FF 02 7E 07 BA C4 09 00 00 EB 05 BA 4C 1D 00 00 8B 4D F8 E8 E2 02 00 00 2B 81 9C 46 00 00 39 D0 76 13 8B 41 0C E8 F0 27 01 00 E8 CB 02 00 00 89 81 9C 46 00 00 8B 45 F8 8B 40 0C 8B 90 10 03 00 00 4A 89 90 14 03 00 00 8B 45 F8 8B 40 0C 83 B8 14 03 00 00 01 7E 19 C7 80 14 03 00 00 01 00 00 00 EB 0D 8B 45 F8 C7 80 9C 46 00 00 00 00 00 00 31 F6 EB 65 8D 04 8D 00 00 00 00 29 C8 C1 E0 02 29 C8 8D BA 18 03 00 00 C1 E0 03 01 C7 69 47 50 34 0E 00 00 8D 8E CB 00 00 00 8B 9C 02 9C 0C 00 00 8B 45 F8 89 CA 8B 80 F4 07 00 00 E8 F5 8D 01 00 8B 45 F8 89 FB 89 CA 8B 80 F4 07 00 00 E8 7B 8C 01 00 8B 45 F8 89 CA 8B 80 F4 07 00 00 46 E8 9A 68 01 00 83 FE 02 7D 12 8B 55 F8 8B 52 0C 8B 8A 14 03 00 00 29 F1 85 C9 7D 89'; New = 'E8 02 44 02 00 8B B8 10 03 00 00 85 FF 7E 5B 8B 4D F8 8B 91 9C 46 00 00 85 D2 75 0D E8 02 03 00 00 89 81 9C 46 00 00 EB 25 E8 F5 02 00 00 2B 81 9C 46 00 00 3D 4C 1D 00 00 76 13 8B 41 0C E8 00 28 01 00 E8 DB 02 00 00 89 81 9C 46 00 00 8B 41 0C 8B 90 10 03 00 00 4A 83 FA 05 7E 05 BA 05 00 00 00 89 90 14 03 00 00 EB 0D 8B 45 F8 C7 80 9C 46 00 00 00 00 00 00 8B 45 F8 FF B0 F4 07 00 00 31 F6 EB 5C 6B F9 58 8D BC 3A 18 03 00 00 8D 8E CB 00 00 00 83 FE 02 7C 03 83 C1 02 8B 04 24 6B D9 34 80 BC 18 89 00 00 00 04 75 2E 69 47 50 34 0E 00 00 8B 9C 02 9C 0C 00 00 8B 04 24 89 CA E8 0B 8E 01 00 8B 04 24 89 FB 89 CA E8 97 8C 01 00 8B 04 24 89 CA E8 BD 68 01 00 46 83 FE 06 7D 12 8B 55 F8 8B 52 0C 8B 8A 14 03 00 00 29 F1 85 C9 7D 92 58 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # chat handler: inc count -> call stub: the queued line is counted by the stub, which also leaves the new-line marker 7FFFFFFF in the ring index
+                    @{ Offset = 0x1CF6F; Old = 'FF 86 10 03 00 00'; New = 'E8 EF 19 01 00 90' }
+                    # stub + helper in the palette NOP room: stub: inc [esi+310h]; mov [esi+314h],7FFFFFFF; ret.  helper: if marker, display->play_sound(187 = sound\msg.wav, 1); ret
+                    @{ Offset = 0x2E963; Old = '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90'; New = 'FF 86 10 03 00 00 C7 86 14 03 00 00 FF FF FF 7F C3 81 B8 14 03 00 00 FF FF FF 7F 75 15 8B 5D F8 8B 5B 08 50 B8 BB 00 00 00 BA 01 00 00 00 FF 53 7C 58 C3' }
+                )
+            }
+
             # ---- ozi @ 640x480: DARK COLONY and OZI MISSIONS menu modes (Council Wars only) ---------------------------------------------------------
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
@@ -12576,10 +12692,47 @@ function Edit-HudScript([string] $Text, [int] $W, [int] $H) {
               else { $nx = $x + [int][Math]::Floor($dx / 2); $ny = $y + [int][Math]::Floor($dy / 2) }
               if ($nx -eq $x -and $ny -eq $y) { return $null }
               return @($nx, $ny) }
-    $t = Edit-Widgets $Text $move $HUD_KINDS
+    $t = Add-ChatLines (Edit-Widgets $Text $move $HUD_KINDS)
     $m = $SIZE2.Match($t)
     if ($m.Success) { $t = $t.Substring(0, $m.Index) + ('{0}size{1}{2} {3}{4}' -f $m.Groups[1].Value, $m.Groups[2].Value, $W, $H, $m.Groups[6].Value) + $t.Substring($m.Index + $m.Length) }
     return $t
+}
+
+# hud_layout.chat_lines (fix `chat`, 28 Sep 2026): six battlefield chat lines instead of two.  The patched exes
+# show chat line i in widget 203 + i (i < 2) / 205 + i (i >= 2) and draw a line only if its widget exists, so
+# `in_text 207..210` are inserted after the (already shifted) `in_text 203`, each a copy of that line with the id
+# and the y replaced, 15 rows further up per line (205/206 are the HUD's count widgets).  Nothing is added when a
+# 207 line is already there.
+function Add-ChatLines([string] $Text) {
+    $lines = $Text.Split("`n")
+    foreach ($ln in $lines) {
+        $i = $ln.IndexOf('%'); $body = if ($i -ge 0) { $ln.Substring(0, $i) } else { $ln }
+        $w = @(@($TOKENS.Matches($body) | ForEach-Object { $_.Value }) | Where-Object { $_.Trim().Length -gt 0 })
+        if ($w.Count -ge 2 -and $w[0] -eq 'in_text' -and $w[1] -eq '207') { return $Text }
+    }
+    $out = New-Object System.Collections.Generic.List[string]
+    foreach ($ln in $lines) {
+        $out.Add($ln)
+        $i = $ln.IndexOf('%')
+        $body = if ($i -ge 0) { $ln.Substring(0, $i) } else { $ln }
+        $rest = if ($i -ge 0) { $ln.Substring($i) } else { '' }
+        $toks = @($TOKENS.Matches($body) | ForEach-Object { $_.Value })
+        $words = @($toks | Where-Object { $_.Trim().Length -gt 0 })
+        if ($words.Count -ge 5 -and $words[0] -eq 'in_text' -and $words[1] -eq '203') {
+            $y = [int]$words[4]
+            for ($k = 2; $k -le 5; $k++) {
+                $t = @($toks); $n = 0
+                for ($j = 0; $j -lt $t.Count; $j++) {
+                    if ($t[$j].Trim().Length -eq 0) { continue }
+                    $n++
+                    if ($n -eq 2) { $t[$j] = [string](205 + $k) }
+                    elseif ($n -eq 5) { $t[$j] = [string]($y - 15 * $k); break }
+                }
+                $out.Add((-join $t) + $rest)
+            }
+        }
+    }
+    return ($out -join "`n")
 }
 
 # pad_background.edit_scene / build_ozi_overlay.shift_scene_markers: the `frame x y` line after an .avi line
