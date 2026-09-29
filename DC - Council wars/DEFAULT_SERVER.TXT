@@ -1,0 +1,20 @@
+/*
+ * DEFAULT_SERVER.TXT - the relay server that ONLINE WAR connects to.
+ *
+ * Dark Colony Ultimate reads this file when you press ONLINE WAR in the main menu.
+ * It connects to the address below with TLS encryption on port 8889 (the Dark Colony
+ * Server relay, https://github.com/endotermic/Dark-Colony-Server), shows the rooms the
+ * relay offers - map, terrain, seats, players, bots, status - and joins the room you pick.
+ *
+ * Usage:
+ *   - one address, optionally with a port:      my.relay.example.org:8889
+ *   - the word "plain" after the address turns the encryption off, for a relay on your own
+ *     network without a certificate (the plain relay port is 8888):
+ *                                                 192.168.1.10 plain
+ *   - comments in the C++ style are ignored: "//" to the end of a line, or a block like this one.
+ *
+ * Keep one address in the file. MULTI PLAYER WAR (the in-game host / CONNECT TO SERVER
+ * screens) does not read this file.
+ */
+
+dark-colony-server.fly.dev
