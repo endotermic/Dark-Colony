@@ -13428,9 +13428,9 @@ function Edit-OnlineScript([string] $Text) {
                 $line = Set-ScriptTokens $line @{ 4 = [string]($x + 56) }
             }
             elseif ($kind -eq 'in_text' -and $id -eq 17) {
-                $out.Add(('in_text  31  0  {0}  {1}   56    1  0  -  read_only' -f $lx, ($ly + $lh + 8)) + $cr)
-                $out.Add(('in_text  17  0  {0}  {1}   56    1  0  -  read_only' -f $lx, ($ly + $lh + 24)) + $cr)
-                $out.Add(('in_text  30  0  {0}  {1}   56    1  0  -  read_only' -f $lx, ($ly - 18)) + $cr)
+                $out.Add(('in_text  31  0  {0}  {1}   56    1  0  -  read_only' -f $lx, ($ly + $lh + 14)) + $cr)
+                $out.Add(('in_text  17  0  {0}  {1}   56    1  0  -  read_only' -f $lx, ($ly + $lh + 30)) + $cr)
+                $out.Add(('in_text  30  0  {0}  {1}   56    1  0  -  read_only' -f $lx, ($ly - 16)) + $cr)
                 continue
             }
             elseif ($kind -eq 'label' -and $id -eq 6) { $line = Set-ScriptTokens $line @{ 4 = [string]($lx - 50); 6 = '318' } }
@@ -13455,8 +13455,9 @@ function Write-OnlineScreen([string] $GameDir, [string] $Mode) {
     if (-not $dst) { $dst = Join-Path (Join-Path $GameDir $sub) 'ONLINE' }
     Write-Latin1 $dst $t
     $lines = @(('wrote {0}\ONLINE (the ONLINE WAR room screen, derived from LOADGE)' -f $sub))
-    # the background: LOADER.GIF with a grey frame around the server and status lines (patch_online.online_background:
-    # a 3-px tube in the palette's greys 35 / 106 / 35, a 2-px black gap, black inside, corner pixels off)
+    # the background: LOADER.GIF with three grey frames - header + list, the scroll bar with its buttons, the server
+    # and status lines (patch_online.online_background / frame_rects: a 3-px tube in the palette's greys 35 / 106 / 35,
+    # a 2-px black gap, black inside, corner pixels off)
     $loader = Find-CI (Join-Path $GameDir $sub) 'LOADER.GIF'
     if (-not $loader) { throw 'LOADER.GIF is missing' }
     Initialize-GifCodec    # at 640x480 no interface set is built, so the codec may not be compiled yet
@@ -13471,21 +13472,26 @@ function Write-OnlineScreen([string] $GameDir, [string] $Mode) {
         }
         $best
     }
-    $x0 = $lx - 6; $y0 = $ly + $lh + 2; $x1 = $lx + 448 + 6; $y1 = $ly + $lh + 46
+    $b = $ly + $lh; $ux = $lx + 448 + 12
+    # every coordinate in its own parentheses: inside @( , ) the comma binds before + and -
+    $rects = @(@(($lx - 6), ($ly - 22), ($lx + 448 + 6), ($b + 3)), @(($ux - 4), $ly, ($ux + 26 + 4), ($b + 2)), @(($lx - 6), ($b + 8), ($lx + 448 + 6), ($b + 52)))
     $px = $im.Pixels
-    for ($y = $y0; $y -lt $y1; $y++) {
-        for ($x = $x0; $x -lt $x1; $x++) {
-            if (($x -eq $x0 -or $x -eq ($x1 - 1)) -and ($y -eq $y0 -or $y -eq ($y1 - 1))) { continue }
-            $d = [Math]::Min([Math]::Min($x - $x0, $x1 - 1 - $x), [Math]::Min($y - $y0, $y1 - 1 - $y))
-            $v = if ($d -lt 3) { $greyIdx[$d] } else { $greyIdx[3] }
-            $px[$y * $im.Width + $x] = [byte]$v
+    foreach ($r in $rects) {
+        $x0 = $r[0]; $y0 = $r[1]; $x1 = $r[2]; $y1 = $r[3]
+        for ($y = $y0; $y -lt $y1; $y++) {
+            for ($x = $x0; $x -lt $x1; $x++) {
+                if (($x -eq $x0 -or $x -eq ($x1 - 1)) -and ($y -eq $y0 -or $y -eq ($y1 - 1))) { continue }
+                $d = [Math]::Min([Math]::Min($x - $x0, $x1 - 1 - $x), [Math]::Min($y - $y0, $y1 - 1 - $y))
+                $v = if ($d -lt 3) { $greyIdx[$d] } else { $greyIdx[3] }
+                $px[$y * $im.Width + $x] = [byte]$v
+            }
         }
     }
     $bgOut = [DcGif]::Encode('GIF87a', $im.Width, $im.Height, $im.Palette, $px)
     $bgDst = Find-CI (Join-Path $GameDir $sub) 'ONLINEBG.GIF'
     if (-not $bgDst) { $bgDst = Join-Path (Join-Path $GameDir $sub) 'ONLINEBG.GIF' }
     [System.IO.File]::WriteAllBytes($bgDst, $bgOut)
-    $lines += ('wrote {0}\ONLINEBG.GIF (the screen background: LOADER.GIF with the grey frame around the text lines)' -f $sub)
+    $lines += ('wrote {0}\ONLINEBG.GIF (the screen background: LOADER.GIF with grey frames around the list, the scroll bar and the text lines)' -f $sub)
     if (-not (Find-CI $GameDir 'DEFAULT_SERVER.TXT')) {
         Write-Latin1 (Join-Path $GameDir 'DEFAULT_SERVER.TXT') $DefaultServerText
         $lines += 'wrote DEFAULT_SERVER.TXT (dark-colony-server.fly.dev; an existing file is never overwritten)'
