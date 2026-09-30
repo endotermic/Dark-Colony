@@ -34,6 +34,11 @@ picture  20  0  304   496  288  32   17
 picture  21  0  304   512  288  32   17
 picture  15  0  304   528  288  32   18
 picture  23  0  310   286  292  32   19
+picture  24  0  315   330  282  24   23
+picture  25  0  315   362  282  24   23
+picture  26  0  315   394  282  24   23
+picture  27  0  315   426  282  24   23
+picture  28  0  315   458  282  24   23
 
 
 textmsg 1 OPTIONS
@@ -56,30 +61,30 @@ textmsg 22 ALL
 %scroll   51  0  398   160   5   144 list 50
 %pushb    52  0  392   144   16   16  10  -10  list  50  -3
 %pushb    53  0  392   304   16   16  11  -10  list  50  3
-pushb	 40  0  498  334   14  14  -11 21
-pushb	 41  0  584  334   14  14  -11 22
-pushb	 42  0  498  366   14  14  -11 21
-pushb	 43  0  584  366   14  14  -11 22
-pushb	 67  0  498  398   14  14  -11 21
-pushb	 68  0  584  398   14  14  -11 22
-pushb	 71  0  498  430   14  14  -11 21
-pushb	 44  0  498  462   14  14  -11 21
-pushb	 72  0  584  430   14  14  -11 22
-pushb	 45  0  584  462   14  14  -11 22
+pushb	 40  0  465  335   14  14  -11 21
+pushb	 41  0  569  335   14  14  -11 22
+pushb	 42  0  465  367   14  14  -11 21
+pushb	 43  0  569  367   14  14  -11 22
+pushb	 67  0  465  399   14  14  -11 21
+pushb	 68  0  569  399   14  14  -11 22
+pushb	 71  0  465  431   14  14  -11 21
+pushb	 44  0  465  463   14  14  -11 21
+pushb	 72  0  569  431   14  14  -11 22
+pushb	 45  0  569  463   14  14  -11 22
 
-in_text  46  0  516  335   8   1   0 align centre  - bg textbg read_only
-in_text  47  0  516  367   8   1   0 align centre  - bg textbg read_only
-in_text  69  0  516  399   8   1   0 align centre  - bg textbg read_only
-in_text  73  0  516  431   8   1   0 align centre  - bg textbg read_only
-in_text  48  0  516  463   8   1   0 align centre  - bg textbg read_only
+in_text  46  0  492  336   8   1   0 align centre  - bg textbg read_only
+in_text  47  0  492  368   8   1   0 align centre  - bg textbg read_only
+in_text  69  0  492  400   8   1   0 align centre  - bg textbg read_only
+in_text  73  0  492  432   8   1   0 align centre  - bg textbg read_only
+in_text  48  0  492  464   8   1   0 align centre  - bg textbg read_only
 
-pushb    55  0  360  494   90  26  -11 20  label centre 8 0  -  remap 0
-pushb    56  0  462  494   90  26  -11 20  label centre 7 0  -  remap 0
+pushb    55  0  360  495   90  26  -11 20  label centre 8 0  -  remap 0
+pushb    56  0  462  495   90  26  -11 20  label centre 7 0  -  remap 0
 label    60  0  310  290  292 32 label 1 align centre font 1 - bg textbg remap 4
-label    61  0  320  335  172 14 label 2 align left font 0 - bg textbg remap 4
-label    62  0  320  367  172 14 label 3 align left font 0 - bg textbg remap 4
-label    70  0  320  399  172 14 label 5 align left font 0 - bg textbg remap 4
-label    74  0  320  431  172 14 label 6 align left font 0 - bg textbg remap 4
-label    63  0  320  463  172 14 label 4 align left font 0 - bg textbg remap 4
+label    61  0  331  336  116 14 label 2 align left font 0 - bg textbg remap 4
+label    62  0  331  368  116 14 label 3 align left font 0 - bg textbg remap 4
+label    70  0  331  400  116 14 label 5 align left font 0 - bg textbg remap 4
+label    74  0  331  432  116 14 label 6 align left font 0 - bg textbg remap 4
+label    63  0  331  464  116 14 label 4 align left font 0 - bg textbg remap 4
 
 end
