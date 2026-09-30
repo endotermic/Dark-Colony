@@ -18,10 +18,10 @@ textmsg 1       Research Tab
 pushb   1       1       941     92      41      20      -1      -1
 textmsg 2       Game Option Tab
 pushb   2       2       982     92      40      20      -1      -1
-picture 3       0       900     96      124     16      77              
-picture 4       0       900     96      124     16      78              
-picture 5       0       900     96      124     16      79              
-picture 6       0       900     96      124     16      77              
+picture 3       0       900     96      120     16      77              
+picture 4       0       900     96      120     16      78              
+picture 5       0       900     96      120     16      79              
+picture 6       0       900     96      120     16      77              
 
 % Build button
 textmsg 19      Push to build
@@ -291,7 +291,7 @@ group   65      0       202 62 63 64 151 196 5
 scount  75      0       908     744     72      17      104     - intens 31
 
 in_text 79      0       904     692     15      1   0    - read_only  bg erase  remap 2  intens 31
-in_text 148     0       50      750     61      1   0    - read_only  bg erase  remap 2  intens 31
+in_text 148     0       50      748     61      1   0    - read_only  bg erase  remap 2  intens 31
 in_text 204     0       10      713     72      1   0  mask  - read_only  remap 2  intens 31
 in_text 203     0       10      728     72      1   0  mask  - read_only  remap 2  intens 31
 in_text 207     0       10      698     72      1   0  mask  - read_only  remap 2  intens 31
@@ -437,9 +437,9 @@ textmsg   182   Too many units
 textmsg   183   Issuing refund
 
 %days counter
-in_text   234   0       997      721     3    1   0    align centre - read_only bg erase  remap 0  intens 31
+in_text   234   0       991      718     3    1   0    align centre - read_only bg erase  remap 0  intens 31
 
-in_text   200   0       864      751     3    1   0    - read_only  bg erase  remap 2  intens 31
+in_text   200   0       864      749     3    1   0    - read_only  bg erase  remap 2  intens 31
 
 group 96 0 4 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133
 

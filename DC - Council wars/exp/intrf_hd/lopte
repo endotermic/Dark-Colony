@@ -13,9 +13,9 @@ bright_highlight 4
 %        # desc  x    y    w    h
 
 
-picture  0   0  304   272  288  32   0
-picture  1   0  304   288  288  32   1
-picture  2   0  304   304  288  32   1
+picture  0   0  304   272  288  32   25
+picture  1   0  304   288  288  32   24
+picture  2   0  304   304  288  32   24
 picture  4   0  304   320  288  32   16
 picture  5   0  304   336  288  32   17
 picture  6   0  304   352  288  32   17
@@ -33,7 +33,7 @@ picture  14  0  304   480  288  32   17
 picture  20  0  304   496  288  32   17
 picture  21  0  304   512  288  32   17
 picture  15  0  304   528  288  32   18
-picture  23  0  310   286  292  32   19
+picture  23  0  310   276  292  44   19
 picture  24  0  315   330  282  24   23
 picture  25  0  315   362  282  24   23
 picture  26  0  315   394  282  24   23
@@ -80,7 +80,7 @@ in_text  48  0  492  464   8   1   0 align centre  - bg textbg read_only
 
 pushb    55  0  360  495   90  26  -11 20  label centre 8 0  -  remap 0
 pushb    56  0  462  495   90  26  -11 20  label centre 7 0  -  remap 0
-label    60  0  310  290  292 32 label 1 align centre font 1 - bg textbg remap 4
+label    60  0  314  289  284 28 label 1 align centre font 1 - bg textbg remap 4
 label    61  0  331  336  116 14 label 2 align left font 0 - bg textbg remap 4
 label    62  0  331  368  116 14 label 3 align left font 0 - bg textbg remap 4
 label    70  0  331  400  116 14 label 5 align left font 0 - bg textbg remap 4
