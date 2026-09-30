@@ -36,6 +36,11 @@ picture  17  0  344   364  288  32   6
 picture  18  0  344   396  288  32   6
 picture  22  0  344   428  288  32   6
 picture  19  0  344   460  288  32   6
+picture  23  0  480   332  78  24   14
+picture  24  0  480   364  78  24   14
+picture  25  0  480   396  78  24   14
+picture  26  0  480   428  78  24   14
+picture  27  0  480   460  78  24   14
 
 textmsg 1 OPTIONS
 textmsg 2 GAME SPEED
@@ -66,11 +71,11 @@ pushb	 44  0  464  464   14  14  -16 12
 pushb	 72  0  560  432   14  14  -16 13
 pushb	 45  0  560  464   14  14  -16 13
 
-in_text  46  0  492  338   8   1   0 align centre  - bg textbg read_only
-in_text  47  0  492  370   8   1   0 align centre  - bg textbg read_only
-in_text  69  0  492  402   8   1   0 align centre  - bg textbg read_only
-in_text  73  0  492  434   8   1   0 align centre  - bg textbg read_only
-in_text  48  0  492  466   8   1   0 align centre  - bg textbg read_only
+in_text  46  0  487  339   8   1   0 align centre  - bg textbg read_only
+in_text  47  0  487  371   8   1   0 align centre  - bg textbg read_only
+in_text  69  0  487  403   8   1   0 align centre  - bg textbg read_only
+in_text  73  0  487  435   8   1   0 align centre  - bg textbg read_only
+in_text  48  0  487  467   8   1   0 align centre  - bg textbg read_only
 
 pushb    55  0  552  508   32  32  -16 8
 pushb    56  0  512  508   32  32  -16 7

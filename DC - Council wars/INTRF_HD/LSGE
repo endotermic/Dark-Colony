@@ -11,8 +11,8 @@ colour selbg  0 255 0
 picture  19   0  304   192   28  32   0
 picture  20   0  304   208   28  32   1
 picture  21   0  304   224   28  32   1
-picture  0   0  304   240   28  32   3
-picture  1   0  304   256  28  32   5
+picture  0   0  304   240   28  32   1
+picture  1   0  304   256  28  32   1
 picture  2   0  304   272  28  32   1
 picture  30  0  400    200  28  32   6
 picture  4   0  304   288  28  32   3
@@ -33,14 +33,15 @@ picture  18   0  304   512  288  32   1
 picture  22   0  304   528  288  32   1
 picture  23   0  304   544  288  32   1
 picture  24   0  304   560  288  32   1
+picture  25  0  310   244  264  24   15
 
 textmsg 1 Save Game
 
-list     50  0  324   291  256 217  scroll 51  -  bg textbg remap 4
-scroll   51  0  590   304   10   192 list 50
-pushb    52  0  587   288   16   16  10  -10  list  50  -3
-pushb    53  0  587   496   16   16  11  -10  list  50  3
-in_text  54  0  324   248  32    1  0  -  bg textbg
+list     50  0  314   292  256 216  scroll 51  -  bg textbg remap 4
+scroll   51  0  584   309   10   182 list 50
+pushb    52  0  581   293   16   16  10  -10  list  50  -3
+pushb    53  0  581   491   16   16  11  -10  list  50  3
+in_text  54  0  318   250  32    1  0  -  bg textbg
 pushb    55  0  568  536   32  32  -16 8
 pushb    56  0  528  536   32  32  -16 7
 label    60  0  404  208  106 10 label 1 align centre font 0 - bg textbg remap 4

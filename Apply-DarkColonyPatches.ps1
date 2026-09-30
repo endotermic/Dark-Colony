@@ -13206,8 +13206,9 @@ function Write-InterfaceSet([string] $GameDir, [string] $Mode, [bool] $Movies) {
         if ($m4.Success -and -not $bg.Success) {
             $x = [int]$m4.Groups[3].Value; $y = [int]$m4.Groups[4].Value
             if ($x -eq 0 -and $y -eq 0) { continue }
-            # a sub-window dialog: rect and widgets +(dx,dy); `pictures intrface/popp` -> the console plates in INTRF_HD
-            Write-Latin1 (Join-Path $hd $name) (Set-BackgroundHd (Edit-PaddedScript $text $dx0 $dy0 @(($x + $dx0), ($y + $dy0), [int]$m4.Groups[5].Value, [int]$m4.Groups[6].Value))); $written++
+            # a sub-window dialog: rect and widgets +(dx,dy); `pictures intrface/popp` -> the console plates in INTRF_HD,
+            # then the console layout (list window, scroll channel, framed text boxes; doc 10.53)
+            Write-Latin1 (Join-Path $hd $name) (Edit-DialogConsole (Set-BackgroundHd (Edit-PaddedScript $text $dx0 $dy0 @(($x + $dx0), ($y + $dy0), [int]$m4.Groups[5].Value, [int]$m4.Groups[6].Value)))); $written++
             continue
         }
         if ($m4.Success -or -not $m2.Success -or -not $bg.Success) { continue }
@@ -13373,6 +13374,118 @@ function Edit-MusicDialog([string] $Text) {
     return ($out -join "`n")
 }
 
+# hud_console.console_dialog (doc 10.53, DC16_INTERFACE_STYLE_GUIDE.md): a battlefield dialog script on the console
+# plates of INTRF_HD\POPP.SPR.  Only scripts naming intrf_hd/popp are touched.  Position-derived and idempotent, so
+# the tool chain and this script produce the same text in any order: the `list` sits in the rows' list window
+# (x row + 10, y top row + 4, to the bottom row + 11), UP / DOWN (pushb cells 10 / 11 bound to the list) in the
+# scroll channel at x row + 277 (top row + 5 / bottom row - 5) with the `scroll` bar between them (x row + 280,
+# 10 px); a "-" / "+" pair (pushb cells 12 / 13) gets a value box picture (cell 14, 78x24) at ("-" x + 16,
+# "-" y - 4) with its in_text at ("-" x + 23, "-" y + 3); any other in_text (the save name) turns its two rows
+# into plain rows (cell 1) under a name box picture (cell 15, 264x24) at (row + 6, top row + 4), the in_text at
+# (row + 14, top row + 10).  Box pictures are regenerated on every pass, numbered with the lowest free widget ids
+# from 23 in y order, one block after the last picture line.
+$DIALOG_WIDGETS = @('pushb', 'checkb', 'in_text', 'picture', 'list', 'scroll', 'gadget', 'label', 'count', 'scount', 'group')
+$DIGITS = [regex] '^\d+$'
+function Get-PushbCell([string[]] $t) {             # `-16 8` = plate 8, `10 -10` = UP arrow 10
+    for ($k = 7; $k -le 8 -and $k -lt $t.Count; $k++) { if ($DIGITS.IsMatch($t[$k])) { return [int]$t[$k] } }
+    return -1
+}
+function Edit-DialogConsole([string] $Text) {
+    if (-not [regex]::IsMatch($Text, '(?im)^[ \t]*pictures[ \t]+intrf_hd/popp\b')) { return $Text }
+    $lines = $Text.Split("`n")
+    $rec = @{}
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        $body = $lines[$i]; $p = $body.IndexOf('%'); if ($p -ge 0) { $body = $body.Substring(0, $p) }
+        $t = @([regex]::Matches($body, '\S+') | ForEach-Object { $_.Value })
+        if ($t.Count -ge 5 -and $DIALOG_WIDGETS -contains $t[0].ToLower() -and $DIGITS.IsMatch($t[1]) -and $DIGITS.IsMatch($t[3]) -and $DIGITS.IsMatch($t[4])) {
+            $rec[$i] = @{ kind = $t[0].ToLower(); id = [int]$t[1]; t = $t }
+        }
+    }
+    $keys = @($rec.Keys | Sort-Object)
+    $rows = @()
+    foreach ($i in $keys) {
+        $r = $rec[$i]
+        if ($r.kind -eq 'picture' -and $r.t.Count -ge 8 -and $DIGITS.IsMatch($r.t[7]) -and [int]$r.t[7] -le 5) {
+            $rows += @{ line = $i; y = [int]$r.t[4]; x = [int]$r.t[3]; cell = [int]$r.t[7] }
+        }
+    }
+    if ($rows.Count -eq 0) { return $Text }
+    $rowX = ($rows | ForEach-Object { $_.x } | Measure-Object -Minimum).Minimum
+    $changes = @{}
+    # lists with their scroll channel
+    foreach ($i in $keys) {
+        $r = $rec[$i]; if ($r.kind -ne 'list') { continue }
+        $y0 = [int]$r.t[4]; $h = [int]$r.t[6]
+        $lr = @($rows | Where-Object { (3, 4, 5) -contains $_.cell -and $_.y -gt ($y0 - 16) -and $_.y -lt ($y0 + $h) } | ForEach-Object { $_.y })
+        if ($lr.Count -eq 0) { continue }
+        $top = ($lr | Measure-Object -Minimum).Minimum; $bottom = ($lr | Measure-Object -Maximum).Maximum
+        $ly = $top + 4
+        $changes[$i] = @{ 4 = [string]($rowX + 10); 5 = [string]$ly; 7 = [string]($bottom + 12 - $ly) }
+        foreach ($j in $keys) {
+            $q = $rec[$j]; $qy = [int]$q.t[4]
+            if ($q.kind -eq 'scroll' -and $qy -ge $top -and $qy -le ($bottom + 16)) {
+                $changes[$j] = @{ 4 = [string]($rowX + 280); 5 = [string]($top + 21); 6 = '10'; 7 = [string]($bottom - $top - 26) }
+            } elseif ($q.kind -eq 'pushb' -and $q.t.Count -gt 8 -and (@($q.t[8..($q.t.Count - 1)]) -contains 'list') -and ((10, 11) -contains (Get-PushbCell $q.t)) -and $qy -ge ($top - 16) -and $qy -le ($bottom + 16)) {
+                if ((Get-PushbCell $q.t) -eq 10) { $ay = $top + 5 } else { $ay = $bottom - 5 }
+                $changes[$j] = @{ 4 = [string]($rowX + 277); 5 = [string]$ay }
+            }
+        }
+    }
+    # text boxes
+    $boxes = @()
+    $minus = @()
+    foreach ($i in $keys) { $r = $rec[$i]; if ($r.kind -eq 'pushb' -and (Get-PushbCell $r.t) -eq 12) { $minus += , @([int]$r.t[3], [int]$r.t[4]) } }
+    foreach ($i in $keys) {
+        $r = $rec[$i]; if ($r.kind -ne 'in_text') { continue }
+        $ty = [int]$r.t[4]
+        $pair = $null
+        foreach ($m in $minus) { if ([Math]::Abs($m[1] - $ty) -le 8) { $pair = $m; break } }
+        if ($null -ne $pair) {
+            $boxes += @{ y = ($pair[1] - 4); x = ($pair[0] + 16); cell = 14 }
+            $changes[$i] = @{ 4 = [string]($pair[0] + 23); 5 = [string]($pair[1] + 3) }
+        } else {
+            $top = ($rows | Where-Object { $_.y -le $ty } | ForEach-Object { $_.y } | Measure-Object -Maximum).Maximum
+            foreach ($rw in $rows) {
+                if (($rw.y -eq $top -or $rw.y -eq ($top + 16)) -and (3, 4, 5) -contains $rw.cell) {
+                    if (-not $changes.ContainsKey($rw.line)) { $changes[$rw.line] = @{} }
+                    $changes[$rw.line][8] = '1'
+                }
+            }
+            $boxes += @{ y = ($top + 4); x = ($rowX + 6); cell = 15 }
+            $changes[$i] = @{ 4 = [string]($rowX + 14); 5 = [string]($top + 10) }
+        }
+    }
+    # apply the changes, drop the old box pictures, insert the new ones after the last picture line
+    $out = New-Object System.Collections.Generic.List[string]
+    $lastPicture = -1; $used = @{}
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        $raw = $lines[$i]
+        if ($rec.ContainsKey($i)) {
+            $r = $rec[$i]
+            if ($r.kind -eq 'picture' -and $r.t.Count -ge 8 -and $DIGITS.IsMatch($r.t[7]) -and ((14, 15) -contains [int]$r.t[7])) { continue }
+            $used[$r.id] = $true
+            if ($changes.ContainsKey($i)) {
+                $cr = ''; if ($raw.EndsWith("`r")) { $cr = "`r"; $raw = $raw.Substring(0, $raw.Length - 1) }
+                $p = $raw.IndexOf('%')
+                if ($p -ge 0) { $raw = (Set-ScriptTokens $raw.Substring(0, $p) $changes[$i]) + $raw.Substring($p) } else { $raw = Set-ScriptTokens $raw $changes[$i] }
+                $raw = $raw + $cr
+            }
+            if ($r.kind -eq 'picture') { $lastPicture = $out.Count }
+        }
+        $out.Add($raw)
+    }
+    $cr = ''; if ($out[$lastPicture].EndsWith("`r")) { $cr = "`r" }
+    $next = 23; $new = @()
+    foreach ($b in ($boxes | Sort-Object -Property @{ Expression = { $_.y } }, @{ Expression = { $_.x } })) {
+        while ($used.ContainsKey($next)) { $next++ }
+        $w = 78; if ($b.cell -eq 15) { $w = 264 }
+        $new += (('picture  {0}  0  {1}   {2}  {3}  24   {4}' -f $next, $b.x, $b.y, $w, $b.cell) + $cr)
+        $next++
+    }
+    if ($new.Count -gt 0) { $out.InsertRange($lastPicture + 1, [string[]] $new) }
+    return ($out -join "`n")
+}
+
 # The copies of that dialog the Dark Colony Ultimate exe reads in its three campaign modes: HD sizes
 # exp\intrf_hd\lopte, dc\intrf_hd\lopte, ozi_ns\intrf_hd\lopte from INTRF_HD\LOPTE (the set just written);
 # 640x480 exp\intrface\lopme, dc\intrface\lopme, ozi_ns\intrface\lopme from the stock INTRFACE\LOPTE (the exe's
@@ -13382,7 +13495,7 @@ function Write-MusicDialogs([string] $GameDir, [string] $Mode) {
     $stock = ($Mode -eq '640x480')
     $src = if ($stock) { Find-CI (Join-Path $GameDir 'INTRFACE') 'LOPTE' } else { Find-CI (Join-Path $GameDir 'INTRF_HD') 'LOPTE' }
     if (-not $src) { return @('options dialog copies NOT written: LOPTE is missing') }
-    $t = Edit-MusicDialog (Read-Latin1 $src)
+    $t = Edit-DialogConsole (Edit-MusicDialog (Read-Latin1 $src))
     $name = if ($stock) { 'lopme' } else { 'lopte' }
     $sub = if ($stock) { 'intrface' } else { 'intrf_hd' }
     $lines = @()

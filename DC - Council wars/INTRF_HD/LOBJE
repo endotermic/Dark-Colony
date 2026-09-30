@@ -30,10 +30,10 @@ picture  18   0  304   512  288  32   2
 
 textmsg 1 OBJECTIVES
 
-list     50  0  324   291  256 169  scroll 51  -  read_only bg textbg remap 4
-scroll   51  0  590   304   10   144 list 50
-pushb    52  0  587   288   16   16  10  -10  list  50  -3
-pushb    53  0  587   448   16   16  11  -10  list  50  3
+list     50  0  314   292  256 168  scroll 51  -  read_only bg textbg remap 4
+scroll   51  0  584   309   10   134 list 50
+pushb    52  0  581   293   16   16  10  -10  list  50  -3
+pushb    53  0  581   443   16   16  11  -10  list  50  3
 pushb    56  0  568  472   32  32  -16 7
 label    60  0  404  256  106 10 label 1 align centre font 0 - bg textbg remap 4
 
