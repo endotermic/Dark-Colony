@@ -13380,28 +13380,32 @@ function Edit-MusicDialog([string] $Text) {
     return ($out -join "`n")
 }
 
-# hud_console.console_dialog (doc 10.53 / 10.54, DC16_INTERFACE_STYLE_GUIDE.md): a battlefield dialog script on the
+# hud_console.console_dialog (doc 10.53 / 10.54, DC16_INTERFACE_STYLE_GUIDE.md §6): a battlefield dialog script on the
 # console plates of INTRF_HD\POPP.SPR.  Only scripts naming intrf_hd/popp are touched.  Position-derived and idempotent,
-# so the tool chain and this script produce the same text in any order.  List dialogs: the `list` sits in the rows'
-# list window (x row + 10, y top row + 4, to the bottom row + 11), UP / DOWN (pushb cells 10 / 11 bound to the list) in
-# the scroll channel at x row + 277 (top row + 5 / bottom row - 5) with the `scroll` bar between them (x row + 280,
-# 10 px); an in_text without a "-" / "+" pair (the save name) turns its two rows into plain rows (cell 1) under a name
-# box picture (cell 15, 264x24) at (row + 6, top row + 4), the in_text at (row + 14, top row + 10).  A dialog with
-# "-" / "+" pairs (the options dialog) is the options form of the pre-battle menus: rows 3..last one framed panel
-# (cells 16 / 17 / 18; rows 0..2 the blank cells 25 / 24), the title a font-1 (MFONTO2) label centred in a header box
-# (cell 19, 292x44 at row + 6, y0 + 4 - it fills the space between the border and the panel; the label's rect
-# 284x28 at + 4 / + 13 inside it, or its black background erases the box's frame), every option one capsule strip picture (cell 23, 282x24 at row + 11, y0 + 58 + 32 k: the lobby's element
-# frames - label 140, "<" 22, value 70, ">" 32 - joined by grey bars) with the label at row + 27 (116 px), the value
-# in_text at row + 188 and KNOBE's arrows (cells 21 / 22) at row + 161 / + 265 on y0 + 63 + 32 k, CANCEL / OK as 90x26
-# text buttons (cell 20, textmsg 8 / 7) at row + 56 / + 158 under the last option; font 0 MFONTO5, bright_pushed 8 /
-# bright_highlight 4.  Box pictures are
-# regenerated on every pass, numbered with the lowest free widget ids from 23 in y order, one block after the last
-# picture line.
+# so the tool chain and this script produce the same text in any order.  Every dialog is a form: rows 0..2 are the blank
+# cells 25 / 24 under the header box (cell 19, 292x44 at row + 6, y0 + 4) with the title as a font-1 (MFONTO2) label
+# inside it (284x28 at + 4 / + 13), the red title / label plates (cell 6) are dropped, the buttons are the lobby's text
+# buttons (cell 20 = 90x26, cell 26 = 180x26, `label centre N 2` with font 2 = MFONTO5), font 0 becomes MFONTO5 for the
+# options form only, bright_pushed 8 / bright_highlight 4.
+# List dialogs: the `list` sits in the rows' list window (x row + 10, y top row + 4, to the bottom row + 11), UP / DOWN
+# (pushb cells 10 / 11 bound to the list) in the scroll channel at x row + 277 (top row + 5 / bottom row - 5) with the
+# `scroll` bar between them (x row + 280, 10 px); an in_text (the save name) turns its two rows blank under a name box
+# picture (cell 15, 264x24) at (row + 6, top row + 4), the in_text at (row + 14, top row + 10); OK (id 56) at row + 158
+# (a lone OK at + 107) and CANCEL (id 55) at row + 56 as 90x26 text buttons on their own y.  The quit dialog (pushb 57):
+# two 180x26 buttons at row + 62 with textmsg 2 / 3, the two label widgets dropped.  The options dialog ("-" / "+"
+# pairs): rows 3..last one framed panel (cells 16 / 17 / 18), every option a capsule strip picture (cell 23, 282x24 at
+# row + 11, y0 + 58 + 32 k) with the label at row + 27 (116 px), the in_text at row + 188 and KNOBE's arrows (cells
+# 21 / 22) at row + 161 / + 265 on y0 + 63 + 32 k, CANCEL / OK under the last option.  Box pictures are regenerated on
+# every pass, numbered with the lowest free widget ids from 23 in y order, one block after the last picture line; the
+# OK / CANCEL texts (textmsg 7 / 8) are re-placed right after the first textmsg line.
 $DIALOG_WIDGETS = @('pushb', 'checkb', 'in_text', 'picture', 'list', 'scroll', 'gadget', 'label', 'count', 'scount', 'group')
 $DIGITS = [regex] '^\d+$'
 function Get-PushbCell([string[]] $t) {             # `-16 8` = plate 8, `10 -10` = UP arrow 10, `-11 21` = plate 21
     for ($k = 7; $k -le 8 -and $k -lt $t.Count; $k++) { if ($DIGITS.IsMatch($t[$k])) { return [int]$t[$k] } }
     return -1
+}
+function Get-TextButton([int] $n, [int] $x, [int] $y, [int] $w, [int] $cell, [int] $msg) {
+    return ('pushb    {0}  0  {1}  {2}   {3}  26  -11 {4}  label centre {5} 2  -  remap 0' -f $n, $x, $y, $w, $cell, $msg)
 }
 function Edit-DialogConsole([string] $Text) {
     if (-not [regex]::IsMatch($Text, '(?im)^[ \t]*pictures[ \t]+intrf_hd/popp\b')) { return $Text }
@@ -13426,7 +13430,15 @@ function Edit-DialogConsole([string] $Text) {
     $rowX = ($rows | ForEach-Object { $_.x } | Measure-Object -Minimum).Minimum
     $changes = @{}; $rebuilt = @{}; $drop = @{}; $boxes = @()
     $minus = @()
-    foreach ($i in $keys) { $r = $rec[$i]; if ($r.kind -eq 'pushb' -and ((12, 21) -contains (Get-PushbCell $r.t))) { $minus += , @([int]$r.t[3], [int]$r.t[4]) } }
+    $quitForm = $false; $hasCancel = $false
+    foreach ($i in $keys) {
+        $r = $rec[$i]
+        if ($r.kind -eq 'pushb') {
+            if ((12, 21) -contains (Get-PushbCell $r.t)) { $minus += , @([int]$r.t[3], [int]$r.t[4]) }
+            if ($r.id -eq 57) { $quitForm = $true }
+            if ($r.id -eq 55) { $hasCancel = $true }
+        }
+    }
     # lists with their scroll channel
     foreach ($i in $keys) {
         $r = $rec[$i]; if ($r.kind -ne 'list') { continue }
@@ -13446,57 +13458,82 @@ function Edit-DialogConsole([string] $Text) {
             }
         }
     }
+    # the form frame every dialog shares: blank rows under the header box, the title inside it, no red plates
+    $ordered = @($rows | Sort-Object -Property @{ Expression = { $_.y } })
+    $y0 = $ordered[0].y
+    for ($k = 0; $k -lt 3 -and $k -lt $ordered.Count; $k++) {
+        $rw = $ordered[$k]
+        if (-not $changes.ContainsKey($rw.line)) { $changes[$rw.line] = @{} }
+        if ($k -eq 0) { $changes[$rw.line][8] = '25' } else { $changes[$rw.line][8] = '24' }
+    }
+    $boxes += @{ y = ($y0 + 4); x = ($rowX + 6); cell = 19 }
+    $ms = @($minus | Sort-Object -Property @{ Expression = { $_[1] } })
+    $optionOf = { param($ty) for ($k = 0; $k -lt $ms.Count; $k++) { if ([Math]::Abs($ms[$k][1] - $ty) -le 8) { return $k } }; return -1 }
+    foreach ($i in $keys) {
+        $r = $rec[$i]
+        if ($r.kind -eq 'picture' -and $r.t.Count -ge 8 -and $r.t[7] -eq '6') { $drop[$i] = $true }
+        elseif ($r.kind -eq 'label' -and ($r.t -contains 'centre') -and ((& $optionOf ([int]$r.t[4])) -lt 0)) {
+            $changes[$i] = @{ 4 = [string]($rowX + 10); 5 = [string]($y0 + 17); 6 = '284'; 7 = '28'; 13 = '1' }
+        }
+    }
     if ($minus.Count -gt 0) {
         # the options form
-        $ordered = @($rows | Sort-Object -Property @{ Expression = { $_.y } })
-        $y0 = $ordered[0].y
-        for ($k = 0; $k -lt $ordered.Count; $k++) {
+        for ($k = 3; $k -lt $ordered.Count; $k++) {
             $rw = $ordered[$k]
-            if ($k -eq 0) { $cell = 25 } elseif ($k -lt 3) { $cell = 24 } elseif ($k -eq 3) { $cell = 16 } elseif ($k -eq $ordered.Count - 1) { $cell = 18 } else { $cell = 17 }
+            if ($k -eq 3) { $cell = 16 } elseif ($k -eq $ordered.Count - 1) { $cell = 18 } else { $cell = 17 }
             if (-not $changes.ContainsKey($rw.line)) { $changes[$rw.line] = @{} }
             $changes[$rw.line][8] = [string]$cell
         }
-        $boxes += @{ y = ($y0 + 4); x = ($rowX + 6); cell = 19 }
-        $ms = @($minus | Sort-Object -Property @{ Expression = { $_[1] } })
         for ($k = 0; $k -lt $ms.Count; $k++) { $boxes += @{ y = ($y0 + 58 + 32 * $k); x = ($rowX + 11); cell = 23 } }
         foreach ($i in $keys) {
             $r = $rec[$i]; $ty = [int]$r.t[4]
-            $o = -1
-            for ($k = 0; $k -lt $ms.Count; $k++) { if ([Math]::Abs($ms[$k][1] - $ty) -le 8) { $o = $k; break } }
+            $o = & $optionOf $ty
             $pc = Get-PushbCell $r.t
-            if ($r.kind -eq 'picture' -and $r.t.Count -ge 8 -and $r.t[7] -eq '6') {
-                $drop[$i] = $true
-            } elseif ($r.kind -eq 'pushb' -and ((12, 21, 13, 22) -contains $pc)) {
+            if ($r.kind -eq 'pushb' -and ((12, 21, 13, 22) -contains $pc)) {
                 if ($o -lt 0) { continue }
                 if ((13, 22) -contains $pc) { $px = $rowX + 265; $pcell = '22' } else { $px = $rowX + 161; $pcell = '21' }
                 $changes[$i] = @{ 4 = [string]$px; 5 = [string]($y0 + 63 + 32 * $o); 8 = '-11'; 9 = $pcell }
             } elseif ($r.kind -eq 'pushb' -and ((55, 56) -contains $r.id)) {
                 $by = $y0 + 63 + 32 * $ms.Count
-                if ($r.id -eq 56) { $bx = $rowX + 158; $msg = 7 } else { $bx = $rowX + 56; $msg = 8 }
-                $rebuilt[$i] = ('pushb    {0}  0  {1}  {2}   90  26  -11 20  label centre {3} 0  -  remap 0' -f $r.id, $bx, $by, $msg)
+                if ($r.id -eq 56) { $rebuilt[$i] = Get-TextButton 56 ($rowX + 158) $by 90 20 7 } else { $rebuilt[$i] = Get-TextButton 55 ($rowX + 56) $by 90 20 8 }
             } elseif ($r.kind -eq 'in_text') {
                 if ($o -ge 0) { $changes[$i] = @{ 4 = [string]($rowX + 188); 5 = [string]($y0 + 63 + 32 * $o + 1) } }
             } elseif ($r.kind -eq 'label') {
                 if ($o -ge 0) { $changes[$i] = @{ 4 = [string]($rowX + 27); 5 = [string]($y0 + 63 + 32 * $o + 1); 6 = '116'; 7 = '14' } }
-                elseif ($r.t -contains 'centre') { $changes[$i] = @{ 4 = [string]($rowX + 10); 5 = [string]($y0 + 17); 6 = '284'; 7 = '28'; 13 = '1' } }
             }
         }
     } else {
+        # the save / objectives / quit dialogs
         foreach ($i in $keys) {
-            $r = $rec[$i]; if ($r.kind -ne 'in_text') { continue }
-            $ty = [int]$r.t[4]
-            $top = ($rows | Where-Object { $_.y -le $ty } | ForEach-Object { $_.y } | Measure-Object -Maximum).Maximum
-            foreach ($rw in $rows) {
-                if (($rw.y -eq $top -or $rw.y -eq ($top + 16)) -and (3, 4, 5) -contains $rw.cell) {
-                    if (-not $changes.ContainsKey($rw.line)) { $changes[$rw.line] = @{} }
-                    $changes[$rw.line][8] = '1'
+            $r = $rec[$i]
+            if ($r.kind -eq 'in_text') {
+                $ty = [int]$r.t[4]
+                $top = ($rows | Where-Object { $_.y -le $ty } | ForEach-Object { $_.y } | Measure-Object -Maximum).Maximum
+                foreach ($rw in $rows) {
+                    if ($rw.y -eq $top -or $rw.y -eq ($top + 16)) {
+                        if (-not $changes.ContainsKey($rw.line)) { $changes[$rw.line] = @{} }
+                        $changes[$rw.line][8] = '24'
+                    }
                 }
+                $boxes += @{ y = ($top + 4); x = ($rowX + 6); cell = 15 }
+                $changes[$i] = @{ 4 = [string]($rowX + 14); 5 = [string]($top + 10) }
+            } elseif ($r.kind -eq 'pushb' -and ((55, 56, 57) -contains $r.id) -and -not ($r.t.Count -gt 8 -and (@($r.t[8..($r.t.Count - 1)]) -contains 'list'))) {
+                $by = [int]$r.t[4]
+                if ($quitForm) {
+                    if ($r.id -eq 56) { $msg = 2 } else { $msg = 3 }
+                    $rebuilt[$i] = Get-TextButton $r.id ($rowX + 62) $by 180 26 $msg
+                } elseif ($r.id -eq 56) {
+                    if ($hasCancel) { $ox = $rowX + 158 } else { $ox = $rowX + 107 }
+                    $rebuilt[$i] = Get-TextButton 56 $ox $by 90 20 7
+                } else {
+                    $rebuilt[$i] = Get-TextButton 55 ($rowX + 56) $by 90 20 8
+                }
+            } elseif ($quitForm -and $r.kind -eq 'label' -and -not ($r.t -contains 'centre')) {
+                $drop[$i] = $true
             }
-            $boxes += @{ y = ($top + 4); x = ($rowX + 6); cell = 15 }
-            $changes[$i] = @{ 4 = [string]($rowX + 14); 5 = [string]($top + 10) }
         }
     }
-    # apply the changes, drop the old box pictures (and the red plates of an options form), insert the new boxes
+    # apply the changes, drop the old box pictures and the red plates, insert the new boxes after the last picture line
     $out = New-Object System.Collections.Generic.List[string]
     $lastPicture = -1; $used = @{}
     for ($i = 0; $i -lt $lines.Count; $i++) {
@@ -13526,27 +13563,30 @@ function Edit-DialogConsole([string] $Text) {
         $next++
     }
     if ($new.Count -gt 0) { $out.InsertRange($lastPicture + 1, [string[]] $new) }
-    if ($minus.Count -gt 0) {
-        # the options form's header lines: font 0 MFONTO5, font 1 MFONTO2, the hover brightness, OK / CANCEL texts (each once)
-        $text = ($out -join "`n")
-        $res = New-Object System.Collections.Generic.List[string]
-        foreach ($line in $out) {
-            $body = $line; $lcr = ''; if ($body.EndsWith("`r")) { $lcr = "`r"; $body = $body.Substring(0, $body.Length - 1) }
-            $body = [regex]::Replace($body, '(?i)^(\s*font\s+0\s+)intrface/mfonto7\b', '${1}intrface/mfonto5')
-            $res.Add($body + $lcr)
-            if ([regex]::IsMatch($body, '^\s*font_offset\s+0\s') -and -not [regex]::IsMatch($text, '(?im)^\s*font\s+1\s')) {
-                $res.Add('font 1 intrface/mfonto2' + $lcr); $res.Add('font_offset  1 31' + $lcr)
-            }
-            if ([regex]::IsMatch($body, '^\s*colour\s+selbg\s') -and -not [regex]::IsMatch($text, '(?im)^\s*bright_pushed\s')) {
-                $res.Add('bright_pushed    8' + $lcr); $res.Add('bright_highlight 4' + $lcr)
-            }
-            if ([regex]::IsMatch($body, '^\s*textmsg\s+5\s') -and -not [regex]::IsMatch($text, '(?m)^\s*textmsg\s+7\s')) {
-                $res.Add('textmsg 7 OK' + $lcr); $res.Add('textmsg 8 CANCEL' + $lcr)
-            }
+    # the form's header lines: font 0 MFONTO5, font 1 MFONTO2, the hover brightness, OK / CANCEL texts after the first textmsg
+    $kept = New-Object System.Collections.Generic.List[string]
+    foreach ($line in $out) { if (-not [regex]::IsMatch($line, '^\s*(textmsg\s+(7|8)|font\s+[12]|font_offset\s+[12]|bright_pushed|bright_highlight)\s')) { $kept.Add($line) } }
+    $text = ($kept -join "`n")
+    $firstMsg = -1
+    for ($i = 0; $i -lt $kept.Count; $i++) { if ([regex]::IsMatch($kept[$i], '^\s*textmsg\s+\d+\s')) { $firstMsg = $i; break } }
+    $res = New-Object System.Collections.Generic.List[string]
+    for ($i = 0; $i -lt $kept.Count; $i++) {
+        $line = $kept[$i]
+        $body = $line; $lcr = ''; if ($body.EndsWith("`r")) { $lcr = "`r"; $body = $body.Substring(0, $body.Length - 1) }
+        if ($minus.Count -gt 0) { $body = [regex]::Replace($body, '(?i)^(\s*font\s+0\s+)intrface/mfonto7\b', '${1}intrface/mfonto5') }
+        $res.Add($body + $lcr)
+        if ([regex]::IsMatch($body, '^\s*font_offset\s+0\s')) {
+            $res.Add('font 1 intrface/mfonto2' + $lcr); $res.Add('font_offset  1 31' + $lcr)
+            $res.Add('font 2 intrface/mfonto5' + $lcr); $res.Add('font_offset  2 31' + $lcr)
         }
-        $out = $res
+        if ([regex]::IsMatch($body, '^\s*colour\s+selbg\s')) {
+            $res.Add('bright_pushed    8' + $lcr); $res.Add('bright_highlight 4' + $lcr)
+        }
+        if (-not $quitForm -and $i -eq $firstMsg) {
+            $res.Add('textmsg 7 OK' + $lcr); $res.Add('textmsg 8 CANCEL' + $lcr)
+        }
     }
-    return ($out -join "`n")
+    return ($res -join "`n")
 }
 
 # The copies of that dialog the Dark Colony Ultimate exe reads in its three campaign modes: HD sizes

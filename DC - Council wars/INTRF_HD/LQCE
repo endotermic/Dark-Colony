@@ -1,27 +1,31 @@
-size 304 304 304 176
+size 752 520 304 176
 pictures intrf_hd/popp
 font 0 intrface/mfonto7
 font_offset  0 31
+font 1 intrface/mfonto2
+font_offset  1 31
+font 2 intrface/mfonto5
+font_offset  2 31
 colour erase  0 0 0
 colour textbg  0 0 0
 colour selbg  0 255 0
+bright_pushed    8
+bright_highlight 4
 
 %        # desc  x    y    w    h
 
-picture  0   0  304   304  288  32   0
-picture  1   0  304   320  288  32   1
-picture  2   0  304   336  288  32   1
-picture  3   0  400   312  288  32   6
-picture  4   0  304   352  288  32   1
-picture  5   0  304   368  288  32   1
-picture  6   0  304   384  288  32   1
-picture  11   0  304   400  288  32   1
-picture  12   0  304   416  288  32   1
-picture  13   0  304   432  288  32   1
-picture  14   0  304   448  288  32   1
-picture  15   0  304   464  288  32   2
-picture  20   0  336   368  288  32   6
-picture  21   0  336   416  288  32   6
+picture  0   0  752   520  288  32   25
+picture  1   0  752   536  288  32   24
+picture  2   0  752   552  288  32   24
+picture  4   0  752   568  288  32   1
+picture  5   0  752   584  288  32   1
+picture  6   0  752   600  288  32   1
+picture  11   0  752   616  288  32   1
+picture  12   0  752   632  288  32   1
+picture  13   0  752   648  288  32   1
+picture  14   0  752   664  288  32   1
+picture  15   0  752   680  288  32   2
+picture  23  0  758   524  292  44   19
 
 
 textmsg 1 REALLY QUIT?
@@ -33,10 +37,8 @@ textmsg 3 NO, CONTINUE
 %pushb    52  0  392   144   16   16  10  -10  list  50  -3
 %pushb    53  0  392   304   16   16  11  -10  list  50  3q
 
-pushb    56  0  536  364   32  32  -16 7
-pushb    57  0  536  412   32  32  -16 8
-label    60  0  404  320  106 10 label 1 align centre font 0 - bg textbg remap 4
-label    61  0  340  376  106 10 label 2 align left font 0 - bg textbg remap 4
-label    62  0  340  424  106 10 label 3 align left font 0 - bg textbg remap 4
+pushb    56  0  814  580   180  26  -11 26  label centre 2 2  -  remap 0
+pushb    57  0  814  628   180  26  -11 26  label centre 3 2  -  remap 0
+label    60  0  762  537  284 28 label 1 align centre font 1 - bg textbg remap 4
 
 end

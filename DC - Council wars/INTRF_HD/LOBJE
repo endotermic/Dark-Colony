@@ -1,40 +1,48 @@
-size 304 240 304 272 
+size 752 456 304 272 
 pictures intrf_hd/popp
 font 0 intrface/mfonto7
 font_offset  0 31
+font 1 intrface/mfonto2
+font_offset  1 31
+font 2 intrface/mfonto5
+font_offset  2 31
 colour erase  0 0 0
 colour textbg  0 0 0
 colour selbg  0 255 0
+bright_pushed    8
+bright_highlight 4
 
 %        # desc  x    y    w    h
 
-picture  0   0  304   240   288  32   0
-picture  1   0  304   256  288  32   1
-picture  2   0  304   272  288  32   1
-picture  3   0  400   248  288  32   6
-picture  4   0  304   288  288  32   3
-picture  5   0  304   304  288  32   4
-picture  6   0  304   320  288  32   4
-picture  7   0  304   336  288  32   4
-picture  8   0  304   352  288  32   4
-picture  9   0  304   368  288  32   4
-picture  10   0  304   384  288  32   4
-picture  11   0  304   400  288  32   4
-picture  12   0  304   416  288  32   4
-picture  13   0  304   432  288  32   4
-picture  14   0  304   448  288  32   5
-picture  15   0  304   464  288  32   1
-picture  16   0  304   480  288  32   1
-picture  17   0  304   496  288  32   1
-picture  18   0  304   512  288  32   2
+picture  0   0  752   456   288  32   25
+picture  1   0  752   472  288  32   24
+picture  2   0  752   488  288  32   24
+picture  4   0  752   504  288  32   3
+picture  5   0  752   520  288  32   4
+picture  6   0  752   536  288  32   4
+picture  7   0  752   552  288  32   4
+picture  8   0  752   568  288  32   4
+picture  9   0  752   584  288  32   4
+picture  10   0  752   600  288  32   4
+picture  11   0  752   616  288  32   4
+picture  12   0  752   632  288  32   4
+picture  13   0  752   648  288  32   4
+picture  14   0  752   664  288  32   5
+picture  15   0  752   680  288  32   1
+picture  16   0  752   696  288  32   1
+picture  17   0  752   712  288  32   1
+picture  18   0  752   728  288  32   2
+picture  23  0  758   460  292  44   19
 
 textmsg 1 OBJECTIVES
+textmsg 7 OK
+textmsg 8 CANCEL
 
-list     50  0  314   292  256 168  scroll 51  -  read_only bg textbg remap 4
-scroll   51  0  584   309   10   134 list 50
-pushb    52  0  581   293   16   16  10  -10  list  50  -3
-pushb    53  0  581   443   16   16  11  -10  list  50  3
-pushb    56  0  568  472   32  32  -16 7
-label    60  0  404  256  106 10 label 1 align centre font 0 - bg textbg remap 4
+list     50  0  762   508  256 168  scroll 51  -  read_only bg textbg remap 4
+scroll   51  0  1032   525   10   134 list 50
+pushb    52  0  1029   509   16   16  10  -10  list  50  -3
+pushb    53  0  1029   659   16   16  11  -10  list  50  3
+pushb    56  0  859  688   90  26  -11 20  label centre 7 2  -  remap 0
+label    60  0  762  473  284 28 label 1 align centre font 1 - bg textbg remap 4
 
 end

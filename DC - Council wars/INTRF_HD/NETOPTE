@@ -1,4 +1,4 @@
-size 0 0 1024 768
+size 0 0 1920 1200
 %text intrface/knob               % Text Graphics   (10000+snum)
 pictures intrface/knobe           % Text Graphics   (10000+snum)
 font 0 intrface/mfonto5           % font
@@ -10,28 +10,28 @@ colour  1               0 0 0
 
 %       number  desc    xpos    ypos    width   height  normal  pushed  flags
 
-checkb  0       0       230      185      178     24      -11     0       label centre 1 0 - remap 0
-checkb  1       0       230      233      178     24      -11     0       label centre 2 0 - remap 0
-checkb  2       0       230      281     178     24      -11     0       label centre 3 0 - remap 0
-checkb  3       0       230      329     178     24      -11     0       label centre 4 0 - remap 0
+checkb  0       0       678      401      178     24      -11     0       label centre 1 0 - remap 0
+checkb  1       0       678      449      178     24      -11     0       label centre 2 0 - remap 0
+checkb  2       0       678      497     178     24      -11     0       label centre 3 0 - remap 0
+checkb  3       0       678      545     178     24      -11     0       label centre 4 0 - remap 0
 
-pushb   4       0       646     521     178     24      -11     0       label centre 5 0 - remap 0
-pushb   5       0       646     553     178     24      -11     0       label centre 6 0 - remap 0
-pushb   6       0       646     585     178     24      -11     0       label centre 7 0 - remap 0
+pushb   4       0       1094     737     178     24      -11     0       label centre 5 0 - remap 0
+pushb   5       0       1094     769     178     24      -11     0       label centre 6 0 - remap 0
+pushb   6       0       1094     801     178     24      -11     0       label centre 7 0 - remap 0
 
-gadget  7       0       230      185      179     25      LARGEBUTTON  anim_oneoff
-gadget  8       0       230      233      179     25      LARGEBUTTON  anim_stopped
-gadget  9       0       230      281     179     25      LARGEBUTTON  anim_stopped
-gadget  10      0       230      329     179     25      LARGEBUTTON  anim_stopped
-gadget  11      0       646     521     179     25      LARGEBUTTON  anim_stopped
-gadget  12      0       646     553     179     25      LARGEBUTTON  anim_stopped
-gadget  13      0       646     585     179     25      LARGEBUTTON  anim_stopped
+gadget  7       0       678      401      179     25      LARGEBUTTON  anim_oneoff
+gadget  8       0       678      449      179     25      LARGEBUTTON  anim_stopped
+gadget  9       0       678      497     179     25      LARGEBUTTON  anim_stopped
+gadget  10      0       678      545     179     25      LARGEBUTTON  anim_stopped
+gadget  11      0       1094     737     179     25      LARGEBUTTON  anim_stopped
+gadget  12      0       1094     769     179     25      LARGEBUTTON  anim_stopped
+gadget  13      0       1094     801     179     25      LARGEBUTTON  anim_stopped
 
-gadget  14      0       352     440     152     168     NETA         anim_stopped unmask - bg 1
-gadget  15      0       536     480     104     136     NETB         anim_stopped unmask - bg 1
-gadget  16      0       440     192      64      158     NETC         anim_stopped unmask - bg 1
-gadget  17      0       664     148       108     8       NETD         anim_stopped unmask - bg 1
-gadget  18      0       552     427     232     40      NETE         anim_stopped unmask - bg 1
+gadget  14      0       800     656     152     168     NETA         anim_stopped unmask - bg 1
+gadget  15      0       984     696     104     136     NETB         anim_stopped unmask - bg 1
+gadget  16      0       888     408      64      158     NETC         anim_stopped unmask - bg 1
+gadget  17      0       1112     364       108     8       NETD         anim_stopped unmask - bg 1
+gadget  18      0       1000     643     232     40      NETE         anim_stopped unmask - bg 1
 
 banim   19  0  7 7  7 8 9 10 11 12 13  0 1 2 3 4 5 6
 
