@@ -1,48 +1,46 @@
 size 304 272 308 240
 pictures intrf_hd/popp
-font 0 intrface/mfonto7
+font 0 intrface/mfonto5
 font_offset  0 31
+font 1 intrface/mfonto2
+font_offset  1 31
 colour erase  0 0 0
 colour textbg  0 0 0
 colour selbg  0 255 0
+bright_pushed    8
+bright_highlight 4
 
 %        # desc  x    y    w    h
 
-picture  3   0  400   280  288  32   6
 
 picture  0   0  304   272  288  32   0
 picture  1   0  304   288  288  32   1
 picture  2   0  304   304  288  32   1
-picture  4   0  304   320  288  32   1
-picture  5   0  304   336  288  32   1
-picture  6   0  304   352  288  32   1
-picture  7   0  304   368  288  32   1
-picture  8   0  304   384  288  32   1
-picture  9   0  304   400  288  32   1
+picture  4   0  304   320  288  32   16
+picture  5   0  304   336  288  32   17
+picture  6   0  304   352  288  32   17
+picture  7   0  304   368  288  32   17
+picture  8   0  304   384  288  32   17
+picture  9   0  304   400  288  32   17
 
-picture  10  0  304   416  288  32   1
-picture  11  0  304   432  288  32   1
+picture  10  0  304   416  288  32   17
+picture  11  0  304   432  288  32   17
 
-picture  12  0  304   448  288  32   1
-picture  13  0  304   464  288  32   1
-picture  14  0  304   480  288  32   1
+picture  12  0  304   448  288  32   17
+picture  13  0  304   464  288  32   17
+picture  14  0  304   480  288  32   17
 
-picture  15  0  304   496  288  32   2
+picture  15  0  304   496  288  32   18
+picture  23  0  310   286  292  32   19
 
-picture  16  0  344   332  288  32   6
-picture  17  0  344   364  288  32   6
-picture  18  0  344   396  288  32   6
-picture  19  0  344   428  288  32   6
-picture  23  0  480   332  78  24   14
-picture  24  0  480   364  78  24   14
-picture  25  0  480   396  78  24   14
-picture  26  0  480   428  78  24   14
 
 textmsg 1 OPTIONS
 textmsg 2 GAME SPEED
 textmsg 3 SOUND VOLUME
 textmsg 4 GAME DETAIL
 textmsg 5 CDROM VOLUME
+textmsg 7 OK
+textmsg 8 CANCEL
 
 textmsg 10 LOW
 textmsg 11 MEDIUM
@@ -52,26 +50,26 @@ textmsg 12 HIGH
 %scroll   51  0  398   160   5   144 list 50
 %pushb    52  0  392   144   16   16  10  -10  list  50  -3
 %pushb    53  0  392   304   16   16  11  -10  list  50  3
-pushb	 40  0  464  336   14  14  -16 12
-pushb	 41  0  560  336   14  14  -16 13
-pushb	 42  0  464  368   14  14  -16 12
-pushb	 43  0  560  368   14  14  -16 13
-pushb	 67  0  464  400   14  14  -16 12
-pushb	 68  0  560  400   14  14  -16 13
-pushb	 44  0  464  432   14  14  -16 12
-pushb	 45  0  560  432   14  14  -16 13
+pushb	 40  0  498  334   14  14  -11 21
+pushb	 41  0  584  334   14  14  -11 22
+pushb	 42  0  498  366   14  14  -11 21
+pushb	 43  0  584  366   14  14  -11 22
+pushb	 67  0  498  398   14  14  -11 21
+pushb	 68  0  584  398   14  14  -11 22
+pushb	 44  0  498  430   14  14  -11 21
+pushb	 45  0  584  430   14  14  -11 22
 
-in_text  46  0  487  339   8   1   0 align centre  - bg textbg read_only
-in_text  47  0  487  371   8   1   0 align centre  - bg textbg read_only
-in_text  69  0  487  403   8   1   0 align centre  - bg textbg read_only
-in_text  48  0  487  435   8   1   0 align centre  - bg textbg read_only
+in_text  46  0  516  335   8   1   0 align centre  - bg textbg read_only
+in_text  47  0  516  367   8   1   0 align centre  - bg textbg read_only
+in_text  69  0  516  399   8   1   0 align centre  - bg textbg read_only
+in_text  48  0  516  431   8   1   0 align centre  - bg textbg read_only
 
-pushb    55  0  552  476   32  32  -16 8
-pushb    56  0  512  476   32  32  -16 7
-label    60  0  404  288  106 10 label 1 align centre font 0 - bg textbg remap 4
-label    61  0  348  340  100 10 label 2 align left font 0 - bg textbg remap 4
-label    62  0  348  372  100 10 label 3 align left font 0 - bg textbg remap 4
-label    70  0  348  404  100 10 label 5 align left font 0 - bg textbg remap 4
-label    63  0  348  436  100 10 label 4 align left font 0 - bg textbg remap 4
+pushb    55  0  360  462   90  26  -11 20  label centre 8 0  -  remap 0
+pushb    56  0  462  462   90  26  -11 20  label centre 7 0  -  remap 0
+label    60  0  310  290  292 32 label 1 align centre font 1 - bg textbg remap 4
+label    61  0  320  335  172 14 label 2 align left font 0 - bg textbg remap 4
+label    62  0  320  367  172 14 label 3 align left font 0 - bg textbg remap 4
+label    70  0  320  399  172 14 label 5 align left font 0 - bg textbg remap 4
+label    63  0  320  431  172 14 label 4 align left font 0 - bg textbg remap 4
 
 end
