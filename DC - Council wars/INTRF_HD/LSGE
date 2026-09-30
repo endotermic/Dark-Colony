@@ -1,4 +1,4 @@
-size 752 408 304 386
+size 304 192 304 386
 pictures intrf_hd/popp
 font 0 intrface/mfonto5
 font_offset  0 31
@@ -14,45 +14,45 @@ bright_highlight 4
 
 %        # desc  x    y    w    h
 
-picture  19   0  752   408   28  32   25
-picture  20   0  752   424   28  32   24
-picture  21   0  752   440   28  32   24
-picture  0   0  752   456   28  32   24
-picture  1   0  752   472  28  32   24
-picture  2   0  752   488  28  32   1
-picture  4   0  752   504  28  32   3
-picture  5   0  752   520  28  32   4
-picture  6   0  752   536  288  32   4
-picture  7   0  752   552  288  32   4
-picture  8   0  752   568  288  32   4
-picture  9   0  752   584  288  32   4
-picture  10   0  752   600  288  32   4
-picture  11   0  752   616  288  32   4
-picture  12   0  752   632  288  32   4
-picture  13   0  752   648  288  32   4
-picture  14   0  752   664  288  32   4
-picture  15   0  752   680  288  32   4
-picture  16   0  752   696  288  32   4
-picture  17   0  752   712  288  32   5
-picture  18   0  752   728  288  32   1
-picture  22   0  752   744  288  32   1
-picture  23   0  752   760  288  32   1
-picture  24   0  752   776  288  32   1
-picture  25  0  758   412  292  44   19
-picture  26  0  758   460  264  24   15
+picture  19   0  304   192   28  32   25
+picture  20   0  304   208   28  32   24
+picture  21   0  304   224   28  32   24
+picture  0   0  304   240   28  32   24
+picture  1   0  304   256  28  32   24
+picture  2   0  304   272  28  32   1
+picture  4   0  304   288  28  32   3
+picture  5   0  304   304  28  32   4
+picture  6   0  304   320  288  32   4
+picture  7   0  304   336  288  32   4
+picture  8   0  304   352  288  32   4
+picture  9   0  304   368  288  32   4
+picture  10   0  304   384  288  32   4
+picture  11   0  304   400  288  32   4
+picture  12   0  304   416  288  32   4
+picture  13   0  304   432  288  32   4
+picture  14   0  304   448  288  32   4
+picture  15   0  304   464  288  32   4
+picture  16   0  304   480  288  32   4
+picture  17   0  304   496  288  32   5
+picture  18   0  304   512  288  32   1
+picture  22   0  304   528  288  32   1
+picture  23   0  304   544  288  32   1
+picture  24   0  304   560  288  32   1
+picture  25  0  310   196  292  44   19
+picture  26  0  310   244  264  24   15
 
 textmsg 1 Save Game
 textmsg 7 OK
 textmsg 8 CANCEL
 
-list     50  0  762   508  256 216  scroll 51  -  bg textbg remap 4
-scroll   51  0  1032   525   10   182 list 50
-pushb    52  0  1029   509   16   16  10  -10  list  50  -3
-pushb    53  0  1029   707   16   16  11  -10  list  50  3
-in_text  54  0  766   466  32    1  0  -  bg textbg
-pushb    55  0  808  752   90  26  -11 20  label centre 8 2  -  remap 0
-pushb    56  0  910  752   90  26  -11 20  label centre 7 2  -  remap 0
-label    60  0  762  425  284 28 label 1 align centre font 1 - bg textbg remap 4
+list     50  0  314   292  256 216  scroll 51  -  bg textbg remap 4
+scroll   51  0  584   309   10   182 list 50
+pushb    52  0  581   293   16   16  10  -10  list  50  -3
+pushb    53  0  581   491   16   16  11  -10  list  50  3
+in_text  54  0  318   250  32    1  0  -  bg textbg
+pushb    55  0  360  536   90  26  -11 20  label centre 8 2  -  remap 0
+pushb    56  0  462  536   90  26  -11 20  label centre 7 2  -  remap 0
+label    60  0  314  209  284 28 label 1 align centre font 1 - bg textbg remap 4
 
 
 %pushb    55  0   50  355   90   26  -11 2  label centre 1 0  -  remap 0
