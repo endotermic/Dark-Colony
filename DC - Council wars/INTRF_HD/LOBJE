@@ -28,10 +28,10 @@ picture  11   0  304   400  288  32   4
 picture  12   0  304   416  288  32   4
 picture  13   0  304   432  288  32   4
 picture  14   0  304   448  288  32   5
-picture  15   0  304   464  288  32   1
-picture  16   0  304   480  288  32   1
-picture  17   0  304   496  288  32   1
-picture  18   0  304   512  288  32   2
+picture  15   0  304   464  288  32   17
+picture  16   0  304   480  288  32   17
+picture  17   0  304   496  288  32   17
+picture  18   0  304   512  288  32   18
 picture  23  0  310   244  292  44   19
 
 textmsg 1 OBJECTIVES

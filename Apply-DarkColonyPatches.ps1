@@ -13387,13 +13387,15 @@ function Edit-MusicDialog([string] $Text) {
 # inside it (284x28 at + 4 / + 13), the red title / label plates (cell 6) are dropped, the buttons are the lobby's text
 # buttons (cell 20 = 90x26, cell 26 = 180x26, `label centre N 2` with font 2 = MFONTO5), font 0 becomes MFONTO5 for the
 # options form only, bright_pushed 8 / bright_highlight 4.
-# List dialogs: the `list` sits in the rows' list window (x row + 10, y top row + 4, to the bottom row + 11), UP / DOWN
-# (pushb cells 10 / 11 bound to the list) in the scroll channel at x row + 277 (top row + 5 / bottom row - 5) with the
-# `scroll` bar between them (x row + 280, 10 px); an in_text (the save name) turns its two rows blank under a name box
-# picture (cell 15, 264x24) at (row + 6, top row + 4), the in_text at (row + 14, top row + 10); OK (id 56) at row + 158
+# Rows 3..last of EVERY dialog are one framed black panel (cells 16 / 17 / 18; doc 10.55).  List dialogs: the list rows
+# are compartments of that panel (cell 3 when the list starts at the panel's top, 27 for a list top inside the panel,
+# 4 middle, 5 bottom), the `list` sits in the rows' list window (x row + 10, y top row + 4, to the bottom row + 11), UP /
+# DOWN (pushb cells 10 / 11 bound to the list) in the scroll channel at x row + 277 (top row + 5 / bottom row - 5) with
+# the `scroll` bar between them (x row + 280, 10 px); an in_text (the save name) gets a name box picture (cell 15,
+# 280x24) inside the panel at (row + 12, top row + 6), the in_text at (row + 20, top row + 12); OK (id 56) at row + 158
 # (a lone OK at + 107) and CANCEL (id 55) at row + 56 as 90x26 text buttons on their own y.  The quit dialog (pushb 57):
 # two 180x26 buttons at row + 62 with textmsg 2 / 3, the two label widgets dropped.  The options dialog ("-" / "+"
-# pairs): rows 3..last one framed panel (cells 16 / 17 / 18), every option a capsule strip picture (cell 23, 282x24 at
+# pairs): every option a capsule strip picture (cell 23, 282x24 at
 # row + 11, y0 + 58 + 32 k) with the label at row + 27 (116 px), the in_text at row + 188 and KNOBE's arrows (cells
 # 21 / 22) at row + 161 / + 265 on y0 + 63 + 32 k, CANCEL / OK under the last option.  Box pictures are regenerated on
 # every pass, numbered with the lowest free widget ids from 23 in y order, one block after the last picture line; the
@@ -13422,7 +13424,7 @@ function Edit-DialogConsole([string] $Text) {
     $rows = @()
     foreach ($i in $keys) {
         $r = $rec[$i]
-        if ($r.kind -eq 'picture' -and $r.t.Count -ge 8 -and $DIGITS.IsMatch($r.t[7]) -and ((0, 1, 2, 3, 4, 5, 16, 17, 18, 24, 25) -contains [int]$r.t[7])) {
+        if ($r.kind -eq 'picture' -and $r.t.Count -ge 8 -and $DIGITS.IsMatch($r.t[7]) -and ((0, 1, 2, 3, 4, 5, 16, 17, 18, 24, 25, 27) -contains [int]$r.t[7])) {
             $rows += @{ line = $i; y = [int]$r.t[4]; x = [int]$r.t[3]; cell = [int]$r.t[7] }
         }
     }
@@ -13443,7 +13445,7 @@ function Edit-DialogConsole([string] $Text) {
     foreach ($i in $keys) {
         $r = $rec[$i]; if ($r.kind -ne 'list') { continue }
         $y0 = [int]$r.t[4]; $h = [int]$r.t[6]
-        $lr = @($rows | Where-Object { (3, 4, 5) -contains $_.cell -and $_.y -gt ($y0 - 16) -and $_.y -lt ($y0 + $h) } | ForEach-Object { $_.y })
+        $lr = @($rows | Where-Object { (3, 4, 5, 27) -contains $_.cell -and $_.y -gt ($y0 - 16) -and $_.y -lt ($y0 + $h) } | ForEach-Object { $_.y })
         if ($lr.Count -eq 0) { continue }
         $top = ($lr | Measure-Object -Minimum).Minimum; $bottom = ($lr | Measure-Object -Maximum).Maximum
         $ly = $top + 4
@@ -13503,20 +13505,34 @@ function Edit-DialogConsole([string] $Text) {
             }
         }
     } else {
-        # the save / objectives / quit dialogs
+        # the save / objectives / quit dialogs: rows 3..last the same black panel, the list rows its compartments
+        # (list rows = list-cell rows inside a `list` widget's y range: the stock save dialog frames its name
+        # field with two list cells that are panel rows here)
+        $listY = @()
+        foreach ($i in $keys) {
+            $r = $rec[$i]; if ($r.kind -ne 'list') { continue }
+            $ly0 = [int]$r.t[4]; $lh = [int]$r.t[6]
+            $listY += @($rows | Where-Object { (3, 4, 5, 27) -contains $_.cell -and $_.y -gt ($ly0 - 16) -and $_.y -lt ($ly0 + $lh) } | ForEach-Object { $_.y })
+        }
+        $lTop = -1; $lBottom = -1
+        if ($listY.Count -gt 0) { $lTop = ($listY | Measure-Object -Minimum).Minimum; $lBottom = ($listY | Measure-Object -Maximum).Maximum }
+        for ($k = 3; $k -lt $ordered.Count; $k++) {
+            $rw = $ordered[$k]
+            if ($listY -contains $rw.y) {
+                if ($rw.y -eq $lTop) { if ($k -eq 3) { $cell = 3 } else { $cell = 27 } } elseif ($rw.y -eq $lBottom) { $cell = 5 } else { $cell = 4 }
+            } else {
+                if ($k -eq 3) { $cell = 16 } elseif ($k -eq $ordered.Count - 1) { $cell = 18 } else { $cell = 17 }
+            }
+            if (-not $changes.ContainsKey($rw.line)) { $changes[$rw.line] = @{} }
+            $changes[$rw.line][8] = [string]$cell
+        }
         foreach ($i in $keys) {
             $r = $rec[$i]
             if ($r.kind -eq 'in_text') {
                 $ty = [int]$r.t[4]
                 $top = ($rows | Where-Object { $_.y -le $ty } | ForEach-Object { $_.y } | Measure-Object -Maximum).Maximum
-                foreach ($rw in $rows) {
-                    if ($rw.y -eq $top -or $rw.y -eq ($top + 16)) {
-                        if (-not $changes.ContainsKey($rw.line)) { $changes[$rw.line] = @{} }
-                        $changes[$rw.line][8] = '24'
-                    }
-                }
-                $boxes += @{ y = ($top + 4); x = ($rowX + 6); cell = 15 }
-                $changes[$i] = @{ 4 = [string]($rowX + 14); 5 = [string]($top + 10) }
+                $boxes += @{ y = ($top + 6); x = ($rowX + 12); cell = 15 }
+                $changes[$i] = @{ 4 = [string]($rowX + 20); 5 = [string]($top + 12) }
             } elseif ($r.kind -eq 'pushb' -and ((55, 56, 57) -contains $r.id) -and -not ($r.t.Count -gt 8 -and (@($r.t[8..($r.t.Count - 1)]) -contains 'list'))) {
                 $by = [int]$r.t[4]
                 if ($quitForm) {
@@ -13558,7 +13574,7 @@ function Edit-DialogConsole([string] $Text) {
     foreach ($b in ($boxes | Sort-Object -Property @{ Expression = { $_.y } }, @{ Expression = { $_.x } })) {
         while ($used.ContainsKey($next)) { $next++ }
         $w = 78; $hh = 24
-        if ($b.cell -eq 15) { $w = 264 } elseif ($b.cell -eq 19) { $w = 292; $hh = 44 } elseif ($b.cell -eq 23) { $w = 282 }
+        if ($b.cell -eq 15) { $w = 280 } elseif ($b.cell -eq 19) { $w = 292; $hh = 44 } elseif ($b.cell -eq 23) { $w = 282 }
         $new += (('picture  {0}  0  {1}   {2}  {3}  {4}   {5}' -f $next, $b.x, $b.y, $w, $hh, $b.cell) + $cr)
         $next++
     }

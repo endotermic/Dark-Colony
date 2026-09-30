@@ -17,14 +17,14 @@ bright_highlight 4
 picture  0   0  304   304  288  32   25
 picture  1   0  304   320  288  32   24
 picture  2   0  304   336  288  32   24
-picture  4   0  304   352  288  32   1
-picture  5   0  304   368  288  32   1
-picture  6   0  304   384  288  32   1
-picture  11   0  304   400  288  32   1
-picture  12   0  304   416  288  32   1
-picture  13   0  304   432  288  32   1
-picture  14   0  304   448  288  32   1
-picture  15   0  304   464  288  32   2
+picture  4   0  304   352  288  32   16
+picture  5   0  304   368  288  32   17
+picture  6   0  304   384  288  32   17
+picture  11   0  304   400  288  32   17
+picture  12   0  304   416  288  32   17
+picture  13   0  304   432  288  32   17
+picture  14   0  304   448  288  32   17
+picture  15   0  304   464  288  32   18
 picture  23  0  310   308  292  44   19
 
 
