@@ -10,15 +10,17 @@ rem  refuses a script that came from the internet (the GitHub ZIP) - the console
 rem  or, on many PCs, every script.  "-ExecutionPolicy Bypass" lifts that for this one run only; no
 rem  setting of your PC is changed.
 rem
-rem  Double-click: the installer opens (Welcome, one page each for Dark Colony, Dark Colony Ultimate
-rem  and the map editor, Finished).  All three originals of this folder (dc16.exe, ENGEXP16.EXE,
-rem  maped.exe) are ticked with all their fixes: Next, Next, Next, Patch writes "Dark Colony.exe",
-rem  "Dark Colony Ultimate.exe" and "Dark Colony Map Editor.exe" beside them and a desktop
-rem  shortcut of the same name to each.
+rem  Double-click: the installer opens (Welcome, Options, one page each for Dark Colony Ultimate and
+rem  the map editor, Ready to patch, Finished).  Choose the screen resolution and the battlefield
+rem  interface - light (classic) or dark (console style) - once (nothing is preselected; 640x480 is the
+rem  original), the originals of this folder (ENGEXP16.EXE, maped.exe) are ticked with all their fixes,
+rem  and Patch writes "Dark Colony Ultimate.exe" and "Dark Colony Map Editor.exe" beside them and a
+rem  desktop shortcut of the same name to each.  The deprecated Classic "Dark Colony.exe" (dc16.exe) is
+rem  no longer shipped and is written only when its box on the options page is ticked.
 rem  Nothing else is installed.  From a command prompt the command-line options work too:
-rem     INSTALL.CMD -All -DesktopShortcut          (all three, like the window)
+rem     INSTALL.CMD -All -Resolution 1024x768 -Theme dark -DesktopShortcut    (like the window; -IncludeDeprecated adds Dark Colony)
 rem     INSTALL.CMD -List
-rem     INSTALL.CMD -Verify "DC - Council wars\Dark Colony.exe"
+rem     INSTALL.CMD -Verify "DC - Council wars\Dark Colony Ultimate.exe"
 
 "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%~dp0Apply-DarkColonyPatches.ps1" %*
 

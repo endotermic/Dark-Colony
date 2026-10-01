@@ -12,17 +12,24 @@ This repository ships two kinds of executables:
 
   * the PATCHED ones that you normally play (until 25 Sep 2026 they
     were called dc16new.exe, engexp16new.exe, maped_ozi_ns_v1.2.exe)
-        DC - Council wars\Dark Colony.exe
         DC - Council wars\Dark Colony Ultimate.exe
             (Council Wars plus the Dark Colony, OZI and Academy
-            campaigns in its main menu)
+            campaigns in its main menu, and the ONLINE WAR button)
         Dark Colony - Map editor\Dark Colony Map Editor.exe
             (the greyed-out dialog controls of the original enabled -
             what the Polish ozi_ns editor did, minus the translation)
-    (no CD at all, 1024x768 or another resolution, hidden Windows
-    pointer, 32 MiB memory pool, two-monitor fix, the CD music as
-    MP3, a high-resolution icon, ... and for Council Wars the DARK
-    COLONY and OZI MISSIONS menu modes and the ONLINE WAR button)
+    (no CD at all, 1024x768 or another resolution, the battlefield
+    interface light (classic) or dark (console style), hidden Windows
+    pointer, 32 MiB memory pool, 150 % default game speed, two-monitor
+    fix, the CD music as MP3, a high-resolution icon, ... and for
+    Council Wars the DARK COLONY and OZI MISSIONS menu modes and the
+    ONLINE WAR button)
+
+    The patched Classic "Dark Colony.exe" is DEPRECATED and no longer
+    shipped since 1 Oct 2026: Dark Colony Ultimate plays the whole Dark
+    Colony campaign, so the separate Classic executable is no longer
+    needed.  The patcher still writes it, but only when you ask for it
+    (its original dc16.exe stays in the repository).
 
 A hand-modified exe cannot be digitally signed, so some antivirus
 programs dislike it and some players do not trust it.  That is why
@@ -64,10 +71,12 @@ What makes it trustworthy:
      of every result - with all fixes selected each is byte-identical
      to the exe published in the repository and the script says so.
 
-  4) Simple usage: one window, all three executables already found and
-     ticked, one button.  Checkboxes for every fix, a description
-     panel.  No Python, no extra tools - only what comes with Windows
-     (Windows PowerShell 5.1, part of Windows 10 and 11).
+  4) Simple usage: an installer window - choose the screen resolution
+     and the battlefield interface once, the executables are already
+     found and ticked, a summary page, one button.  Checkboxes for
+     every fix, a description panel.  No Python, no extra tools - only
+     what comes with Windows (Windows PowerShell 5.1, part of Windows
+     10 and 11).
 
   5) The starter INSTALL.CMD is a few lines of text too (open it in
      Notepad): it runs the .ps1 beside it with PowerShell and
@@ -118,71 +127,112 @@ What makes it trustworthy:
 
 5) The installer.  It works like any setup program - pages with
    "< Back", "Next >" and "Cancel" at the bottom.  In the simplest case
-   you press "Next >" three times and "Patch" once:
+   you choose the screen resolution and the battlefield interface,
+   press "Next >" through the pages and "Patch" once:
 
    a) WELCOME.  A greeting, the list of the three originals the script
       found beside itself ("OK" = the untouched original, its SHA-256
       checked):
 
-          Dark Colony                  DC - Council wars\dc16.exe
           Dark Colony Ultimate         DC - Council wars\ENGEXP16.EXE
-          Dark Colony Map Editor   Dark Colony - Map editor\maped.exe
+          Dark Colony Map Editor       Dark Colony - Map editor\maped.exe
+          Dark Colony                  DC - Council wars\dc16.exe
+                                       (DEPRECATED - only if asked for)
 
       and the option "Put a shortcut to each patched executable on the
-      desktop" (ticked): shortcuts named "Dark Colony", "Dark Colony
-      Ultimate" and "Dark Colony Map Editor", each starting in its
-      game folder, where the game finds its files (do not copy an exe
-      itself to the desktop).  An older shortcut of the same name is
-      replaced.  Press "Next >".
+      desktop" (ticked): shortcuts named "Dark Colony Ultimate", "Dark
+      Colony Map Editor" (and "Dark Colony" if you patch it), each
+      starting in its game folder, where the game finds its files (do
+      not copy an exe itself to the desktop).  An older shortcut of the
+      same name is replaced.  Press "Next >".
 
-   b) STEP 1 OF 3: DARK COLONY,
-      STEP 2 OF 3: DARK COLONY ULTIMATE,
-      STEP 3 OF 3: DARK COLONY MAP EDITOR - one page per executable:
+   b) STEP 1 OF 4: OPTIONS.  Three choices, made once for both games
+      (they share the INTRF_HD interface folder); NOTHING is
+      preselected and "Next >" stays disabled until the first two are
+      made.  You can come back with "< Back".
+
+      * "Screen resolution" - a drop-down:
+
+          640x480 (original)   - the game as it shipped: no display fix
+          1024x768 (4:3)       - the size of the executables published
+                                 in the repository
+          1280x1024 (5:4), 1280x720 (16:9), 1280x800 (16:10),
+          1920x1080 (16:9), 1920x1200 (16:10), 3840x1080 (32:9)
+
+        The sizes with the aspect ratio of your monitor are marked
+        "recommended for your screen".  Every size but 640x480 selects
+        that size's variant of the display fix and makes the patcher
+        WRITE the INTRF_HD interface set for it (menus, HUD, briefing
+        lists, letterboxed backgrounds, loading screens; a few seconds).
+
+      * "Battlefield interface" - two radio buttons (live at the HD
+        sizes; at 640x480 the game keeps its own interface):
+
+          Light (classic)  - the original brushed-metal battlefield
+                             interface: frame, buttons, dialogs and
+                             clock dial as the game shipped them
+          Dark             - the console style of the menus: grey
+                             pipework frame, red-ringed buttons, black
+                             dialogs, redrawn clock dial
+
+        Data only, plus one 14-byte fix ("console") that points the
+        exe at the redrawn clock dial for the dark interface.  The
+        executables published in the repository are the dark 1024x768
+        build.
+
+      * "Also patch the deprecated Dark Colony (dc16.exe -> Dark
+        Colony.exe)" - unticked.  Dark Colony Ultimate plays the whole
+        Dark Colony campaign with every fix, so the separate Classic
+        executable is no longer needed and no longer shipped.  Leave
+        the box unticked and its page does not appear at all; tick it
+        and the installer gets a fourth executable page (STEP 4 OF 5).
+
+   c) STEP 2 OF 4: DARK COLONY ULTIMATE,
+      STEP 3 OF 4: DARK COLONY MAP EDITOR
+      (and STEP 4 OF 5: DARK COLONY when its box is ticked) - one page
+      per executable:
 
       * "Patch <name>" (ticked) - untick it to leave that executable
         alone.
       * "Original:" the file it is built from, with the status line
         under it, and a "Browse..." button that picks another copy of
         THAT original (for example when the script did not find it).
-      * "Screen resolution" (the two game pages only; the sizes that fit
-        your monitor are marked "recommended for your screen" and the
-        largest of them is already chosen).  It is the same for both
-        games - they share the INTRF_HD folder - so changing it on one
-        page changes it on the other.
+      * "Screen resolution: ...; battlefield interface: ..." - the
+        choices of the options page (the game pages; press "< Back" to
+        change them).
       * the fixes of this executable, all ticked, with "Select all
         fixes".  With all fixes the result is exactly the exe published
-        in the repository.  Click on a fix to read, in the box on the
-        right, what it changes and to see its byte edits.  Fixes that
-        only work together are listed as such (for example "1024x768
-        display" needs "Interface data from INTRF_HD"); the script
-        refuses to write if you select one without the other.
+        in the repository (at 1024x768, dark interface).  Click on a fix to read, in
+        the box on the right, what it changes and to see its byte
+        edits.  Fixes that only work together are listed as such; the
+        script refuses to write if you select one without the other.
 
         A fix labelled "[RESOURCES NOT FOUND]" needs data files that
-        are not in the folder the exe is written to (the 1024x768 menus
-        in INTRF_HD\, the Classic movies AVI\DCINTRO.AVI, DCAENDING.AVI,
-        DCHENDING.AVI, the OZI mission pack in ozi_ns\).  It cannot be
-        ticked, "Select all fixes" skips it, and the box on the right
-        says which files are missing.  Use the complete repository and
-        the label disappears.
+        are not in the folder the exe is written to (the Classic movies
+        AVI\DCINTRO.AVI, DCAENDING.AVI, DCHENDING.AVI, the OZI mission
+        pack in ozi_ns\, the stock INTRFACE\ files the interface set
+        is built from).  It cannot be ticked, "Select all fixes" skips
+        it, and the box on the right says which files are missing.  Use
+        the complete repository and the label disappears.
 
         To get the ORIGINAL 640x480 game that just does not ask for the
-        CD, choose 640x480 and tick only "No CD" (it also stops the game
-        from probing the drive letter recorded at install time, so it
-        works on PCs where drive D: is a card reader, an empty DVD drive
-        or a second hard disk - the original would hang behind a
-        "No Disk" box or stall).
+        CD, choose 640x480 (original) on the options page and tick only
+        "No CD" (it also stops the game from probing the drive letter
+        recorded at install time, so it works on PCs where drive D: is
+        a card reader, an empty DVD drive or a second hard disk - the
+        original would hang behind a "No Disk" box or stall).
       * "Written to:" where the patched exe goes - always next to its
         original, inside its game folder, where its data files are.  It
         never writes over an original.
-
-      On the last page "Next >" becomes "Patch".
 
       A BIG RED BOX instead of the fixes means the original of that page
       cannot be used: it is missing, it is already patched, it is a
       changed copy (another size or SHA-256 than the original), or it is
       no Dark Colony executable at all.  The Welcome page lists every
-      such file in red as well.  The box shows what was found and what
-      is expected (size and SHA-256), and offers:
+      such file in red as well (the deprecated one only when asked
+      for).  The box shows
+      what was found and what is expected (size and SHA-256), and
+      offers:
 
         * "Select the correct file..." - pick an untouched copy;
         * "Download from our repository" - opens the file's page on
@@ -196,23 +246,33 @@ What makes it trustworthy:
           (659456 bytes), which only the repository has.
 
       Until the right file is chosen that executable is not patched (its
-      "Patch <name>" box is locked); the other two can still be.
+      "Patch <name>" box is locked); the others can still be.
 
-   c) PATCH.  If some of the files already exist the script asks once
+   d) STEP 4 OF 4 (5 OF 5): READY TO PATCH.  A summary of everything
+      that is about to happen - the resolution and the battlefield
+      interface, every executable (original ->
+      output, how many fixes, which ones were left out and why, whether
+      the interface set is written, whether an existing file is
+      replaced) or why it is not patched (deprecated and not asked for,
+      unticked, no usable original), and the desktop shortcuts.  Nothing has been written
+      yet; "< Back" changes anything.  Here "Next >" reads "Patch".
+
+   e) PATCH.  If some of the files already exist the script asks once
       before replacing them.  A small "Patching in progress" box names
       each step: executable by executable, fix by fix, then - for an HD
       resolution - the INTRF_HD interface set (a few seconds).  Then a
       message box and the FINISHED page list every executable: written
       (file, size, SHA-256, "byte-identical to the exe published in the
-      repository" with all fixes) or failed (what went wrong, and that
-      nothing was written), and its desktop shortcut.  Press "Close".
+      repository" with all fixes at 1024x768, dark interface) or failed (what went
+      wrong, and that nothing was written), its desktop shortcut, and
+      the skipped ones.  Press "Close".
 
-   d) Start the games with the desktop shortcuts, or with the files
+   f) Start the games with the desktop shortcuts, or with the files
       just written.
 
    "Inspect an exe..." checks any Dark Colony executable and tells you
    which build it is and which fixes it already carries - use it on the
-   downloaded "Dark Colony.exe" / "Dark Colony Ultimate.exe" if you want
+   downloaded "Dark Colony Ultimate.exe" / "Dark Colony.exe" if you want
    to know what is in them.
 
 
@@ -223,20 +283,37 @@ What makes it trustworthy:
    From a command prompt ("cmd") in the repository folder, through the
    starter:
 
-   INSTALL.CMD -All -DesktopShortcut      all three executables, like the window
+   INSTALL.CMD -All -Resolution 1024x768 -Theme dark -DesktopShortcut
+                       Dark Colony Ultimate and the map editor, like the
+                       window; add -IncludeDeprecated for Dark Colony too
    INSTALL.CMD -List                      list the fixes
    INSTALL.CMD -List -Detail              ... with every byte edit
-   INSTALL.CMD -Original "DC - Council wars\dc16.exe" -All
-   INSTALL.CMD -Original "DC - Council wars\dc16.exe" -Patches nocd
-   INSTALL.CMD -Verify "DC - Council wars\Dark Colony.exe"
+   INSTALL.CMD -Original "DC - Council wars\ENGEXP16.EXE" -All -Resolution 1920x1200 -Theme light
+   INSTALL.CMD -Original "DC - Council wars\ENGEXP16.EXE" -Resolution 640x480 -Patches nocd
+   INSTALL.CMD -Original "DC - Council wars\dc16.exe" -All -Resolution 1024x768 -Theme dark
+                       (the deprecated Classic build, explicitly)
+   INSTALL.CMD -Verify "DC - Council wars\Dark Colony Ultimate.exe"
 
    From a PowerShell prompt write  .\Apply-DarkColonyPatches.ps1  instead
    (after  Set-ExecutionPolicy -Scope Process Bypass  if scripts are
    blocked).  Relative paths are taken from the current folder.
 
    Patch ids, in the order they are applied:
-     both games      nocd, resolution, hdpaths, cursor, pool, clock,
-                     ddraw, camera, widemap, restore, longpath, music,
+     both games      nocd,
+                     resolution (ONE fix per screen size since 1 Oct
+                       2026: the screen mode, the INTRF_HD path strings
+                       and the clock hand - until then the three fixes
+                       resolution, hdpaths, clock; not at 640x480),
+                     console (the DARK battlefield interface: the
+                       console-style HUD, dialogs and clock dial, data
+                       written with the interface set + one 14-byte
+                       edit for the dial bank; only with -Theme dark),
+                     cursor, pool,
+                     speed (150 % default game speed, 10 Sep 2026;
+                       dropped 21 Sep, back since 1 Oct 2026; the GAME
+                       SPEED slider still changes it in game),
+                     ddraw, palette, camera, widemap, restore, longpath,
+                     music,
                      menuorder (the menu opens logo, title, buttons,
                        credits instead of buttons first),
                      chat (six battlefield chat lines instead of two,
@@ -262,10 +339,15 @@ What makes it trustworthy:
                        if it is missing, DEFAULT_SERVER.TXT with the address
                        dark-colony-server.fly.dev - an existing file with
                        your own relay address is never overwritten)
-   -Resolution WxH picks the screen size (default 1024x768; -List shows
-   the sizes), -Output sets the target file (with -Original only),
-   -Overwrite allows replacing existing files, -DesktopShortcut adds the
-   desktop shortcuts the window's checkbox makes.
+   -Resolution WxH picks the screen size and is REQUIRED for the two
+   games - there is no default (640x480 = the original size; the
+   published exes are 1024x768; -List shows the sizes), -Theme light
+   or -Theme dark picks the battlefield interface and is REQUIRED at
+   an HD size (the published exes are dark), -Output sets
+   the target file (with -Original only), -Overwrite allows replacing
+   existing files, -DesktopShortcut adds the desktop shortcuts the
+   window's checkbox makes, -IncludeDeprecated makes "-All" without
+   -Original patch the deprecated Dark Colony as well.
 
 
 ---------------------------------------------------------------------
@@ -285,7 +367,7 @@ What makes it trustworthy:
    * "... cannot be loaded because running scripts is disabled" even
      then: your PC is managed (school or company rules).  Play the
      patched exes from the repository: they are the bytes the script
-     writes with all fixes at 1024x768 ("Inspect an exe" / -Verify
+     writes with all fixes at 1024x768, dark interface ("Inspect an exe" / -Verify
      shows it on any PC that can run the script).
 
 
