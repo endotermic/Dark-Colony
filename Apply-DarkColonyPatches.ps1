@@ -16361,8 +16361,8 @@ B 308280 7034c9aaa3fc7a01 DC - Council wars/WALLPAPR/SLUG.BMP
 B 308280 8da9a9a3f2cc8988 DC - Council wars/WALLPAPR/SYTHE.BMP
 B 308280 ff3a01890687e72c DC - Council wars/WALLPAPR/TROOPER.BMP
 T 2257 6a41737407584934 INSTALL.CMD
-T 20019 286068e16d262f56 PATCH_HOWTO.TXT
-T 24661 bd7fea6d77762cc6 README.md
+T 22489 aacb715c50553b53 PATCH_HOWTO.TXT
+T 25696 1730e09f4117792f README.md
 '@
 
 # =================================================================================================
