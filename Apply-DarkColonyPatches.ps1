@@ -19,6 +19,11 @@
         Colony Ultimate.exe" and "Dark Colony Map Editor.exe" (and "Dark Colony.exe" if asked for)
         with a shortcut of the same name on the desktop - or drive it from the command line, see
         the examples
+      * before anything is patched, every file the repository ships (except the patched executables
+        and the interface set this script writes itself) is compared with the manifest embedded in this
+        script: a changed, missing or unreadable file stops the installer with the list of those files
+        and a link to the latest build; and the shipped pictures of the chosen resolution
+        (INTRF_HD\<WxH>\*.GIF) must be the repository's pictures of exactly that size (1 Oct 2026)
       * it never touches the input file; it writes a new file
       * every patch is a list of (file offset, old bytes, new bytes, reason) in plain text below
       * a byte is only written if the file still holds the documented old bytes at that offset
@@ -114,6 +119,11 @@
     failure would look like a bug of the patch.  Each fix's Requires / Data lists say what it
     needs; -List prints them.
 
+.PARAMETER IgnoreIntegrity
+    Patch although game files beside this script are not the repository's (the start-up integrity
+    check lists them), or although the shipped pictures of the chosen resolution are not the
+    repository's.  Without it the script stops with the list and the link to the latest build.
+
 .PARAMETER Theme
     The battlefield interface, REQUIRED for a game at an HD resolution (no default): light = the
     original brushed-metal HUD, dialogs and clock dial (classic); dark = the console style of the
@@ -173,6 +183,7 @@ param(
     [Parameter(ParameterSetName = 'Apply')] [switch] $Overwrite,
     [Parameter(ParameterSetName = 'Apply')] [switch] $Force,
     [Parameter(ParameterSetName = 'Apply')] [switch] $IgnoreMissingData,
+    [Parameter(ParameterSetName = 'Apply')] [switch] $IgnoreIntegrity,
     [Parameter(ParameterSetName = 'Apply')] [switch] $DesktopShortcut,
     [Parameter(ParameterSetName = 'Apply')] [switch] $IncludeDeprecated,
     [Parameter(ParameterSetName = 'List')] [switch] $List,
@@ -13836,6 +13847,2525 @@ directory that lists them); their SHA-256 is checked like every other edit.
 )
 
 # =================================================================================================
+#  INTEGRITY MANIFEST (1 Oct 2026, maintainer: "installer must be sure that all files (except already patched
+#  executables) are correct before patching") - every file the repository ships, one per line:
+#      T|B <size> <first 16 hex digits of the SHA-256> <path relative to this script>
+#  T = text (no NUL byte): compared with every CR removed, so a Git checkout with CRLF line endings passes;
+#  B = binary: size and hash.  Hashed from the repository's index when this script was generated.
+#  Not listed, because this script, the game or the player writes them: the patched executables, the
+#  INTRF_HD interface set and its exp\ dc\ ozi_ns\ intrf_hd copies (written per resolution), minimap caches
+#  (.OVH / .O16), ERROR.LOG, DEFAULT_SERVER.TXT, the HBNFUFL drive-letter files.
+# =================================================================================================
+$RepoPageUrl = 'https://github.com/endotermic/Dark-Colony'
+$RepoDownloadUrl = 'https://github.com/endotermic/Dark-Colony/archive/refs/heads/main.zip'
+$ManifestText = @'
+T 112 19e66751e9f4f1a0 .gitattributes
+T 1322 737129e882f5ebd3 .gitignore
+B 65488 69f3217c74210cc5 Dark Colony - Map editor/BWCC.DLL
+B 211488 1660460fd6253454 Dark Colony - Map editor/BWCC32.DLL
+B 176128 d6177186752e2b38 Dark Colony - Map editor/CW3215MT.DLL
+B 2258 7354fc565df71bcc Dark Colony - Map editor/DeIsL1.isu
+B 336424 e8471a0adcade0d0 Dark Colony - Map editor/maped.exe
+B 12800 34341c68c7d363da Dark Colony - Map editor/readme.doc
+B 79545 811486d8b21d2014 Dark Colony - Map editor/scenario/all.jus
+B 1350540 61a2aed6ac8d36fc Dark Colony - Map editor/scenario/atlantis.bts
+B 2659540 65ad6e8476a01a4b Dark Colony - Map editor/scenario/atlantis.set
+B 1421472 3243b51139cb3cf7 Dark Colony - Map editor/scenario/desert.bts
+B 2107076 d5b9140dd48ad3e8 Dark Colony - Map editor/scenario/desert.set
+B 1357736 ab72a4cb1358de2e Dark Colony - Map editor/scenario/jungle.bts
+B 2017140 8e8a830a896b16f6 Dark Colony - Map editor/scenario/jungle.set
+B 62578 9899142a96ba260c Dark Colony - Map editor/scenario/mplayer/palette.gif
+T 32672 c8807b01168188f4 Dark Colony - Map editor/scenario/mplayer/palette.rgb
+T 67039 3fa4cfd93e88dc9c Dark Colony - Map editor/scenario/mplayer/palette.rmp
+B 217043 3d41c42444ecf20d Dark Colony - Map editor/scenario/mplayer/pmap.exe
+B 52404 c6bf787c974b9919 Dark Colony - Map editor/scenario/mplayer/primes.dat
+B 28535 ce4e47a3693a45a2 Dark Colony - Map editor/scenario/vent.jus
+T 1005 6e75834389164ba4 DC - Council wars/ANIM.DAT
+B 4430 5d3dc059f7b30f3f DC - Council wars/ANIMATE/ABUILDNG.FIN
+B 8640 3d26aa2e19525f3a DC - Council wars/ANIMATE/ACAR.FIN
+B 3040 bb75883f459825c3 DC - Council wars/ANIMATE/ACOM.FIN
+B 22296 b9d017682624a63e DC - Council wars/ANIMATE/AIRD.FIN
+B 96134 99c3d4e4fa0badeb DC - Council wars/ANIMATE/ALBU.FIN
+B 6448 972b8a15170cd2c5 DC - Council wars/ANIMATE/ALIEN1.FIN
+B 3896 9fd40d2e0bfbd05b DC - Council wars/ANIMATE/ANIM.FIN
+B 966 7c5c0dc1f6d8c6cd DC - Council wars/ANIMATE/ART.FIN
+B 780 731284e41b353d62 DC - Council wars/ANIMATE/ARTF.FIN
+B 6448 f33f2d1279913d90 DC - Council wars/ANIMATE/ARTILER2.FIN
+B 55106 84bc2c0a62db56cd DC - Council wars/ANIMATE/ATRIL.FIN
+B 17422 95d5daafd5f83a19 DC - Council wars/ANIMATE/ATTACK1.FIN
+B 4960 4140468c920ca7a3 DC - Council wars/ANIMATE/ATTACK2.FIN
+B 51670 32270eedaa2a3f6b DC - Council wars/ANIMATE/AVII.FIN
+B 45478 08ef8a38d3d0ba56 DC - Council wars/ANIMATE/BARR.FIN
+B 14956 034a2fbe82bb7554 DC - Council wars/ANIMATE/BEAC.FIN
+B 92388 39839d18d99d1463 DC - Council wars/ANIMATE/BEES.FIN
+B 99832 935786b224dfbee8 DC - Council wars/ANIMATE/BEEZ.FIN
+B 35864 eeb1966287f7f51e DC - Council wars/ANIMATE/BEON.FIN
+B 89350 7f1eea56f1cb638e DC - Council wars/ANIMATE/BLEED.FIN
+B 74640 c5440978efed5317 DC - Council wars/ANIMATE/BLEED2.FIN
+B 12298 e11f7cbbe7731a77 DC - Council wars/ANIMATE/BLEED3.FIN
+B 25406 470e4e805de22c37 DC - Council wars/ANIMATE/BLOO.FIN
+B 41796 641f5362f4efbb30 DC - Council wars/ANIMATE/BLUSPARK.FIN
+B 1916 0892dd2566d35223 DC - Council wars/ANIMATE/BRIT.FIN
+B 2282 bcf85b3a4bdffcde DC - Council wars/ANIMATE/BUILDING.FIN
+B 4430 d517aae223c50c7d DC - Council wars/ANIMATE/BUILDNG.FIN
+B 2076 7bc46bc2f4b5caad DC - Council wars/ANIMATE/BUILTILE.FIN
+B 110708 26ed51a0e037f1fb DC - Council wars/ANIMATE/BURN.FIN
+B 85446 b2dd6c3721245166 DC - Council wars/ANIMATE/BURN2.FIN
+B 222 21c7282befda8704 DC - Council wars/ANIMATE/BURN3.FIN
+B 8172 b26a336a8610b884 DC - Council wars/ANIMATE/CAMM.FIN
+B 16052 58cac6fae5085fe6 DC - Council wars/ANIMATE/CENT.FIN
+B 9922 337e0a2ba40de84e DC - Council wars/ANIMATE/CHAA.FIN
+B 9234 cbcffc1897c427e1 DC - Council wars/ANIMATE/CHOA.FIN
+B 8140 18a566b1afd90b2f DC - Council wars/ANIMATE/CRYO.FIN
+B 7466 be86b82588129a07 DC - Council wars/ANIMATE/CURS.FIN
+B 6448 ea1123577560e27b DC - Council wars/ANIMATE/CYBORG.FIN
+B 5430 0757533a94df917e DC - Council wars/ANIMATE/DCSS.FIN
+B 5430 44aa3cb5b63570d7 DC - Council wars/ANIMATE/DCSS_HD.FIN
+B 2276 62cf79f97a3011fa DC - Council wars/ANIMATE/DCUK.FIN
+B 2276 a23b714830acffcc DC - Council wars/ANIMATE/DCUK_HD.FIN
+B 788 68dcf6e2d0d05f38 DC - Council wars/ANIMATE/DCUT.FIN
+B 788 a30c506ce8634f72 DC - Council wars/ANIMATE/DCUT_HD.FIN
+B 13786 8c6977818f28b55d DC - Council wars/ANIMATE/DISH.FIN
+B 222 005e22d43a95de00 DC - Council wars/ANIMATE/DOTT.FIN
+B 16752 b41cf50cd59d8858 DC - Council wars/ANIMATE/DROA.FIN
+B 51370 66e8da41ff0a4722 DC - Council wars/ANIMATE/DROP.FIN
+B 67884 8ef09745fd963539 DC - Council wars/ANIMATE/DROP2.FIN
+B 9508 be48d8c46444ee49 DC - Council wars/ANIMATE/DROP3.FIN
+B 13306 3425eb26d3a47e57 DC - Council wars/ANIMATE/DROP4.FIN
+B 51052 0dc029d02be652dc DC - Council wars/ANIMATE/EFFECTS.FIN
+B 24914 0395e6895fc20b63 DC - Council wars/ANIMATE/ENCA.FIN
+B 19180 e2f29845b5dcc6d4 DC - Council wars/ANIMATE/ENGI.FIN
+B 47864 6cd02d2153bf6921 DC - Council wars/ANIMATE/EXPL.FIN
+B 516 af3dce833de53dd4 DC - Council wars/ANIMATE/FACT.FIN
+B 6840 5254a2d78c89a06a DC - Council wars/ANIMATE/FETU.FIN
+B 11216 9078654f34e89b50 DC - Council wars/ANIMATE/FILL.FIN
+B 9140 8c07be0688e15c26 DC - Council wars/ANIMATE/FIRE.FIN
+B 3192 5b47c9023095b8b3 DC - Council wars/ANIMATE/FLUCTION.FIN
+B 74590 6b32818cf91788b6 DC - Council wars/ANIMATE/FUEL.FIN
+B 8194 c74d2aae652743f8 DC - Council wars/ANIMATE/GASY.FIN
+B 16990 a37b059de5da33b9 DC - Council wars/ANIMATE/GLOG.FIN
+B 9128 a2b3784463d222d1 DC - Council wars/ANIMATE/GLOT.FIN
+B 87616 077887b708009109 DC - Council wars/ANIMATE/GRAY.FIN
+B 16264 06a8869223d4f54a DC - Council wars/ANIMATE/GRND.FIN
+B 27666 39702fdb6d6a1cd2 DC - Council wars/ANIMATE/GRUB.FIN
+B 114458 1cf8220d4d5820cd DC - Council wars/ANIMATE/HAZE.FIN
+B 8454 1fd2b96802444511 DC - Council wars/ANIMATE/HCAR.FIN
+B 4686 d0a6d3dbd4a11807 DC - Council wars/ANIMATE/HEAT.FIN
+B 118860 b27b20282999188e DC - Council wars/ANIMATE/HUBU.FIN
+B 40464 96b317312d506b2f DC - Council wars/ANIMATE/HYYK.FIN
+B 26974 d0aaeaa42c61fcdb DC - Council wars/ANIMATE/KNOBE.FIN
+B 2886 35f8261a892074b3 DC - Council wars/ANIMATE/LEFT.FIN
+B 34120 70e330d9ecdcebcb DC - Council wars/ANIMATE/LENS.FIN
+B 190 61c7a4d9a39ecc53 DC - Council wars/ANIMATE/LIGHT1B.FIN
+B 5284 c4ddd6c9476a1b00 DC - Council wars/ANIMATE/LIGHT1F.FIN
+B 116 258705d6d0f4b705 DC - Council wars/ANIMATE/LIGHT1M.FIN
+B 116 f8c96321f1ec100e DC - Council wars/ANIMATE/LIGHT2B.FIN
+B 5656 88e25a1005d83316 DC - Council wars/ANIMATE/LIGHT2F.FIN
+B 116 364a9e21128e1f82 DC - Council wars/ANIMATE/LIGHT2M.FIN
+B 116 c4a7fcc5ca6d3da0 DC - Council wars/ANIMATE/LIGHT3B.FIN
+B 2146 873cfce6e78919a4 DC - Council wars/ANIMATE/LIGHT3F.FIN
+B 116 f7c2955b20a22f97 DC - Council wars/ANIMATE/LIGHT3M.FIN
+B 116 7335dc972b030129 DC - Council wars/ANIMATE/LIGHT4B.FIN
+B 2146 84bcbca836200e9a DC - Council wars/ANIMATE/LIGHT4F.FIN
+B 116 7d1907e7179a7972 DC - Council wars/ANIMATE/LIGHT4M.FIN
+B 1492 f5629d25cb386b23 DC - Council wars/ANIMATE/LITE.FIN
+B 53816 a6ab5291685672d5 DC - Council wars/ANIMATE/LUNA.FIN
+B 1192 ea4da9f26db96887 DC - Council wars/ANIMATE/MACTOR.FIN
+B 44502 62b809b0fcd2385b DC - Council wars/ANIMATE/MAKT.FIN
+B 23240 5752a6ea2e3bb5e6 DC - Council wars/ANIMATE/MISA.FIN
+B 2268 725fb2ad59421983 DC - Council wars/ANIMATE/MISE.FIN
+B 5616 0403fcaf6c672815 DC - Council wars/ANIMATE/MISH.FIN
+B 6816 83094babc46b3878 DC - Council wars/ANIMATE/MWIN.FIN
+B 145840 9c4d87719ffc5210 DC - Council wars/ANIMATE/N1.FIN
+B 161894 70b45774fec4c799 DC - Council wars/ANIMATE/NAPALM.FIN
+B 17158 84befd6bb2bb7be0 DC - Council wars/ANIMATE/NET.FIN
+B 8248 9195c68067c95f22 DC - Council wars/ANIMATE/NETD.FIN
+B 6212 c707ee2bf6c57c49 DC - Council wars/ANIMATE/NUKE.FIN
+B 50406 410a683cfbafcc28 DC - Council wars/ANIMATE/ORTU.FIN
+B 25176 65df874d78adfffc DC - Council wars/ANIMATE/PART2.FIN
+B 67684 ecc3d563241fd4fa DC - Council wars/ANIMATE/PART3.FIN
+B 44840 726d14cb9347a393 DC - Council wars/ANIMATE/PART4.FIN
+B 222 f549e344d25d3186 DC - Council wars/ANIMATE/PCFO.FIN
+B 4960 b99407a96d72e1fd DC - Council wars/ANIMATE/PHT.FIN
+B 5872 c9640f3023d906ef DC - Council wars/ANIMATE/PORT.FIN
+B 6448 78e41a1202b4d0a1 DC - Council wars/ANIMATE/PSY_R.FIN
+B 64508 24735b9d142797d3 DC - Council wars/ANIMATE/PSYC.FIN
+B 3756 092c5b9c46a41f17 DC - Council wars/ANIMATE/PUFF.FIN
+B 3756 2e8fdbc5e0f74827 DC - Council wars/ANIMATE/PUSB.FIN
+B 2324 9a96ab6d237ad5fd DC - Council wars/ANIMATE/PUST.FIN
+B 8814 c2b6e8be91cee564 DC - Council wars/ANIMATE/RACK.FIN
+B 55408 44d1e85d5a28bca0 DC - Council wars/ANIMATE/REAP.FIN
+B 2640 dcb2c990ef0a3534 DC - Council wars/ANIMATE/RESA.FIN
+B 2640 10321ddd5c14ecf5 DC - Council wars/ANIMATE/RESN.FIN
+B 24398 07b9fb9e12cf00b5 DC - Council wars/ANIMATE/RNAT.FIN
+B 17536 7a4aa44ebb7b9a4d DC - Council wars/ANIMATE/ROBO.FIN
+B 20658 b0a50e428b78d233 DC - Council wars/ANIMATE/SALA.FIN
+B 28018 14805d218ad01a17 DC - Council wars/ANIMATE/SALY.FIN
+B 130894 3c29f398dfdb315c DC - Council wars/ANIMATE/SARG.FIN
+B 70234 e3378e2f627df255 DC - Council wars/ANIMATE/SAUC.FIN
+B 72464 33fea87c7688d98a DC - Council wars/ANIMATE/SAUC2.FIN
+B 92676 2c26f3882e9e07ba DC - Council wars/ANIMATE/SAUC3.FIN
+B 20440 14ff0c939946a214 DC - Council wars/ANIMATE/SAUC4.FIN
+B 96566 7c9b19edfd72193b DC - Council wars/ANIMATE/SAWS.FIN
+B 6608 a23898d671bac878 DC - Council wars/ANIMATE/SCFG.FIN
+B 24480 5504da63bf959105 DC - Council wars/ANIMATE/SCGM.FIN
+B 9776 a760d6d3441fa800 DC - Council wars/ANIMATE/SCOU.FIN
+B 3312 78f7a032ae711a21 DC - Council wars/ANIMATE/SCOUT1.FIN
+B 6802 d8f3ac3ec3b2db26 DC - Council wars/ANIMATE/SCOUT2.FIN
+B 1896 46dc20baaabfe571 DC - Council wars/ANIMATE/SCUT.FIN
+B 44276 a07924ca5d72d666 DC - Council wars/ANIMATE/SCYT.FIN
+B 40518 12fe0602f9e096eb DC - Council wars/ANIMATE/SCYTH.FIN
+B 17840 132093f713be6cda DC - Council wars/ANIMATE/SERA.FIN
+B 6044 91f5a668fa208da4 DC - Council wars/ANIMATE/SERA2.FIN
+B 31740 a3395d73fab6244d DC - Council wars/ANIMATE/SERG.FIN
+B 11888 647d4f811eb74d7e DC - Council wars/ANIMATE/SHLITZ.FIN
+B 3570 1dc3eeaed28a440f DC - Council wars/ANIMATE/SHOK.FIN
+B 22144 1e8f9bf14946495a DC - Council wars/ANIMATE/SHRI.FIN
+B 20688 54b62a8a750695fc DC - Council wars/ANIMATE/SLOM.FIN
+B 62384 f1b813f0607aab42 DC - Council wars/ANIMATE/SLUG.FIN
+B 6332 04ec47435e1047cd DC - Council wars/ANIMATE/SMAE.FIN
+B 2638 68e7aaf1585837b0 DC - Council wars/ANIMATE/SMAY.FIN
+B 5058 597bfd1b670fa2b3 DC - Council wars/ANIMATE/SMOA.FIN
+B 3620 05032820993cd8dc DC - Council wars/ANIMATE/SMSP.FIN
+B 252 651bd0c1fdde6647 DC - Council wars/ANIMATE/SMSP2.FIN
+B 230 798c5e4525e00cab DC - Council wars/ANIMATE/SMSP3.FIN
+B 252 f0f1b3e2cab942a0 DC - Council wars/ANIMATE/SMSP4.FIN
+B 1378 26344889524f1dbf DC - Council wars/ANIMATE/SOLAR.FIN
+B 3756 f9fdb3dbe4860014 DC - Council wars/ANIMATE/SPAC.FIN
+B 4528 fd1a26eb5be810e2 DC - Council wars/ANIMATE/SPAK.FIN
+B 5244 44fbdc46e1604a63 DC - Council wars/ANIMATE/SPAR.FIN
+B 1584 1ad011e335abe8e3 DC - Council wars/ANIMATE/SPARE.FIN
+B 4616 f4ba4d30cb775437 DC - Council wars/ANIMATE/SPED.FIN
+B 21322 cb88670088acaf25 DC - Council wars/ANIMATE/SPID.FIN
+B 22824 9819805d0c8d3d09 DC - Council wars/ANIMATE/SPON.FIN
+B 3012 9390a11cea2a1848 DC - Council wars/ANIMATE/SPUC.FIN
+B 48800 dc9528873475f7f8 DC - Council wars/ANIMATE/TEKT.FIN
+B 11940 784c68dc033ef9c1 DC - Council wars/ANIMATE/TEKTARA.FIN
+B 19840 48163a5a07217330 DC - Council wars/ANIMATE/TMP.FIN
+B 7580 5c4510ba67675eb9 DC - Council wars/ANIMATE/TONG.FIN
+B 16 836764bb0cda7671 DC - Council wars/ANIMATE/TOP.FIN
+B 14474 03665dfc61dcbb87 DC - Council wars/ANIMATE/TORT.FIN
+B 222 9e5637a26681eca1 DC - Council wars/ANIMATE/TOWR.FIN
+B 16818 c440d38595d33642 DC - Council wars/ANIMATE/TOXX.FIN
+B 3312 0054f70b4fd6d259 DC - Council wars/ANIMATE/TRANS.FIN
+B 6448 b3666d2bb9b3bb45 DC - Council wars/ANIMATE/TROOPER1.FIN
+B 7936 b173ec25a265094b DC - Council wars/ANIMATE/TROOPER2.FIN
+B 92108 eb94f6f3fff53b9f DC - Council wars/ANIMATE/TRSC.FIN
+B 9950 6dc904c057dd02c8 DC - Council wars/ANIMATE/TRUK.FIN
+B 634 b4a7811e9ebeb2f2 DC - Council wars/ANIMATE/TSDF.FIN
+B 48884 f0f25f1ae13cfcd6 DC - Council wars/ANIMATE/TURR.FIN
+B 6926 eca5ec5b8b2b27ee DC - Council wars/ANIMATE/VCAL.FIN
+B 6918 1b43ef7879ec4993 DC - Council wars/ANIMATE/VCEA.FIN
+B 10380 9f43206aba24f71a DC - Council wars/ANIMATE/VENT.FIN
+B 74534 ae16a77dd7f65239 DC - Council wars/ANIMATE/WATC.FIN
+B 10564 2dd8f862cd9c4ead DC - Council wars/ANIMATE/WIN.FIN
+B 60716 2c4c436d26db6a49 DC - Council wars/ANIMATE/XENO.FIN
+B 37332 de5990b2cc372c92 DC - Council wars/ANIMATE/ZISP.FIN
+B 1751 c4781afff97d419b DC - Council wars/ATLANTIS.GIF
+T 2 75a11da44c802486 DC - Council wars/ATLANTIS.NCY
+B 32768 2fa199a28d6f4aac DC - Council wars/ATLANTIS.RGB
+B 196608 5d7f64c5a62f1d9b DC - Council wars/ATLANTIS.RMP
+B 2661294 88b89e08c6623c8f DC - Council wars/AVI/ADTEMP.AVI
+B 8119634 8f5b01de1865f9cd DC - Council wars/AVI/AENDING.AVI
+B 4315890 0c191697e201c0ae DC - Council wars/AVI/AFIELD.AVI
+B 6350498 5edc238048fb2c6b DC - Council wars/AVI/ASCRUBB.AVI
+B 3428618 d67682e04a025423 DC - Council wars/AVI/ATAVHD.AVI
+B 9800736 efc0e1b0b3f1e35e DC - Council wars/AVI/ATRAIN.AVI
+B 1955792 cff81cce8b70dbb4 DC - Council wars/AVI/ATRAN1.AVI
+B 2057256 1382e47864e4585a DC - Council wars/AVI/ATRAN2.AVI
+B 2129220 161b94731620bc7b DC - Council wars/AVI/ATRAN3.AVI
+B 2129508 8b75ce40d26c66b1 DC - Council wars/AVI/ATRAN4.AVI
+B 2127950 986c37b1fa47c1a6 DC - Council wars/AVI/ATRAN5.AVI
+B 2129076 a363712bfa0fb4ac DC - Council wars/AVI/ATRAN6.AVI
+B 1727770 24df97a9694a8f7e DC - Council wars/AVI/ATRAN7.AVI
+B 1424012 514b232486db244f DC - Council wars/AVI/AVHD.AVI
+B 2790972 0be6af473f6dd358 DC - Council wars/AVI/AVHD4.AVI
+B 3574776 413e992390fcaac4 DC - Council wars/AVI/AVHD5.AVI
+B 1816692 f18e6f58c3fba53a DC - Council wars/AVI/BARBQ.AVI
+B 2661654 3baff8a3e56f6c3b DC - Council wars/AVI/BODYS.AVI
+B 6036308 980937abb334cd40 DC - Council wars/AVI/CAPTURE.AVI
+B 2571082 4f8fde10fd0b39e2 DC - Council wars/AVI/COUNCIL.AVI
+B 2567864 ce690578d13f37e7 DC - Council wars/AVI/COUNCIL1.AVI
+B 2567324 d51301a09880fe30 DC - Council wars/AVI/COUNCIL2.AVI
+B 4195092 f17f00bacedb88c1 DC - Council wars/AVI/CRAWL.AVI
+B 18607952 a7988c2d611c89a0 DC - Council wars/AVI/DCAENDING.AVI
+B 20527522 13c8e937bbbbc36c DC - Council wars/AVI/DCHENDING.AVI
+B 29336178 dd76fee36d6ae3b1 DC - Council wars/AVI/DCINTRO.AVI
+B 1730120 7a32357db468e795 DC - Council wars/AVI/DESNIGHT.AVI
+B 1884472 d6202ee20c5e3908 DC - Council wars/AVI/DTALK1.AVI
+B 1442116 1a6e1bef98154594 DC - Council wars/AVI/DTALK2.AVI
+B 3863214 08c2012dda455159 DC - Council wars/AVI/ELECTRIC.AVI
+B 2729788 6015183f947052db DC - Council wars/AVI/ESCAPE.AVI
+B 2595634 3c062cf03b4d6d28 DC - Council wars/AVI/HDTEMP.AVI
+B 12532454 f0b2e120b07da4c5 DC - Council wars/AVI/HENDING.AVI
+B 4200518 12a26ad97f3f27fe DC - Council wars/AVI/HFIELD.AVI
+B 2388966 59305a4d6b4bbcaa DC - Council wars/AVI/HJTEMP.AVI
+B 7855174 689af88ee07ac5d3 DC - Council wars/AVI/HTRAIN.AVI
+B 1714600 58a2b6c6251a18c8 DC - Council wars/AVI/HTRAN1.AVI
+B 1571240 9abb89ba2a7e8c37 DC - Council wars/AVI/HTRAN10.AVI
+B 1972810 bc5b451d1427d19f DC - Council wars/AVI/HTRAN2.AVI
+B 1282092 a2898dbe51eab5d2 DC - Council wars/AVI/HTRAN3.AVI
+B 1943674 d353af2d88fcd5a4 DC - Council wars/AVI/HTRAN4.AVI
+B 1656220 3c7095e29c686afa DC - Council wars/AVI/HTRAN5.AVI
+B 1355636 d219401e546b7b7e DC - Council wars/AVI/HTRAN6.AVI
+B 1773272 c91ac86431b7841d DC - Council wars/AVI/HTRAN7.AVI
+B 1673442 69a235eb7db3d3f8 DC - Council wars/AVI/HTRAN8.AVI
+B 967374 229848dfe6943391 DC - Council wars/AVI/HTRAN9.AVI
+B 2691160 0c947c6f81e7f5f4 DC - Council wars/AVI/HVAD.AVI
+B 2747310 e183e5933f20a477 DC - Council wars/AVI/HVAD2.AVI
+B 3413184 3237f0f6962ff209 DC - Council wars/AVI/HVAD5.AVI
+B 3327604 4fa0d37512810303 DC - Council wars/AVI/HVAD6.AVI
+B 17631124 5b37eb64b0cb1f7e DC - Council wars/AVI/INTRO.AVI
+B 2291060 e1b928bbac0ad160 DC - Council wars/AVI/JCRAWL.AVI
+B 2158712 e36141918f543198 DC - Council wars/AVI/JTALK1.AVI
+B 1586854 b2dd3ab314c10512 DC - Council wars/AVI/JTALK2.AVI
+B 2204532 3fc4376f221b04da DC - Council wars/AVI/JTALK3.AVI
+B 2685148 6dcd3216969b1296 DC - Council wars/AVI/KAOXMAKT.AVI
+B 3823286 347095e760f91a8c DC - Council wars/AVI/LENZ.AVI
+B 1715690 7e4f7e396d0c48a9 DC - Council wars/AVI/LIZARDS.AVI
+B 3077748 edfa2072b1420475 DC - Council wars/AVI/PORTALIS.AVI
+B 10156750 b4530cb6c92ba4a2 DC - Council wars/AVI/SCRUB.AVI
+B 3586618 a95b011d41ba5ddb DC - Council wars/AVI/STRATUS.AVI
+B 2565428 06731b7fb4922266 DC - Council wars/AVI/SYLUNGE.AVI
+B 2150758 9ceb3b23b425438a DC - Council wars/AVI/TEKTAARA.AVI
+B 2877508 787db3e472dc3f94 DC - Council wars/AVI/TICK.AVI
+B 3611184 c4b4c73a4f274db0 DC - Council wars/AVI/ULTIMATE.AVI
+B 3325570 beecbccb8f6f9d15 DC - Council wars/AVI/WASTE.AVI
+T 2134 244ab38aacff4890 DC - Council wars/COLOUR.SET
+T 105 597077765808b39a DC - Council wars/CURSOR/CSCRIPT
+B 31330 c614526158b82e99 DC - Council wars/CURSOR/CURS.SPR
+B 614 9ae6cd19e11eb5fb DC - Council wars/CURSOR/CURSOR0.BMP
+B 614 7c05cc962fbcd9ed DC - Council wars/CURSOR/CURSOR1.BMP
+B 738 1f41d90dc7de759b DC - Council wars/CURSOR/CURSOR10.BMP
+B 958 f7b8cdb97ea72c88 DC - Council wars/CURSOR/CURSOR11.BMP
+B 614 392e54dd028695f5 DC - Council wars/CURSOR/CURSOR12.BMP
+B 614 0401868f3e671e5d DC - Council wars/CURSOR/CURSOR13.BMP
+B 614 3bdd13e2744de208 DC - Council wars/CURSOR/CURSOR14.BMP
+B 2398 aa9b1eccea21a335 DC - Council wars/CURSOR/CURSOR15.BMP
+B 738 b6754f46b35f9813 DC - Council wars/CURSOR/CURSOR16.BMP
+B 2618 09e84eeb1e9522dc DC - Council wars/CURSOR/CURSOR17.BMP
+B 486 b8e54cee9a1a4681 DC - Council wars/CURSOR/CURSOR18.BMP
+B 486 9e0608d868b147ee DC - Council wars/CURSOR/CURSOR19.BMP
+B 614 61e4d4c909cff792 DC - Council wars/CURSOR/CURSOR2.BMP
+B 486 8997377e450b57aa DC - Council wars/CURSOR/CURSOR20.BMP
+B 486 bfb5f9c731b03fb2 DC - Council wars/CURSOR/CURSOR21.BMP
+B 486 3b4298135ecc3ae4 DC - Council wars/CURSOR/CURSOR22.BMP
+B 486 a7e22815fd199449 DC - Council wars/CURSOR/CURSOR23.BMP
+B 486 1361635bcbb0621f DC - Council wars/CURSOR/CURSOR24.BMP
+B 486 d7990095d7a3b79c DC - Council wars/CURSOR/CURSOR25.BMP
+B 614 4a57c58e2fb6fe70 DC - Council wars/CURSOR/CURSOR26.BMP
+B 614 5cd703356706fe02 DC - Council wars/CURSOR/CURSOR27.BMP
+B 614 d460037a18a1339d DC - Council wars/CURSOR/CURSOR28.BMP
+B 738 0d6c7a9b445debf7 DC - Council wars/CURSOR/CURSOR29.BMP
+B 658 74b0f618b47ec24d DC - Council wars/CURSOR/CURSOR3.BMP
+B 738 393cd214eb0c7742 DC - Council wars/CURSOR/CURSOR30.BMP
+B 738 0e94f68a3fb8d3b3 DC - Council wars/CURSOR/CURSOR31.BMP
+B 658 ddc5819a2c201def DC - Council wars/CURSOR/CURSOR4.BMP
+B 614 d03517447a96b7c1 DC - Council wars/CURSOR/CURSOR5.BMP
+B 614 a69b17f39031aa2e DC - Council wars/CURSOR/CURSOR6.BMP
+B 738 0d8284ad73cf9f9f DC - Council wars/CURSOR/CURSOR7.BMP
+B 614 c03751c9092a82e5 DC - Council wars/CURSOR/CURSOR8.BMP
+B 778 b25f954d955a10fb DC - Council wars/CURSOR/CURSOR9.BMP
+B 308278 ddfee7946fe6cf78 DC - Council wars/CURSOR/PALETTE.BMP
+B 766 85b1621a6df4510b DC - Council wars/DC.ICO
+T 847 dc892c9977a02fec DC - Council wars/dc/intrface/credits.txt
+B 659456 7c003f85d902dc02 DC - Council wars/dc16.exe
+B 766 1cf3180f1cdd5696 DC - Council wars/DC16.ICO
+B 82440 fad0a22a08f13b4a DC - Council wars/DC_HD.ICO
+B 116368 12de66cc6dcdd17c DC - Council wars/DeIsL1.isu
+B 18910 59dd3eee40a0b4a0 DC - Council wars/DeIsL2.isu
+B 1751 e54c377435e5f40f DC - Council wars/DESERT.GIF
+B 32768 783c399429f9fd95 DC - Council wars/DESERT.RGB
+B 196608 450b62c07f54925f DC - Council wars/DESERT.RMP
+B 874763 6eeb6c7ea0cfb9c5 DC - Council wars/ENCYCLO/ATRIL.SPR
+T 560 d305f8b09d4a16d1 DC - Council wars/ENCYCLO/ATRIL.TXT
+B 239800 bf083e608f3259d8 DC - Council wars/ENCYCLO/ATRIL.WAV
+B 1228455 c26d7bb9455a58c1 DC - Council wars/ENCYCLO/BARR.SPR
+T 497 530e14cc1692beda DC - Council wars/ENCYCLO/BARR.TXT
+B 252040 fccac9dbc276b22e DC - Council wars/ENCYCLO/BARR.WAV
+B 537238 d2a3bcbd9ed4cd90 DC - Council wars/ENCYCLO/BEON.SPR
+T 548 1eb3b55da02c6a26 DC - Council wars/ENCYCLO/BEON.TXT
+B 286600 3747ebb739db144d DC - Council wars/ENCYCLO/BEON.WAV
+B 756860 0eae2393dd9cb626 DC - Council wars/ENCYCLO/CYBO.SPR
+T 371 3e732a7a3694dd4d DC - Council wars/ENCYCLO/CYBO.TXT
+B 293800 8e71092fdc13a2fe DC - Council wars/ENCYCLO/CYBO.WAV
+B 1015211 1c24df4cb58810be DC - Council wars/ENCYCLO/DROP.SPR
+T 587 1386b34e413ce7c7 DC - Council wars/ENCYCLO/DROP.TXT
+B 285156 92740b8c22f47286 DC - Council wars/ENCYCLO/DROP.WAV
+B 723019 15decbd9452aca6f DC - Council wars/ENCYCLO/ENGI.SPR
+T 817 6b70bbbbde15fab4 DC - Council wars/ENCYCLO/ENGI.TXT
+B 261040 193b3d74dc368a8a DC - Council wars/ENCYCLO/ENGI.WAV
+B 1098882 d8b0f42beccb9c41 DC - Council wars/ENCYCLO/EXPL.SPR
+T 797 dea619040ddfe006 DC - Council wars/ENCYCLO/EXPL.TXT
+B 275440 d0d6e8f0d9c793da DC - Council wars/ENCYCLO/EXPL.WAV
+B 317261 5d6f8c261355ae8c DC - Council wars/ENCYCLO/GRAY.SPR
+T 570 23331b4e9956a564 DC - Council wars/ENCYCLO/GRAY.TXT
+B 127484 17f2688215e555b9 DC - Council wars/ENCYCLO/GRAY.WAV
+B 719136 6b262f13aae02fa2 DC - Council wars/ENCYCLO/HYK.SPR
+T 801 932dd5329f70e741 DC - Council wars/ENCYCLO/HYK.TXT
+B 296512 5721e363d44b3ba6 DC - Council wars/ENCYCLO/HYK.WAV
+B 611957 329324d78e66e6bf DC - Council wars/ENCYCLO/LNA.SPR
+T 860 049314f0b64fafc1 DC - Council wars/ENCYCLO/LNA.TXT
+B 301720 44f5fb06c889d10f DC - Council wars/ENCYCLO/LNA.WAV
+B 778949 19cc7e3b96e26780 DC - Council wars/ENCYCLO/LNS.SPR
+T 800 1637c7c85d3f878c DC - Council wars/ENCYCLO/LNS.TXT
+B 316116 5b53e81d1564751f DC - Council wars/ENCYCLO/LNS.WAV
+B 457296 619cd490b21099fa DC - Council wars/ENCYCLO/MKT.SPR
+T 824 017f1d253e433631 DC - Council wars/ENCYCLO/MKT.TXT
+B 258520 a5685a7e2c10a0a6 DC - Council wars/ENCYCLO/MKT.WAV
+B 540289 d5a9c7b1131dfc8f DC - Council wars/ENCYCLO/ORTU.SPR
+T 646 a431455ab3ac961f DC - Council wars/ENCYCLO/ORTU.TXT
+B 260320 908f541a1962065f DC - Council wars/ENCYCLO/ORTU.WAV
+B 949750 297f13d22ebf5fc2 DC - Council wars/ENCYCLO/PSYCH.SPR
+T 757 8da7dda5c124658a DC - Council wars/ENCYCLO/PSYCH.TXT
+B 251680 ed293e3ae06ebe52 DC - Council wars/ENCYCLO/PSYCH.WAV
+B 743516 832ad29b0101cb35 DC - Council wars/ENCYCLO/REAP.SPR
+T 703 4f60eaedc025abe2 DC - Council wars/ENCYCLO/REAP.TXT
+B 265000 6914b29bf5423249 DC - Council wars/ENCYCLO/REAP.WAV
+B 994434 07ab537e81825ca0 DC - Council wars/ENCYCLO/SAUC.SPR
+T 648 9cfd2bf200bfefda DC - Council wars/ENCYCLO/SAUC.TXT
+B 292000 01f2519e2b2ac89a DC - Council wars/ENCYCLO/SAUC.WAV
+B 864304 c63f054eb3460957 DC - Council wars/ENCYCLO/SCGM.SPR
+T 665 dfb4be766822f084 DC - Council wars/ENCYCLO/SCGM.TXT
+B 376596 84cef06fd055ebc8 DC - Council wars/ENCYCLO/SCGM.WAV
+B 829611 5009d7a70112ebcf DC - Council wars/ENCYCLO/SLOM.SPR
+T 729 307468fcd6073ee5 DC - Council wars/ENCYCLO/SLOM.TXT
+B 293080 7f2b20259ad9da25 DC - Council wars/ENCYCLO/SLOM.WAV
+B 763581 89654d29d340a8e7 DC - Council wars/ENCYCLO/SLUG.SPR
+T 682 edece902111bdb78 DC - Council wars/ENCYCLO/SLUG.TXT
+B 284800 b46147ab851947cc DC - Council wars/ENCYCLO/SLUG.WAV
+B 596953 8a48c0809e9fedb3 DC - Council wars/ENCYCLO/SYTH.SPR
+T 610 931e1bb122cbce44 DC - Council wars/ENCYCLO/SYTH.TXT
+B 231160 e2e43cd913c7e0ad DC - Council wars/ENCYCLO/SYTH.WAV
+B 320909 e813111bc2fffdfd DC - Council wars/ENCYCLO/TKT.SPR
+T 730 40e943ef458faf66 DC - Council wars/ENCYCLO/TKT.TXT
+B 334836 2bc8cdab4a951667 DC - Council wars/ENCYCLO/TKT.WAV
+B 447571 269ae4a6d4efb232 DC - Council wars/ENCYCLO/TROOP.SPR
+T 563 fc9661af4f79b904 DC - Council wars/ENCYCLO/TROOP.TXT
+B 229000 5cbd74b7318d2eea DC - Council wars/ENCYCLO/TROOP.WAV
+B 895286 65b718f22c3db0b2 DC - Council wars/ENCYCLO/TURR.SPR
+T 747 7b478a4ab6ac71d8 DC - Council wars/ENCYCLO/TURR.TXT
+B 265720 a2a161f57593cc2a DC - Council wars/ENCYCLO/TURR.WAV
+B 877854 0bc9a1b984b745e0 DC - Council wars/ENCYCLO/XENO.SPR
+T 744 5f19c1d937509cc7 DC - Council wars/ENCYCLO/XENO.TXT
+B 270760 b58ba1c75c7ab553 DC - Council wars/ENCYCLO/XENO.WAV
+B 284083 1de681fb599f8e7e DC - Council wars/ENCYCLO/ZISP.SPR
+T 518 5452f32fd3765792 DC - Council wars/ENCYCLO/ZISP.TXT
+B 295960 4af31e323f99500f DC - Council wars/ENCYCLO/ZISP.WAV
+B 659968 3b930ba92cfd07ab DC - Council wars/ENGEXP16.EXE
+T 32 562d2670ffea8555 DC - Council wars/ESAVE/SAVE.TXT
+B 1751 c625006d12626d87 DC - Council wars/exp/alta.gif
+B 32768 04582ef77bd3f8fc DC - Council wars/exp/alta.rgb
+B 196608 6d7ae39348742333 DC - Council wars/exp/alta.rmp
+T 1117 80e1bcfd70cf359e DC - Council wars/exp/anim.dat
+B 44818 eb6040f0e31d298c DC - Council wars/exp/animate/carb.fin
+B 26384 b4386439f9d32426 DC - Council wars/exp/animate/carr.fin
+B 35545 a06bca4dab66cc3a DC - Council wars/exp/animate/dalg.fin
+B 27612 9fb7fdc6b58014c2 DC - Council wars/exp/animate/grrr.fin
+B 5214 6f79746182c7b00c DC - Council wars/exp/animate/horn.fin
+B 20966 99bdc6b213be5194 DC - Council wars/exp/animate/pimp.fin
+B 222 64e09d8db2053a21 DC - Council wars/exp/animate/pimptowr.fin
+B 64020 816aefcc293c78d4 DC - Council wars/exp/animate/reae.fin
+B 134564 655fc19d7b434350 DC - Council wars/exp/animate/scid.fin
+B 32596 8bc513e99fd66e79 DC - Council wars/exp/animate/snak.fin
+B 5284 2d7bf5a73d431d8c DC - Council wars/exp/animate/spyo.fin
+B 9686 95d67454412ad2c2 DC - Council wars/exp/animate/tran.fin
+B 10190 5df2d1e73f08a68d DC - Council wars/exp/animate/tranozi.fin
+B 1664 6ae4d333876d6199 DC - Council wars/exp/animate/troo.fin
+B 33186 61aaf9eefd53fdc1 DC - Council wars/exp/animate/urur.fin
+B 39032 fe3994a7a25bda35 DC - Council wars/exp/animate/vato.fin
+T 1129 aef97f43b4d0d7e6 DC - Council wars/exp/animozi.dat
+B 1751 b7491d9c8524a043 DC - Council wars/exp/area52.gif
+B 32768 ac3e5f05efe9de70 DC - Council wars/exp/area52.rgb
+B 196608 445d1fc636b7f139 DC - Council wars/exp/area52.rmp
+B 79340 bef319b19d0c45c2 DC - Council wars/exp/earth.gif
+T 17443 985b5d5d08d6be15 DC - Council wars/exp/gamestat/gamestat.txt
+T 15814 1ab3498ce5f3d712 DC - Council wars/exp/gamestat/gxmestat.txt
+T 1405 4db0806037596b64 DC - Council wars/exp/gamestat/gxscene.txt
+T 1412 e5d68e0ad4a43905 DC - Council wars/exp/gamestat/hxscene.txt
+T 749 dedd68a5bc8d68f0 DC - Council wars/exp/intrface/astory.txt
+T 2293 2a449f7abebcb027 DC - Council wars/exp/intrface/bintroe
+T 847 dc892c9977a02fec DC - Council wars/exp/intrface/credits.txt
+T 749 dedd68a5bc8d68f0 DC - Council wars/exp/intrface/hstory.txt
+B 23866 62046504a9edaeb0 DC - Council wars/exp/intrface/intrg.gif
+B 26061 6063a4d6f3e713e2 DC - Council wars/exp/intrface/intro.gif
+T 1727 038ccadaeb14236c DC - Council wars/exp/intrface/introe
+T 4334 aceff548909ca0d6 DC - Council wars/exp/intrface/shumane
+B 1751 62b8822fa354c567 DC - Council wars/exp/jubjub.gif
+B 32768 8df3af3b706102cf DC - Council wars/exp/jubjub.rgb
+B 196608 6bf9798d670da422 DC - Council wars/exp/jubjub.rmp
+B 194136 6eb849bfe81265a4 DC - Council wars/exp/mission/g1.wav
+B 133400 01c0e955d2053670 DC - Council wars/exp/mission/g2.wav
+B 206020 c620fdb6279a7fba DC - Council wars/exp/mission/g3.wav
+B 221868 41c3ec02ec77688f DC - Council wars/exp/mission/g4.wav
+B 187540 aec805b12715f2f9 DC - Council wars/exp/mission/g5.wav
+B 192816 ba5e7ba6f4da182a DC - Council wars/exp/mission/g6.wav
+B 153208 1b391a3a2c5522bd DC - Council wars/exp/mission/g7.wav
+B 187536 344927d41a2adb80 DC - Council wars/exp/mission/g8.wav
+B 235024 8660a1f101d6405c DC - Council wars/exp/mission/h1.wav
+B 198100 bb030f0c504ccf55 DC - Council wars/exp/mission/h2.wav
+B 171692 c88fd53a959a97bf DC - Council wars/exp/mission/h3.wav
+B 265880 a878d02e01e1e726 DC - Council wars/exp/mission/h4.wav
+B 142648 a04763f16d0f7746 DC - Council wars/exp/mission/h5.wav
+B 192820 a9c42f34f5287ceb DC - Council wars/exp/mission/h6.wav
+B 315616 e18ba3a8184656b9 DC - Council wars/exp/mission/h7.wav
+B 178296 3e5606bdd836f950 DC - Council wars/exp/mission/h8.wav
+B 2357852 32a11e1de0f4d1ec DC - Council wars/exp/music/track02.mp3
+B 3239828 75a622bd3b16af04 DC - Council wars/exp/music/track03.mp3
+B 3033764 78695691e482c8ee DC - Council wars/exp/music/track04.mp3
+B 3823052 d1afedca58f051e0 DC - Council wars/exp/music/track05.mp3
+T 96 3fe28116def36d50 DC - Council wars/exp/scenario/aerogen/aero01.001
+T 103 66c6003d8e829802 DC - Council wars/exp/scenario/aerogen/aero01.002
+B 86024 5cda5fe71df34409 DC - Council wars/exp/scenario/aerogen/aero01.map
+T 199 8ea3ffd4dcaa39b2 DC - Council wars/exp/scenario/aerogen/aero01.msg
+B 14338 ba73c02dd75d9294 DC - Council wars/exp/scenario/aerogen/aero01.mtg
+B 79872 a00b1e8c83e741d5 DC - Council wars/exp/scenario/aerogen/aero01.pth
+T 2761 18fc8dfa26df2fa5 DC - Council wars/exp/scenario/aerogen/aero01.scn
+T 1046 dc47b998bd936e71 DC - Council wars/exp/scenario/aerogen/aero01.tro
+T 493 070e3d4e3b020d3b DC - Council wars/exp/scenario/aerogen/aero01.txt
+T 98 136efa9149d2152f DC - Council wars/exp/scenario/aerogen/aero02.001
+T 142 52c2dce6d5ea2b6f DC - Council wars/exp/scenario/aerogen/aero02.002
+B 86024 ebe7f58e52529b04 DC - Council wars/exp/scenario/aerogen/aero02.map
+T 264 ce26d8f598fdeecd DC - Council wars/exp/scenario/aerogen/aero02.msg
+B 14338 21d92cba3d5ed0d8 DC - Council wars/exp/scenario/aerogen/aero02.mtg
+B 79872 c92e8d54f67b3b0a DC - Council wars/exp/scenario/aerogen/aero02.pth
+T 3129 9a6af94556214ce7 DC - Council wars/exp/scenario/aerogen/aero02.scn
+T 961 133a52003434b110 DC - Council wars/exp/scenario/aerogen/aero02.tro
+T 346 0778d8803c7ecee9 DC - Council wars/exp/scenario/aerogen/aero02.txt
+T 95 bae0f96bb472d3d6 DC - Council wars/exp/scenario/aerogen/aero03.001
+T 112 93d62bc7048c39c6 DC - Council wars/exp/scenario/aerogen/aero03.002
+B 134408 af2e70452b96f96e DC - Council wars/exp/scenario/aerogen/aero03.map
+T 198 871a86892ecdba82 DC - Council wars/exp/scenario/aerogen/aero03.msg
+B 22402 15fec06e9d02f301 DC - Council wars/exp/scenario/aerogen/aero03.mtg
+B 87936 13d1d6f066a267bf DC - Council wars/exp/scenario/aerogen/aero03.pth
+T 4786 4d9538dbf0bc7fe4 DC - Council wars/exp/scenario/aerogen/aero03.scn
+T 1369 24f1aff8c2f343f6 DC - Council wars/exp/scenario/aerogen/aero03.tro
+T 396 ea1dbc7f08d55248 DC - Council wars/exp/scenario/aerogen/aero03.txt
+T 130 2eb0ef7b64303a74 DC - Council wars/exp/scenario/aerogen/aero04.001
+T 83 e9b8e3c07af23cda DC - Council wars/exp/scenario/aerogen/aero04.002
+B 134408 ea1fac50549ebbe1 DC - Council wars/exp/scenario/aerogen/aero04.map
+T 473 09699e670a76fc09 DC - Council wars/exp/scenario/aerogen/aero04.msg
+B 22402 08aab4ab809da01b DC - Council wars/exp/scenario/aerogen/aero04.mtg
+B 87936 4444f7b46f868d28 DC - Council wars/exp/scenario/aerogen/aero04.pth
+T 3954 0ba626076e3bf949 DC - Council wars/exp/scenario/aerogen/aero04.scn
+T 1295 20e0e5b341a3f9f5 DC - Council wars/exp/scenario/aerogen/aero04.tro
+T 646 862f0df0b288fb5f DC - Council wars/exp/scenario/aerogen/aero04.txt
+T 74 8c2fb98f05c1efb6 DC - Council wars/exp/scenario/aerogen/aero05.001
+T 71 e8519909e96455de DC - Council wars/exp/scenario/aerogen/aero05.002
+B 134408 43cf3a4a3e613030 DC - Council wars/exp/scenario/aerogen/aero05.map
+T 217 f769f87579780d20 DC - Council wars/exp/scenario/aerogen/aero05.msg
+B 22402 15fec06e9d02f301 DC - Council wars/exp/scenario/aerogen/aero05.mtg
+B 87936 3ce0c998db6e619e DC - Council wars/exp/scenario/aerogen/aero05.pth
+T 3166 468b9ba3f7211b24 DC - Council wars/exp/scenario/aerogen/aero05.scn
+T 674 cc19192c4feea289 DC - Council wars/exp/scenario/aerogen/aero05.tro
+T 473 45a02e5c72c47b4f DC - Council wars/exp/scenario/aerogen/aero05.txt
+T 79 a658e71a5578b913 DC - Council wars/exp/scenario/aerogen/aero06.001
+T 137 83a4d27ed62184dd DC - Council wars/exp/scenario/aerogen/aero06.002
+B 134408 76089534177d3231 DC - Council wars/exp/scenario/aerogen/aero06.map
+T 411 d0b46025b713f2dd DC - Council wars/exp/scenario/aerogen/aero06.msg
+B 22402 15fec06e9d02f301 DC - Council wars/exp/scenario/aerogen/aero06.mtg
+B 87936 2fb615bc6aaea951 DC - Council wars/exp/scenario/aerogen/aero06.pth
+T 3839 cb312e73b268d83a DC - Council wars/exp/scenario/aerogen/aero06.scn
+T 1186 b947c30e2ca4bafd DC - Council wars/exp/scenario/aerogen/aero06.tro
+T 501 cfd3b152edba0529 DC - Council wars/exp/scenario/aerogen/aero06.txt
+T 179 0f7871d88d2fbe72 DC - Council wars/exp/scenario/aerogen/aero07.001
+T 133 576c8da5a53ede53 DC - Council wars/exp/scenario/aerogen/aero07.002
+B 134408 0eb4b64bcd7e8602 DC - Council wars/exp/scenario/aerogen/aero07.map
+T 257 c586e45863601314 DC - Council wars/exp/scenario/aerogen/aero07.msg
+B 22402 15fec06e9d02f301 DC - Council wars/exp/scenario/aerogen/aero07.mtg
+B 87936 1cbb0cbfdf0ddeab DC - Council wars/exp/scenario/aerogen/aero07.pth
+T 3365 f39abe3e343e9d3b DC - Council wars/exp/scenario/aerogen/aero07.scn
+T 971 e5c0f46775b7ff3e DC - Council wars/exp/scenario/aerogen/aero07.tro
+T 312 c9110ff88c1308c6 DC - Council wars/exp/scenario/aerogen/aero07.txt
+T 214 b1f627a8bdb54465 DC - Council wars/exp/scenario/aerogen/aero08.001
+T 112 4740670d0c49b215 DC - Council wars/exp/scenario/aerogen/aero08.002
+B 134408 7f1364c5f656ec84 DC - Council wars/exp/scenario/aerogen/aero08.map
+T 421 328a72df3b6888ce DC - Council wars/exp/scenario/aerogen/aero08.msg
+B 22402 15fec06e9d02f301 DC - Council wars/exp/scenario/aerogen/aero08.mtg
+B 87936 0f8f4e4f482fb27f DC - Council wars/exp/scenario/aerogen/aero08.pth
+T 4517 581fc376f4d5e132 DC - Council wars/exp/scenario/aerogen/aero08.scn
+T 1095 1538dec14bab9237 DC - Council wars/exp/scenario/aerogen/aero08.tro
+T 803 101dfa5a3ce60b7e DC - Council wars/exp/scenario/aerogen/aero08.txt
+B 1436892 6cbaa6f91c2ed929 DC - Council wars/exp/scenario/alta.bts
+B 1020552 ef7470023b94da81 DC - Council wars/exp/scenario/area52.bts
+T 90 88bf0aa931852302 DC - Council wars/exp/scenario/council/coun01.001
+T 114 2059597383cad99f DC - Council wars/exp/scenario/council/coun01.002
+B 86024 fe8560b521c6201b DC - Council wars/exp/scenario/council/coun01.map
+T 249 c88d8271db9d19ce DC - Council wars/exp/scenario/council/coun01.msg
+B 14338 21d92cba3d5ed0d8 DC - Council wars/exp/scenario/council/coun01.mtg
+B 79872 5f2b1b505b5490de DC - Council wars/exp/scenario/council/coun01.pth
+T 2831 b3c1f5e6d655e0ab DC - Council wars/exp/scenario/council/coun01.scn
+T 643 339de4cbcf98e5b5 DC - Council wars/exp/scenario/council/coun01.tro
+T 419 cee5d655af82b7ba DC - Council wars/exp/scenario/council/coun01.txt
+T 104 e5d670b416909234 DC - Council wars/exp/scenario/council/coun02.001
+T 100 ec895de997867de0 DC - Council wars/exp/scenario/council/coun02.002
+B 134408 e63a49638d30d7aa DC - Council wars/exp/scenario/council/coun02.map
+T 254 ae0cbf0192385dbf DC - Council wars/exp/scenario/council/coun02.msg
+B 22402 15fec06e9d02f301 DC - Council wars/exp/scenario/council/coun02.mtg
+B 87936 82dfd22e61e0c44a DC - Council wars/exp/scenario/council/coun02.pth
+T 5635 8d76195245bd714f DC - Council wars/exp/scenario/council/coun02.scn
+T 621 077e539ee5452734 DC - Council wars/exp/scenario/council/coun02.tro
+T 281 9d153e5bd2394a23 DC - Council wars/exp/scenario/council/coun02.txt
+T 72 f9a034541621b3a2 DC - Council wars/exp/scenario/council/coun03.001
+T 85 5773738acb2a6bc0 DC - Council wars/exp/scenario/council/coun03.002
+B 134408 977e3b76f9b347c0 DC - Council wars/exp/scenario/council/coun03.map
+T 345 e2ad4fa132d77549 DC - Council wars/exp/scenario/council/coun03.msg
+B 22402 15fec06e9d02f301 DC - Council wars/exp/scenario/council/coun03.mtg
+B 87936 3747c2e8fc793c6e DC - Council wars/exp/scenario/council/coun03.pth
+T 3768 778320f065a4ee7c DC - Council wars/exp/scenario/council/coun03.scn
+T 1966 2891e1866332ff3c DC - Council wars/exp/scenario/council/coun03.tro
+T 420 27b684e6f6863297 DC - Council wars/exp/scenario/council/coun03.txt
+T 130 ee43c3a29973d843 DC - Council wars/exp/scenario/council/coun04.001
+T 81 802fd22a27b3430c DC - Council wars/exp/scenario/council/coun04.002
+B 134408 4d8f6ca37e9329ea DC - Council wars/exp/scenario/council/coun04.map
+T 298 d4832fb4f5d51bcd DC - Council wars/exp/scenario/council/coun04.msg
+B 22402 e0bb62b7da1c9be7 DC - Council wars/exp/scenario/council/coun04.mtg
+B 87936 f538f5e10f6007df DC - Council wars/exp/scenario/council/coun04.pth
+T 5635 5d9bcfcb88eb330e DC - Council wars/exp/scenario/council/coun04.scn
+T 304 460ccb0675554c5f DC - Council wars/exp/scenario/council/coun04.tro
+T 409 79ff48778b0e35c2 DC - Council wars/exp/scenario/council/coun04.txt
+T 120 9f4d607ccbd83454 DC - Council wars/exp/scenario/council/coun05.001
+T 81 adedbcec29761c36 DC - Council wars/exp/scenario/council/coun05.002
+T 147 2add909aa01f7cb9 DC - Council wars/exp/scenario/council/coun05.003
+B 134408 0958c6f520d1475d DC - Council wars/exp/scenario/council/coun05.map
+T 378 9bfddd8faa1539cb DC - Council wars/exp/scenario/council/coun05.msg
+B 22402 15fec06e9d02f301 DC - Council wars/exp/scenario/council/coun05.mtg
+B 87936 ba25a77dc93f3586 DC - Council wars/exp/scenario/council/coun05.pth
+T 3437 5e252427229cea2d DC - Council wars/exp/scenario/council/coun05.scn
+T 944 0ccbe72f8df5a680 DC - Council wars/exp/scenario/council/coun05.tro
+T 667 08519aa641f7d3e5 DC - Council wars/exp/scenario/council/coun05.txt
+T 62 4331a31152486884 DC - Council wars/exp/scenario/council/coun06.001
+T 123 4f213fcdb177698e DC - Council wars/exp/scenario/council/coun06.002
+T 125 8e091eaf956c7a1b DC - Council wars/exp/scenario/council/coun06.003
+B 134408 0712f323b9cf0314 DC - Council wars/exp/scenario/council/coun06.map
+T 50 a83dfaa5cfe58579 DC - Council wars/exp/scenario/council/coun06.msg
+B 22402 15fec06e9d02f301 DC - Council wars/exp/scenario/council/coun06.mtg
+B 87936 ac610f2ee0f0f992 DC - Council wars/exp/scenario/council/coun06.pth
+T 3293 189775e42db12b31 DC - Council wars/exp/scenario/council/coun06.scn
+T 1065 01c1ecb5c9230e66 DC - Council wars/exp/scenario/council/coun06.tro
+T 296 0a80235ec5dfd49a DC - Council wars/exp/scenario/council/coun06.txt
+T 103 ec817f6cc225dbad DC - Council wars/exp/scenario/council/coun07.001
+T 77 2d9e54e343d04797 DC - Council wars/exp/scenario/council/coun07.002
+T 64 2522629c3fb6b328 DC - Council wars/exp/scenario/council/coun07.003
+B 134408 80cb40fd1bbfbc9f DC - Council wars/exp/scenario/council/coun07.map
+T 41 e0f6ac7cd29f9bb0 DC - Council wars/exp/scenario/council/coun07.msg
+B 22402 15fec06e9d02f301 DC - Council wars/exp/scenario/council/coun07.mtg
+B 87936 cbaf396d46b2451f DC - Council wars/exp/scenario/council/coun07.pth
+T 4280 eac60c374391ae55 DC - Council wars/exp/scenario/council/coun07.scn
+T 1051 10200e2683643d80 DC - Council wars/exp/scenario/council/coun07.tro
+T 456 6734a94b3d08833d DC - Council wars/exp/scenario/council/coun07.txt
+T 47 6a22ca9c3cd8e1ca DC - Council wars/exp/scenario/council/coun08.001
+T 95 75ec4e81e92f7313 DC - Council wars/exp/scenario/council/coun08.002
+B 134408 5b0a58aabb1c15b2 DC - Council wars/exp/scenario/council/coun08.map
+T 336 e835207ce9413416 DC - Council wars/exp/scenario/council/coun08.msg
+B 22402 15fec06e9d02f301 DC - Council wars/exp/scenario/council/coun08.mtg
+B 87936 6dae03f836f8f744 DC - Council wars/exp/scenario/council/coun08.pth
+T 4556 e84f1fb35ce92b4e DC - Council wars/exp/scenario/council/coun08.scn
+T 1835 cd4dc6ca57fb98d0 DC - Council wars/exp/scenario/council/coun08.tro
+T 934 88350b57621f55fa DC - Council wars/exp/scenario/council/coun08.txt
+B 999992 4adbfaeb5de06737 DC - Council wars/exp/scenario/earth.bts
+B 1409136 80f259cb9b515acf DC - Council wars/exp/scenario/jubjub.bts
+T 1294 d20f5a5a1e7a6683 DC - Council wars/exp/sound/alta.amb
+T 1294 d20f5a5a1e7a6683 DC - Council wars/exp/sound/area52.amb
+B 41216 0c81495c0f61aea6 DC - Council wars/exp/sound/birds.wav
+B 22498 9301d1daf52c8789 DC - Council wars/exp/sound/cobra.wav
+B 15254 a2788ed262ed6f57 DC - Council wars/exp/sound/cow.wav
+B 11090 15aac28af61fe02f DC - Council wars/exp/sound/cricket.wav
+B 58313 87207fa3636eb7b6 DC - Council wars/exp/sound/dog.wav
+B 42221 c29ccd9e9c49ad04 DC - Council wars/exp/sound/dog2.wav
+T 1320 c070225df575480b DC - Council wars/exp/sound/earth.amb
+B 11090 15aac28af61fe02f DC - Council wars/exp/sound/frog.wav
+B 59272 6f808b85b97f0efd DC - Council wars/exp/sound/frogs.wav
+B 44574 2798305817191492 DC - Council wars/exp/sound/gease.wav
+T 1294 d20f5a5a1e7a6683 DC - Council wars/exp/sound/jubjub.amb
+B 17225 d568a95b903b43f3 DC - Council wars/exp/sound/mosq.wav
+B 38006 de38a9c563a74c87 DC - Council wars/exp/sound/r2bird.wav
+B 33666 3afc68c950c062cd DC - Council wars/exp/sound/seagull.wav
+T 6165 b39e6891b0da8ea5 DC - Council wars/exp/sound/slist.dat
+T 6095 11af97d3140f777e DC - Council wars/exp/sound/sound2.dat
+B 34366 8edda57c88f901b8 DC - Council wars/exp/sound/turkey.wav
+B 17966 9c67e702439f1f32 DC - Council wars/exp/sound/water.wav
+B 75771 b2c0f734d1f364c7 DC - Council wars/exp/sound/wolf.wav
+B 51348 40eb475b675a38f3 DC - Council wars/exp/sprites/carr.spr
+B 476589 1c50227e5e8b2db1 DC - Council wars/exp/sprites/dalg.spr
+B 1962 ff5c02a1cafadde8 DC - Council wars/exp/sprites/horn.spr
+B 21095 a2785b712a3e5f1f DC - Council wars/exp/sprites/pimp.spr
+B 11209 f5fc5beb4c40a8b4 DC - Council wars/exp/sprites/pimptowr.spr
+B 215123 88187e25c01fe7d0 DC - Council wars/exp/sprites/reae.spr
+B 11429 73d8385b78bcbec1 DC - Council wars/exp/sprites/scid.spr
+B 17774 c53d836c9c603d20 DC - Council wars/exp/sprites/snak.spr
+B 3227 6e876ee8fbb3b4be DC - Council wars/exp/sprites/spyo.spr
+B 3019 5ba69bb5fa3f0ba2 DC - Council wars/exp/sprites/tran.spr
+B 42585 18bad635ccc0af5f DC - Council wars/exp/sprites/tranozi.spr
+B 9458 cc3140e8a090a29d DC - Council wars/exp/sprites/urur.spr
+B 9188 3ffeb6529f44a74b DC - Council wars/exp/sprites/vato.spr
+B 9248 c9db8f97c083441d DC - Council wars/FADE.DAT
+T 5 ea302cc74f0d8a94 DC - Council wars/FULL
+T 1638 f1bae36cbb04b0e3 DC - Council wars/GAMESTAT/BOOMSTAT.TXT
+T 5597 286f83c613aac1c8 DC - Council wars/GAMESTAT/DEPEND.TXT
+T 15814 1ab3498ce5f3d712 DC - Council wars/GAMESTAT/GAMESTAT.TXT
+T 2232 2e9a54e2b0c32998 DC - Council wars/GAMESTAT/GSCENE.TXT
+T 1124 05e4411075a6c48d DC - Council wars/GAMESTAT/GTSCENE.TXT
+T 2249 52cdc70e1ac56ec0 DC - Council wars/GAMESTAT/HSCENE.TXT
+T 1124 292a2594125e4d02 DC - Council wars/GAMESTAT/HTSCENE.TXT
+T 578 96f476033adaa998 DC - Council wars/GAMESTAT/MBULLET.TXT
+T 816 b8a783b0bb8e2777 DC - Council wars/GAMESTAT/UNITID.TXT
+T 4432 83f33375f74cdb1d DC - Council wars/GAMESTAT/WEAPSTAT.TXT
+B 1751 b7491d9c8524a043 DC - Council wars/HTRAIN.GIF
+B 32768 ac3e5f05efe9de70 DC - Council wars/HTRAIN.RGB
+B 196608 f0bd17a7db3bf917 DC - Council wars/HTRAIN.RMP
+T 39 00ee25fce7c3b720 DC - Council wars/ICON.RC
+B 843 0cd869f32650dd6c DC - Council wars/ICON.RES
+T 43 8641fa5e283503a1 DC - Council wars/ICON16.RC
+B 845 12119eea2500b392 DC - Council wars/ICON16.RES
+B 37874 9a1321159dd1916b DC - Council wars/INTRF_HD/1024x768/BACKDROP.GIF
+B 11568 5273275886e604da DC - Council wars/INTRF_HD/1024x768/INTRFACE.GIF
+B 13693 a0c59cb3ea66a7da DC - Council wars/INTRF_HD/1024x768/INTRFACE_LIGHT.GIF
+B 41010 0ea9effd526ab451 DC - Council wars/INTRF_HD/1024x768/INTRG.GIF
+B 41364 175852af9696edfd DC - Council wars/INTRF_HD/1024x768/INTRO.GIF
+B 58915 de72de465e477d43 DC - Council wars/INTRF_HD/1280x1024/BACKDROP.GIF
+B 16639 b57db17b9ed8d476 DC - Council wars/INTRF_HD/1280x1024/INTRFACE.GIF
+B 15769 464c46a189071aa8 DC - Council wars/INTRF_HD/1280x1024/INTRFACE_LIGHT.GIF
+B 62115 a987e226b82e0611 DC - Council wars/INTRF_HD/1280x1024/INTRG.GIF
+B 62428 e5f84737198fbf27 DC - Council wars/INTRF_HD/1280x1024/INTRO.GIF
+B 43749 3078f2908995e76d DC - Council wars/INTRF_HD/1280x720/BACKDROP.GIF
+B 12466 20621b6bbcf4f074 DC - Council wars/INTRF_HD/1280x720/INTRFACE.GIF
+B 14308 75d4b30478a5d760 DC - Council wars/INTRF_HD/1280x720/INTRFACE_LIGHT.GIF
+B 46961 13e6c806a79d6b7a DC - Council wars/INTRF_HD/1280x720/INTRG.GIF
+B 47325 d02fba86a9a096f2 DC - Council wars/INTRF_HD/1280x720/INTRO.GIF
+B 47859 fdf5bdb8b7b26a15 DC - Council wars/INTRF_HD/1280x800/BACKDROP.GIF
+B 12737 12c94b4dd5306660 DC - Council wars/INTRF_HD/1280x800/INTRFACE.GIF
+B 14367 e6a4f5d7753b6b70 DC - Council wars/INTRF_HD/1280x800/INTRFACE_LIGHT.GIF
+B 51044 b3889f46be29768d DC - Council wars/INTRF_HD/1280x800/INTRG.GIF
+B 51408 92a2498c515a49c0 DC - Council wars/INTRF_HD/1280x800/INTRO.GIF
+B 89691 a507fde832986b6e DC - Council wars/INTRF_HD/1920x1080/BACKDROP.GIF
+B 21900 32ee7665a2d37fd8 DC - Council wars/INTRF_HD/1920x1080/INTRFACE.GIF
+B 17500 ea0d90bfb0fb73ec DC - Council wars/INTRF_HD/1920x1080/INTRFACE_LIGHT.GIF
+B 92659 4629b69c9bfd561d DC - Council wars/INTRF_HD/1920x1080/INTRG.GIF
+B 93057 06f18821083e1fe8 DC - Council wars/INTRF_HD/1920x1080/INTRO.GIF
+B 98187 d036fc2253602e84 DC - Council wars/INTRF_HD/1920x1200/BACKDROP.GIF
+B 22096 c2ae6f4a3590b143 DC - Council wars/INTRF_HD/1920x1200/INTRFACE.GIF
+B 18679 e754765c3fb187db DC - Council wars/INTRF_HD/1920x1200/INTRFACE_LIGHT.GIF
+B 101468 ee09390db321070c DC - Council wars/INTRF_HD/1920x1200/INTRG.GIF
+B 101936 2f1c62f8192f0a2f DC - Council wars/INTRF_HD/1920x1200/INTRO.GIF
+B 190378 ab63cb8cd4a96849 DC - Council wars/INTRF_HD/3840x1080/BACKDROP.GIF
+B 28326 14c83e7120f4ce87 DC - Council wars/INTRF_HD/3840x1080/INTRFACE.GIF
+B 23020 73d01fe38d905e18 DC - Council wars/INTRF_HD/3840x1080/INTRFACE_LIGHT.GIF
+B 193769 f197d28170f40ada DC - Council wars/INTRF_HD/3840x1080/INTRG.GIF
+B 193790 3b823736bdb4c330 DC - Council wars/INTRF_HD/3840x1080/INTRO.GIF
+B 286163 cbd237ed51bdb556 DC - Council wars/INTRF_HD/MAINBUT.SPR
+B 101643 e7a8393248532094 DC - Council wars/INTRF_HD/POPP.SPR
+B 236567 d4b34ee974c44ef6 DC - Council wars/INTRFACE/ACAR.SPR
+B 87959 e7dd9cde977aa12f DC - Council wars/INTRFACE/ACOM.SPR
+T 1318 b83f43ab786a930e DC - Council wars/INTRFACE/ASTORY.TXT
+T 2959 a5e4aa80f67df693 DC - Council wars/INTRFACE/BDF.TXT
+T 2293 e05e1784ce4966d8 DC - Council wars/INTRFACE/BINTROE
+B 1008396 3cf7fc1eb9dbd343 DC - Council wars/INTRFACE/BLEW.SPR
+B 179292 463af18bb04ee825 DC - Council wars/INTRFACE/BLOGO.SPR
+B 255176 47990731245e422e DC - Council wars/INTRFACE/BUTTON.SPR
+T 733 2b99a5de371a03ea DC - Council wars/INTRFACE/BUTTONSE
+T 66 ad737a6233b43bae DC - Council wars/INTRFACE/CHOO.DAT
+B 35635 5cbc0043a694f899 DC - Council wars/INTRFACE/CHOO.GIF
+B 32768 d150b22fbc6109df DC - Council wars/INTRFACE/CHOO.RGB
+B 196608 51e83ecce2947dc0 DC - Council wars/INTRFACE/CHOO.RMP
+B 6156 3f790667ec55fa6d DC - Council wars/INTRFACE/CLIENT.SPR
+B 814 488e27832e5abf14 DC - Council wars/INTRFACE/CODE.SPR
+T 1591 9c2e2e000df4952f DC - Council wars/INTRFACE/CREDITS.TXT
+B 458196 4c2a4160198246f6 DC - Council wars/INTRFACE/DCSS.SPR
+B 324400 e0deb7c5a68e6379 DC - Council wars/INTRFACE/DCUK.SPR
+B 39061 90af7c4ac79c7d17 DC - Council wars/INTRFACE/DCUT.SPR
+T 1385 646811f2e3a49b09 DC - Council wars/INTRFACE/DEMOWINE
+B 155433 f1094c331010c238 DC - Council wars/INTRFACE/DIAG.SPR
+T 986 f07719437f2a9239 DC - Council wars/INTRFACE/DINTROE
+B 191384 0e2e5dad45f36412 DC - Council wars/INTRFACE/DOT.SPR
+T 446 780e8eb98751d1e3 DC - Council wars/INTRFACE/DPBLANKE
+T 1581 16475ba49eff1d78 DC - Council wars/INTRFACE/DPLAYSE
+B 1648241 188c75889543f3ed DC - Council wars/INTRFACE/EARTHG.SPR
+B 82317 25ad421957b1184f DC - Council wars/INTRFACE/EARTHS.SPR
+T 37 2eba20946045da79 DC - Council wars/INTRFACE/ENCY.DAT
+B 16459 db99ffee7fe1523b DC - Council wars/INTRFACE/ENCY.GIF
+B 32768 d150b22fbc6109df DC - Council wars/INTRFACE/ENCY.RGB
+B 196608 1341dc4cc1c04ff7 DC - Council wars/INTRFACE/ENCY.RMP
+T 846 3b57c99a01edd2f5 DC - Council wars/INTRFACE/ENCYCLO.TXT
+T 3702 0358a047aed1a32f DC - Council wars/INTRFACE/ENCYCLOE
+B 10173 738e892ed913f0a8 DC - Council wars/INTRFACE/EPIC.SPR
+B 8022 30ed0d2fb30c2e7a DC - Council wars/INTRFACE/FLASH.SPR
+B 56941 f5c5920b6f4dde19 DC - Council wars/INTRFACE/FONT.SPR
+T 2579 22275e7f6c605fe9 DC - Council wars/INTRFACE/FOO
+T 577 ce685c484ef48df9 DC - Council wars/INTRFACE/GENERALE
+T 1805 9e90d5953d50b502 DC - Council wars/INTRFACE/GETSVRE
+B 16056 2c2207b04d648036 DC - Council wars/INTRFACE/GETSVRE.SPR
+B 4753 0207770a98bc8c10 DC - Council wars/INTRFACE/GLIGHT.SPR
+B 244468 d3880a63a8320ca1 DC - Council wars/INTRFACE/GLOBEG.SPR
+B 1401542 b6d049976dc15786 DC - Council wars/INTRFACE/GLOBES.SPR
+B 28342 e9fd9c400970af21 DC - Council wars/INTRFACE/GLOI.SPR
+T 367 fc35e8eb5475bb6d DC - Council wars/INTRFACE/GRAYDEMO.TXT
+B 131728 5ab1a8bd983d8403 DC - Council wars/INTRFACE/GRDO.SPR
+B 1751 87a974aeac34ca68 DC - Council wars/INTRFACE/GTSUX.GIF
+B 32768 6b48dbfcc3a988fd DC - Council wars/INTRFACE/GTSUX.RGB
+B 196608 9abbf556ce95a93a DC - Council wars/INTRFACE/GTSUX.RMP
+B 236567 496ce87c530e9ba8 DC - Council wars/INTRFACE/HCAR.SPR
+B 87959 45373c190cb4dcc2 DC - Council wars/INTRFACE/HCOM.SPR
+T 1020 546fbdb50dcafd32 DC - Council wars/INTRFACE/HSTORY.TXT
+B 5216 b826e6072b9754fd DC - Council wars/INTRFACE/INSEE.SPR
+B 10555 ef3a814d7fd8535d DC - Council wars/INTRFACE/INTRFACE.GIF
+T 28 c2461edc83f5cdb0 DC - Council wars/INTRFACE/INTRG.DAT
+B 21926 badb219051223745 DC - Council wars/INTRFACE/INTRG.GIF
+B 32768 484fd5adf81185e4 DC - Council wars/INTRFACE/INTRG.RGB
+B 196608 f1e9679af809d6d0 DC - Council wars/INTRFACE/INTRG.RMP
+T 19 eb533375727ffc4d DC - Council wars/INTRFACE/INTRO.DAT
+B 22255 89fb1e3cf6149831 DC - Council wars/INTRFACE/INTRO.GIF
+B 32768 484fd5adf81185e4 DC - Council wars/INTRFACE/INTRO.RGB
+B 196608 7b0fa7f515db2d5d DC - Council wars/INTRFACE/INTRO.RMP
+B 86710 60926a823e5ade76 DC - Council wars/INTRFACE/INTRO.SPR
+T 1670 6386cb8870cc7e95 DC - Council wars/INTRFACE/INTROE
+B 86710 60926a823e5ade76 DC - Council wars/INTRFACE/INTROE.SPR
+T 780 5a7a420a402d7a70 DC - Council wars/INTRFACE/IPXNAMEE
+B 146593 915d4c2edef29069 DC - Council wars/INTRFACE/KNOBE.SPR
+B 138737 d357483d87ddbe90 DC - Council wars/INTRFACE/LEVEL.SPR
+B 308278 051f472740d2147d DC - Council wars/INTRFACE/LOAD.BMP
+B 308276 8898d40775a2a270 DC - Council wars/INTRFACE/LOAD2.BMP
+B 25805 85f442cc5a5e8169 DC - Council wars/INTRFACE/LOADER.GIF
+B 32768 4d208e6d1fd5bcdf DC - Council wars/INTRFACE/LOADER.RGB
+B 196608 a21a5386076a0a02 DC - Council wars/INTRFACE/LOADER.RMP
+T 37 746eb4d657082ccb DC - Council wars/INTRFACE/LOADG.DAT
+T 1714 a639161965783768 DC - Council wars/INTRFACE/LOADGE
+T 1325 86b0574f945d341b DC - Council wars/INTRFACE/LOBJE
+T 2472 d3f2571b99cd842c DC - Council wars/INTRFACE/LOGOE
+T 2470 c97e345cd1010025 DC - Council wars/INTRFACE/LOPTE
+B 34627 5af9ea1342e8a8bd DC - Council wars/INTRFACE/LOST.GIF
+B 32768 783c399429f9fd95 DC - Council wars/INTRFACE/LOST.RGB
+B 196608 8ec7ecbb63c6ad91 DC - Council wars/INTRFACE/LOST.RMP
+T 674 6472a67d83d1914e DC - Council wars/INTRFACE/LOSTE
+T 1378 df1a165fdca4cc09 DC - Council wars/INTRFACE/LQCE
+B 2572 0bca8ee46a0cab6a DC - Council wars/INTRFACE/LSG.SPR
+T 1784 715cbd0de08d3a29 DC - Council wars/INTRFACE/LSGE
+B 242231 53f7f00a7dd93f65 DC - Council wars/INTRFACE/MAINBUT.SPR
+T 19533 49c9f36817fbc3ed DC - Council wars/INTRFACE/MAINE
+T 1 01ba4719c80b6fe9 DC - Council wars/INTRFACE/MAKEFILE
+T 2 75a11da44c802486 DC - Council wars/INTRFACE/MAKEFILE.TPL
+T 134 be2878a12215b717 DC - Council wars/INTRFACE/MAKESPR.BAT
+B 301073 99bc78988ddcdbff DC - Council wars/INTRFACE/MDLA.SPR
+B 301073 8eb9e344e2505dca DC - Council wars/INTRFACE/MDLB.SPR
+B 301073 95b2b06c776acd77 DC - Council wars/INTRFACE/MDLC.SPR
+B 301073 f5e7b89e340db0dc DC - Council wars/INTRFACE/MDLD.SPR
+B 301073 7ed33580c242f809 DC - Council wars/INTRFACE/MDLE.SPR
+B 301079 5420e4f2db0d8662 DC - Council wars/INTRFACE/MDLF.SPR
+B 301073 1ba38e4cf8caaa77 DC - Council wars/INTRFACE/MDLG.SPR
+B 301073 b734b7e780453e3a DC - Council wars/INTRFACE/MDLH.SPR
+B 301073 7c14b79e7699441c DC - Council wars/INTRFACE/MDLI.SPR
+B 301073 878bc5743ad5ab97 DC - Council wars/INTRFACE/MDLJ.SPR
+B 301073 7c14b79e7699441c DC - Council wars/INTRFACE/MDLK.SPR
+B 301073 dace125e1edfe8c2 DC - Council wars/INTRFACE/MDLL.SPR
+T 1027 103a89dc0028f206 DC - Council wars/INTRFACE/METAE
+B 248936 7305e5d9bb537b65 DC - Council wars/INTRFACE/METR.SPR
+B 15591 9d1cd56fa2f5a478 DC - Council wars/INTRFACE/MFONT.SPR
+B 44038 d060dc9fae1bd036 DC - Council wars/INTRFACE/MFONTO1.SPR
+B 32222 8d97b4dbf7341938 DC - Council wars/INTRFACE/MFONTO2.SPR
+B 10495 a45daf3661428202 DC - Council wars/INTRFACE/MFONTO5.SPR
+B 8297 bacefabb427e45bb DC - Council wars/INTRFACE/MFONTO7.SPR
+B 19776 53f12b647e53a3d2 DC - Council wars/INTRFACE/MFONTO8.SPR
+T 11497 fbcf6af50fa64b3a DC - Council wars/INTRFACE/MULTIE
+B 5991 71d04f813d7074d7 DC - Council wars/INTRFACE/MULTIE.SPR
+T 1186 eb1b842fb1fc173e DC - Council wars/INTRFACE/MULTIE~1.TXT
+T 19 ca4c78a866779c2d DC - Council wars/INTRFACE/MULTIWIN.DAT
+B 31025 8f7cd65c315a8eac DC - Council wars/INTRFACE/MULTIWIN.GIF
+B 32768 783c399429f9fd95 DC - Council wars/INTRFACE/MULTIWIN.RGB
+B 196608 8ec7ecbb63c6ad91 DC - Council wars/INTRFACE/MULTIWIN.RMP
+T 1810 67974223af8d6ac3 DC - Council wars/INTRFACE/MULTIWNE
+B 36792 e590a142a7f1206e DC - Council wars/INTRFACE/NAME.GIF
+B 32768 783c399429f9fd95 DC - Council wars/INTRFACE/NAME.RGB
+B 196608 450b62c07f54925f DC - Council wars/INTRFACE/NAME.RMP
+T 26 17c2196fc48f1095 DC - Council wars/INTRFACE/NET.DAT
+B 27706 873d4d694205c746 DC - Council wars/INTRFACE/NET.GIF
+B 32768 d150b22fbc6109df DC - Council wars/INTRFACE/NET.RGB
+B 196608 1341dc4cc1c04ff7 DC - Council wars/INTRFACE/NET.RMP
+B 161248 d053c743e4c67295 DC - Council wars/INTRFACE/NETBUTE.SPR
+T 2378 54a8c9078f025cf2 DC - Council wars/INTRFACE/NETOPTE
+B 74240 119cf537ae6ff207 DC - Council wars/INTRFACE/NEWGAME.SPR
+T 3666 2331ef6d3409ba21 DC - Council wars/INTRFACE/NEWGAMEE
+T 4 f2c67feadfb47e3b DC - Council wars/INTRFACE/NUM.TXT
+B 15405 892c9b614490cb8a DC - Council wars/INTRFACE/PALETTE.GIF
+B 103525 e71670c972006451 DC - Council wars/INTRFACE/PLASMA.SPR
+B 74444 36610ca41ee337dd DC - Council wars/INTRFACE/POLO.SPR
+B 36161 6ada75523b01dcc6 DC - Council wars/INTRFACE/POPP.SPR
+B 7622 6959ec8b1bdc20df DC - Council wars/INTRFACE/ROUND.SPR
+B 32144 661753c2dd0fb527 DC - Council wars/INTRFACE/SCNE.SPR
+T 37 3fc77c9e89513459 DC - Council wars/INTRFACE/SERVER.DAT
+B 37777 cff7e2399809197c DC - Council wars/INTRFACE/SERVER.GIF
+B 32768 783c399429f9fd95 DC - Council wars/INTRFACE/SERVER.RGB
+B 196608 8ec7ecbb63c6ad91 DC - Council wars/INTRFACE/SERVER.RMP
+B 74240 119cf537ae6ff207 DC - Council wars/INTRFACE/SGREYE.SPR
+T 47 6b464c8b529837b1 DC - Council wars/INTRFACE/SHUMAN.DAT
+B 16345 bb35009278c8859f DC - Council wars/INTRFACE/SHUMAN.GIF
+B 32768 d150b22fbc6109df DC - Council wars/INTRFACE/SHUMAN.RGB
+B 196608 51e83ecce2947dc0 DC - Council wars/INTRFACE/SHUMAN.RMP
+T 4284 c260baaadec367e8 DC - Council wars/INTRFACE/SHUMANE
+B 74240 119cf537ae6ff207 DC - Council wars/INTRFACE/SHUMANE.SPR
+B 6538 321c099c7e076dd8 DC - Council wars/INTRFACE/SOKAYE.SPR
+B 9112 32e54cc2939b8a51 DC - Council wars/INTRFACE/STORY.GIF
+B 32768 d150b22fbc6109df DC - Council wars/INTRFACE/STORY.RGB
+B 196608 51e83ecce2947dc0 DC - Council wars/INTRFACE/STORY.RMP
+T 1334 1657dce6a1575ec8 DC - Council wars/INTRFACE/STORYE
+T 26 9d060ad859294cb4 DC - Council wars/INTRFACE/TCPWAIT.DAT
+B 17377 8489cd28f689a6cc DC - Council wars/INTRFACE/TCPWAIT.GIF
+B 32768 4d208e6d1fd5bcdf DC - Council wars/INTRFACE/TCPWAIT.RGB
+B 196608 a21a5386076a0a02 DC - Council wars/INTRFACE/TCPWAIT.RMP
+B 33492 34f5b5ca2f0f7e98 DC - Council wars/INTRFACE/VCAL.SPR
+B 33856 15adbee6bb8e8dfa DC - Council wars/INTRFACE/VCEA.SPR
+B 34758 318796f41453ead0 DC - Council wars/INTRFACE/VICTORG.GIF
+T 9 11e67d8345d280e3 DC - Council wars/INTRFACE/VICTORY.DAT
+B 33239 72b16e3702698342 DC - Council wars/INTRFACE/VICTORY.GIF
+B 174686 1fb2837914015a4b DC - Council wars/INTRFACE/WEATH.SPR
+B 431052 b28e116e99faa886 DC - Council wars/INTRFACE/WHOO.SPR
+B 58590 870059e031ae5e17 DC - Council wars/INTRFACE/WIND.SPR
+T 676 bab1f21315b1f158 DC - Council wars/INTRFACE/WINE
+T 54 7083188b6c125860 DC - Council wars/INTRFACE/WINGAME.DAT
+B 20942 0e2883675c319ba2 DC - Council wars/INTRFACE/WINGAME.GIF
+B 32768 d150b22fbc6109df DC - Council wars/INTRFACE/WINGAME.RGB
+B 196608 51e83ecce2947dc0 DC - Council wars/INTRFACE/WINGAME.RMP
+T 5108 9494b89e9065285a DC - Council wars/INTRFACE/WINGAMEE
+T 678 004dc9dcd386ca5e DC - Council wars/INTRFACE/WINUKE
+B 346374 c1bf2511d69a08a1 DC - Council wars/INTRFACE/WLNT.SPR
+B 1751 a52d3b31278548b9 DC - Council wars/JUNGLE.GIF
+B 32768 454513121ad3e42a DC - Council wars/JUNGLE.RGB
+B 196608 386a427f1141f198 DC - Council wars/JUNGLE.RMP
+B 90228 95789d96148684af DC - Council wars/MISSION/G1.WAV
+B 106552 53e2e4c75ae0e64b DC - Council wars/MISSION/G10.WAV
+B 105692 a10b641e501850f3 DC - Council wars/MISSION/G11.WAV
+B 114280 f982d8036a579618 DC - Council wars/MISSION/G12.WAV
+B 105688 fc9a2688dd207cd6 DC - Council wars/MISSION/G13.WAV
+B 81824 a95b0aa274c1b2d2 DC - Council wars/MISSION/G14.WAV
+B 139888 793e9602c9e2136c DC - Council wars/MISSION/G15.WAV
+B 91948 f20e63a6962f2b6e DC - Council wars/MISSION/G2.WAV
+B 119436 5002c1b1c811c2d7 DC - Council wars/MISSION/G3.WAV
+B 143072 904b2574ec70324d DC - Council wars/MISSION/G4.WAV
+B 174400 69f9b468aa4ec9b9 DC - Council wars/MISSION/G5.WAV
+B 101396 9334c266272d4054 DC - Council wars/MISSION/G6.WAV
+B 81640 ebdc420bcaef7782 DC - Council wars/MISSION/G7.WAV
+B 77344 44b53961ea23e8f1 DC - Council wars/MISSION/G8.WAV
+B 93668 7dab75059a3ed1cd DC - Council wars/MISSION/G9.WAV
+B 83360 a6976f42791b5bb3 DC - Council wars/MISSION/H1.WAV
+B 102256 c8960db29b675176 DC - Council wars/MISSION/H10.WAV
+B 82500 9bb4c527188adc67 DC - Council wars/MISSION/H11.WAV
+B 84220 17fee39cbe673476 DC - Council wars/MISSION/H12.WAV
+B 84220 2b3222e569ff65ca DC - Council wars/MISSION/H13.WAV
+B 121148 08efbafb6911cf0a DC - Council wars/MISSION/H14.WAV
+B 104832 7c1c9e6f187dd95b DC - Council wars/MISSION/H15.WAV
+B 106548 1bda058cc95dd074 DC - Council wars/MISSION/H2.WAV
+B 116856 cd118f9688a40c8e DC - Council wars/MISSION/H3.WAV
+B 92804 175afb0059b42cfb DC - Council wars/MISSION/H4.WAV
+B 101396 7c2047de7a4d2e18 DC - Council wars/MISSION/H5.WAV
+B 106548 af1804200476df2d DC - Council wars/MISSION/H6.WAV
+B 96244 2c03433b33f47437 DC - Council wars/MISSION/H7.WAV
+B 91088 5dc4d4a1ae74fd4b DC - Council wars/MISSION/H8.WAV
+B 109984 cf055b1900e26228 DC - Council wars/MISSION/H9.WAV
+B 2930828 c3832a32d47bd66a DC - Council wars/MUSIC/TRACK02.MP3
+B 1047716 45abf0f2fd34e3b4 DC - Council wars/MUSIC/TRACK03.MP3
+B 1599044 730a1f990319bdfb DC - Council wars/MUSIC/TRACK04.MP3
+B 2956916 fc4aae6249f4120b DC - Council wars/MUSIC/TRACK05.MP3
+B 1751 c625006d12626d87 DC - Council wars/ozi_ns/alta.gif
+B 32768 04582ef77bd3f8fc DC - Council wars/ozi_ns/alta.rgb
+B 196608 6d7ae39348742333 DC - Council wars/ozi_ns/alta.rmp
+B 1751 b7491d9c8524a043 DC - Council wars/ozi_ns/area52.gif
+B 32768 ac3e5f05efe9de70 DC - Council wars/ozi_ns/area52.rgb
+B 196608 445d1fc636b7f139 DC - Council wars/ozi_ns/area52.rmp
+B 79340 bef319b19d0c45c2 DC - Council wars/ozi_ns/earth.gif
+T 1718 738860aaab0a5579 DC - Council wars/ozi_ns/gamestat/BOOMSTAT.TXT
+T 18561 b70a2795da6f0bb9 DC - Council wars/ozi_ns/gamestat/gamestat.txt
+T 1743 6322b59ffa9b1b0e DC - Council wars/ozi_ns/gamestat/gxscene.txt
+T 1705 0634b51062759c0e DC - Council wars/ozi_ns/gamestat/hxscene.txt
+T 769 4ec20178004d42f4 DC - Council wars/ozi_ns/gamestat/MBULLET.TXT
+T 965 3b9cabd973ed9ff7 DC - Council wars/ozi_ns/gamestat/UNITID.TXT
+T 4582 63f148cec4c3e479 DC - Council wars/ozi_ns/gamestat/WEAPSTAT.TXT
+B 1751 c4781afff97d419b DC - Council wars/ozi_ns/gatlan.GIF
+T 2 75a11da44c802486 DC - Council wars/ozi_ns/gatlan.NCY
+B 32768 2fa199a28d6f4aac DC - Council wars/ozi_ns/gatlan.RGB
+B 196608 5d7f64c5a62f1d9b DC - Council wars/ozi_ns/gatlan.RMP
+B 1751 a52d3b31278548b9 DC - Council wars/ozi_ns/gjungle.gif
+B 32768 454513121ad3e42a DC - Council wars/ozi_ns/gjungle.rgb
+B 196608 386a427f1141f198 DC - Council wars/ozi_ns/gJUNGLE.RMP
+T 797 bcdd0cfc175c9cc3 DC - Council wars/ozi_ns/intrface/astory.txt
+T 847 dc892c9977a02fec DC - Council wars/ozi_ns/intrface/credits.txt
+T 918 620e6bcca9603919 DC - Council wars/ozi_ns/intrface/hstory.txt
+B 1751 62b8822fa354c567 DC - Council wars/ozi_ns/jubjub.gif
+B 32768 8df3af3b706102cf DC - Council wars/ozi_ns/jubjub.rgb
+B 196608 6bf9798d670da422 DC - Council wars/ozi_ns/jubjub.rmp
+B 3528044 2f295fed3bda7573 DC - Council wars/ozi_ns/mission/g1.wav
+B 1764044 26cfcb16a4194725 DC - Council wars/ozi_ns/mission/g10.wav
+B 2646044 7107998e5224e607 DC - Council wars/ozi_ns/mission/g11.wav
+B 1764044 03718213d20d4e3a DC - Council wars/ozi_ns/mission/g2.wav
+B 2646044 3ff61deb1663379a DC - Council wars/ozi_ns/mission/g3.wav
+B 1764044 1bc3ad21f74f0a16 DC - Council wars/ozi_ns/mission/g4.wav
+B 1764044 ec5ebe49d89f4e47 DC - Council wars/ozi_ns/mission/g5.wav
+B 2646044 675bfd38d33b4b12 DC - Council wars/ozi_ns/mission/g6.wav
+B 1764044 9207a4d32a4a7bcc DC - Council wars/ozi_ns/mission/g7.wav
+B 2646044 4e7161d88d2c1697 DC - Council wars/ozi_ns/mission/g8.wav
+B 3528044 a1922d767144e525 DC - Council wars/ozi_ns/mission/g9.wav
+B 2646044 0a2fd40ca7186da7 DC - Council wars/ozi_ns/mission/h1.wav
+B 2646044 ae2c5ef196e5a7d3 DC - Council wars/ozi_ns/mission/h10.wav
+B 2646044 ea3f65588d193d28 DC - Council wars/ozi_ns/mission/h11.wav
+B 1764044 de9342d351cb26f7 DC - Council wars/ozi_ns/mission/h2.wav
+B 1764044 6bbce87ed17f80e3 DC - Council wars/ozi_ns/mission/h3.wav
+B 1764044 22944d8375dc9417 DC - Council wars/ozi_ns/mission/h4.wav
+B 1764044 cee3dc6ff6918d69 DC - Council wars/ozi_ns/mission/h5.wav
+B 1764044 65e087f5f2b0afa0 DC - Council wars/ozi_ns/mission/h6.wav
+B 2646044 95096bc47645a9e7 DC - Council wars/ozi_ns/mission/h7.wav
+B 2646044 92f9938729acbb8c DC - Council wars/ozi_ns/mission/h8.wav
+B 1323044 b4b6459f9fecba98 DC - Council wars/ozi_ns/mission/h80.wav
+B 4410044 9db75d5b66ccfdec DC - Council wars/ozi_ns/mission/h9.wav
+B 79545 811486d8b21d2014 DC - Council wars/ozi_ns/scenario/all.jus
+B 1436892 6cbaa6f91c2ed929 DC - Council wars/ozi_ns/scenario/alta.bts
+B 1020552 ef7470023b94da81 DC - Council wars/ozi_ns/scenario/area52.bts
+B 1350540 61a2aed6ac8d36fc DC - Council wars/ozi_ns/scenario/atlantis.bts
+T 10896 4b59e183c5750d00 DC - Council wars/ozi_ns/scenario/council/scene.txt
+T 126 6bc7d0bde378506a DC - Council wars/ozi_ns/scenario/council/tarr01.001
+T 85 f1483a5c265a397c DC - Council wars/ozi_ns/scenario/council/tarr01.002
+T 113 bf13e7b6951ba60d DC - Council wars/ozi_ns/scenario/council/tarr01.003
+T 122 d6201234959ac826 DC - Council wars/ozi_ns/scenario/council/tarr01.004
+B 134408 c5c02505d4a6b6df DC - Council wars/ozi_ns/scenario/council/tarr01.map
+T 455 82651b6ec5328c63 DC - Council wars/ozi_ns/scenario/council/tarr01.msg
+B 22402 5a3a4a698f9d5d4e DC - Council wars/ozi_ns/scenario/council/tarr01.mtg
+T 134 73129d87766bcb2a DC - Council wars/ozi_ns/scenario/council/tarr01.pop
+B 87936 0bd3cdef84d8868a DC - Council wars/ozi_ns/scenario/council/tarr01.pth
+T 3749 8ec6bbced363f943 DC - Council wars/ozi_ns/scenario/council/tarr01.scn
+T 1683 fe7a7ab4203af1cd DC - Council wars/ozi_ns/scenario/council/tarr01.tro
+T 1008 760369eb01a1ea61 DC - Council wars/ozi_ns/scenario/council/tarr01.txt
+T 161 4fc7d862ce3b2b28 DC - Council wars/ozi_ns/scenario/council/tarr02.001
+T 85 f1483a5c265a397c DC - Council wars/ozi_ns/scenario/council/tarr02.002
+B 65864 1fcc72b754a3d2ab DC - Council wars/ozi_ns/scenario/council/tarr02.map
+T 711 5783f9c5f0e3404e DC - Council wars/ozi_ns/scenario/council/tarr02.msg
+B 10978 1b83aff1b33ee48c DC - Council wars/ozi_ns/scenario/council/tarr02.mtg
+T 14 a95edd521e42e1cc DC - Council wars/ozi_ns/scenario/council/tarr02.pop
+B 76512 6e4e283425210a5c DC - Council wars/ozi_ns/scenario/council/tarr02.pth
+T 3419 23ac37726d800ddf DC - Council wars/ozi_ns/scenario/council/tarr02.scn
+T 2268 092feba2eb8f8da5 DC - Council wars/ozi_ns/scenario/council/tarr02.tro
+T 396 3dc88c156e957c76 DC - Council wars/ozi_ns/scenario/council/tarr02.txt
+T 160 9e5e110fa26cb82c DC - Council wars/ozi_ns/scenario/council/tarr03.001
+T 107 3be28b0f964cac80 DC - Council wars/ozi_ns/scenario/council/tarr03.002
+B 65864 da1ab580294dc7f0 DC - Council wars/ozi_ns/scenario/council/tarr03.map
+T 662 bec41536c99cb791 DC - Council wars/ozi_ns/scenario/council/tarr03.msg
+B 10978 007c4db6737417d1 DC - Council wars/ozi_ns/scenario/council/tarr03.mtg
+T 84 f32e5421137cd3f9 DC - Council wars/ozi_ns/scenario/council/tarr03.pop
+B 76512 480d30b57116d73b DC - Council wars/ozi_ns/scenario/council/tarr03.pth
+T 4948 a8e660d49a05e4c8 DC - Council wars/ozi_ns/scenario/council/tarr03.scn
+T 2633 674bc6fbf5ad5ae3 DC - Council wars/ozi_ns/scenario/council/tarr03.tro
+T 655 c4472464bb42be08 DC - Council wars/ozi_ns/scenario/council/tarr03.txt
+T 118 5b67719e5dc72027 DC - Council wars/ozi_ns/scenario/council/tarr04.001
+T 113 bf13e7b6951ba60d DC - Council wars/ozi_ns/scenario/council/tarr04.002
+B 48392 12513a7a24ee06d6 DC - Council wars/ozi_ns/scenario/council/tarr04.map
+T 613 687c17841a8f430c DC - Council wars/ozi_ns/scenario/council/tarr04.msg
+B 8066 615e95f568d1c83d DC - Council wars/ozi_ns/scenario/council/tarr04.mtg
+T 50 a3c1a2609f2ad19f DC - Council wars/ozi_ns/scenario/council/tarr04.pop
+B 73600 3725ad7a7295a07c DC - Council wars/ozi_ns/scenario/council/tarr04.pth
+T 3137 16816aad2459c0bb DC - Council wars/ozi_ns/scenario/council/tarr04.scn
+T 1032 4ce578f4ca2f70e2 DC - Council wars/ozi_ns/scenario/council/tarr04.tro
+T 606 ddea4c17183926a0 DC - Council wars/ozi_ns/scenario/council/tarr04.txt
+T 247 e48f694255224899 DC - Council wars/ozi_ns/scenario/council/tarr05.001
+T 114 3b512f0c4ccf1655 DC - Council wars/ozi_ns/scenario/council/tarr05.002
+B 86024 302e66d74cf3f70e DC - Council wars/ozi_ns/scenario/council/tarr05.map
+T 582 e862d0acf294246b DC - Council wars/ozi_ns/scenario/council/tarr05.msg
+B 14338 0a1f95301793074f DC - Council wars/ozi_ns/scenario/council/tarr05.mtg
+T 127 42c0e2dcb814e6d7 DC - Council wars/ozi_ns/scenario/council/tarr05.pop
+B 79872 9bc1f5caadba7c9c DC - Council wars/ozi_ns/scenario/council/tarr05.pth
+T 3361 80f0d0c4f2f0ae3a DC - Council wars/ozi_ns/scenario/council/tarr05.scn
+T 1956 6716828fb151ed97 DC - Council wars/ozi_ns/scenario/council/tarr05.tro
+T 559 10bc17b09b3631d3 DC - Council wars/ozi_ns/scenario/council/tarr05.txt
+T 186 4dc8109232ace9ad DC - Council wars/ozi_ns/scenario/council/tarr06.001
+T 80 13fae7a1704e72f3 DC - Council wars/ozi_ns/scenario/council/tarr06.002
+T 84 483510bae0a575bf DC - Council wars/ozi_ns/scenario/council/tarr06.003
+B 134408 bdb73c8ff48d4636 DC - Council wars/ozi_ns/scenario/council/tarr06.map
+T 665 67d5750f84050e2a DC - Council wars/ozi_ns/scenario/council/tarr06.msg
+B 22402 875eabe5542db252 DC - Council wars/ozi_ns/scenario/council/tarr06.mtg
+T 135 e929c3c4ecd37f09 DC - Council wars/ozi_ns/scenario/council/tarr06.pop
+B 87936 4b1e97dc71d0fac8 DC - Council wars/ozi_ns/scenario/council/tarr06.pth
+T 7183 126f580c8cddf20c DC - Council wars/ozi_ns/scenario/council/tarr06.scn
+T 862 a44a115b0d3e1dc4 DC - Council wars/ozi_ns/scenario/council/tarr06.tro
+T 721 1789f4d3655633fb DC - Council wars/ozi_ns/scenario/council/tarr06.txt
+T 180 b8d05062f1d32a57 DC - Council wars/ozi_ns/scenario/council/tarr07.001
+T 85 f1483a5c265a397c DC - Council wars/ozi_ns/scenario/council/tarr07.002
+T 80 f42186ea3f0b9ffa DC - Council wars/ozi_ns/scenario/council/tarr07.003
+T 72 2fb40c303b3a9438 DC - Council wars/ozi_ns/scenario/council/tarr07.004
+B 86024 b44b79cb1331f564 DC - Council wars/ozi_ns/scenario/council/tarr07.map
+T 691 51748efd89eb2395 DC - Council wars/ozi_ns/scenario/council/tarr07.msg
+B 14338 cd06f03d54314548 DC - Council wars/ozi_ns/scenario/council/tarr07.mtg
+T 124 96f2035f63464498 DC - Council wars/ozi_ns/scenario/council/tarr07.pop
+B 79872 bf53f0a578bf9d76 DC - Council wars/ozi_ns/scenario/council/tarr07.pth
+T 4193 0c2ac3216ed13f5e DC - Council wars/ozi_ns/scenario/council/tarr07.scn
+T 2283 867989f7d7a49832 DC - Council wars/ozi_ns/scenario/council/tarr07.tro
+T 505 18b304330fa268e7 DC - Council wars/ozi_ns/scenario/council/tarr07.txt
+T 312 42aa044b0789c345 DC - Council wars/ozi_ns/scenario/council/tarr08.001
+T 84 483510bae0a575bf DC - Council wars/ozi_ns/scenario/council/tarr08.002
+T 120 8ddc85e79b3bbf33 DC - Council wars/ozi_ns/scenario/council/tarr08.003
+T 109 e025a8eaea55ae34 DC - Council wars/ozi_ns/scenario/council/tarr08.004
+B 65864 190f6e724c8bc5b9 DC - Council wars/ozi_ns/scenario/council/tarr08.map
+T 610 8089cc66870934be DC - Council wars/ozi_ns/scenario/council/tarr08.msg
+B 10978 d818b39e4a7369c4 DC - Council wars/ozi_ns/scenario/council/tarr08.mtg
+T 32 6582db2ba696cf9d DC - Council wars/ozi_ns/scenario/council/tarr08.pop
+B 76512 d6562096d057d65b DC - Council wars/ozi_ns/scenario/council/tarr08.pth
+T 3841 c2707c7e06685a6b DC - Council wars/ozi_ns/scenario/council/tarr08.scn
+T 790 b168997a47d87ec9 DC - Council wars/ozi_ns/scenario/council/tarr08.tro
+T 696 be2a9767948a701d DC - Council wars/ozi_ns/scenario/council/tarr08.txt
+T 229 c7344d7db2cb3530 DC - Council wars/ozi_ns/scenario/council/tarr09.001
+T 88 17cb088af0382384 DC - Council wars/ozi_ns/scenario/council/tarr09.002
+T 165 d212655dc4fbaca9 DC - Council wars/ozi_ns/scenario/council/tarr09.003
+B 86024 19456f4692667aa4 DC - Council wars/ozi_ns/scenario/council/tarr09.map
+T 662 dd3373fc37018050 DC - Council wars/ozi_ns/scenario/council/tarr09.msg
+B 14338 e658ca71af70549b DC - Council wars/ozi_ns/scenario/council/tarr09.mtg
+T 51 7c48a923c279da9a DC - Council wars/ozi_ns/scenario/council/tarr09.pop
+B 79872 c0f5c0a80000c6b4 DC - Council wars/ozi_ns/scenario/council/tarr09.pth
+T 4031 69e871dc5febe522 DC - Council wars/ozi_ns/scenario/council/tarr09.scn
+T 1906 0799c77382fd3c4e DC - Council wars/ozi_ns/scenario/council/tarr09.tro
+T 1007 6fc984236aacf343 DC - Council wars/ozi_ns/scenario/council/tarr09.txt
+T 104 b35a6099bce3530b DC - Council wars/ozi_ns/scenario/council/tarr10.001
+T 85 f1483a5c265a397c DC - Council wars/ozi_ns/scenario/council/tarr10.002
+T 116 4b75e3f6c898434f DC - Council wars/ozi_ns/scenario/council/tarr10.003
+T 135 03b36cef50ac4f29 DC - Council wars/ozi_ns/scenario/council/tarr10.004
+B 65864 d796e99ca4192dd3 DC - Council wars/ozi_ns/scenario/council/tarr10.map
+T 528 181f362b9426183c DC - Council wars/ozi_ns/scenario/council/tarr10.MSG
+B 10978 a6eae2f3a3958eb9 DC - Council wars/ozi_ns/scenario/council/tarr10.mtg
+T 85 f68f8a76bda087f6 DC - Council wars/ozi_ns/scenario/council/tarr10.pop
+B 76512 26f20f5c61bc667a DC - Council wars/ozi_ns/scenario/council/tarr10.pth
+T 4401 c2f3ed6d91ec6707 DC - Council wars/ozi_ns/scenario/council/tarr10.scn
+T 1128 1d5021d019db7a6f DC - Council wars/ozi_ns/scenario/council/tarr10.tro
+T 443 5b09dd9e10f56989 DC - Council wars/ozi_ns/scenario/council/tarr10.TXT
+T 247 4fd0d89ebab95175 DC - Council wars/ozi_ns/scenario/council/tarr11.001
+T 116 4b75e3f6c898434f DC - Council wars/ozi_ns/scenario/council/tarr11.002
+B 134408 3b869fec2b03b9fa DC - Council wars/ozi_ns/scenario/council/tarr11.map
+T 639 095cfba7188326b0 DC - Council wars/ozi_ns/scenario/council/tarr11.msg
+B 22402 15fec06e9d02f301 DC - Council wars/ozi_ns/scenario/council/tarr11.mtg
+T 180 43924fae739cba87 DC - Council wars/ozi_ns/scenario/council/tarr11.pop
+B 87936 3c47b553a963676d DC - Council wars/ozi_ns/scenario/council/tarr11.pth
+T 7094 cd38e728b97417ac DC - Council wars/ozi_ns/scenario/council/tarr11.scn
+T 2299 5aa841df988a7e9a DC - Council wars/ozi_ns/scenario/council/tarr11.tro
+T 842 e4e1c7e97c25f3fa DC - Council wars/ozi_ns/scenario/council/tarr11.txt
+B 1421472 3243b51139cb3cf7 DC - Council wars/ozi_ns/scenario/DESERT.BTS
+B 999992 4adbfaeb5de06737 DC - Council wars/ozi_ns/scenario/earth.bts
+B 1350540 61a2aed6ac8d36fc DC - Council wars/ozi_ns/scenario/gatlan.bts
+B 1357736 ab72a4cb1358de2e DC - Council wars/ozi_ns/scenario/GJUNGLE.BTS
+T 127 79d83997fba5497f DC - Council wars/ozi_ns/scenario/globo/globo01.001
+T 86 07d39e612e83f17c DC - Council wars/ozi_ns/scenario/globo/globo01.002
+T 83 f0b91a7da31a79c2 DC - Council wars/ozi_ns/scenario/globo/globo01.003
+B 48392 6cce1696a3c4937d DC - Council wars/ozi_ns/scenario/globo/globo01.map
+T 440 e451cb94bbebeac5 DC - Council wars/ozi_ns/scenario/globo/globo01.msg
+B 8066 763521ad6471fc61 DC - Council wars/ozi_ns/scenario/globo/globo01.mtg
+T 15 7beac6552bad5c26 DC - Council wars/ozi_ns/scenario/globo/globo01.pop
+B 73600 55b2025b977938b0 DC - Council wars/ozi_ns/scenario/globo/globo01.pth
+T 3911 8624fffa02dee4bb DC - Council wars/ozi_ns/scenario/globo/globo01.scn
+T 1413 3eea8e41cecb2ef5 DC - Council wars/ozi_ns/scenario/globo/globo01.tro
+T 863 45b97cbdb073ae1a DC - Council wars/ozi_ns/scenario/globo/globo01.txt
+T 159 acc5af456471ac0d DC - Council wars/ozi_ns/scenario/globo/globo02.001
+T 86 a27193aeeb1862fa DC - Council wars/ozi_ns/scenario/globo/globo02.002
+T 117 31cc5c0597704a07 DC - Council wars/ozi_ns/scenario/globo/globo02.003
+B 48392 04189a5942a551df DC - Council wars/ozi_ns/scenario/globo/globo02.map
+T 407 9aa7f4663a1878bc DC - Council wars/ozi_ns/scenario/globo/globo02.msg
+B 8066 ecf31046bac9a4da DC - Council wars/ozi_ns/scenario/globo/globo02.mtg
+T 46 212638f95823bbbf DC - Council wars/ozi_ns/scenario/globo/globo02.pop
+B 73600 fbd778ba73cd8d7f DC - Council wars/ozi_ns/scenario/globo/globo02.pth
+T 3069 b8cdd0085eaab6df DC - Council wars/ozi_ns/scenario/globo/globo02.scn
+T 1936 eea2be1732f81f76 DC - Council wars/ozi_ns/scenario/globo/globo02.tro
+T 508 01f04841ad7c2684 DC - Council wars/ozi_ns/scenario/globo/globo02.txt
+T 127 afaad3747d2a7d5a DC - Council wars/ozi_ns/scenario/globo/globo03.001
+T 87 848af0b50ea9370a DC - Council wars/ozi_ns/scenario/globo/globo03.002
+T 117 5aafc58f91e10727 DC - Council wars/ozi_ns/scenario/globo/globo03.003
+B 86024 d93c409886de499d DC - Council wars/ozi_ns/scenario/globo/globo03.map
+T 729 5235e628dd070335 DC - Council wars/ozi_ns/scenario/globo/globo03.msg
+B 14338 516b515019de0c35 DC - Council wars/ozi_ns/scenario/globo/globo03.mtg
+T 47 522a14eeca54e279 DC - Council wars/ozi_ns/scenario/globo/globo03.pop
+B 79872 04cc2842576c6eb8 DC - Council wars/ozi_ns/scenario/globo/globo03.pth
+T 3517 003c5c2d2813b95a DC - Council wars/ozi_ns/scenario/globo/globo03.scn
+T 1712 8bd5024b00bca2a0 DC - Council wars/ozi_ns/scenario/globo/globo03.tro
+T 476 1a1e07c7bf7fe2ac DC - Council wars/ozi_ns/scenario/globo/globo03.txt
+T 142 4711994971460bf0 DC - Council wars/ozi_ns/scenario/globo/globo04.001
+T 118 55ecdbf2a09cc768 DC - Council wars/ozi_ns/scenario/globo/globo04.002
+T 116 8e4a541af5d02545 DC - Council wars/ozi_ns/scenario/globo/globo04.003
+B 86024 8ee3e8a52090d938 DC - Council wars/ozi_ns/scenario/globo/globo04.map
+T 631 085d21e69d1a73ab DC - Council wars/ozi_ns/scenario/globo/globo04.msg
+B 14338 53c5b2530d3b60b3 DC - Council wars/ozi_ns/scenario/globo/globo04.mtg
+T 115 414b0726a99c4d6d DC - Council wars/ozi_ns/scenario/globo/globo04.pop
+B 79872 3577635bb678bf39 DC - Council wars/ozi_ns/scenario/globo/globo04.pth
+T 4473 6089e2441461ee66 DC - Council wars/ozi_ns/scenario/globo/globo04.scn
+T 1705 7f1445bc4de9bd83 DC - Council wars/ozi_ns/scenario/globo/globo04.tro
+T 543 e3dc9f8eb03b2645 DC - Council wars/ozi_ns/scenario/globo/globo04.txt
+T 137 2bae88edc228838d DC - Council wars/ozi_ns/scenario/globo/globo05.001
+T 121 82f4d7eca501871a DC - Council wars/ozi_ns/scenario/globo/globo05.002
+B 86024 b806ae73c134c92e DC - Council wars/ozi_ns/scenario/globo/globo05.map
+T 549 ef7793d908e4309d DC - Council wars/ozi_ns/scenario/globo/globo05.msg
+B 14338 21d92cba3d5ed0d8 DC - Council wars/ozi_ns/scenario/globo/globo05.mtg
+T 153 3b99cd1149047e8b DC - Council wars/ozi_ns/scenario/globo/globo05.pop
+B 79872 8fcd1f0943306065 DC - Council wars/ozi_ns/scenario/globo/globo05.pth
+T 3756 c10f19c5a37151b4 DC - Council wars/ozi_ns/scenario/globo/globo05.scn
+T 1240 ddc6fefdc477f3d8 DC - Council wars/ozi_ns/scenario/globo/globo05.tro
+T 563 09871bf22af67685 DC - Council wars/ozi_ns/scenario/globo/globo05.txt
+T 134 d898e53a2bf16ac2 DC - Council wars/ozi_ns/scenario/globo/globo06.001
+T 120 0e4e8bafff59f135 DC - Council wars/ozi_ns/scenario/globo/globo06.002
+T 82 832fa04c425d5baa DC - Council wars/ozi_ns/scenario/globo/globo06.003
+B 134408 f4fa2e84473a56e0 DC - Council wars/ozi_ns/scenario/globo/globo06.map
+T 1194 0d7d7b4fce1fc4d3 DC - Council wars/ozi_ns/scenario/globo/globo06.msg
+B 22402 15fec06e9d02f301 DC - Council wars/ozi_ns/scenario/globo/globo06.mtg
+T 68 6bf65f5e5dc3482e DC - Council wars/ozi_ns/scenario/globo/globo06.pop
+B 87936 98c832fadf860eef DC - Council wars/ozi_ns/scenario/globo/globo06.pth
+T 5466 f718738b6a8814a3 DC - Council wars/ozi_ns/scenario/globo/globo06.scn
+T 3862 8b7fec40db5edc2c DC - Council wars/ozi_ns/scenario/globo/globo06.tro
+T 613 4db07566136409c5 DC - Council wars/ozi_ns/scenario/globo/globo06.txt
+T 272 bb17a9b478eee06e DC - Council wars/ozi_ns/scenario/globo/globo07.001
+T 68 1a369b41ac64bc94 DC - Council wars/ozi_ns/scenario/globo/globo07.002
+T 84 3ed9aeea9158a4ac DC - Council wars/ozi_ns/scenario/globo/globo07.003
+T 107 a11839c6ba8b8086 DC - Council wars/ozi_ns/scenario/globo/globo07.004
+B 134408 f0f41b132f4c55f2 DC - Council wars/ozi_ns/scenario/globo/globo07.map
+T 378 2cf8958418a6854e DC - Council wars/ozi_ns/scenario/globo/globo07.msg
+B 22402 6e2f4309a3fdc145 DC - Council wars/ozi_ns/scenario/globo/globo07.mtg
+T 135 e929c3c4ecd37f09 DC - Council wars/ozi_ns/scenario/globo/globo07.pop
+B 87936 ebd729bd26e560b2 DC - Council wars/ozi_ns/scenario/globo/globo07.pth
+T 7621 8925997b2d109119 DC - Council wars/ozi_ns/scenario/globo/globo07.scn
+T 2534 61fa2ae96dffd14a DC - Council wars/ozi_ns/scenario/globo/globo07.tro
+T 692 9e186cfca3f64cd5 DC - Council wars/ozi_ns/scenario/globo/globo07.txt
+T 115 453461b2cac4b90d DC - Council wars/ozi_ns/scenario/globo/globo08.001
+T 162 26837cc3ff91e92a DC - Council wars/ozi_ns/scenario/globo/globo08.002
+T 122 0cec478913dad11e DC - Council wars/ozi_ns/scenario/globo/globo08.003
+B 86024 7efa90c227381087 DC - Council wars/ozi_ns/scenario/globo/globo08.map
+T 1053 efa110a862b4ea45 DC - Council wars/ozi_ns/scenario/globo/globo08.msg
+B 14338 89f672417a74c44e DC - Council wars/ozi_ns/scenario/globo/globo08.mtg
+T 123 e607f7560c4c1d3f DC - Council wars/ozi_ns/scenario/globo/globo08.pop
+B 79872 545491c99e87e89e DC - Council wars/ozi_ns/scenario/globo/globo08.pth
+T 3862 0e8945944bbf819e DC - Council wars/ozi_ns/scenario/globo/globo08.scn
+T 3763 afafdbbe5bf591b3 DC - Council wars/ozi_ns/scenario/globo/globo08.tro
+T 753 133a31aed8ced4f6 DC - Council wars/ozi_ns/scenario/globo/globo08.txt
+T 103 8cbf622fe40ce842 DC - Council wars/ozi_ns/scenario/globo/globo09.001
+T 101 a07cc35bb9f3994a DC - Council wars/ozi_ns/scenario/globo/globo09.002
+T 120 726072f6ea8247ee DC - Council wars/ozi_ns/scenario/globo/globo09.003
+B 134408 fa3500cae7778ba2 DC - Council wars/ozi_ns/scenario/globo/globo09.map
+T 755 36ed577a893126d7 DC - Council wars/ozi_ns/scenario/globo/globo09.msg
+B 22402 c622cebc73c74d6e DC - Council wars/ozi_ns/scenario/globo/globo09.mtg
+T 15 7beac6552bad5c26 DC - Council wars/ozi_ns/scenario/globo/globo09.pop
+B 87936 93a453f708cec7c6 DC - Council wars/ozi_ns/scenario/globo/globo09.pth
+T 6746 c6e8cf103d427ea9 DC - Council wars/ozi_ns/scenario/globo/globo09.scn
+T 5833 40deb207e7b2220a DC - Council wars/ozi_ns/scenario/globo/globo09.tro
+T 1281 dca84688d65f17bd DC - Council wars/ozi_ns/scenario/globo/globo09.txt
+T 128 03ccac8790da195e DC - Council wars/ozi_ns/scenario/globo/globo10.001
+T 109 c972caad73ae1b9a DC - Council wars/ozi_ns/scenario/globo/globo10.002
+T 108 207f4f637644af38 DC - Council wars/ozi_ns/scenario/globo/globo10.003
+T 120 726072f6ea8247ee DC - Council wars/ozi_ns/scenario/globo/globo10.004
+B 86024 8e3636235f106908 DC - Council wars/ozi_ns/scenario/globo/globo10.map
+T 660 cec24c74877b0fb7 DC - Council wars/ozi_ns/scenario/globo/globo10.msg
+B 14338 28275f194729cc5d DC - Council wars/ozi_ns/scenario/globo/globo10.mtg
+T 30 cb7ff5edb42e97a7 DC - Council wars/ozi_ns/scenario/globo/globo10.pop
+B 79872 b81f50572f55cb0a DC - Council wars/ozi_ns/scenario/globo/globo10.pth
+T 4615 34aa4fc025dec8c2 DC - Council wars/ozi_ns/scenario/globo/globo10.scn
+T 1498 5d6bde4b543a8891 DC - Council wars/ozi_ns/scenario/globo/globo10.tro
+T 831 7fc2e56348f4d6db DC - Council wars/ozi_ns/scenario/globo/globo10.txt
+T 228 173031950ad2b30b DC - Council wars/ozi_ns/scenario/globo/globo11.001
+T 96 e9dbc91190fd97af DC - Council wars/ozi_ns/scenario/globo/globo11.002
+T 133 a933f546d5314675 DC - Council wars/ozi_ns/scenario/globo/globo11.003
+B 134408 cad69097857069ca DC - Council wars/ozi_ns/scenario/globo/globo11.map
+T 965 2cb3e47ead1dd543 DC - Council wars/ozi_ns/scenario/globo/globo11.msg
+B 22402 15fec06e9d02f301 DC - Council wars/ozi_ns/scenario/globo/globo11.mtg
+T 259 1fb1b0d0cfbeb812 DC - Council wars/ozi_ns/scenario/globo/globo11.pop
+B 87936 2772c58f31963129 DC - Council wars/ozi_ns/scenario/globo/globo11.pth
+T 5826 e855019b2403cfc9 DC - Council wars/ozi_ns/scenario/globo/globo11.scn
+T 3839 9d6eddc78ab5e09b DC - Council wars/ozi_ns/scenario/globo/globo11.tro
+T 778 9c3414f2520adf4b DC - Council wars/ozi_ns/scenario/globo/globo11.txt
+T 3447 4f97e2241830600c DC - Council wars/ozi_ns/scenario/globo/scene.txt
+B 770748 af18c80699bc6109 DC - Council wars/ozi_ns/scenario/HTRAIN.BTS
+B 1408108 39a5c3386ededf39 DC - Council wars/ozi_ns/scenario/jubjub.bts
+B 1357736 ab72a4cb1358de2e DC - Council wars/ozi_ns/scenario/JUNGLE.BTS
+B 1408108 39a5c3386ededf39 DC - Council wars/ozi_ns/scenario/special.bts
+B 770748 af18c80699bc6109 DC - Council wars/ozi_ns/scenario/trainh.bts
+B 28535 ce4e47a3693a45a2 DC - Council wars/ozi_ns/scenario/vent.jus
+T 1938 66166a05b78c85a6 DC - Council wars/ozi_ns/sound/ALIST.DAT
+T 1294 d20f5a5a1e7a6683 DC - Council wars/ozi_ns/sound/alta.amb
+T 1294 d20f5a5a1e7a6683 DC - Council wars/ozi_ns/sound/area52.amb
+T 707 2b482cb1dcdad303 DC - Council wars/ozi_ns/sound/ATLANTIS.AMB
+T 58 ea6beba24f6a9f06 DC - Council wars/ozi_ns/sound/ATLANTIS.DAT
+T 58 ea6beba24f6a9f06 DC - Council wars/ozi_ns/sound/ATRAIN.DAT
+B 41216 0c81495c0f61aea6 DC - Council wars/ozi_ns/sound/birds.wav
+B 22498 9301d1daf52c8789 DC - Council wars/ozi_ns/sound/cobra.wav
+B 15254 a2788ed262ed6f57 DC - Council wars/ozi_ns/sound/cow.wav
+B 11090 15aac28af61fe02f DC - Council wars/ozi_ns/sound/cricket.wav
+B 355424 9783225ca67afcc6 DC - Council wars/ozi_ns/sound/DALG1DEA.wav
+B 130592 a3651e0d22e72458 DC - Council wars/ozi_ns/sound/DALG1SEL.wav
+B 236600 d932612f595f70d5 DC - Council wars/ozi_ns/sound/DALG2ACK.wav
+B 88856 1d40fca71f657138 DC - Council wars/ozi_ns/sound/DALG2SEL.wav
+B 58313 87207fa3636eb7b6 DC - Council wars/ozi_ns/sound/dog.wav
+B 42221 c29ccd9e9c49ad04 DC - Council wars/ozi_ns/sound/dog2.wav
+T 1320 c070225df575480b DC - Council wars/ozi_ns/sound/earth.amb
+B 11090 15aac28af61fe02f DC - Council wars/ozi_ns/sound/frog.wav
+B 59272 6f808b85b97f0efd DC - Council wars/ozi_ns/sound/frogs.wav
+T 707 2b482cb1dcdad303 DC - Council wars/ozi_ns/sound/gatlan.AMB
+B 44574 2798305817191492 DC - Council wars/ozi_ns/sound/gease.wav
+T 1458 f916765e70a0c687 DC - Council wars/ozi_ns/sound/GJUNGLE.AMB
+T 58 ea6beba24f6a9f06 DC - Council wars/ozi_ns/sound/GJUNGLE.DAT
+T 1294 d20f5a5a1e7a6683 DC - Council wars/ozi_ns/sound/jubjub.amb
+B 191572 314a2d6603945937 DC - Council wars/ozi_ns/sound/KOMANDWE.wav
+B 248240 be4c1effda008d84 DC - Council wars/ozi_ns/sound/KOMANWEA.wav
+B 17225 d568a95b903b43f3 DC - Council wars/ozi_ns/sound/mosq.wav
+B 38006 de38a9c563a74c87 DC - Council wars/ozi_ns/sound/r2bird.wav
+T 191 7f57bd60fcaa1dc2 DC - Council wars/ozi_ns/sound/SCENESND.DAT
+B 33666 3afc68c950c062cd DC - Council wars/ozi_ns/sound/seagull.wav
+T 6860 e58e1f80406c733e DC - Council wars/ozi_ns/sound/slist.dat
+B 34366 8edda57c88f901b8 DC - Council wars/ozi_ns/sound/turkey.wav
+B 17966 9c67e702439f1f32 DC - Council wars/ozi_ns/sound/water.wav
+B 75771 b2c0f734d1f364c7 DC - Council wars/ozi_ns/sound/wolf.wav
+B 1751 62b8822fa354c567 DC - Council wars/ozi_ns/special.gif
+B 32768 8df3af3b706102cf DC - Council wars/ozi_ns/special.rgb
+B 196608 6bf9798d670da422 DC - Council wars/ozi_ns/special.rmp
+T 68 f02ce0b497b4c2a5 DC - Council wars/ozisave/ozisave.txt
+B 13866 0f4fc712e4ec777c DC - Council wars/PALETTE.GIF
+B 1549 ea88075cbf8d5885 DC - Council wars/PALETTE.PPM
+B 32768 484fd5adf81185e4 DC - Council wars/PALETTE.RGB
+B 196608 7b0fa7f515db2d5d DC - Council wars/PALETTE.RMP
+B 52404 c6bf787c974b9919 DC - Council wars/PRIMES.DAT
+T 2413 451207b5fe0bfbc1 DC - Council wars/README.TXT
+T 32 562d2670ffea8555 DC - Council wars/SAVE/SAVE.TXT
+T 266 ce11b716ec8437f6 DC - Council wars/SCENARIO/ALIEN/ALIEN01.001
+T 141 cc5d623d27bd9292 DC - Council wars/SCENARIO/ALIEN/ALIEN01.002
+B 48392 df03f260fdf832a9 DC - Council wars/SCENARIO/ALIEN/ALIEN01.MAP
+T 275 b9b58adde7886371 DC - Council wars/SCENARIO/ALIEN/ALIEN01.MSG
+B 8066 6d79d94cb5608eb8 DC - Council wars/SCENARIO/ALIEN/ALIEN01.MTG
+B 73600 94629c5e73d5bfe0 DC - Council wars/SCENARIO/ALIEN/ALIEN01.PTH
+T 2975 876a0ddbfb95fcb1 DC - Council wars/SCENARIO/ALIEN/ALIEN01.SCN
+T 556 7e88506ad272f08f DC - Council wars/SCENARIO/ALIEN/ALIEN01.TRO
+T 1300 718c201830244a9d DC - Council wars/SCENARIO/ALIEN/ALIEN01.TXT
+T 166 a04f8ff68b230c1b DC - Council wars/SCENARIO/ALIEN/ALIEN02.001
+T 94 c3d6cd1e11cdf9e4 DC - Council wars/SCENARIO/ALIEN/ALIEN02.002
+B 48392 d5ab938493b41614 DC - Council wars/SCENARIO/ALIEN/ALIEN02.MAP
+T 336 32516e1dfe523bd4 DC - Council wars/SCENARIO/ALIEN/ALIEN02.MSG
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/ALIEN/ALIEN02.MTG
+B 73600 1e6633ca04693915 DC - Council wars/SCENARIO/ALIEN/ALIEN02.PTH
+T 2821 458588d4fb2cd951 DC - Council wars/SCENARIO/ALIEN/ALIEN02.SCN
+T 1032 26d010778ad6dc64 DC - Council wars/SCENARIO/ALIEN/ALIEN02.TRO
+T 598 e3b3dcb91bce6d5e DC - Council wars/SCENARIO/ALIEN/ALIEN02.TXT
+T 204 8494b93c86e9449e DC - Council wars/SCENARIO/ALIEN/ALIEN03.001
+T 163 33249bb195c3dc55 DC - Council wars/SCENARIO/ALIEN/ALIEN03.002
+T 84 a17a7fe305987ce3 DC - Council wars/SCENARIO/ALIEN/ALIEN03.003
+B 65864 475b165159bae409 DC - Council wars/SCENARIO/ALIEN/ALIEN03.MAP
+T 481 519b7bb086ee7088 DC - Council wars/SCENARIO/ALIEN/ALIEN03.MSG
+B 10978 6e1cd0d973598dcd DC - Council wars/SCENARIO/ALIEN/ALIEN03.MTG
+B 76512 230f3cc1169762e6 DC - Council wars/SCENARIO/ALIEN/ALIEN03.PTH
+T 2756 b1b517612f66060c DC - Council wars/SCENARIO/ALIEN/ALIEN03.SCN
+T 862 a7ee0e9e5cdbd064 DC - Council wars/SCENARIO/ALIEN/ALIEN03.TRO
+T 742 7f0a95c92b77ce5b DC - Council wars/SCENARIO/ALIEN/ALIEN03.TXT
+T 162 4ebb265a9b903c07 DC - Council wars/SCENARIO/ALIEN/ALIEN04.001
+T 74 8d21cfd94259237e DC - Council wars/SCENARIO/ALIEN/ALIEN04.002
+T 117 375ad60292cc27e7 DC - Council wars/SCENARIO/ALIEN/ALIEN04.003
+B 65864 84d3ec6eadb27ba8 DC - Council wars/SCENARIO/ALIEN/ALIEN04.MAP
+T 618 a27ae507834b6213 DC - Council wars/SCENARIO/ALIEN/ALIEN04.MSG
+B 10978 f6e259196681abd5 DC - Council wars/SCENARIO/ALIEN/ALIEN04.MTG
+B 76512 710d324647ee3236 DC - Council wars/SCENARIO/ALIEN/ALIEN04.PTH
+T 3872 a0b33b5c020ab010 DC - Council wars/SCENARIO/ALIEN/ALIEN04.SCN
+T 1590 6753d4d488464e5a DC - Council wars/SCENARIO/ALIEN/ALIEN04.TRO
+T 962 bcdc02e252bad9e0 DC - Council wars/SCENARIO/ALIEN/ALIEN04.TXT
+T 211 c2290a0bb2d5e42f DC - Council wars/SCENARIO/ALIEN/ALIEN05.001
+T 254 feaed6d481189d59 DC - Council wars/SCENARIO/ALIEN/ALIEN05.002
+B 65864 a25273d5b108bdb5 DC - Council wars/SCENARIO/ALIEN/ALIEN05.MAP
+T 378 9bfddd8faa1539cb DC - Council wars/SCENARIO/ALIEN/ALIEN05.MSG
+B 10978 ee8f62543c07811c DC - Council wars/SCENARIO/ALIEN/ALIEN05.MTG
+B 76512 c442636315537abf DC - Council wars/SCENARIO/ALIEN/ALIEN05.PTH
+T 2962 8aa40fe7f39b67c6 DC - Council wars/SCENARIO/ALIEN/ALIEN05.SCN
+T 2452 fb37fae16f07b3de DC - Council wars/SCENARIO/ALIEN/ALIEN05.TRO
+T 1041 22fc938151ca85e3 DC - Council wars/SCENARIO/ALIEN/ALIEN05.TXT
+T 157 8e0d1eed233c369e DC - Council wars/SCENARIO/ALIEN/ALIEN06.001
+T 102 eb6256cd17a1aac8 DC - Council wars/SCENARIO/ALIEN/ALIEN06.002
+B 86024 1661af45e0b69526 DC - Council wars/SCENARIO/ALIEN/ALIEN06.MAP
+T 524 179a8130db0e3e0a DC - Council wars/SCENARIO/ALIEN/ALIEN06.MSG
+B 14338 ed342bf84f7d8fa0 DC - Council wars/SCENARIO/ALIEN/ALIEN06.MTG
+B 79872 1f657be737766b14 DC - Council wars/SCENARIO/ALIEN/ALIEN06.PTH
+T 3629 5a19a6798c852ad0 DC - Council wars/SCENARIO/ALIEN/ALIEN06.SCN
+T 1357 4e774d25e6daf31f DC - Council wars/SCENARIO/ALIEN/ALIEN06.TRO
+T 820 e8cf3dfc12f5d8b9 DC - Council wars/SCENARIO/ALIEN/ALIEN06.TXT
+T 204 e00d013d96cba22a DC - Council wars/SCENARIO/ALIEN/ALIEN07.001
+T 67 daa0d2f2796c72e2 DC - Council wars/SCENARIO/ALIEN/ALIEN07.002
+B 65864 66858bd4e9cc8e5b DC - Council wars/SCENARIO/ALIEN/ALIEN07.MAP
+T 346 d67e1429b06a7c23 DC - Council wars/SCENARIO/ALIEN/ALIEN07.MSG
+B 10978 a6eae2f3a3958eb9 DC - Council wars/SCENARIO/ALIEN/ALIEN07.MTG
+B 76512 ab05cae02141cc94 DC - Council wars/SCENARIO/ALIEN/ALIEN07.PTH
+T 3010 1871ec7c1bb2d787 DC - Council wars/SCENARIO/ALIEN/ALIEN07.SCN
+T 1190 8c0dba5c8c3abf35 DC - Council wars/SCENARIO/ALIEN/ALIEN07.TRO
+T 554 b069508afa7692ed DC - Council wars/SCENARIO/ALIEN/ALIEN07.TXT
+T 69 2d93442d83fddb28 DC - Council wars/SCENARIO/ALIEN/ALIEN08.001
+T 102 62f17baf495c6c38 DC - Council wars/SCENARIO/ALIEN/ALIEN08.002
+T 93 d947556e477eabdd DC - Council wars/SCENARIO/ALIEN/ALIEN08.003
+B 86024 2cf57ccb57304619 DC - Council wars/SCENARIO/ALIEN/ALIEN08.MAP
+T 1007 380d6b3d7fb47735 DC - Council wars/SCENARIO/ALIEN/ALIEN08.MSG
+B 14338 aa1c7766ee82d915 DC - Council wars/SCENARIO/ALIEN/ALIEN08.MTG
+B 79872 2e65bc19382116d3 DC - Council wars/SCENARIO/ALIEN/ALIEN08.PTH
+T 3423 88528c6b30f27024 DC - Council wars/SCENARIO/ALIEN/ALIEN08.SCN
+T 1602 31473260ceca65b3 DC - Council wars/SCENARIO/ALIEN/ALIEN08.TRO
+T 504 0d15c8b1b31d3937 DC - Council wars/SCENARIO/ALIEN/ALIEN08.TXT
+T 93 7be2d94bfe5d8e16 DC - Council wars/SCENARIO/ALIEN/ALIEN09.001
+T 104 4a16667aba6361b7 DC - Council wars/SCENARIO/ALIEN/ALIEN09.002
+B 86024 1ef3ff11c7ab8ad3 DC - Council wars/SCENARIO/ALIEN/ALIEN09.MAP
+T 567 60e9581fe337fff9 DC - Council wars/SCENARIO/ALIEN/ALIEN09.MSG
+B 14338 b235af89f3328f5c DC - Council wars/SCENARIO/ALIEN/ALIEN09.MTG
+B 79872 98411d5e113778ae DC - Council wars/SCENARIO/ALIEN/ALIEN09.PTH
+T 4055 379c719cc3b8e718 DC - Council wars/SCENARIO/ALIEN/ALIEN09.SCN
+T 733 53c14504758dbfd5 DC - Council wars/SCENARIO/ALIEN/ALIEN09.TRO
+T 957 db1b78b416085aa3 DC - Council wars/SCENARIO/ALIEN/ALIEN09.TXT
+T 188 28af526c2df9c49a DC - Council wars/SCENARIO/ALIEN/ALIEN10.001
+T 155 931e017afde64f60 DC - Council wars/SCENARIO/ALIEN/ALIEN10.002
+B 86024 28bd023a07c72b78 DC - Council wars/SCENARIO/ALIEN/ALIEN10.MAP
+T 280 e5e0167a2e39cfc1 DC - Council wars/SCENARIO/ALIEN/ALIEN10.MSG
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/ALIEN/ALIEN10.MTG
+B 79872 8116c574568103e5 DC - Council wars/SCENARIO/ALIEN/ALIEN10.PTH
+T 3258 5fcc48ba1992c141 DC - Council wars/SCENARIO/ALIEN/ALIEN10.SCN
+T 892 5c1524d74191512b DC - Council wars/SCENARIO/ALIEN/ALIEN10.TRO
+T 618 181c0c1b16f53744 DC - Council wars/SCENARIO/ALIEN/ALIEN10.TXT
+T 133 9695e51978387c82 DC - Council wars/SCENARIO/ALIEN/ALIEN11.001
+T 175 75a95ddfa6c79594 DC - Council wars/SCENARIO/ALIEN/ALIEN11.002
+B 86024 2d359497d16d8afe DC - Council wars/SCENARIO/ALIEN/ALIEN11.MAP
+T 319 edf07139076b3bc6 DC - Council wars/SCENARIO/ALIEN/ALIEN11.MSG
+B 14338 3ae2e88fd6b0dee3 DC - Council wars/SCENARIO/ALIEN/ALIEN11.MTG
+B 79872 430599329dc32031 DC - Council wars/SCENARIO/ALIEN/ALIEN11.PTH
+T 2687 36b9ec30ea9da2c7 DC - Council wars/SCENARIO/ALIEN/ALIEN11.SCN
+T 986 76a6403bdf4fa1e6 DC - Council wars/SCENARIO/ALIEN/ALIEN11.TRO
+T 1091 ddf2cf6110d71909 DC - Council wars/SCENARIO/ALIEN/ALIEN11.TXT
+T 128 8ed53a6f682f4471 DC - Council wars/SCENARIO/ALIEN/ALIEN12.001
+T 165 59a954a58e132e31 DC - Council wars/SCENARIO/ALIEN/ALIEN12.002
+B 134408 36c1977287e8476e DC - Council wars/SCENARIO/ALIEN/ALIEN12.MAP
+T 234 2a6c38452e6d8444 DC - Council wars/SCENARIO/ALIEN/ALIEN12.MSG
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/ALIEN/ALIEN12.MTG
+B 87936 11ea1a0d45c23f8f DC - Council wars/SCENARIO/ALIEN/ALIEN12.PTH
+T 3032 b59555dd9410f7cb DC - Council wars/SCENARIO/ALIEN/ALIEN12.SCN
+T 972 f699fb28e2ac5dba DC - Council wars/SCENARIO/ALIEN/ALIEN12.TRO
+T 550 4058b758465136ce DC - Council wars/SCENARIO/ALIEN/ALIEN12.TXT
+T 75 55655716d735237f DC - Council wars/SCENARIO/ALIEN/ALIEN13.001
+T 81 07ff307872a54fda DC - Council wars/SCENARIO/ALIEN/ALIEN13.002
+B 134408 6325b8d840d97c3f DC - Council wars/SCENARIO/ALIEN/ALIEN13.MAP
+T 230 8ebbf73355237863 DC - Council wars/SCENARIO/ALIEN/ALIEN13.MSG
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/ALIEN/ALIEN13.MTG
+B 87936 8e27ac8898c7b8a1 DC - Council wars/SCENARIO/ALIEN/ALIEN13.PTH
+T 3546 4368f9b2c504d32b DC - Council wars/SCENARIO/ALIEN/ALIEN13.SCN
+T 901 0a3c86d2969d05e8 DC - Council wars/SCENARIO/ALIEN/ALIEN13.TRO
+T 473 7c86383819ba6036 DC - Council wars/SCENARIO/ALIEN/ALIEN13.TXT
+T 66 73b2bdc0bb0d1491 DC - Council wars/SCENARIO/ALIEN/ALIEN14.001
+T 148 04c8038c9734551d DC - Council wars/SCENARIO/ALIEN/ALIEN14.002
+B 65864 bdf41c401b8e5305 DC - Council wars/SCENARIO/ALIEN/ALIEN14.MAP
+T 127 9b253a48b959aae3 DC - Council wars/SCENARIO/ALIEN/ALIEN14.MSG
+B 10978 ec99d684e504f24a DC - Council wars/SCENARIO/ALIEN/ALIEN14.MTG
+B 76512 411862793963f15f DC - Council wars/SCENARIO/ALIEN/ALIEN14.PTH
+T 3586 f70f96efd9a7b7a9 DC - Council wars/SCENARIO/ALIEN/ALIEN14.SCN
+T 401 fd5aa09c3cd3876d DC - Council wars/SCENARIO/ALIEN/ALIEN14.TRO
+T 396 2f3f1af7f3874606 DC - Council wars/SCENARIO/ALIEN/ALIEN14.TXT
+T 55 9683320b574ac58c DC - Council wars/SCENARIO/ALIEN/ALIEN15.001
+T 92 cd94efab64e4e080 DC - Council wars/SCENARIO/ALIEN/ALIEN15.002
+B 134408 b57fb2e9e60d31fb DC - Council wars/SCENARIO/ALIEN/ALIEN15.MAP
+T 444 36031dd062f09ca0 DC - Council wars/SCENARIO/ALIEN/ALIEN15.MSG
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/ALIEN/ALIEN15.MTG
+B 87936 2ea198f97014216a DC - Council wars/SCENARIO/ALIEN/ALIEN15.PTH
+T 3168 a8458522c6bc9959 DC - Council wars/SCENARIO/ALIEN/ALIEN15.SCN
+T 1871 af15c79b56099e85 DC - Council wars/SCENARIO/ALIEN/ALIEN15.TRO
+T 739 d603769517202284 DC - Council wars/SCENARIO/ALIEN/ALIEN15.TXT
+T 821 652ba3fec8b77a3b DC - Council wars/SCENARIO/ALIEN/DEMO.TXT
+B 79545 811486d8b21d2014 DC - Council wars/SCENARIO/ALL.JUS
+B 1350540 61a2aed6ac8d36fc DC - Council wars/SCENARIO/ATLANTIS.BTS
+B 1421472 3243b51139cb3cf7 DC - Council wars/SCENARIO/DESERT.BTS
+B 2107076 d5b9140dd48ad3e8 DC - Council wars/SCENARIO/DESERT.SET
+B 770748 af18c80699bc6109 DC - Council wars/SCENARIO/HTRAIN.BTS
+B 86024 f1a091d4ec4d908b DC - Council wars/SCENARIO/HUMAN/DEMO.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/HUMAN/DEMO.MTG
+B 79872 74e67990388766cf DC - Council wars/SCENARIO/HUMAN/DEMO.PTH
+T 2463 433802a94188f5ad DC - Council wars/SCENARIO/HUMAN/DEMO.SCN
+T 895 6a209c27fc420935 DC - Council wars/SCENARIO/HUMAN/DEMO.TXT
+T 155 253dbab6a0db6b8c DC - Council wars/SCENARIO/HUMAN/HUMAN01.001
+T 105 93a74c14906dc893 DC - Council wars/SCENARIO/HUMAN/HUMAN01.002
+T 129 068a71327e4f35d7 DC - Council wars/SCENARIO/HUMAN/HUMAN01.003
+T 64 4d2daab2b22c7136 DC - Council wars/SCENARIO/HUMAN/HUMAN01.004
+B 48392 09d712271c8deca5 DC - Council wars/SCENARIO/HUMAN/HUMAN01.MAP
+T 402 0809fbb8228a42ea DC - Council wars/SCENARIO/HUMAN/HUMAN01.MSG
+B 8066 8d88fb9419b1d104 DC - Council wars/SCENARIO/HUMAN/HUMAN01.MTG
+B 73600 681198c4ac5fba41 DC - Council wars/SCENARIO/HUMAN/HUMAN01.PTH
+T 2633 1f1ae572c5a814ff DC - Council wars/SCENARIO/HUMAN/HUMAN01.SCN
+T 1073 f448162d4cd80ce6 DC - Council wars/SCENARIO/HUMAN/HUMAN01.TRO
+T 844 11ab401cf08b8ea3 DC - Council wars/SCENARIO/HUMAN/HUMAN01.TXT
+T 137 4f5cbe0319083fd4 DC - Council wars/SCENARIO/HUMAN/HUMAN02.001
+T 98 913edcfda7b13875 DC - Council wars/SCENARIO/HUMAN/HUMAN02.002
+T 87 fb191c4e874cb8d0 DC - Council wars/SCENARIO/HUMAN/HUMAN02.003
+B 48392 ea7377f73ad1d029 DC - Council wars/SCENARIO/HUMAN/HUMAN02.MAP
+T 321 ec5d166150c9a87a DC - Council wars/SCENARIO/HUMAN/HUMAN02.MSG
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/HUMAN/HUMAN02.MTG
+B 73600 623c4e65f710527b DC - Council wars/SCENARIO/HUMAN/HUMAN02.PTH
+T 2572 d533b259a7f2a308 DC - Council wars/SCENARIO/HUMAN/HUMAN02.SCN
+T 1795 6b3a4cc06552e58a DC - Council wars/SCENARIO/HUMAN/HUMAN02.TRO
+T 955 6d3a7cb92a6708cd DC - Council wars/SCENARIO/HUMAN/HUMAN02.TXT
+T 109 ff40fcfd219dc4cd DC - Council wars/SCENARIO/HUMAN/HUMAN03.001
+T 104 3c50148d8a7503ab DC - Council wars/SCENARIO/HUMAN/HUMAN03.002
+T 112 53efc463f478ce24 DC - Council wars/SCENARIO/HUMAN/HUMAN03.003
+B 65864 64b30e8d6048ae85 DC - Council wars/SCENARIO/HUMAN/HUMAN03.MAP
+T 322 3ce4cb82ece14335 DC - Council wars/SCENARIO/HUMAN/HUMAN03.MSG
+B 10978 a6eae2f3a3958eb9 DC - Council wars/SCENARIO/HUMAN/HUMAN03.MTG
+B 76512 a447ba7e3445ee6a DC - Council wars/SCENARIO/HUMAN/HUMAN03.PTH
+T 3078 cdae1815a0bdba9b DC - Council wars/SCENARIO/HUMAN/HUMAN03.SCN
+T 1126 f8f9abcc18647d14 DC - Council wars/SCENARIO/HUMAN/HUMAN03.TRO
+T 565 5a7066d59956ac90 DC - Council wars/SCENARIO/HUMAN/HUMAN03.TXT
+T 167 aca251c53425fcb9 DC - Council wars/SCENARIO/HUMAN/HUMAN04.001
+T 60 dca052a2f889cad2 DC - Council wars/SCENARIO/HUMAN/HUMAN04.002
+B 65864 8b3c30a8323a1baf DC - Council wars/SCENARIO/HUMAN/HUMAN04.MAP
+T 424 c66cb4a9b56fd8d8 DC - Council wars/SCENARIO/HUMAN/HUMAN04.MSG
+B 10978 17815b00a428f5a1 DC - Council wars/SCENARIO/HUMAN/HUMAN04.MTG
+B 76512 0fcc99c7adb2b0bf DC - Council wars/SCENARIO/HUMAN/HUMAN04.PTH
+T 2648 1cb2cc1f567ebbbc DC - Council wars/SCENARIO/HUMAN/HUMAN04.SCN
+T 1029 7156c6edc673f155 DC - Council wars/SCENARIO/HUMAN/HUMAN04.TRO
+T 680 c257629bd87189dc DC - Council wars/SCENARIO/HUMAN/HUMAN04.TXT
+T 133 220f0afa3ad5c169 DC - Council wars/SCENARIO/HUMAN/HUMAN05.001
+T 106 6de1807fd819f443 DC - Council wars/SCENARIO/HUMAN/HUMAN05.002
+B 65864 39f3ee3d9e529b5b DC - Council wars/SCENARIO/HUMAN/HUMAN05.MAP
+T 836 49cdc3b1f9083893 DC - Council wars/SCENARIO/HUMAN/HUMAN05.MSG
+B 10978 8580bc81dfa5d790 DC - Council wars/SCENARIO/HUMAN/HUMAN05.MTG
+B 76512 ed57a55bf34eb912 DC - Council wars/SCENARIO/HUMAN/HUMAN05.PTH
+T 2760 8ef18b480986d453 DC - Council wars/SCENARIO/HUMAN/HUMAN05.SCN
+T 1500 759d388b867efd68 DC - Council wars/SCENARIO/HUMAN/HUMAN05.TRO
+T 514 6235fd1a0e8bfcc5 DC - Council wars/SCENARIO/HUMAN/HUMAN05.TXT
+T 309 088ab77b92fc4286 DC - Council wars/SCENARIO/HUMAN/HUMAN06.001
+T 78 7d36a2e360076388 DC - Council wars/SCENARIO/HUMAN/HUMAN06.002
+B 65864 39f109b01536bc59 DC - Council wars/SCENARIO/HUMAN/HUMAN06.MAP
+T 116 a3c93e7046e02c6e DC - Council wars/SCENARIO/HUMAN/HUMAN06.MSG
+B 10978 c467372a526b1eac DC - Council wars/SCENARIO/HUMAN/HUMAN06.MTG
+B 76512 9863a63959247055 DC - Council wars/SCENARIO/HUMAN/HUMAN06.PTH
+T 3903 0850032134deba03 DC - Council wars/SCENARIO/HUMAN/HUMAN06.SCN
+T 1068 94e27489621a3a3e DC - Council wars/SCENARIO/HUMAN/HUMAN06.TRO
+T 458 e1d90d72fc8205d4 DC - Council wars/SCENARIO/HUMAN/HUMAN06.TXT
+T 208 f921bdb3f4f303bf DC - Council wars/SCENARIO/HUMAN/HUMAN07.001
+T 133 576c8da5a53ede53 DC - Council wars/SCENARIO/HUMAN/HUMAN07.002
+T 81 f22c3ce7ee2e1f72 DC - Council wars/SCENARIO/HUMAN/HUMAN07.003
+B 65864 ecfd658ec7e89567 DC - Council wars/SCENARIO/HUMAN/HUMAN07.MAP
+T 266 12ebd28f2088d7cf DC - Council wars/SCENARIO/HUMAN/HUMAN07.MSG
+B 10978 a6eae2f3a3958eb9 DC - Council wars/SCENARIO/HUMAN/HUMAN07.MTG
+B 76512 0ea2bc59c0c60335 DC - Council wars/SCENARIO/HUMAN/HUMAN07.PTH
+T 3107 1898ccdf4d733246 DC - Council wars/SCENARIO/HUMAN/HUMAN07.SCN
+T 1261 f42ed1557d57dc2f DC - Council wars/SCENARIO/HUMAN/HUMAN07.TRO
+T 1312 cddecdeb1814537a DC - Council wars/SCENARIO/HUMAN/HUMAN07.TXT
+T 221 579780d5cf241a43 DC - Council wars/SCENARIO/HUMAN/HUMAN08.001
+T 96 0c4db68be89322d2 DC - Council wars/SCENARIO/HUMAN/HUMAN08.002
+T 189 80029e9de6364468 DC - Council wars/SCENARIO/HUMAN/HUMAN08.003
+B 65864 365a208693b929d1 DC - Council wars/SCENARIO/HUMAN/HUMAN08.MAP
+T 225 5878b3fa22211b99 DC - Council wars/SCENARIO/HUMAN/HUMAN08.MSG
+B 10978 a6eae2f3a3958eb9 DC - Council wars/SCENARIO/HUMAN/HUMAN08.MTG
+B 76512 17fc9bd5554bf51d DC - Council wars/SCENARIO/HUMAN/HUMAN08.PTH
+T 3303 c855362074eac78f DC - Council wars/SCENARIO/HUMAN/HUMAN08.SCN
+T 760 a46c26dc2d149282 DC - Council wars/SCENARIO/HUMAN/HUMAN08.TRO
+T 665 644c3f6c74f06cfa DC - Council wars/SCENARIO/HUMAN/HUMAN08.TXT
+T 153 835f182af0b6f17f DC - Council wars/SCENARIO/HUMAN/HUMAN09.001
+T 81 97d17bdfd74826ee DC - Council wars/SCENARIO/HUMAN/HUMAN09.002
+B 86024 d0a8c60592f8b462 DC - Council wars/SCENARIO/HUMAN/HUMAN09.MAP
+T 217 ff1a1ee33ce00740 DC - Council wars/SCENARIO/HUMAN/HUMAN09.MSG
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/HUMAN/HUMAN09.MTG
+B 79872 28228e98f8c12166 DC - Council wars/SCENARIO/HUMAN/HUMAN09.PTH
+T 3673 eb6e9d3be8500d2d DC - Council wars/SCENARIO/HUMAN/HUMAN09.SCN
+T 1044 ac24304f675fcef3 DC - Council wars/SCENARIO/HUMAN/human09.tro
+T 702 cc3570066d181c0a DC - Council wars/SCENARIO/HUMAN/HUMAN09.TXT
+T 183 20a5759b763e807d DC - Council wars/SCENARIO/HUMAN/HUMAN10.001
+T 81 97d17bdfd74826ee DC - Council wars/SCENARIO/HUMAN/HUMAN10.002
+B 86024 414049ff4121e0c1 DC - Council wars/SCENARIO/HUMAN/HUMAN10.MAP
+T 287 d75bb65d6e3f939b DC - Council wars/SCENARIO/HUMAN/HUMAN10.MSG
+B 14338 293085a4d0134486 DC - Council wars/SCENARIO/HUMAN/HUMAN10.MTG
+B 79872 4dfb4aea478958d7 DC - Council wars/SCENARIO/HUMAN/HUMAN10.PTH
+T 2688 6c5ec90318e29ebe DC - Council wars/SCENARIO/HUMAN/HUMAN10.SCN
+T 2093 961ad015981afd5f DC - Council wars/SCENARIO/HUMAN/HUMAN10.TRO
+T 1132 ae6906df3058fe75 DC - Council wars/SCENARIO/HUMAN/HUMAN10.TXT
+T 139 1211dda441d6f724 DC - Council wars/SCENARIO/HUMAN/HUMAN11.001
+T 147 80574ec94901a15b DC - Council wars/SCENARIO/HUMAN/HUMAN11.002
+B 134408 f13424f96c5e61c0 DC - Council wars/SCENARIO/HUMAN/HUMAN11.MAP
+T 244 5180212950d83cb0 DC - Council wars/SCENARIO/HUMAN/HUMAN11.MSG
+B 22402 56406e5a5e7a41a6 DC - Council wars/SCENARIO/HUMAN/HUMAN11.MTG
+B 87936 19927f7c596d5198 DC - Council wars/SCENARIO/HUMAN/HUMAN11.PTH
+T 4366 bc8600f57d418bf3 DC - Council wars/SCENARIO/HUMAN/HUMAN11.SCN
+T 1015 45960ea7edbd6b70 DC - Council wars/SCENARIO/HUMAN/HUMAN11.TRO
+T 731 5dc0fbe7b74ad023 DC - Council wars/SCENARIO/HUMAN/HUMAN11.TXT
+T 174 1df7c71e1de0775b DC - Council wars/SCENARIO/HUMAN/HUMAN12.001
+T 59 bcf8092d54c092fc DC - Council wars/SCENARIO/HUMAN/HUMAN12.002
+T 73 0e97922602c55539 DC - Council wars/SCENARIO/HUMAN/HUMAN12.003
+B 86024 6d278f62c36d731d DC - Council wars/SCENARIO/HUMAN/HUMAN12.MAP
+T 330 615acf4d0d6fa3d1 DC - Council wars/SCENARIO/HUMAN/HUMAN12.MSG
+B 14338 181bbd490aa81aa6 DC - Council wars/SCENARIO/HUMAN/HUMAN12.MTG
+B 79872 7e8ec1191b8e26de DC - Council wars/SCENARIO/HUMAN/HUMAN12.PTH
+T 3764 4e30088670b4bb40 DC - Council wars/SCENARIO/HUMAN/HUMAN12.SCN
+T 3710 1adc56867ab32d34 DC - Council wars/SCENARIO/HUMAN/HUMAN12.TRO
+T 1077 ca3dd2ea4b4d5da5 DC - Council wars/SCENARIO/HUMAN/HUMAN12.TXT
+T 130 9124ff351e664d59 DC - Council wars/SCENARIO/HUMAN/HUMAN13.001
+T 88 e709d2e6355003f8 DC - Council wars/SCENARIO/HUMAN/HUMAN13.002
+B 134408 783a36c2ff9dc47e DC - Council wars/SCENARIO/HUMAN/HUMAN13.MAP
+T 263 37a1e9d689c0f295 DC - Council wars/SCENARIO/HUMAN/HUMAN13.MSG
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/HUMAN/HUMAN13.MTG
+B 87936 659584114fe7483d DC - Council wars/SCENARIO/HUMAN/HUMAN13.PTH
+T 3375 8887ef7c931464b5 DC - Council wars/SCENARIO/HUMAN/HUMAN13.SCN
+T 1051 272b73d97360960f DC - Council wars/SCENARIO/HUMAN/HUMAN13.TRO
+T 564 00be03b39b65eb29 DC - Council wars/SCENARIO/HUMAN/HUMAN13.TXT
+T 153 c15cda6851842809 DC - Council wars/SCENARIO/HUMAN/HUMAN14.001
+T 98 b9e97a805cc45dc7 DC - Council wars/SCENARIO/HUMAN/HUMAN14.002
+B 86024 c1742f114a8f930e DC - Council wars/SCENARIO/HUMAN/HUMAN14.MAP
+T 158 1e8b95a62db38276 DC - Council wars/SCENARIO/HUMAN/HUMAN14.MSG
+B 14338 98bf1d582967cc17 DC - Council wars/SCENARIO/HUMAN/HUMAN14.MTG
+B 79872 e99fd099842e7e5d DC - Council wars/SCENARIO/HUMAN/HUMAN14.PTH
+T 3423 0c0d6d7dccc12321 DC - Council wars/SCENARIO/HUMAN/HUMAN14.SCN
+T 394 cc6a16c61311e085 DC - Council wars/SCENARIO/HUMAN/HUMAN14.TRO
+T 566 06a42f125433d287 DC - Council wars/SCENARIO/HUMAN/HUMAN14.TXT
+T 86 fdb0f9dec0fbcb52 DC - Council wars/SCENARIO/HUMAN/HUMAN15.001
+T 115 d124b8deb6b4a4d1 DC - Council wars/SCENARIO/HUMAN/HUMAN15.002
+B 134408 4f3a012e0c881dd2 DC - Council wars/SCENARIO/HUMAN/HUMAN15.MAP
+T 221 4d324728b7656f7e DC - Council wars/SCENARIO/HUMAN/HUMAN15.MSG
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/HUMAN/HUMAN15.MTG
+B 87936 b2dbd6d1a3d734f1 DC - Council wars/SCENARIO/HUMAN/HUMAN15.PTH
+T 3506 c2a8793f7bb498ab DC - Council wars/SCENARIO/HUMAN/HUMAN15.SCN
+T 1652 5e154aee92dc6558 DC - Council wars/SCENARIO/HUMAN/HUMAN15.TRO
+T 657 3fdb836a56ec81f8 DC - Council wars/SCENARIO/HUMAN/HUMAN15.TXT
+B 1357736 ab72a4cb1358de2e DC - Council wars/SCENARIO/JUNGLE.BTS
+B 2017140 8e8a830a896b16f6 DC - Council wars/SCENARIO/JUNGLE.SET
+B 48392 d928c893b5d7d757 DC - Council wars/SCENARIO/MPLAYER/A2PLAY01.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/A2PLAY01.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/A2PLAY01.POP
+B 73600 2283ca0c72da34f8 DC - Council wars/SCENARIO/MPLAYER/A2PLAY01.PTH
+T 2798 4f87d75e27ef249a DC - Council wars/SCENARIO/MPLAYER/A2PLAY01.SCN
+T 0 e3b0c44298fc1c14 DC - Council wars/SCENARIO/MPLAYER/A2PLAY01.TRO
+B 48392 36f5a52bcd65480d DC - Council wars/SCENARIO/MPLAYER/D2PLAY01.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/D2PLAY01.MTG
+T 102 cfe41735b025ba5b DC - Council wars/SCENARIO/MPLAYER/D2PLAY01.POP
+B 73600 965cac1ed2eecd94 DC - Council wars/SCENARIO/MPLAYER/D2PLAY01.PTH
+T 2396 9e288b370b835ce1 DC - Council wars/SCENARIO/MPLAYER/D2PLAY01.SCN
+T 2088 cf5668adffae78c1 DC - Council wars/SCENARIO/MPLAYER/D2PLAY01.TRO
+B 86024 501b9169733664d2 DC - Council wars/SCENARIO/MPLAYER/D2PLAY02.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/D2PLAY02.MTG
+T 90 a24831bc374102d2 DC - Council wars/SCENARIO/MPLAYER/D2PLAY02.POP
+B 79872 c26e7e17ec9c7358 DC - Council wars/SCENARIO/MPLAYER/D2PLAY02.PTH
+T 2543 08e228f374747d19 DC - Council wars/SCENARIO/MPLAYER/D2PLAY02.SCN
+T 2635 a75848c4b4ddc94d DC - Council wars/SCENARIO/MPLAYER/D2PLAY02.TRO
+B 48392 296756f7791d74ed DC - Council wars/SCENARIO/MPLAYER/D2PLAY03.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/D2PLAY03.MTG
+T 50 93e1aff197f91a2f DC - Council wars/SCENARIO/MPLAYER/D2PLAY03.POP
+B 73600 a62c290991615d26 DC - Council wars/SCENARIO/MPLAYER/D2PLAY03.PTH
+T 2534 825cb7e7e93abe22 DC - Council wars/SCENARIO/MPLAYER/D2PLAY03.SCN
+T 2274 79402426f57513f2 DC - Council wars/SCENARIO/MPLAYER/D2PLAY03.TRO
+B 48392 7545ade4de548d94 DC - Council wars/SCENARIO/MPLAYER/D2PLAY04.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/D2PLAY04.MTG
+T 67 de90857d3f77be63 DC - Council wars/SCENARIO/MPLAYER/D2PLAY04.POP
+B 73600 91022d8d2492a247 DC - Council wars/SCENARIO/MPLAYER/D2PLAY04.PTH
+T 2465 0ee99615281efdf8 DC - Council wars/SCENARIO/MPLAYER/D2PLAY04.SCN
+T 2150 dda9d3e5d85592d8 DC - Council wars/SCENARIO/MPLAYER/D2PLAY04.TRO
+B 48392 6ddf89bf1406c898 DC - Council wars/SCENARIO/MPLAYER/D2PLAY05.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/D2PLAY05.MTG
+T 120 f2b6ebb93f2569bc DC - Council wars/SCENARIO/MPLAYER/D2PLAY05.POP
+B 73600 465f4cdcdf33753a DC - Council wars/SCENARIO/MPLAYER/D2PLAY05.PTH
+T 2496 5ec2a46857b67e16 DC - Council wars/SCENARIO/MPLAYER/D2PLAY05.SCN
+T 3137 3bb3d0762148d6d4 DC - Council wars/SCENARIO/MPLAYER/D2PLAY05.TRO
+B 48392 36be45a4ea27855e DC - Council wars/SCENARIO/MPLAYER/D2PLAY06.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/D2PLAY06.MTG
+T 82 4a136cda0b37fe5f DC - Council wars/SCENARIO/MPLAYER/D2PLAY06.POP
+B 73600 2681e791c2d44616 DC - Council wars/SCENARIO/MPLAYER/D2PLAY06.PTH
+T 2605 6b6d52d309ff0263 DC - Council wars/SCENARIO/MPLAYER/D2PLAY06.SCN
+T 3198 fe6cc01ba6a0fdaf DC - Council wars/SCENARIO/MPLAYER/D2PLAY06.TRO
+B 21512 3cead2deb0ccec3d DC - Council wars/SCENARIO/MPLAYER/D2PLAY07.MAP
+B 3586 37d3abd3d16dc83e DC - Council wars/SCENARIO/MPLAYER/D2PLAY07.MTG
+T 82 087f80e6fc6ff3c1 DC - Council wars/SCENARIO/MPLAYER/D2PLAY07.POP
+B 69120 31c8b612dd723ce0 DC - Council wars/SCENARIO/MPLAYER/D2PLAY07.PTH
+T 2373 6f8048de7eebb688 DC - Council wars/SCENARIO/MPLAYER/D2PLAY07.SCN
+T 2009 06126dbd826f1c49 DC - Council wars/SCENARIO/MPLAYER/D2PLAY07.TRO
+B 48392 e6f612791f1a0c9d DC - Council wars/SCENARIO/MPLAYER/D2PLAY08.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/D2PLAY08.MTG
+T 65 4a35593c1b1b4157 DC - Council wars/SCENARIO/MPLAYER/D2PLAY08.POP
+B 73600 1ef22f9147a55861 DC - Council wars/SCENARIO/MPLAYER/D2PLAY08.PTH
+T 2565 cc749dd199629ff9 DC - Council wars/SCENARIO/MPLAYER/D2PLAY08.SCN
+T 2148 07b8752eb6c21639 DC - Council wars/SCENARIO/MPLAYER/D2PLAY08.TRO
+B 48392 5566265c3a34d89c DC - Council wars/SCENARIO/MPLAYER/D2PLAY09.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/D2PLAY09.MTG
+T 68 8d7d9f387b9235b0 DC - Council wars/SCENARIO/MPLAYER/D2PLAY09.POP
+B 73600 1811ed2c973859fe DC - Council wars/SCENARIO/MPLAYER/D2PLAY09.PTH
+T 2441 aab1df36a7f1d3e7 DC - Council wars/SCENARIO/MPLAYER/D2PLAY09.SCN
+T 1764 f556cad455e34bc7 DC - Council wars/SCENARIO/MPLAYER/D2PLAY09.TRO
+B 48392 bd07dbb5f6c0171b DC - Council wars/SCENARIO/MPLAYER/D2PLAY10.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/D2PLAY10.MTG
+T 103 bb3a64acac365052 DC - Council wars/SCENARIO/MPLAYER/D2PLAY10.POP
+B 73600 4049c9fd5c7c183f DC - Council wars/SCENARIO/MPLAYER/D2PLAY10.PTH
+T 2448 17830eb17d207612 DC - Council wars/SCENARIO/MPLAYER/D2PLAY10.SCN
+T 2092 466db7fb5955b723 DC - Council wars/SCENARIO/MPLAYER/D2PLAY10.TRO
+B 86024 14b07fac32269292 DC - Council wars/SCENARIO/MPLAYER/D4PLAY01.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/D4PLAY01.MTG
+T 124 7a0d74087298dd21 DC - Council wars/SCENARIO/MPLAYER/D4PLAY01.POP
+B 79872 0308c16a59899a53 DC - Council wars/SCENARIO/MPLAYER/D4PLAY01.PTH
+T 2831 25f0213bc5eb2b5a DC - Council wars/SCENARIO/MPLAYER/D4PLAY01.SCN
+T 3366 f733ab8ed03c4b19 DC - Council wars/SCENARIO/MPLAYER/D4PLAY01.TRO
+B 134408 f45f393396c4b7cd DC - Council wars/SCENARIO/MPLAYER/D4PLAY02.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/D4PLAY02.MTG
+T 106 4d70b4a27ca3a5c8 DC - Council wars/SCENARIO/MPLAYER/D4PLAY02.POP
+B 87936 0f8808e4eb866a65 DC - Council wars/SCENARIO/MPLAYER/D4PLAY02.PTH
+T 2871 211aea217b127fe6 DC - Council wars/SCENARIO/MPLAYER/D4PLAY02.SCN
+T 3693 2f4d3fa084a9a7b2 DC - Council wars/SCENARIO/MPLAYER/D4PLAY02.TRO
+B 86024 f4a846224fd94489 DC - Council wars/SCENARIO/MPLAYER/D4PLAY03.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/D4PLAY03.MTG
+T 177 359ce96a5a572c46 DC - Council wars/SCENARIO/MPLAYER/D4PLAY03.POP
+B 79872 d0cd5cb93d97abfa DC - Council wars/SCENARIO/MPLAYER/D4PLAY03.PTH
+T 2743 ab79f06cd62d33b7 DC - Council wars/SCENARIO/MPLAYER/D4PLAY03.SCN
+T 3363 eda14455c48e417f DC - Council wars/SCENARIO/MPLAYER/D4PLAY03.TRO
+B 134408 d4b268d939bb136f DC - Council wars/SCENARIO/MPLAYER/D4PLAY04.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/D4PLAY04.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/D4PLAY04.POP
+B 87936 d0ad31edb7cbe804 DC - Council wars/SCENARIO/MPLAYER/D4PLAY04.PTH
+T 2740 da74179b2ec8d9a7 DC - Council wars/SCENARIO/MPLAYER/D4PLAY04.SCN
+T 3683 702b75375da3a62c DC - Council wars/SCENARIO/MPLAYER/D4PLAY04.TRO
+B 86024 ab7209ef15e1923a DC - Council wars/SCENARIO/MPLAYER/D4PLAY05.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/D4PLAY05.MTG
+T 124 819eb1e0d2e11a20 DC - Council wars/SCENARIO/MPLAYER/D4PLAY05.POP
+B 79872 934408a421e0b63f DC - Council wars/SCENARIO/MPLAYER/D4PLAY05.PTH
+T 2806 18447b709e4d4845 DC - Council wars/SCENARIO/MPLAYER/D4PLAY05.SCN
+T 2765 d7436fff7c17fcbf DC - Council wars/SCENARIO/MPLAYER/D4PLAY05.TRO
+B 86024 14992b3f6cbf10cd DC - Council wars/SCENARIO/MPLAYER/D4PLAY06.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/D4PLAY06.MTG
+T 86 24515ae18d0c78a9 DC - Council wars/SCENARIO/MPLAYER/D4PLAY06.POP
+B 79872 f573b7802ff1d21c DC - Council wars/SCENARIO/MPLAYER/D4PLAY06.PTH
+T 2702 44fdd9d7e834752e DC - Council wars/SCENARIO/MPLAYER/D4PLAY06.SCN
+T 2621 45a7f05dcf263a97 DC - Council wars/SCENARIO/MPLAYER/D4PLAY06.TRO
+B 86024 94d11be43e7f5f13 DC - Council wars/SCENARIO/MPLAYER/D4PLAY07.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/D4PLAY07.MTG
+T 141 88065a55c8c40f98 DC - Council wars/SCENARIO/MPLAYER/D4PLAY07.POP
+B 79872 b4913738914872e7 DC - Council wars/SCENARIO/MPLAYER/D4PLAY07.PTH
+T 2681 439d018551435b73 DC - Council wars/SCENARIO/MPLAYER/D4PLAY07.SCN
+T 2834 30c3e61187fa227c DC - Council wars/SCENARIO/MPLAYER/D4PLAY07.TRO
+B 86024 c2a6ee2d87d6952b DC - Council wars/SCENARIO/MPLAYER/D4PLAY08.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/D4PLAY08.MTG
+T 159 ddd8c4286d65d365 DC - Council wars/SCENARIO/MPLAYER/D4PLAY08.POP
+B 79872 ac5658e23db73a24 DC - Council wars/SCENARIO/MPLAYER/D4PLAY08.PTH
+T 2865 c98db16b66361992 DC - Council wars/SCENARIO/MPLAYER/D4PLAY08.SCN
+T 3292 1d2b3454ef2d7dd9 DC - Council wars/SCENARIO/MPLAYER/D4PLAY08.TRO
+B 86024 5ac4cb4e69a6541d DC - Council wars/SCENARIO/MPLAYER/D4PLAY09.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/D4PLAY09.MTG
+T 85 0e37e82bfaa20d5d DC - Council wars/SCENARIO/MPLAYER/D4PLAY09.POP
+B 79872 6aaf58cd86199e1e DC - Council wars/SCENARIO/MPLAYER/D4PLAY09.PTH
+T 2843 edd83558e432afaf DC - Council wars/SCENARIO/MPLAYER/D4PLAY09.SCN
+T 3419 d3a97c4976069a0b DC - Council wars/SCENARIO/MPLAYER/D4PLAY09.TRO
+B 86024 7f42c247567906c9 DC - Council wars/SCENARIO/MPLAYER/D4PLAY10.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/D4PLAY10.MTG
+T 127 e680f36fadc3f944 DC - Council wars/SCENARIO/MPLAYER/D4PLAY10.POP
+B 79872 e5230ae2f606449c DC - Council wars/SCENARIO/MPLAYER/D4PLAY10.PTH
+T 2847 2dccece2f87ad763 DC - Council wars/SCENARIO/MPLAYER/D4PLAY10.SCN
+T 3172 a4091ec1f411842b DC - Council wars/SCENARIO/MPLAYER/D4PLAY10.TRO
+B 134408 691ddbd15317337a DC - Council wars/SCENARIO/MPLAYER/D8PLAY01.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/D8PLAY01.MTG
+T 197 d155f7408a733965 DC - Council wars/SCENARIO/MPLAYER/D8PLAY01.POP
+B 87936 a70e983148e7ae90 DC - Council wars/SCENARIO/MPLAYER/D8PLAY01.PTH
+T 3064 3e56284f79c59d1b DC - Council wars/SCENARIO/MPLAYER/D8PLAY01.SCN
+T 4232 fe3b3181f3f3e1b5 DC - Council wars/SCENARIO/MPLAYER/D8PLAY01.TRO
+B 134408 e63375c857e7654d DC - Council wars/SCENARIO/MPLAYER/D8PLAY02.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/D8PLAY02.MTG
+T 238 1daebfc29217a3e0 DC - Council wars/SCENARIO/MPLAYER/D8PLAY02.POP
+B 87936 ba76ecc25baff6ca DC - Council wars/SCENARIO/MPLAYER/D8PLAY02.PTH
+T 3023 790e323df08bcdfe DC - Council wars/SCENARIO/MPLAYER/D8PLAY02.SCN
+T 4920 b401ba6b2913b88a DC - Council wars/SCENARIO/MPLAYER/D8PLAY02.TRO
+B 134408 f3399f985cd88d78 DC - Council wars/SCENARIO/MPLAYER/D8PLAY03.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/D8PLAY03.MTG
+T 104 8fbfa4c3e5b5d1b7 DC - Council wars/SCENARIO/MPLAYER/D8PLAY03.POP
+B 87936 cde99dbeddbe8872 DC - Council wars/SCENARIO/MPLAYER/D8PLAY03.PTH
+T 2964 4298a02a642f3021 DC - Council wars/SCENARIO/MPLAYER/D8PLAY03.SCN
+T 4481 e2d9e1dfc9f17c19 DC - Council wars/SCENARIO/MPLAYER/D8PLAY03.TRO
+B 86024 bab5092a3ab7bb3e DC - Council wars/SCENARIO/MPLAYER/D8PLAY04.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/D8PLAY04.MTG
+T 157 d20fe6061872d0e5 DC - Council wars/SCENARIO/MPLAYER/D8PLAY04.POP
+B 79872 f8f3602518d690f3 DC - Council wars/SCENARIO/MPLAYER/D8PLAY04.PTH
+T 2678 d49d83c7b01d18b7 DC - Council wars/SCENARIO/MPLAYER/D8PLAY04.SCN
+T 3685 5dd6bea0a784d14d DC - Council wars/SCENARIO/MPLAYER/D8PLAY04.TRO
+B 134408 f0a3f195ae41f3a2 DC - Council wars/SCENARIO/MPLAYER/D8PLAY05.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/D8PLAY05.MTG
+T 32 007faf928cbb0fee DC - Council wars/SCENARIO/MPLAYER/D8PLAY05.POP
+B 87936 712c036f7cb12bea DC - Council wars/SCENARIO/MPLAYER/D8PLAY05.PTH
+T 2916 97b58fba86d7cd76 DC - Council wars/SCENARIO/MPLAYER/D8PLAY05.SCN
+T 4220 9cd107487da29b0b DC - Council wars/SCENARIO/MPLAYER/D8PLAY05.TRO
+B 134408 9177553dfad5e117 DC - Council wars/SCENARIO/MPLAYER/D8PLAY06.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/D8PLAY06.MTG
+T 32 d280109042f82773 DC - Council wars/SCENARIO/MPLAYER/D8PLAY06.POP
+B 87936 712a0dfa2b69a0dd DC - Council wars/SCENARIO/MPLAYER/D8PLAY06.PTH
+T 3029 5e641c3fe8664c74 DC - Council wars/SCENARIO/MPLAYER/D8PLAY06.SCN
+T 4012 340eb579453b29bf DC - Council wars/SCENARIO/MPLAYER/D8PLAY06.TRO
+B 134408 450d67df39674890 DC - Council wars/SCENARIO/MPLAYER/D8PLAY07.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/D8PLAY07.MTG
+T 32 2a3ea20a38d212cb DC - Council wars/SCENARIO/MPLAYER/D8PLAY07.POP
+B 87936 de74dbf952b477bf DC - Council wars/SCENARIO/MPLAYER/D8PLAY07.PTH
+T 2995 5c5720b95134a381 DC - Council wars/SCENARIO/MPLAYER/D8PLAY07.SCN
+T 4248 5ecc59ace8cc6726 DC - Council wars/SCENARIO/MPLAYER/D8PLAY07.TRO
+B 134408 ac9d3c75d8aa31cb DC - Council wars/SCENARIO/MPLAYER/D8PLAY08.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/D8PLAY08.MTG
+T 181 57b45f2a2ea1ed4f DC - Council wars/SCENARIO/MPLAYER/D8PLAY08.POP
+B 87936 ec1190d4dd36736c DC - Council wars/SCENARIO/MPLAYER/D8PLAY08.PTH
+T 3030 7e911a72f0091791 DC - Council wars/SCENARIO/MPLAYER/D8PLAY08.SCN
+T 4366 3cc3f3bc89514e02 DC - Council wars/SCENARIO/MPLAYER/D8PLAY08.TRO
+B 134408 38759fd109dd9755 DC - Council wars/SCENARIO/MPLAYER/D8PLAY09.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/D8PLAY09.MTG
+T 142 02b58f074570c6ef DC - Council wars/SCENARIO/MPLAYER/D8PLAY09.POP
+B 87936 65809e54bb9b9226 DC - Council wars/SCENARIO/MPLAYER/D8PLAY09.PTH
+T 3158 13d0e30291f93af6 DC - Council wars/SCENARIO/MPLAYER/D8PLAY09.SCN
+T 4251 418ee9b28af0fefb DC - Council wars/SCENARIO/MPLAYER/D8PLAY09.TRO
+B 134408 42925ba3a7870c58 DC - Council wars/SCENARIO/MPLAYER/D8PLAY10.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/D8PLAY10.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/D8PLAY10.POP
+B 87936 0884ada4b7679d8b DC - Council wars/SCENARIO/MPLAYER/D8PLAY10.PTH
+T 3011 fb15fc681240dee9 DC - Council wars/SCENARIO/MPLAYER/D8PLAY10.SCN
+T 4162 453998dda6afef18 DC - Council wars/SCENARIO/MPLAYER/D8PLAY10.TRO
+B 48392 67b124c186cf2151 DC - Council wars/SCENARIO/MPLAYER/J2PLAY01.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/J2PLAY01.MTG
+T 50 d5d1fafcf2fa7e7f DC - Council wars/SCENARIO/MPLAYER/J2PLAY01.POP
+B 73600 8683f227873e7043 DC - Council wars/SCENARIO/MPLAYER/J2PLAY01.PTH
+T 2480 a049ea443db4c0c0 DC - Council wars/SCENARIO/MPLAYER/J2PLAY01.SCN
+T 2682 12c389b028876d63 DC - Council wars/SCENARIO/MPLAYER/J2PLAY01.TRO
+B 48392 55dae359bd112f49 DC - Council wars/SCENARIO/MPLAYER/J2PLAY02.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/J2PLAY02.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J2PLAY02.POP
+B 73600 e1f7913279643aa3 DC - Council wars/SCENARIO/MPLAYER/J2PLAY02.PTH
+T 2469 7fb71ee207bf702e DC - Council wars/SCENARIO/MPLAYER/J2PLAY02.SCN
+T 1570 658dd81d93e00b27 DC - Council wars/SCENARIO/MPLAYER/J2PLAY02.TRO
+B 48392 a09dd93f9439cb2a DC - Council wars/SCENARIO/MPLAYER/J2PLAY03.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/J2PLAY03.MTG
+T 50 ab3db97f9db7bf3f DC - Council wars/SCENARIO/MPLAYER/J2PLAY03.POP
+B 73600 4854bbb129322af2 DC - Council wars/SCENARIO/MPLAYER/J2PLAY03.PTH
+T 2523 a4966f90676ebfba DC - Council wars/SCENARIO/MPLAYER/J2PLAY03.SCN
+T 2087 68c2feed31cd17fd DC - Council wars/SCENARIO/MPLAYER/J2PLAY03.TRO
+B 48392 449af62499e50754 DC - Council wars/SCENARIO/MPLAYER/J2PLAY04.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/J2PLAY04.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J2PLAY04.POP
+B 73600 a39afb15d050fd35 DC - Council wars/SCENARIO/MPLAYER/J2PLAY04.PTH
+T 2376 5a8bca41591ebe55 DC - Council wars/SCENARIO/MPLAYER/J2PLAY04.SCN
+T 2341 23c442c9d9f263f4 DC - Council wars/SCENARIO/MPLAYER/J2PLAY04.TRO
+B 65864 959bc4f72d1015ff DC - Council wars/SCENARIO/MPLAYER/J2PLAY05.MAP
+B 10978 a6eae2f3a3958eb9 DC - Council wars/SCENARIO/MPLAYER/J2PLAY05.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J2PLAY05.POP
+B 76512 49e194d02cbdf336 DC - Council wars/SCENARIO/MPLAYER/J2PLAY05.PTH
+T 2273 a06552b0d42ecb98 DC - Council wars/SCENARIO/MPLAYER/J2PLAY05.SCN
+T 1170 20098650ebc5a26f DC - Council wars/SCENARIO/MPLAYER/J2PLAY05.TRO
+B 48392 fc752465f275303e DC - Council wars/SCENARIO/MPLAYER/J2PLAY06.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/J2PLAY06.MTG
+T 103 9c82db03d57576dc DC - Council wars/SCENARIO/MPLAYER/J2PLAY06.POP
+B 73600 0d69c29cd1a46e09 DC - Council wars/SCENARIO/MPLAYER/J2PLAY06.PTH
+T 2413 ce06b298700bea11 DC - Council wars/SCENARIO/MPLAYER/J2PLAY06.SCN
+T 2481 d43736b54f3d968a DC - Council wars/SCENARIO/MPLAYER/J2PLAY06.TRO
+B 48392 d98ad1f4dc865aec DC - Council wars/SCENARIO/MPLAYER/J2PLAY07.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/J2PLAY07.MTG
+T 200 0a9642980f8ca443 DC - Council wars/SCENARIO/MPLAYER/J2PLAY07.POP
+B 73600 452569c9e9849252 DC - Council wars/SCENARIO/MPLAYER/J2PLAY07.PTH
+T 2598 5b705502c11a80c8 DC - Council wars/SCENARIO/MPLAYER/J2PLAY07.SCN
+T 4465 fa515d995a13ad10 DC - Council wars/SCENARIO/MPLAYER/J2PLAY07.TRO
+B 48392 ffc753fc338de3f0 DC - Council wars/SCENARIO/MPLAYER/J2PLAY08.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/J2PLAY08.MTG
+T 32 c420895b22066607 DC - Council wars/SCENARIO/MPLAYER/J2PLAY08.POP
+B 73600 08ae26c65f3ebd55 DC - Council wars/SCENARIO/MPLAYER/J2PLAY08.PTH
+T 2311 782d29ca2bb427de DC - Council wars/SCENARIO/MPLAYER/J2PLAY08.SCN
+T 1813 12633beb139a16cf DC - Council wars/SCENARIO/MPLAYER/J2PLAY08.TRO
+B 21512 8123dbd27bbd0e4e DC - Council wars/SCENARIO/MPLAYER/J2PLAY09.MAP
+B 3586 37d3abd3d16dc83e DC - Council wars/SCENARIO/MPLAYER/J2PLAY09.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J2PLAY09.POP
+B 69120 f58995739d90aa24 DC - Council wars/SCENARIO/MPLAYER/J2PLAY09.PTH
+T 2749 9cbf03335deb28bf DC - Council wars/SCENARIO/MPLAYER/J2PLAY09.SCN
+T 972 4f7f91f4f256c939 DC - Council wars/SCENARIO/MPLAYER/J2PLAY09.TRO
+B 86024 b1faee0a486b37b9 DC - Council wars/SCENARIO/MPLAYER/J4PLAY01.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/J4PLAY01.MTG
+T 123 4d6c67e0ef8ea480 DC - Council wars/SCENARIO/MPLAYER/J4PLAY01.POP
+B 79872 5d34139c13f1a0f6 DC - Council wars/SCENARIO/MPLAYER/J4PLAY01.PTH
+T 2773 d12ce8eebdb6176b DC - Council wars/SCENARIO/MPLAYER/J4PLAY01.SCN
+T 3172 9243c53d771f6250 DC - Council wars/SCENARIO/MPLAYER/J4PLAY01.TRO
+B 48392 15836fa8a9bf5f27 DC - Council wars/SCENARIO/MPLAYER/J4PLAY02.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/J4PLAY02.MTG
+T 86 287da8aac52951d2 DC - Council wars/SCENARIO/MPLAYER/J4PLAY02.POP
+B 73600 a87119cecdc75e0c DC - Council wars/SCENARIO/MPLAYER/J4PLAY02.PTH
+T 2627 7a14f884e0a12c4d DC - Council wars/SCENARIO/MPLAYER/J4PLAY02.SCN
+T 2624 346e0115eb1a5287 DC - Council wars/SCENARIO/MPLAYER/J4PLAY02.TRO
+B 86024 1cc3cecc565d49aa DC - Council wars/SCENARIO/MPLAYER/J4PLAY03.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/J4PLAY03.MTG
+T 65 24a5ce88900efc62 DC - Council wars/SCENARIO/MPLAYER/J4PLAY03.POP
+B 79872 5338cc7e6739e333 DC - Council wars/SCENARIO/MPLAYER/J4PLAY03.PTH
+T 2436 4364f7fd3c93f794 DC - Council wars/SCENARIO/MPLAYER/J4PLAY03.SCN
+T 2351 eb977c1315899861 DC - Council wars/SCENARIO/MPLAYER/J4PLAY03.TRO
+B 59624 de6cf145b8aa09b1 DC - Council wars/SCENARIO/MPLAYER/J4PLAY04.MAP
+B 9938 a88586214e7f8c26 DC - Council wars/SCENARIO/MPLAYER/J4PLAY04.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J4PLAY04.POP
+B 75472 37fca70f52f07785 DC - Council wars/SCENARIO/MPLAYER/J4PLAY04.PTH
+T 2459 37ce4de73536a45a DC - Council wars/SCENARIO/MPLAYER/J4PLAY04.SCN
+T 2338 db021e0c957e3c76 DC - Council wars/SCENARIO/MPLAYER/J4PLAY04.TRO
+B 86024 0e6f9b5b10fd2862 DC - Council wars/SCENARIO/MPLAYER/J4PLAY05.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/J4PLAY05.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J4PLAY05.POP
+B 79872 2b1fb34f80b1c380 DC - Council wars/SCENARIO/MPLAYER/J4PLAY05.PTH
+T 2442 f5f0b3b63d0e01e0 DC - Council wars/SCENARIO/MPLAYER/J4PLAY05.SCN
+T 2360 a49d1046844536df DC - Council wars/SCENARIO/MPLAYER/J4PLAY05.TRO
+B 48392 614f282547718c74 DC - Council wars/SCENARIO/MPLAYER/J4PLAY06.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MPLAYER/J4PLAY06.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J4PLAY06.POP
+B 73600 132b1741e29af2c5 DC - Council wars/SCENARIO/MPLAYER/J4PLAY06.PTH
+T 2514 2bdad6621461e8cd DC - Council wars/SCENARIO/MPLAYER/J4PLAY06.SCN
+T 3128 e2445ff1d4019034 DC - Council wars/SCENARIO/MPLAYER/J4PLAY06.TRO
+B 86024 e6e7eacae487a0e3 DC - Council wars/SCENARIO/MPLAYER/J4PLAY07.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/J4PLAY07.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J4PLAY07.POP
+B 79872 d61b2e00d70e141d DC - Council wars/SCENARIO/MPLAYER/J4PLAY07.PTH
+T 2458 961ff799f9b140dd DC - Council wars/SCENARIO/MPLAYER/J4PLAY07.SCN
+T 2386 5fd4c7269cb77844 DC - Council wars/SCENARIO/MPLAYER/J4PLAY07.TRO
+B 86024 98622eacc0e52f86 DC - Council wars/SCENARIO/MPLAYER/J6PLAY01.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/J6PLAY01.MTG
+T 143 2c05625646d0bb74 DC - Council wars/SCENARIO/MPLAYER/J6PLAY01.POP
+B 79872 a01469e6b3a80e6a DC - Council wars/SCENARIO/MPLAYER/J6PLAY01.PTH
+T 2652 6f9fbbb18d4ff0ce DC - Council wars/SCENARIO/MPLAYER/J6PLAY01.SCN
+T 3029 c10f80766b19368c DC - Council wars/SCENARIO/MPLAYER/J6PLAY01.TRO
+B 86024 cc0d1707b3677078 DC - Council wars/SCENARIO/MPLAYER/J6PLAY02.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/J6PLAY02.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J6PLAY02.POP
+B 79872 bb6558f12541f154 DC - Council wars/SCENARIO/MPLAYER/J6PLAY02.PTH
+T 2528 ce1fd4d57897fd9b DC - Council wars/SCENARIO/MPLAYER/J6PLAY02.SCN
+T 2344 112301a331da8d0e DC - Council wars/SCENARIO/MPLAYER/J6PLAY02.TRO
+B 134408 2d7e1ca2ce98c8c9 DC - Council wars/SCENARIO/MPLAYER/J8PLAY01.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/J8PLAY01.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J8PLAY01.POP
+B 87936 9e14c8500b98290c DC - Council wars/SCENARIO/MPLAYER/J8PLAY01.PTH
+T 2658 bc11ac1f879c9267 DC - Council wars/SCENARIO/MPLAYER/J8PLAY01.SCN
+T 2756 37881b2cacd48bd5 DC - Council wars/SCENARIO/MPLAYER/J8PLAY01.TRO
+B 86024 a353e858167666b2 DC - Council wars/SCENARIO/MPLAYER/J8PLAY02.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/J8PLAY02.MTG
+T 50 5fe57b7d0c929829 DC - Council wars/SCENARIO/MPLAYER/J8PLAY02.POP
+B 79872 8e5779223109c718 DC - Council wars/SCENARIO/MPLAYER/J8PLAY02.PTH
+T 2725 ef3fd4818b4b9d9c DC - Council wars/SCENARIO/MPLAYER/J8PLAY02.SCN
+T 3871 36f4bca95a79cf52 DC - Council wars/SCENARIO/MPLAYER/J8PLAY02.TRO
+B 86024 d7ce7a5a4c8686d0 DC - Council wars/SCENARIO/MPLAYER/J8PLAY03.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/J8PLAY03.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J8PLAY03.POP
+B 79872 cd42a5e52e66e1f0 DC - Council wars/SCENARIO/MPLAYER/J8PLAY03.PTH
+T 2655 2633194456389ca6 DC - Council wars/SCENARIO/MPLAYER/J8PLAY03.SCN
+T 2941 6cca9b2e12749b4f DC - Council wars/SCENARIO/MPLAYER/J8PLAY03.TRO
+B 86024 04a40f4ac54f7cfe DC - Council wars/SCENARIO/MPLAYER/J8PLAY04.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MPLAYER/J8PLAY04.MTG
+T 86 ae7b05c34a598d2a DC - Council wars/SCENARIO/MPLAYER/J8PLAY04.POP
+B 79872 c358027fd5a35925 DC - Council wars/SCENARIO/MPLAYER/J8PLAY04.PTH
+T 2706 72c2fd12dc1b92df DC - Council wars/SCENARIO/MPLAYER/J8PLAY04.SCN
+T 3614 951a9358eb807e4b DC - Council wars/SCENARIO/MPLAYER/J8PLAY04.TRO
+B 134408 fa4d0e0d0ab5ceaa DC - Council wars/SCENARIO/MPLAYER/J8PLAY05.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/J8PLAY05.MTG
+T 32 f387cda9e7c2f310 DC - Council wars/SCENARIO/MPLAYER/J8PLAY05.POP
+B 87936 aafadd65638c420b DC - Council wars/SCENARIO/MPLAYER/J8PLAY05.PTH
+T 2866 fbf350aed693531f DC - Council wars/SCENARIO/MPLAYER/J8PLAY05.SCN
+T 4817 5f264f83582cebfc DC - Council wars/SCENARIO/MPLAYER/J8PLAY05.TRO
+B 134408 2f3d81fab03797b8 DC - Council wars/SCENARIO/MPLAYER/J8PLAY06.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/J8PLAY06.MTG
+T 14 a95edd521e42e1cc DC - Council wars/SCENARIO/MPLAYER/J8PLAY06.POP
+B 87936 5e404275b5ddb447 DC - Council wars/SCENARIO/MPLAYER/J8PLAY06.PTH
+T 2822 0045097366c43685 DC - Council wars/SCENARIO/MPLAYER/J8PLAY06.SCN
+T 3959 afbbed499fae7b7b DC - Council wars/SCENARIO/MPLAYER/J8PLAY06.TRO
+B 134408 2c3fced10b0284c0 DC - Council wars/SCENARIO/MPLAYER/J8PLAY07.MAP
+B 8748 afb467875192ffaf DC - Council wars/SCENARIO/MPLAYER/J8PLAY07.MED
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MPLAYER/J8PLAY07.MTG
+T 253 8c8870fe073c3323 DC - Council wars/SCENARIO/MPLAYER/J8PLAY07.POP
+B 87936 0d8967505cfac155 DC - Council wars/SCENARIO/MPLAYER/J8PLAY07.PTH
+T 2781 d5758f7258ebf0b1 DC - Council wars/SCENARIO/MPLAYER/J8PLAY07.SCN
+T 4784 cddef30837fd0228 DC - Council wars/SCENARIO/MPLAYER/J8PLAY07.TRO
+B 62578 9899142a96ba260c DC - Council wars/SCENARIO/MPLAYER/PALETTE.GIF
+T 32672 c8807b01168188f4 DC - Council wars/SCENARIO/MPLAYER/PALETTE.RGB
+T 67039 3fa4cfd93e88dc9c DC - Council wars/SCENARIO/MPLAYER/PALETTE.RMP
+B 217043 3d41c42444ecf20d DC - Council wars/SCENARIO/MPLAYER/PMAP.EXE
+B 52404 c6bf787c974b9919 DC - Council wars/SCENARIO/MPLAYER/PRIMES.DAT
+B 48392 37f70e1f6161c88d DC - Council wars/SCENARIO/MULTI-~1/J2PLAY01.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MULTI-~1/J2PLAY01.MTG
+B 73600 8e6cc3bd21631f50 DC - Council wars/SCENARIO/MULTI-~1/J2PLAY01.PTH
+T 2442 ba0987ed46bec658 DC - Council wars/SCENARIO/MULTI-~1/J2PLAY01.SCN
+B 48392 182b7d932ec53887 DC - Council wars/SCENARIO/MULTI-~1/J2PLAY02.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MULTI-~1/J2PLAY02.MTG
+B 73600 facbf940ce14674f DC - Council wars/SCENARIO/MULTI-~1/J2PLAY02.PTH
+T 2367 fb5d1ba8a46961e4 DC - Council wars/SCENARIO/MULTI-~1/J2PLAY02.SCN
+B 48392 04b78036cfb24e53 DC - Council wars/SCENARIO/MULTI-~1/J2PLAY03.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MULTI-~1/J2PLAY03.MTG
+B 73600 bbbe342ec2c770e0 DC - Council wars/SCENARIO/MULTI-~1/J2PLAY03.PTH
+T 2341 517817f7d317e488 DC - Council wars/SCENARIO/MULTI-~1/J2PLAY03.SCN
+B 86024 3b8ca0d4dfdd89eb DC - Council wars/SCENARIO/MULTI-~1/J4PLAY01.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MULTI-~1/J4PLAY01.MTG
+B 79872 2b37abd37e0a75c8 DC - Council wars/SCENARIO/MULTI-~1/J4PLAY01.PTH
+T 2821 6a675d60ae68e9cb DC - Council wars/SCENARIO/MULTI-~1/J4PLAY01.SCN
+T 7134 9e4305d3d139b1a0 DC - Council wars/SCENARIO/MULTI-~1/J4PLAY01.TRM
+T 7150 e5b5f4658617ea42 DC - Council wars/SCENARIO/MULTI-~1/J4PLAY01.TRO
+B 48392 ef4e16da1b70571c DC - Council wars/SCENARIO/MULTI-~1/J4PLAY02.MAP
+B 8066 615e95f568d1c83d DC - Council wars/SCENARIO/MULTI-~1/J4PLAY02.MTG
+B 73600 7037744e6b77bd0d DC - Council wars/SCENARIO/MULTI-~1/J4PLAY02.PTH
+T 2511 de29562478e538cb DC - Council wars/SCENARIO/MULTI-~1/J4PLAY02.SCN
+B 86024 5c86833556229e64 DC - Council wars/SCENARIO/MULTI-~1/J6PLAY01.MAP
+B 14338 21d92cba3d5ed0d8 DC - Council wars/SCENARIO/MULTI-~1/J6PLAY01.MTG
+B 79872 2be2362cbe4c7be4 DC - Council wars/SCENARIO/MULTI-~1/J6PLAY01.PTH
+T 2568 0975626c11ebcdf0 DC - Council wars/SCENARIO/MULTI-~1/J6PLAY01.SCN
+B 134408 4e5d54a28f7db9a0 DC - Council wars/SCENARIO/MULTI-~1/J8PLAY01.MAP
+B 22402 15fec06e9d02f301 DC - Council wars/SCENARIO/MULTI-~1/J8PLAY01.MTG
+B 87936 24f031dd314de5f0 DC - Council wars/SCENARIO/MULTI-~1/J8PLAY01.PTH
+T 2482 ea7157f2aa22e673 DC - Council wars/SCENARIO/MULTI-~1/J8PLAY01.SCN
+T 311 2b9c8ea4de1ae05c DC - Council wars/SCENARIO/TEST/7BACK.TXT
+T 89 69465b8c5abe7331 DC - Council wars/SCENARIO/TEST/ATRAIN1.001
+T 54 236e640448a00092 DC - Council wars/SCENARIO/TEST/ATRAIN1.002
+B 21512 9158c98b874bb3c5 DC - Council wars/SCENARIO/TEST/ATRAIN1.MAP
+T 314 dede3864ea1f9dfd DC - Council wars/SCENARIO/TEST/ATRAIN1.MSG
+B 3586 37d3abd3d16dc83e DC - Council wars/SCENARIO/TEST/ATRAIN1.MTG
+B 69120 2d5f96e30027eb8d DC - Council wars/SCENARIO/TEST/ATRAIN1.PTH
+T 2205 ad47e7f57c4b1c7b DC - Council wars/SCENARIO/TEST/ATRAIN1.SCN
+T 355 13ceb7d17cf0bee2 DC - Council wars/SCENARIO/TEST/ATRAIN1.TRO
+T 1130 ad527a13580162ce DC - Council wars/SCENARIO/TEST/ATRAIN1.TXT
+T 113 bb48b614f614c5e6 DC - Council wars/SCENARIO/TEST/ATRAIN2.001
+T 54 236e640448a00092 DC - Council wars/SCENARIO/TEST/ATRAIN2.002
+T 58 e3177922ecc32097 DC - Council wars/SCENARIO/TEST/ATRAIN2.003
+T 39 d48a984840916ea8 DC - Council wars/SCENARIO/TEST/ATRAIN2.004
+B 21512 6fa2a60795f946ef DC - Council wars/SCENARIO/TEST/ATRAIN2.MAP
+T 471 098d3fef206d4a2c DC - Council wars/SCENARIO/TEST/ATRAIN2.MSG
+B 3586 24776b0c787cec42 DC - Council wars/SCENARIO/TEST/ATRAIN2.MTG
+B 69120 90b26a78a1a2d30d DC - Council wars/SCENARIO/TEST/ATRAIN2.PTH
+T 2223 ff542414187abad4 DC - Council wars/SCENARIO/TEST/ATRAIN2.SCN
+T 603 830d232f305b5b5b DC - Council wars/SCENARIO/TEST/ATRAIN2.TRO
+T 656 7f890d00a4707aa7 DC - Council wars/SCENARIO/TEST/ATRAIN2.TXT
+T 105 10c70e8d275e320e DC - Council wars/SCENARIO/TEST/ATRAIN3.001
+T 33 7aa2d07abddb1f32 DC - Council wars/SCENARIO/TEST/ATRAIN3.002
+T 54 236e640448a00092 DC - Council wars/SCENARIO/TEST/ATRAIN3.003
+B 21512 bb800896397d7a15 DC - Council wars/SCENARIO/TEST/ATRAIN3.MAP
+T 241 c3cc9c2447449192 DC - Council wars/SCENARIO/TEST/ATRAIN3.MSG
+B 3586 149faf8b61d992fa DC - Council wars/SCENARIO/TEST/ATRAIN3.MTG
+B 69120 871af75b38c7e564 DC - Council wars/SCENARIO/TEST/ATRAIN3.PTH
+T 2315 65e56e8cc288bb7d DC - Council wars/SCENARIO/TEST/ATRAIN3.SCN
+T 303 b1dda8ba3c1213a3 DC - Council wars/SCENARIO/TEST/ATRAIN3.TRO
+T 705 33a995a6401642d6 DC - Council wars/SCENARIO/TEST/ATRAIN3.TXT
+T 109 616368dbb39a0e84 DC - Council wars/SCENARIO/TEST/ATRAIN4.001
+T 36 6d3c31ef2bde37e2 DC - Council wars/SCENARIO/TEST/ATRAIN4.002
+T 72 fce68e891c8dcaf6 DC - Council wars/SCENARIO/TEST/ATRAIN4.003
+B 21512 7e3a8603f3c6115e DC - Council wars/SCENARIO/TEST/ATRAIN4.MAP
+T 613 cb7788ad1460104e DC - Council wars/SCENARIO/TEST/ATRAIN4.MSG
+B 3586 75a25c9a24a7c4ea DC - Council wars/SCENARIO/TEST/ATRAIN4.MTG
+B 69120 d90471aec5c3f124 DC - Council wars/SCENARIO/TEST/ATRAIN4.PTH
+T 3737 ef5d39822bc89fd6 DC - Council wars/SCENARIO/TEST/ATRAIN4.SCN
+T 837 eef7b6a5826940e4 DC - Council wars/SCENARIO/TEST/ATRAIN4.TRO
+T 504 78a86b8a5b2ffcf4 DC - Council wars/SCENARIO/TEST/ATRAIN4.TXT
+T 109 59c43b573593fe84 DC - Council wars/SCENARIO/TEST/ATRAIN5.001
+T 56 46ad505b297edd15 DC - Council wars/SCENARIO/TEST/ATRAIN5.002
+T 38 a007d36d6e4d5d26 DC - Council wars/SCENARIO/TEST/ATRAIN5.003
+T 40 79c9eaf4f4156bbe DC - Council wars/SCENARIO/TEST/ATRAIN5.004
+T 45 dfd7c927dd00dc91 DC - Council wars/SCENARIO/TEST/ATRAIN5.005
+B 21512 fa49ac39249d1439 DC - Council wars/SCENARIO/TEST/ATRAIN5.MAP
+T 435 6ae99b5f96975f6b DC - Council wars/SCENARIO/TEST/ATRAIN5.MSG
+B 3586 5f9494b28f70594a DC - Council wars/SCENARIO/TEST/ATRAIN5.MTG
+B 69120 543104f8d6123790 DC - Council wars/SCENARIO/TEST/ATRAIN5.PTH
+T 2623 d5fdfc5c6b4c7b4f DC - Council wars/SCENARIO/TEST/ATRAIN5.SCN
+T 700 fb17be6d235c87e3 DC - Council wars/SCENARIO/TEST/ATRAIN5.TRO
+T 497 425b58382c01344d DC - Council wars/SCENARIO/TEST/ATRAIN5.TXT
+T 105 f4212d5fe0afc7b9 DC - Council wars/SCENARIO/TEST/ATRAIN6.001
+T 51 bfcdb0ce276fa7a1 DC - Council wars/SCENARIO/TEST/ATRAIN6.002
+T 34 e1fa60e7d4710598 DC - Council wars/SCENARIO/TEST/ATRAIN6.003
+T 47 29514dcb7a2f0562 DC - Council wars/SCENARIO/TEST/ATRAIN6.004
+B 21512 3f1c75ccece39704 DC - Council wars/SCENARIO/TEST/ATRAIN6.MAP
+T 464 e151907b9525177a DC - Council wars/SCENARIO/TEST/ATRAIN6.MSG
+B 3586 1f5a03cf4619728c DC - Council wars/SCENARIO/TEST/ATRAIN6.MTG
+B 69120 82eb11ebe14ca87b DC - Council wars/SCENARIO/TEST/ATRAIN6.PTH
+T 2832 a4fac0e71f71eae2 DC - Council wars/SCENARIO/TEST/ATRAIN6.SCN
+T 653 337418ce45f0189a DC - Council wars/SCENARIO/TEST/ATRAIN6.TRO
+T 743 1d01536a08146a08 DC - Council wars/SCENARIO/TEST/ATRAIN6.TXT
+T 162 50567c4fa914c000 DC - Council wars/SCENARIO/TEST/ATRAIN7.001
+T 55 feb4c32da434dae0 DC - Council wars/SCENARIO/TEST/ATRAIN7.002
+T 37 74aeb11f2d463977 DC - Council wars/SCENARIO/TEST/ATRAIN7.003
+B 21512 26d55f4d9f148822 DC - Council wars/SCENARIO/TEST/ATRAIN7.MAP
+T 305 49acd5a9b1166dac DC - Council wars/SCENARIO/TEST/ATRAIN7.MSG
+B 3586 09817252fb183c00 DC - Council wars/SCENARIO/TEST/ATRAIN7.MTG
+B 69120 eec60e69576088d1 DC - Council wars/SCENARIO/TEST/ATRAIN7.PTH
+T 2544 08499b9cbf4bfd2f DC - Council wars/SCENARIO/TEST/ATRAIN7.SCN
+T 391 24a9d644008eea8f DC - Council wars/SCENARIO/TEST/ATRAIN7.TRO
+T 755 59aa287bce8f1e3c DC - Council wars/SCENARIO/TEST/ATRAIN7.TXT
+T 114 1869fdbddc0f6888 DC - Council wars/SCENARIO/TEST/HTRAIN1.001
+T 54 bb3bf17cddd90cdf DC - Council wars/SCENARIO/TEST/HTRAIN1.002
+B 21512 2138b8cf1dad3ea4 DC - Council wars/SCENARIO/TEST/HTRAIN1.MAP
+T 318 62b41fd175e4d639 DC - Council wars/SCENARIO/TEST/HTRAIN1.MSG
+B 3586 37d3abd3d16dc83e DC - Council wars/SCENARIO/TEST/HTRAIN1.MTG
+B 69120 0cf70eb3b84bb23e DC - Council wars/SCENARIO/TEST/HTRAIN1.PTH
+T 2310 d633cf59014b46a3 DC - Council wars/SCENARIO/TEST/HTRAIN1.SCN
+T 355 0f5384cd6e685d20 DC - Council wars/SCENARIO/TEST/HTRAIN1.TRO
+T 1059 4c6b7807fbe10432 DC - Council wars/SCENARIO/TEST/HTRAIN1.TXT
+T 180 d02f4066d93203bf DC - Council wars/SCENARIO/TEST/HTRAIN2.001
+T 54 bb3bf17cddd90cdf DC - Council wars/SCENARIO/TEST/HTRAIN2.002
+T 58 e3177922ecc32097 DC - Council wars/SCENARIO/TEST/HTRAIN2.003
+T 41 fa5efe29dbb4ca9a DC - Council wars/SCENARIO/TEST/HTRAIN2.004
+B 21512 543534aea4125759 DC - Council wars/SCENARIO/TEST/HTRAIN2.MAP
+T 521 be6f656cb7e8a6fa DC - Council wars/SCENARIO/TEST/HTRAIN2.MSG
+B 3586 87db57811e21426f DC - Council wars/SCENARIO/TEST/HTRAIN2.MTG
+B 69120 f9fa86d13972742d DC - Council wars/SCENARIO/TEST/HTRAIN2.PTH
+T 2222 08bc361cde8261f8 DC - Council wars/SCENARIO/TEST/HTRAIN2.SCN
+T 503 00c8263b67c58346 DC - Council wars/SCENARIO/TEST/HTRAIN2.TRO
+T 788 5c7f846b1bf8fa90 DC - Council wars/SCENARIO/TEST/HTRAIN2.TXT
+T 176 eb10309cbe24958f DC - Council wars/SCENARIO/TEST/HTRAIN3.001
+T 35 ced318a055947645 DC - Council wars/SCENARIO/TEST/HTRAIN3.002
+T 54 bb3bf17cddd90cdf DC - Council wars/SCENARIO/TEST/HTRAIN3.003
+B 21512 a1b712a070b496f6 DC - Council wars/SCENARIO/TEST/HTRAIN3.MAP
+T 256 3d3a3b4769ce701e DC - Council wars/SCENARIO/TEST/HTRAIN3.MSG
+B 3586 149faf8b61d992fa DC - Council wars/SCENARIO/TEST/HTRAIN3.MTG
+B 69120 8e34413206cd75a8 DC - Council wars/SCENARIO/TEST/HTRAIN3.PTH
+T 2309 a75a7991107f7ba4 DC - Council wars/SCENARIO/TEST/HTRAIN3.SCN
+T 302 d9f0f0a259f5a51c DC - Council wars/SCENARIO/TEST/HTRAIN3.TRO
+T 1091 9c605654b0a84071 DC - Council wars/SCENARIO/TEST/HTRAIN3.TXT
+T 141 f4682c1ab0084fe7 DC - Council wars/SCENARIO/TEST/HTRAIN4.001
+T 36 6d3c31ef2bde37e2 DC - Council wars/SCENARIO/TEST/HTRAIN4.002
+T 72 f55f0d4042df0faf DC - Council wars/SCENARIO/TEST/HTRAIN4.003
+B 21512 faacdb000bada8c5 DC - Council wars/SCENARIO/TEST/HTRAIN4.MAP
+T 641 bc46edf15e5d690a DC - Council wars/SCENARIO/TEST/HTRAIN4.MSG
+B 3586 5489138b7ca10b06 DC - Council wars/SCENARIO/TEST/HTRAIN4.MTG
+B 69120 ef0470acb73e3285 DC - Council wars/SCENARIO/TEST/HTRAIN4.PTH
+T 3888 aa00fed1923856b0 DC - Council wars/SCENARIO/TEST/HTRAIN4.SCN
+T 798 ed62b95668f42f7f DC - Council wars/SCENARIO/TEST/HTRAIN4.TRO
+T 676 3403e6df8779fcfc DC - Council wars/SCENARIO/TEST/HTRAIN4.TXT
+T 176 95e95d54e611ecd7 DC - Council wars/SCENARIO/TEST/HTRAIN5.001
+T 56 c28d0f4639ac9483 DC - Council wars/SCENARIO/TEST/HTRAIN5.002
+T 41 4ebfe6804761be8a DC - Council wars/SCENARIO/TEST/HTRAIN5.003
+T 42 34d461b331dfc784 DC - Council wars/SCENARIO/TEST/HTRAIN5.004
+T 87 846187c9f929d224 DC - Council wars/SCENARIO/TEST/HTRAIN5.005
+B 21512 6b30390e2e803078 DC - Council wars/SCENARIO/TEST/HTRAIN5.MAP
+T 468 bca0720332893090 DC - Council wars/SCENARIO/TEST/HTRAIN5.MSG
+B 3586 5f9494b28f70594a DC - Council wars/SCENARIO/TEST/HTRAIN5.MTG
+B 69120 1492dda345f1d782 DC - Council wars/SCENARIO/TEST/HTRAIN5.PTH
+T 2672 d26a75d72497d071 DC - Council wars/SCENARIO/TEST/HTRAIN5.SCN
+T 662 b4fde443910085f4 DC - Council wars/SCENARIO/TEST/HTRAIN5.TRO
+T 679 96c9e6164104e4b0 DC - Council wars/SCENARIO/TEST/HTRAIN5.TXT
+T 175 45b21ade9899d456 DC - Council wars/SCENARIO/TEST/HTRAIN6.001
+T 51 586c1bc6015c9142 DC - Council wars/SCENARIO/TEST/HTRAIN6.002
+T 28 0c161b9cfd375abc DC - Council wars/SCENARIO/TEST/HTRAIN6.003
+B 21512 4a990c005383e6b8 DC - Council wars/SCENARIO/TEST/HTRAIN6.MAP
+T 460 034a199c55d68049 DC - Council wars/SCENARIO/TEST/HTRAIN6.MSG
+B 3586 1f5a03cf4619728c DC - Council wars/SCENARIO/TEST/HTRAIN6.MTG
+B 69120 2285cea714e3078d DC - Council wars/SCENARIO/TEST/HTRAIN6.PTH
+T 2790 132c9204009e4b35 DC - Council wars/SCENARIO/TEST/HTRAIN6.SCN
+T 686 50a167793d9e2eb2 DC - Council wars/SCENARIO/TEST/HTRAIN6.TRO
+T 929 197073a8ad507970 DC - Council wars/SCENARIO/TEST/HTRAIN6.TXT
+T 159 0b6c4c0f2346ad3c DC - Council wars/SCENARIO/TEST/HTRAIN7.001
+T 55 d7397dc6310cf7d6 DC - Council wars/SCENARIO/TEST/HTRAIN7.002
+T 37 74aeb11f2d463977 DC - Council wars/SCENARIO/TEST/HTRAIN7.003
+B 21512 629f4d9631127b4a DC - Council wars/SCENARIO/TEST/HTRAIN7.MAP
+T 312 3b4c564964079e32 DC - Council wars/SCENARIO/TEST/HTRAIN7.MSG
+B 3586 09817252fb183c00 DC - Council wars/SCENARIO/TEST/HTRAIN7.MTG
+B 69120 855208638695cf7e DC - Council wars/SCENARIO/TEST/HTRAIN7.PTH
+T 2510 65cabd2ca7bc943c DC - Council wars/SCENARIO/TEST/HTRAIN7.SCN
+T 391 be9aefeb099960ac DC - Council wars/SCENARIO/TEST/HTRAIN7.TRO
+T 934 0cd955435704660a DC - Council wars/SCENARIO/TEST/HTRAIN7.TXT
+B 28535 ce4e47a3693a45a2 DC - Council wars/SCENARIO/VENT.JUS
+B 17840 796b9d473c48ad3c DC - Council wars/SOUND/A51.WAV
+B 264 f02ab74c05557382 DC - Council wars/SOUND/ABOVE.WAV
+B 198856 b492b76af1fb221e DC - Council wars/SOUND/ACTIVE.WAV
+T 1938 66166a05b78c85a6 DC - Council wars/SOUND/ALIST.DAT
+B 10325 feaf81497f5d0849 DC - Council wars/SOUND/ARTACK.WAV
+B 20309 e727dd631f780250 DC - Council wars/SOUND/ARTDIG.WAV
+B 10349 54ef7d6646d5a2a8 DC - Council wars/SOUND/ARTSEL.WAV
+T 707 2b482cb1dcdad303 DC - Council wars/SOUND/ATLANTIS.AMB
+T 58 ea6beba24f6a9f06 DC - Council wars/SOUND/ATLANTIS.DAT
+T 58 ea6beba24f6a9f06 DC - Council wars/SOUND/ATRAIN.DAT
+B 9889 c51f87a70857c6bf DC - Council wars/SOUND/ATRILDEA.WAV
+B 11838 14917b09849633fb DC - Council wars/SOUND/ATRILSEL.WAV
+B 9830 fb26fe10e6b0de77 DC - Council wars/SOUND/ATRILWEA.WAV
+B 10507 d70dcdd962dd279f DC - Council wars/SOUND/ATRL1ACK.WAV
+B 9774 1cb2e6c3e195c871 DC - Council wars/SOUND/ATRL1DEA.WAV
+B 29458 029b02557b431a3d DC - Council wars/SOUND/BALLDPLY.WAV
+B 9271 cae83cc18c5b7477 DC - Council wars/SOUND/BARR1SEL.WAV
+B 12528 a2b5bb6c869a23eb DC - Council wars/SOUND/BARRACK.WAV
+B 13956 32ffa0e5d4a02c1d DC - Council wars/SOUND/BARRWEA.WAV
+B 25364 03e9fc03294c0a48 DC - Council wars/SOUND/BASE.WAV
+B 6641 5a60c6b02aca566f DC - Council wars/SOUND/BATWEA.WAV
+B 6771 a7cfa6ca7222a8cc DC - Council wars/SOUND/BATWEA1.WAV
+B 236 8fc1bc3fb89185bd DC - Council wars/SOUND/BEAT.WAV
+B 3908 92f35377d627138d DC - Council wars/SOUND/BEAT2.WAV
+B 714 8a9840898ec7340a DC - Council wars/SOUND/BEEP.WAV
+B 264 f02ab74c05557382 DC - Council wars/SOUND/BELOW.WAV
+B 6092 63df3d1112734eb8 DC - Council wars/SOUND/BEOP.WAV
+B 36508 3975f9fd1b29b104 DC - Council wars/SOUND/BIRDCALL.WAV
+B 14622 5c0bdcdbe7e011a9 DC - Council wars/SOUND/BRTHWTR.WAV
+B 15223 f592fcd915c9dff0 DC - Council wars/SOUND/BUG.WAV
+B 1888 5d059c0fce973424 DC - Council wars/SOUND/BUTTON.WAV
+B 27872 4a5d50bb611a28fe DC - Council wars/SOUND/CAPTURE.WAV
+B 15531 3c434f53809c768c DC - Council wars/SOUND/CHIGGERS.WAV
+B 13700 6bb0db9dd62015c9 DC - Council wars/SOUND/CLICK.WAV
+B 17278 96d0fb8d7161dd72 DC - Council wars/SOUND/CMND2NDF.WAV
+B 12630 23dbf17ddf01e955 DC - Council wars/SOUND/CMNDACK.WAV
+B 14910 52d9cca388c8fedf DC - Council wars/SOUND/CMNDACK1.WAV
+B 14484 e0503bc4f3062a75 DC - Council wars/SOUND/CMNDACK2.WAV
+B 8500 6284ad03d31ecbad DC - Council wars/SOUND/CMNDACK3.WAV
+B 12739 c41a3318a915110c DC - Council wars/SOUND/CMNDDPLY.WAV
+B 10275 cbf855f7ab2357ad DC - Council wars/SOUND/CMNDSEL.WAV
+B 10262 e45a54794ce7842a DC - Council wars/SOUND/CMNDSEL1.WAV
+B 15633 4ac0f0233947f8fc DC - Council wars/SOUND/CREEP.WAV
+B 20029 bef382c32ae4eb03 DC - Council wars/SOUND/CY2NDFI.WAV
+B 8708 d7a42585813ce636 DC - Council wars/SOUND/CYACK1.WAV
+B 5847 8db1a4948a43fe33 DC - Council wars/SOUND/CYACK2.WAV
+B 7370 62d7d2efdfad15b7 DC - Council wars/SOUND/CYACK3.WAV
+B 11906 467a21ed6153f8cf DC - Council wars/SOUND/CYACK4.WAV
+B 61288 c1b88e9be157558a DC - Council wars/SOUND/CYDEA.WAV
+B 34059 d4c63f7e30090f92 DC - Council wars/SOUND/CYDPLY1.WAV
+B 32313 1da11d74e5ba7b0b DC - Council wars/SOUND/CYDPLY2.WAV
+B 8198 58106431ac9e3522 DC - Council wars/SOUND/CYSEL1.WAV
+B 10939 414192a97a74b952 DC - Council wars/SOUND/CYSEL2.WAV
+B 8177 cae7835167786696 DC - Council wars/SOUND/CYSEL3.WAV
+B 7313 4d6f76d1060e1691 DC - Council wars/SOUND/CYWEA.WAV
+B 5598 f1d3af94fe2de4f0 DC - Council wars/SOUND/DAYCHIRP.WAV
+B 7377 aeada8885749c732 DC - Council wars/SOUND/DCHIRP2.WAV
+B 5215 86956bf7c8039e47 DC - Council wars/SOUND/DCHIRP3.WAV
+T 1294 d20f5a5a1e7a6683 DC - Council wars/SOUND/DESERT.AMB
+T 58 ea6beba24f6a9f06 DC - Council wars/SOUND/DESERT.DAT
+B 20159 5c444dd93652673e DC - Council wars/SOUND/DRAIN.WAV
+B 20022 63d4a0bad94f50d1 DC - Council wars/SOUND/DROPLP.WAV
+B 7997 786b0da1e932c924 DC - Council wars/SOUND/DROPLPG.WAV
+B 7347 ed914f2ad4569ce4 DC - Council wars/SOUND/ENGACK.WAV
+B 41478 ed89093ea2d2098b DC - Council wars/SOUND/ENGDPLY.WAV
+B 7189 3016f28c7a02eb06 DC - Council wars/SOUND/ENGSEL.WAV
+B 43973 063ed4b046745769 DC - Council wars/SOUND/ERUPT.WAV
+B 8231 cc78d206fb602dfd DC - Council wars/SOUND/EXP1SEL.WAV
+B 4941 3b3465568b06d52d DC - Council wars/SOUND/EXPACK.WAV
+B 28434 c474682c2a1768d7 DC - Council wars/SOUND/EXPLDPLY.WAV
+B 17687 c500f5225d2d2cd0 DC - Council wars/SOUND/EXPLO.WAV
+B 18373 25e4712046597f32 DC - Council wars/SOUND/EXPLO1.WAV
+B 20267 5fa03bab13bd19a4 DC - Council wars/SOUND/EXPLO2.WAV
+B 22721 9b3b5fbcc30ad804 DC - Council wars/SOUND/EXPLO3.WAV
+B 11576 f4c3145358bd665a DC - Council wars/SOUND/EXPLODEA.WAV
+B 21988 22e634f9a6f82eee DC - Council wars/SOUND/GC2NDFI.WAV
+B 9326 65fb7424960a9c36 DC - Council wars/SOUND/GCACK.WAV
+B 3856 ce2486ca6b854d21 DC - Council wars/SOUND/GCACK1.WAV
+B 7447 b8f6a5959f2fa2b1 DC - Council wars/SOUND/GCACK2.WAV
+B 10414 2200c03a76cc05aa DC - Council wars/SOUND/GCACK3.WAV
+B 13565 5e73ce029d8ad4ae DC - Council wars/SOUND/GCDPLY.WAV
+B 9016 33708946cf3c68bb DC - Council wars/SOUND/GCLAZER.WAV
+B 7688 fc9b355281842109 DC - Council wars/SOUND/GCSEL.WAV
+B 13206 c59bdf91834494aa DC - Council wars/SOUND/GCSEL1.WAV
+B 11478 c08003eec436e20e DC - Council wars/SOUND/GHELACK.WAV
+B 4004 e0fac4d921612a2e DC - Council wars/SOUND/GHELDEA.WAV
+B 4938 a8b8961e6e6fb190 DC - Council wars/SOUND/GHELSEL.WAV
+B 4005 eaf6fd0d5b0eb591 DC - Council wars/SOUND/GHELSEL1.WAV
+B 4589 ac3cf702188408e7 DC - Council wars/SOUND/GHELSEL2.WAV
+B 6728 e2f68b8e41f0c8de DC - Council wars/SOUND/GMINEDEA.WAV
+B 8825 8aaf236264bb5bc3 DC - Council wars/SOUND/GRAY1ACK.WAV
+B 11053 a00b85ac4ae5ad14 DC - Council wars/SOUND/GRAY1DEA.WAV
+B 6092 751de25c73bf92c0 DC - Council wars/SOUND/GRAY1SEL.WAV
+B 7957 33567abd9dc09bfe DC - Council wars/SOUND/GRAY1WEA.WAV
+B 8538 4910ae2a85156aac DC - Council wars/SOUND/GRAY2ACK.WAV
+B 12740 e34fa6f8723b93d7 DC - Council wars/SOUND/GRAY2DEA.WAV
+B 7483 cd823865a7fa750c DC - Council wars/SOUND/GRAY2SEL.WAV
+B 8206 a2cb67c8510bbc0d DC - Council wars/SOUND/GRAY2WEA.WAV
+B 9222 3e311c4bad89668c DC - Council wars/SOUND/GRAY3ACK.WAV
+B 5186 e9aed99015c515f9 DC - Council wars/SOUND/GRAY3DEA.WAV
+B 7251 ffb1a7df262946ba DC - Council wars/SOUND/GRAY3SEL.WAV
+B 6959 b1f872e28acb2bc6 DC - Council wars/SOUND/GRAY3WEA.WAV
+B 9635 58eee6b593b33901 DC - Council wars/SOUND/GRAY4ACK.WAV
+B 2171 df482485d38493f6 DC - Council wars/SOUND/GRAY4DEA.WAV
+B 5844 b5b65ff4cb394086 DC - Council wars/SOUND/GRUBWEA.WAV
+B 5981 395f8cd0f8da3720 DC - Council wars/SOUND/GRUBWEA1.WAV
+B 39323 7d0b67872f2eaf3f DC - Council wars/SOUND/HBUILD.WAV
+B 19616 8179e84f2c178057 DC - Council wars/SOUND/HEAL.WAV
+B 12605 5ecf3e25bd2613f0 DC - Council wars/SOUND/HHELACK.WAV
+B 8224 d4d4d0f140786600 DC - Council wars/SOUND/HHELDEA.WAV
+B 4706 9d4685ba9b69bcd2 DC - Council wars/SOUND/HHELSEL.WAV
+B 2747 ff30b7862e97de4b DC - Council wars/SOUND/HHELSEL1.WAV
+B 2581 0291e178b6ce6d22 DC - Council wars/SOUND/HHELSEL2.WAV
+B 1771 ea2fe3c0229b4174 DC - Council wars/SOUND/HLIGHT.WAV
+B 7495 a984f47e764ea7a4 DC - Council wars/SOUND/HMINEDEA.WAV
+T 1320 c070225df575480b DC - Council wars/SOUND/HTRAIN.AMB
+T 58 ea6beba24f6a9f06 DC - Council wars/SOUND/HTRAIN.DAT
+B 9983 b945a2567f7f6e9d DC - Council wars/SOUND/HUM.WAV
+B 4256 8971ec3488e04911 DC - Council wars/SOUND/INDGDIE.WAV
+T 1458 f916765e70a0c687 DC - Council wars/SOUND/JUNGLE.AMB
+T 58 ea6beba24f6a9f06 DC - Council wars/SOUND/JUNGLE.DAT
+B 29899 b933c0062fb4ccd9 DC - Council wars/SOUND/LENSDPLY.WAV
+B 27878 e2b009a709287fda DC - Council wars/SOUND/LUNADPLY.WAV
+B 6800 f5c29aa97cace94b DC - Council wars/SOUND/MECH1SEL.WAV
+B 9146 11165e5d516346e9 DC - Council wars/SOUND/MECH2SEL.WAV
+B 7029 23dcec3acedb7f0a DC - Council wars/SOUND/MECH3SEL.WAV
+B 19936 82c438e7e40ce754 DC - Council wars/SOUND/MECHACK.WAV
+B 6383 4607cb717024a2b6 DC - Council wars/SOUND/MECHDEA.WAV
+B 11312 c1710917cace06e5 DC - Council wars/SOUND/MECHDEA1.WAV
+B 11084 aa6efb1941f037a9 DC - Council wars/SOUND/MECHWEA.WAV
+B 11045 bf52df92a950abe8 DC - Council wars/SOUND/MECHWEA2.WAV
+B 10916 88bd8cf811ee55b0 DC - Council wars/SOUND/MECHWEA3.WAV
+B 19720 cde5a0085a0abc3c DC - Council wars/SOUND/MKTDPLY.WAV
+B 19222 532298343b435e52 DC - Council wars/SOUND/MONK.WAV
+B 13863 6ed6ad8c1549746e DC - Council wars/SOUND/MORTDEA.WAV
+B 5834 bb5caa4fd048c3e2 DC - Council wars/SOUND/MSG.WAV
+B 20420 59ce0135a6f5a356 DC - Council wars/SOUND/NAPALM.WAV
+T 29 dc253c015d4e88c3 DC - Council wars/SOUND/NEWSND.DAT
+B 8284 940c73e01ba51df3 DC - Council wars/SOUND/NIGHTBUG.WAV
+B 11968 30f65f2a8efb57b9 DC - Council wars/SOUND/ORTU1ACK.WAV
+B 13896 0bedaed172ff3d53 DC - Council wars/SOUND/ORTU2ACK.WAV
+B 25536 e7704680f4bb6a42 DC - Council wars/SOUND/ORTUDEA.WAV
+B 9146 699ff4c32ab34bb9 DC - Council wars/SOUND/ORTUSEL.WAV
+B 8079 6f36489fc82df24a DC - Council wars/SOUND/OWL.WAV
+B 11643 8dfd42b4504950e8 DC - Council wars/SOUND/PIPSTEAM.WAV
+B 2462 55683f5befcc55cd DC - Council wars/SOUND/PSY1SEL.WAV
+B 19111 6fe9080e4c2fe577 DC - Council wars/SOUND/PSY2NDFI.WAV
+B 4519 c79b0225801d5eaa DC - Council wars/SOUND/PSY2SEL.WAV
+B 14447 ece0d58c1ec9f579 DC - Council wars/SOUND/PSYACK.WAV
+B 5446 db794a99bae06e48 DC - Council wars/SOUND/PSYDEA.WAV
+B 6400 79f08e625bb5d695 DC - Council wars/SOUND/PSYDPLY.WAV
+B 8975 3d3a3f386ce275e7 DC - Council wars/SOUND/PSYSEL.WAV
+B 404848 2af92cfaeb88c4d7 DC - Council wars/SOUND/REZIN.WAV
+B 4133 37241e6f7b9ce1e5 DC - Council wars/SOUND/RNATWEA.WAV
+B 3245 e6886e0dfb625d4b DC - Council wars/SOUND/RNATWEA1.WAV
+B 16339 9bf04887f1149e51 DC - Council wars/SOUND/ROCK.WAV
+B 6480 98404243961bef49 DC - Council wars/SOUND/SALWEA.WAV
+B 3361 a0287726574e4a7f DC - Council wars/SOUND/SALWEA1.WAV
+T 191 7f57bd60fcaa1dc2 DC - Council wars/SOUND/SCENESND.DAT
+B 8081 56e001dbf639cc8a DC - Council wars/SOUND/SCYT1SEL.WAV
+B 264 f02ab74c05557382 DC - Council wars/SOUND/SILENCE.WAV
+T 6001 f1bc9ed155318f68 DC - Council wars/SOUND/SLIST.DAT
+B 11444 e2876b5ca5bb4489 DC - Council wars/SOUND/SLOMACK.WAV
+B 38511 ffce2fdd43f59a60 DC - Council wars/SOUND/SLOMDPLY.WAV
+B 11951 8d76cb4182531ed8 DC - Council wars/SOUND/SLOMSEL.WAV
+B 3908 92f35377d627138d DC - Council wars/SOUND/SLUGAKN.WAV
+B 15647 dd0203ee456875bf DC - Council wars/SOUND/SLUGDEA.WAV
+B 17200 0692aa2127519463 DC - Council wars/SOUND/SLUGDPY.WAV
+B 12961 20897290cad18506 DC - Council wars/SOUND/SLUGSEL.WAV
+B 10995 4cf6513548094f7b DC - Council wars/SOUND/SNIPER.WAV
+B 11084 6cf9098d4c3953ef DC - Council wars/SOUND/SNIPER2.WAV
+T 6511 b4c1b0de870e87fb DC - Council wars/SOUND/SOUND2.DAT
+T 1458 f916765e70a0c687 DC - Council wars/SOUND/SPECIAL.AMB
+B 2113 4511e38b25cccf3a DC - Council wars/SOUND/SPIDWEA.WAV
+B 4131 87579733cf74051f DC - Council wars/SOUND/SPIDWEA1.WAV
+B 18001 44f11e8b4640747e DC - Council wars/SOUND/SYCWEA.WAV
+B 9755 f40cff0f94337164 DC - Council wars/SOUND/SYTH1ACK.WAV
+B 10356 656bb58ca84afed0 DC - Council wars/SOUND/SYTH1WEA.WAV
+B 7412 f55c3c21c551e977 DC - Council wars/SOUND/SYTH2ACK.WAV
+B 11059 a2e7feea010a319a DC - Council wars/SOUND/SYTH2WEA.WAV
+B 7911 b5e9e16a1ee46a93 DC - Council wars/SOUND/SYTH3ACK.WAV
+B 17007 94e54b51796e981d DC - Council wars/SOUND/SYTHDEA.WAV
+B 8582 accc94a3946c8faa DC - Council wars/SOUND/SYTHDEA1.WAV
+B 6417 34f82d3511c8d692 DC - Council wars/SOUND/SYTHDEA2.WAV
+B 3883 717a2e8946b7c48d DC - Council wars/SOUND/SYTHSEL.WAV
+B 27573 5405fe2e92a08523 DC - Council wars/SOUND/TEKDPLY.WAV
+B 11695 68eb728ede91205e DC - Council wars/SOUND/TINGLE.WAV
+B 7954 6161ba3819854512 DC - Council wars/SOUND/TOWERDEA.WAV
+B 11945 d3e0fe5ea7cc4722 DC - Council wars/SOUND/TOWERWEA.WAV
+B 6747 c86af18b6f4fa7f5 DC - Council wars/SOUND/TROPDEA.WAV
+B 16357 630aec1eef4f8abb DC - Council wars/SOUND/TROPDEA1.WAV
+B 8503 8b6b4da76a3b3420 DC - Council wars/SOUND/TROPDEA2.WAV
+B 6457 c7a7dba3c558525b DC - Council wars/SOUND/TROPDEA3.WAV
+B 8291 4716f6711dc1d080 DC - Council wars/SOUND/TRP1ACK.WAV
+B 6875 353cc66e83f060dc DC - Council wars/SOUND/TRP1SEL.WAV
+B 10257 d28b6ef85be2e4d8 DC - Council wars/SOUND/TRP1WEA.WAV
+B 8772 193b6f77b27a8f76 DC - Council wars/SOUND/TRP1WEAU.WAV
+B 10466 3bd0883ee530050f DC - Council wars/SOUND/TRP2ACK.WAV
+B 10838 de699ea9e67c1994 DC - Council wars/SOUND/TRP2WEA.WAV
+B 7927 d5d62f9293920dc2 DC - Council wars/SOUND/TRP2WEAU.WAV
+B 8652 94bb249f150f1273 DC - Council wars/SOUND/TRP3ACK.WAV
+B 5805 7519c417907d7db6 DC - Council wars/SOUND/TRP3SEL.WAV
+B 10385 290320795ede54be DC - Council wars/SOUND/TRPWEA.WAV
+B 8208 77fce3c9779066ab DC - Council wars/SOUND/TRPWEAU.WAV
+B 12641 b2b632af1382830e DC - Council wars/SOUND/TURRACK.WAV
+B 36779 a75088f130c456f9 DC - Council wars/SOUND/TURRDPLY.WAV
+B 11245 9b0cf60efb1db242 DC - Council wars/SOUND/TURRSEL.WAV
+B 23938 eb49010188c9640e DC - Council wars/SOUND/UNIT.WAV
+B 14460 917cb544e4c1f903 DC - Council wars/SOUND/VENTPOO.WAV
+B 13410 ea7dcc8016a42e76 DC - Council wars/SOUND/VTOL1SEL.WAV
+B 20045 38b8fec20ddaa8a8 DC - Council wars/SOUND/VTOLACK.WAV
+B 13968 e97d2663444d0aa3 DC - Council wars/SOUND/VTOLACK2.WAV
+B 15843 cf4cefe4600bf38e DC - Council wars/SOUND/VTOLDEA.WAV
+B 9977 fc60c49418fff489 DC - Council wars/SOUND/VTOLWEA.WAV
+B 10435 cb9c516aa5e9d069 DC - Council wars/SOUND/WATER.WAV
+B 33589 97757e9b33e4183d DC - Council wars/SOUND/WHALE.WAV
+B 9937 633ae73270d56290 DC - Council wars/SOUND/XENODEA.WAV
+B 11299 91bad541b783bae8 DC - Council wars/SOUND/XENODPLY.WAV
+B 4353 3c7ac7ffea2eb532 DC - Council wars/SOUND/XENOSEL.WAV
+B 1751 a52d3b31278548b9 DC - Council wars/SPECIAL.GIF
+B 183757 a47af3d9bdcb7547 DC - Council wars/SPRITES/ACAR.SPR
+B 87959 e7dd9cde977aa12f DC - Council wars/SPRITES/ACOM.SPR
+B 5214 bfdf7cd6e3fb90f8 DC - Council wars/SPRITES/AIRD.SPR
+B 151360 eff81187b3379c7f DC - Council wars/SPRITES/ALBU.SPR
+B 10866 2c6fd5e5c11cebcf DC - Council wars/SPRITES/ALIEN1.SPR
+B 49571 707bb0134aa3d6ca DC - Council wars/SPRITES/ARTILER2.SPR
+B 158746 33c12a201e17ab26 DC - Council wars/SPRITES/ARTY.SPR
+B 201689 8bed53ddaade4ad4 DC - Council wars/SPRITES/ATRIL.SPR
+B 39800 33ab862164c63389 DC - Council wars/SPRITES/ATTACK2.SPR
+B 26769 49a552600b5640e7 DC - Council wars/SPRITES/AVII.SPR
+B 248142 446622924f43aefe DC - Council wars/SPRITES/BARR.SPR
+B 2418 8ec5bc0fe7ba3949 DC - Council wars/SPRITES/BBIT.SPR
+B 3348 52b3185f84d79375 DC - Council wars/SPRITES/BEAC.SPR
+B 85074 0e4b02ceeb8d795b DC - Council wars/SPRITES/BEES.SPR
+B 28389 042deaf68bea7af9 DC - Council wars/SPRITES/BEON.SPR
+B 22287 a436f5b5d62114bd DC - Council wars/SPRITES/BIGC.SPR
+B 12009 d629c471cadd11e4 DC - Council wars/SPRITES/BITS.SPR
+B 84820 3114de0d37aefa46 DC - Council wars/SPRITES/BLAH.SPR
+B 56029 ac7f764b64c14b08 DC - Council wars/SPRITES/BLAM.SPR
+B 1844 d702075dc31f2595 DC - Council wars/SPRITES/BLAZ.SPR
+B 34238 2aeb67189dfc7f93 DC - Council wars/SPRITES/BLOO.SPR
+B 13032 dd772f19d829bc03 DC - Council wars/SPRITES/BOIG.SPR
+B 88005 0e1c04d89e419b9b DC - Council wars/SPRITES/BRIT.SPR
+B 50064 7baff779cc6c4982 DC - Council wars/SPRITES/BUILDNG.SPR
+B 2475 88be9b3533994878 DC - Council wars/SPRITES/CAMM.SPR
+B 9912 d0592944767b2686 DC - Council wars/SPRITES/CENT.SPR
+B 133663 260e6407e7186643 DC - Council wars/SPRITES/CHAA.SPR
+B 145260 c6cc29b990139bea DC - Council wars/SPRITES/CHAB.SPR
+B 154328 d9efd7c03bc43b3f DC - Council wars/SPRITES/CHOA.SPR
+B 32150 54e3722c6803abb2 DC - Council wars/SPRITES/CHOB.SPR
+B 23619 375c521016292a05 DC - Council wars/SPRITES/CHOC.SPR
+B 60615 92654705ae522464 DC - Council wars/SPRITES/CHOD.SPR
+B 29684 99453d9544a3afbd DC - Council wars/SPRITES/CLOC.SPR
+B 23276 41b8dab70fb4e88a DC - Council wars/SPRITES/CLOCK.SPR
+B 89409 e4244910b3d982b3 DC - Council wars/SPRITES/CLOD.SPR
+B 2707 0b2a70105ab38e7a DC - Council wars/SPRITES/CRYO.SPR
+B 22074 bfba928bcf79716b DC - Council wars/SPRITES/CURS.SPR
+B 25181 cebab703fbf1b818 DC - Council wars/SPRITES/CYBORG.SPR
+B 880718 f6f59e3d1cc79ae2 DC - Council wars/SPRITES/DCSS.SPR
+B 507613 d38943e61a32dbc3 DC - Council wars/SPRITES/DCSS_HD.SPR
+B 324400 e0deb7c5a68e6379 DC - Council wars/SPRITES/DCUK.SPR
+B 158883 6d92bfa526621973 DC - Council wars/SPRITES/DCUK_HD.SPR
+B 39061 90af7c4ac79c7d17 DC - Council wars/SPRITES/DCUT.SPR
+B 53184 a9e3576c713e8313 DC - Council wars/SPRITES/DCUT_HD.SPR
+B 2615 6ae4521f43fa6e3b DC - Council wars/SPRITES/DISH.SPR
+B 790 5782fe0197c7c957 DC - Council wars/SPRITES/DOTT.SPR
+B 6097 c8a3799f5cc9f03f DC - Council wars/SPRITES/DROA.SPR
+B 15919 c50f07aecac01556 DC - Council wars/SPRITES/DROP.SPR
+B 81533 94167da47d3655d2 DC - Council wars/SPRITES/DSTY.SPR
+B 181662 29594481f9a57432 DC - Council wars/SPRITES/DUTS.SPR
+B 896 e00d4868c7fbc1f6 DC - Council wars/SPRITES/EGG.SPR
+B 60240 29a7c5034deb8b83 DC - Council wars/SPRITES/ENCA.SPR
+B 15946 745efac411de599b DC - Council wars/SPRITES/ENCB.SPR
+B 21229 a3f1cdd1a7410fee DC - Council wars/SPRITES/ENCC.SPR
+B 72567 a9ae724bd65c7cf5 DC - Council wars/SPRITES/ENCD.SPR
+B 33904 1c865177ec2faff8 DC - Council wars/SPRITES/ENCE.SPR
+B 86085 c48e8798c781a69a DC - Council wars/SPRITES/ENCF.SPR
+B 12364 a4792d90cdf4f7f6 DC - Council wars/SPRITES/ENGI.SPR
+B 79821 1eed4f57075ff915 DC - Council wars/SPRITES/EXPL.SPR
+B 18498 045a0e4988b09fa3 DC - Council wars/SPRITES/FACT.SPR
+B 4188 ee736afbdd30d374 DC - Council wars/SPRITES/FETU.SPR
+B 4086 19a33a864f803c6f DC - Council wars/SPRITES/FILL.SPR
+B 21954 aa428f8b9a734a95 DC - Council wars/SPRITES/FIRA.SPR
+B 38338 d007bd984fe133cb DC - Council wars/SPRITES/FIRB.SPR
+B 85739 f372f7761cf1a042 DC - Council wars/SPRITES/FIRE.SPR
+B 13064 da944f88afca5a68 DC - Council wars/SPRITES/FLUCTION.SPR
+B 118520 4ebfc95d2ab1a03b DC - Council wars/SPRITES/FRIEGHT.SPR
+B 4245 82df8ed3ef70619c DC - Council wars/SPRITES/FUEL.SPR
+B 119576 405ac1a26e80888a DC - Council wars/SPRITES/GASY.SPR
+B 19981 e7e4ce580d5fdc9c DC - Council wars/SPRITES/GLAT.SPR
+B 16093 9c0979c3492a10e5 DC - Council wars/SPRITES/GLIT.SPR
+B 11418 69b384342318dbb0 DC - Council wars/SPRITES/GLOT.SPR
+B 71482 95e71a6b19ecca1b DC - Council wars/SPRITES/GRAY.SPR
+B 8537 9c06658d4fc6510c DC - Council wars/SPRITES/GRND.SPR
+B 6429 7f01f058f755f152 DC - Council wars/SPRITES/GRUB.SPR
+B 308457 74f20ab72916a643 DC - Council wars/SPRITES/HCAR.SPR
+B 87959 45373c190cb4dcc2 DC - Council wars/SPRITES/HCOM.SPR
+B 4382 46f8b6a4b6243937 DC - Council wars/SPRITES/HITA.SPR
+B 3830 743c4da2dfa346dc DC - Council wars/SPRITES/HITB.SPR
+B 2627 8d027e2a4f318dfd DC - Council wars/SPRITES/HITC.SPR
+B 2223 7c0a494619c83bb9 DC - Council wars/SPRITES/HITD.SPR
+B 2459 89cf63eafa400cdc DC - Council wars/SPRITES/HITE.SPR
+B 2181 1edf21eb14002527 DC - Council wars/SPRITES/HITF.SPR
+B 1953 edebc6d6ef725c25 DC - Council wars/SPRITES/HITG.SPR
+B 2620 d8ed623ff5537efc DC - Council wars/SPRITES/HITH.SPR
+B 6544 4fae1b3444128b68 DC - Council wars/SPRITES/HITT.SPR
+B 110938 d9132c612f12deda DC - Council wars/SPRITES/HUBU.SPR
+B 27294 52c0f19ef79b5a60 DC - Council wars/SPRITES/HYYK.SPR
+B 14487 3aea360214deaaf4 DC - Council wars/SPRITES/IT.SPR
+B 146593 915d4c2edef29069 DC - Council wars/SPRITES/KNOBE.SPR
+B 6954 72f5b4314a4f9ab4 DC - Council wars/SPRITES/LEFT.SPR
+B 8410 efeb69b6096b181d DC - Council wars/SPRITES/LENS.SPR
+B 133786 5672a013c91f17d5 DC - Council wars/SPRITES/LEVEL.SPR
+B 11092 aa27cbe13ee38b3c DC - Council wars/SPRITES/LLLL.SPR
+B 16507 b29dc0fcd13893ed DC - Council wars/SPRITES/LUNA.SPR
+B 65627 ba71fb5b8d595024 DC - Council wars/SPRITES/LUNY.SPR
+B 12916 257a9347b22c7640 DC - Council wars/SPRITES/MAKT.SPR
+B 77748 da0295f8d942d381 DC - Council wars/SPRITES/MATATRAC.SPR
+B 288 a3347bc917ceed92 DC - Council wars/SPRITES/MISA.INF
+B 17767 e8062711653f761c DC - Council wars/SPRITES/MISA.SPR
+B 53465 891717c388582bd1 DC - Council wars/SPRITES/MISB.SPR
+B 5879 f9f11f45d9086444 DC - Council wars/SPRITES/MISC.SPR
+B 11094 f4d57b9394502e6f DC - Council wars/SPRITES/MISD.SPR
+B 8545 3dde61661aba7a36 DC - Council wars/SPRITES/MISE.SPR
+B 7466 98592cbf4fccdc02 DC - Council wars/SPRITES/MISF.SPR
+B 5781 18422b1ffe8adfdc DC - Council wars/SPRITES/MISG.SPR
+B 100126 115266ca3c502924 DC - Council wars/SPRITES/MISH.SPR
+B 7090 851938753c7f4d68 DC - Council wars/SPRITES/MORE.SPR
+B 1874 5f937ffc5a5af7cd DC - Council wars/SPRITES/MSLS.SPR
+B 4334 9290beca297ef60c DC - Council wars/SPRITES/MUZA.SPR
+B 101584 f7dd2e985724526b DC - Council wars/SPRITES/MWIA.SPR
+B 62718 41798dde5d47251c DC - Council wars/SPRITES/MWIB.SPR
+B 41790 1dccbaa254d29199 DC - Council wars/SPRITES/MWIC.SPR
+B 73667 fb66089e96fcd25d DC - Council wars/SPRITES/MWID.SPR
+B 251549 06c24d0f6c66d481 DC - Council wars/SPRITES/NETA.SPR
+B 123750 49d13d5474fa150c DC - Council wars/SPRITES/NETB.SPR
+B 74397 70abb06feb7cf676 DC - Council wars/SPRITES/NETC.SPR
+B 11619 f9177a1479c1a689 DC - Council wars/SPRITES/NETD.SPR
+B 102159 7ef20228aa0a5349 DC - Council wars/SPRITES/NETE.SPR
+B 112691 08887b4241dba853 DC - Council wars/SPRITES/NUKE.SPR
+B 73512 d678fb53ce718956 DC - Council wars/SPRITES/ORTU.SPR
+B 1694 4be4b9bdba7e2102 DC - Council wars/SPRITES/PCFO.JUS
+B 1920 4f6d6631f16a66ae DC - Council wars/SPRITES/PCFO.SPR
+B 103282 d06da20bada2cef9 DC - Council wars/SPRITES/PLASMA.SPR
+B 36161 6ada75523b01dcc6 DC - Council wars/SPRITES/POPP.SPR
+B 13172 0ed5526d3cf51810 DC - Council wars/SPRITES/POPPPAEN.SPR
+B 5383 a20f7a095fb121b5 DC - Council wars/SPRITES/PORT.SPR
+B 143271 3c37358f556fc86e DC - Council wars/SPRITES/PSYC.SPR
+B 15040 cc2abec5170f36c0 DC - Council wars/SPRITES/PUFF.SPR
+B 9661 0194002c3978b6aa DC - Council wars/SPRITES/PUSB.SPR
+B 170653 b34d2324a2b358a9 DC - Council wars/SPRITES/REAP.SPR
+B 31172 1805d0f41a60d891 DC - Council wars/SPRITES/RNAT.SPR
+B 3996 41018f099d7bbdd2 DC - Council wars/SPRITES/SALA.SPR
+B 32485 8ce15563935aa69c DC - Council wars/SPRITES/SALY.SPR
+B 226605 7e441aa49451d241 DC - Council wars/SPRITES/SARG.SPR
+B 53028 7ccd29b2aa8dc25b DC - Council wars/SPRITES/SAUC.SPR
+B 27407 7325c5d2424e57ab DC - Council wars/SPRITES/SCGM.JUS
+B 28317 53c01854110ce172 DC - Council wars/SPRITES/SCGM.SPR
+B 19708 f02c12649a4ead15 DC - Council wars/SPRITES/SCOU.SPR
+B 36392 2981f083a46cf7d5 DC - Council wars/SPRITES/SCOUT1.SPR
+B 47747 3dc79d4fd6395d38 DC - Council wars/SPRITES/SCUT.SPR
+B 180004 ba852cfcbe629878 DC - Council wars/SPRITES/SCYT.SPR
+B 62005 e78ada92cd166449 DC - Council wars/SPRITES/SERA.SPR
+B 84823 b6ddff67985a1de4 DC - Council wars/SPRITES/SERB.SPR
+B 190036 0a89a829204ee75d DC - Council wars/SPRITES/SERC.SPR
+B 70012 20f3093731a8ac54 DC - Council wars/SPRITES/SERD.SPR
+B 38100 b93c982a5c7c9056 DC - Council wars/SPRITES/SERE.SPR
+B 88005 0e1c04d89e419b9b DC - Council wars/SPRITES/SHOK.SPR
+B 38014 a0ebc00c90ee30d2 DC - Council wars/SPRITES/SHORTCIT.SPR
+B 5068 147bcd1b9c6873da DC - Council wars/SPRITES/SHRI.SPR
+B 7115 e84d309075e26bb1 DC - Council wars/SPRITES/SIDE.SPR
+B 33526 3440316e027ed36d DC - Council wars/SPRITES/SLOM.SPR
+B 134302 7795ddeea56ca68b DC - Council wars/SPRITES/SLUG.B00
+B 116239 15f8f25029981f00 DC - Council wars/SPRITES/SLUG.SPR
+B 24685 945f93ee5abddc00 DC - Council wars/SPRITES/SMAE.SPR
+B 11555 6c3ab23854931927 DC - Council wars/SPRITES/SMAY.SPR
+B 110314 c206540f4d83f0ad DC - Council wars/SPRITES/SMOA.SPR
+B 94115 eba1db778071b071 DC - Council wars/SPRITES/SMOK.SPR
+B 35936 4691c01594c981e2 DC - Council wars/SPRITES/SMSP.SPR
+B 32072 af4ea2eb6ac065d6 DC - Council wars/SPRITES/SONIC.SPR
+B 55186 6571d3677721de5c DC - Council wars/SPRITES/SPAC.SPR
+B 119737 8ed607046109b2a4 DC - Council wars/SPRITES/SPAK.SPR
+B 76119 f69edf1fb15d6a9f DC - Council wars/SPRITES/SPAR.SPR
+B 60108 a086f2667e64a150 DC - Council wars/SPRITES/SPED.SPR
+B 14020 90573a80bcfdd0b0 DC - Council wars/SPRITES/SPID.SPR
+B 1016 518e8527c1235232 DC - Council wars/SPRITES/SPIKE.SPR
+B 40183 7582ce387ea3b7ed DC - Council wars/SPRITES/SPON.SPR
+B 248235 791e1e246f3b83fe DC - Council wars/SPRITES/SPOT.SPR
+B 30204 cf7cddc4f1d81d9f DC - Council wars/SPRITES/SPUC.SPR
+B 115091 34aafac77e27b562 DC - Council wars/SPRITES/SRCH.SPR
+B 4673 339750af854e60c6 DC - Council wars/SPRITES/SSSS.SPR
+B 6531 01a3cfa8269924a1 DC - Council wars/SPRITES/TEKT.SPR
+B 252523 cd47d76b6aa4a593 DC - Council wars/SPRITES/TEKTARA.SPR
+B 19784 c98c6b388acedae4 DC - Council wars/SPRITES/TIMEMIS.SPR
+B 9489 7d93d55c7b49385e DC - Council wars/SPRITES/TONG.SPR
+B 19527 0d50e176724bf0e0 DC - Council wars/SPRITES/TORT.SPR
+B 11474 eb7622b6cc46236f DC - Council wars/SPRITES/TOWR.SPR
+B 6321 19e3c7d52f62b6a5 DC - Council wars/SPRITES/TOXX.SPR
+B 14038 23bcc69f6bfb052d DC - Council wars/SPRITES/TROOPER1.SPR
+B 16702 a0b21a8a87561a6d DC - Council wars/SPRITES/TROOPER2.SPR
+B 184959 51092690d9700cec DC - Council wars/SPRITES/TRSC.SPR
+B 15430 fb475e335d5052e9 DC - Council wars/SPRITES/TRUK.SPR
+B 47663 3a4e753e4122149c DC - Council wars/SPRITES/TURR.SPR
+B 33492 34f5b5ca2f0f7e98 DC - Council wars/SPRITES/VCAL.SPR
+B 33856 15adbee6bb8e8dfa DC - Council wars/SPRITES/VCEA.SPR
+B 11836 dfb4454f2f19928a DC - Council wars/SPRITES/VENT.SPR
+B 1238 657379fed65c133b DC - Council wars/SPRITES/VENT2.SPR
+B 3023 ceb9f7b891c54780 DC - Council wars/SPRITES/WATC.SPR
+B 172394 aa673cfa2f081e15 DC - Council wars/SPRITES/WEATH.SPR
+B 123969 32afaf9e199d16c3 DC - Council wars/SPRITES/WINA.SPR
+B 51003 18b5cc46d47cd5d3 DC - Council wars/SPRITES/WINB.SPR
+B 21574 8dc3d052c4d1133c DC - Council wars/SPRITES/WINC.SPR
+B 30363 c67774747f97df07 DC - Council wars/SPRITES/WIND.SPR
+B 24987 a7d7700b83a9dbfe DC - Council wars/SPRITES/WINE.SPR
+B 34889 e6b50069dfc89446 DC - Council wars/SPRITES/WINF.SPR
+B 106356 61093cc25b479c14 DC - Council wars/SPRITES/XENO.SPR
+B 106247 400e940ea1c782f2 DC - Council wars/SPRITES/YABA.SPR
+B 31774 ee84058407d5ac79 DC - Council wars/SPRITES/ZISP.SPR
+B 308280 c17615a2e9e16a53 DC - Council wars/WALLPAPR/ATRFU4.BMP
+B 308280 6ab30a9518cd0fb9 DC - Council wars/WALLPAPR/EXPLOIT.BMP
+B 308280 18ca146a45c18656 DC - Council wars/WALLPAPR/FIRESTRM.BMP
+B 308280 6e008ff2dbd062b8 DC - Council wars/WALLPAPR/GORREM.BMP
+B 308280 dabcff9dc975854f DC - Council wars/WALLPAPR/GRAY.BMP
+B 308280 1c3c646d4e9efe2f DC - Council wars/WALLPAPR/ORTU3.BMP
+B 308280 9edf7d0dab18a1b5 DC - Council wars/WALLPAPR/OSPREYIV.BMP
+B 308280 95f44bda19fe0ba0 DC - Council wars/WALLPAPR/REAPER.BMP
+B 308280 51f6e7af881b31f9 DC - Council wars/WALLPAPR/SARGE.BMP
+B 308280 f4e5fa02c051a199 DC - Council wars/WALLPAPR/SENTINEL.BMP
+B 308280 7034c9aaa3fc7a01 DC - Council wars/WALLPAPR/SLUG.BMP
+B 308280 8da9a9a3f2cc8988 DC - Council wars/WALLPAPR/SYTHE.BMP
+B 308280 ff3a01890687e72c DC - Council wars/WALLPAPR/TROOPER.BMP
+T 2257 6a41737407584934 INSTALL.CMD
+T 20019 286068e16d262f56 PATCH_HOWTO.TXT
+T 24661 bd7fea6d77762cc6 README.md
+'@
+
+# =================================================================================================
 #  LOGIC - byte level helpers
 # =================================================================================================
 function ConvertFrom-HexString([string] $Hex) {
@@ -15525,6 +18055,270 @@ function New-GameShortcut([string] $ExePath, $Build) {
 # Returns a small result object; throws on any check failure.
 # $Progress (optional): a script block called with one line of text before each step - the window
 # shows it in its "patching in progress" box; the command line passes nothing.
+# =================================================================================================
+#  INTEGRITY CHECK (1 Oct 2026) - the game files must be the repository's before anything is patched
+# =================================================================================================
+$script:manifest = $null
+function Get-Manifest {
+    if ($script:manifest) { return $script:manifest }
+    $list = New-Object System.Collections.ArrayList
+    foreach ($line in ($ManifestText -split "`n")) {
+        $line = $line.Trim()
+        if (-not $line) { continue }
+        $a = $line.IndexOf(' '); $b = $line.IndexOf(' ', $a + 1); $c = $line.IndexOf(' ', $b + 1)
+        [void] $list.Add(@{ Text = ($line.Substring(0, $a) -eq 'T'); Size = [long] $line.Substring($a + 1, $b - $a - 1)
+                            Hash = $line.Substring($b + 1, $c - $b - 1); Path = $line.Substring($c + 1) })
+    }
+    $script:manifest = $list
+    return $list
+}
+
+# The first 16 hex digits of a file's SHA-256 as the manifest hashes it: a text file with every CR removed.
+function Get-ManifestHash([string] $Path, [bool] $Text) {
+    $bytes = [System.IO.File]::ReadAllBytes($Path)
+    if ($Text) { $bytes = $script:latin1.GetBytes($script:latin1.GetString($bytes).Replace("`r", '')) }
+    return (Get-Sha256Hex $bytes).Substring(0, 16)
+}
+
+# Compares the repository's files under $Root (the folder this script sits in = the repository root) with
+# the manifest; $Prefix limits the check to one subtree ('DC - Council wars/').  Returns one record per file
+# that is not the repository's: @{ Path; Problem = MISSING | MODIFIED | UNREADABLE; Detail }.  $Progress
+# (optional) is called with (done, total, path) every 20 files.
+function Get-IntegrityProblems([string] $Root, [string] $Prefix = '', [scriptblock] $Progress = $null) {
+    $problems = @()
+    $entries = @(Get-Manifest | Where-Object { -not $Prefix -or $_.Path.StartsWith($Prefix, [StringComparison]::OrdinalIgnoreCase) })
+    $n = 0
+    foreach ($e in $entries) {
+        $n++
+        if ($Progress -and ($n % 20 -eq 0 -or $n -eq $entries.Count)) { & $Progress $n $entries.Count $e.Path }
+        $p = [System.IO.Path]::Combine($Root, $e.Path.Replace('/', [string][char] 92))
+        if (-not [System.IO.File]::Exists($p)) { $problems += @{ Path = $e.Path; Problem = 'MISSING'; Detail = 'not found' }; continue }
+        try {
+            if (-not $e.Text) {
+                $len = (New-Object System.IO.FileInfo($p)).Length
+                if ($len -ne $e.Size) { $problems += @{ Path = $e.Path; Problem = 'MODIFIED'; Detail = ('{0} bytes instead of {1}' -f $len, $e.Size) }; continue }
+            }
+            if ((Get-ManifestHash $p $e.Text) -ne $e.Hash) { $problems += @{ Path = $e.Path; Problem = 'MODIFIED'; Detail = 'not the content of the repository build' } }
+        } catch { $problems += @{ Path = $e.Path; Problem = 'UNREADABLE'; Detail = $_.Exception.Message } }
+    }
+    return $problems
+}
+
+# The resources of the chosen resolution (maintainer, 1 Oct 2026: "installer must check that resources
+# matches selected resolution"): the shipped pictures INTRF_HD\<WxH>\*.GIF in the game folder must be the
+# repository's and must be WxH pictures.  Returns problem records like Get-IntegrityProblems (empty = ok;
+# nothing to check at 640x480 or for a build without a resolution).
+function Get-ModeResourceProblems([string] $GameDir, [string] $Mode) {
+    if (-not $Mode -or $Mode -eq '640x480' -or -not $GameDir) { return @() }
+    $wh = Get-ModeSize $Mode
+    $top = 'DC - Council wars/'
+    $prefix = $top + 'INTRF_HD/' + $Mode + '/'
+    $entries = @(Get-Manifest | Where-Object { $_.Path.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase) })
+    if ($entries.Count -eq 0) { return @(@{ Path = "INTRF_HD\$Mode\"; Problem = 'UNKNOWN'; Detail = 'the repository ships no pictures for this size' }) }
+    $problems = @()
+    foreach ($e in $entries) {
+        $rel = $e.Path.Substring($top.Length).Replace('/', [string][char] 92)
+        $p = [System.IO.Path]::Combine($GameDir, $rel)
+        if (-not [System.IO.File]::Exists($p)) { $problems += @{ Path = $rel; Problem = 'MISSING'; Detail = 'not found' }; continue }
+        try {
+            $bytes = [System.IO.File]::ReadAllBytes($p)
+            if ($bytes.Length -lt 13 -or $script:latin1.GetString($bytes, 0, 3) -ne 'GIF') { $problems += @{ Path = $rel; Problem = 'MODIFIED'; Detail = 'not a GIF picture' }; continue }
+            $w = $bytes[6] + 256 * $bytes[7]; $h = $bytes[8] + 256 * $bytes[9]
+            if ($w -ne $wh[0] -or $h -ne $wh[1]) { $problems += @{ Path = $rel; Problem = 'WRONG SIZE'; Detail = ('a {0}x{1} picture, {2} needed' -f $w, $h, $Mode) }; continue }
+            if ((Get-Sha256Hex $bytes).Substring(0, 16) -ne $e.Hash) { $problems += @{ Path = $rel; Problem = 'MODIFIED'; Detail = 'not the picture of the repository build' } }
+        } catch { $problems += @{ Path = $rel; Problem = 'UNREADABLE'; Detail = $_.Exception.Message } }
+    }
+    return $problems
+}
+
+# Which screen resolution and battlefield interface a patched game exe carries: @{ Mode = 'WxH' | '640x480' |
+# $null (not patched); Dark = $true / $false / $null }.  The `resolution` variant whose every edit is in place
+# names the size; `nocd` alone = a 640x480 build; the `console` edit = the dark interface.
+function Get-ExeInstallState([byte[]] $Data, $Build) {
+    $state = @{ Mode = $null; Dark = $null }
+    if (@($Build.Modes).Count -eq 0) { return $state }
+    $applied = {
+        param($Patch)
+        foreach ($e in $Patch.Edits) { if ($e.ContainsKey('Offset') -and (Get-EditState $Data $e) -ne 'new') { return $false } }
+        return $true
+    }
+    foreach ($v in @($Build.Patches | Where-Object { $_.Id -eq 'resolution' })) { if (& $applied $v) { $state.Mode = $v.Mode; break } }
+    if (-not $state.Mode) {
+        $nocd = @($Build.Patches | Where-Object { $_.Id -eq 'nocd' })
+        if ($nocd.Count -gt 0 -and (& $applied $nocd[0])) { $state.Mode = '640x480' }
+    }
+    $con = @($Build.Patches | Where-Object { $_.Id -eq 'console' })
+    if ($con.Count -gt 0 -and $state.Mode -and $state.Mode -ne '640x480') { $state.Dark = [bool] (& $applied $con[0]) }
+    return $state
+}
+
+# The installation itself must be consistent (1 Oct 2026, the doc 10.59 case: a player's HUD script written for
+# one size under the frame of another put every battlefield widget inside the map view, where the terrain paints
+# over it - "interface elements are not in place").  Compares, in $GameDir: the size of INTRF_HD\INTRFACE.GIF (the
+# frame) and its theme (= the shipped dark or light picture of that size), the `size` line of every set script
+# (INTRF_HD, exp\ dc\ ozi_ns\ intrf_hd: `size W H` or `size 0 0 W H`), the HUD script's bank line (intrf_hd/mainbut
+# = dark), and the resolution / theme each patched game exe in the folder carries.  Returns @{ Problems = MIXED
+# records like Get-IntegrityProblems (empty = consistent, or nothing installed); Frame; FrameDark; Sizes (size ->
+# script count); Dark (the HUD script's); Exes = @(@{ Name; Mode; Dark }) }.  Informational: a patcher run rewrites
+# the set and the exes it is asked for, which makes them consistent again.
+function Get-InstallConsistency([string] $GameDir) {
+    $r = @{ Problems = @(); Frame = $null; FrameDark = $null; Sizes = @{}; Dark = $null; Exes = @() }
+    if (-not $GameDir -or -not (Test-Path -LiteralPath $GameDir)) { return $r }
+    $hd = Join-Path $GameDir 'INTRF_HD'
+    $fb = $null
+    if (Test-Path -LiteralPath $hd) {
+        $frame = Find-CI $hd 'INTRFACE.GIF'
+        if ($frame) {
+            $fb = [System.IO.File]::ReadAllBytes($frame)
+            if ($fb.Length -gt 10 -and $script:latin1.GetString($fb, 0, 3) -eq 'GIF') { $r.Frame = ('{0}x{1}' -f ($fb[6] + 256 * $fb[7]), ($fb[8] + 256 * $fb[9])) } else { $fb = $null }
+        }
+    }
+    if ($r.Frame) {
+        # which of the two shipped frames of that size it is = the theme the set was written for
+        $src = Join-Path $hd $r.Frame
+        if (Test-Path -LiteralPath $src) {
+            $fh = Get-Sha256Hex $fb
+            $dark = Find-CI $src 'INTRFACE.GIF'; $light = Find-CI $src 'INTRFACE_LIGHT.GIF'
+            if ($dark -and (Get-Sha256Hex ([System.IO.File]::ReadAllBytes($dark))) -eq $fh) { $r.FrameDark = $true }
+            elseif ($light -and (Get-Sha256Hex ([System.IO.File]::ReadAllBytes($light))) -eq $fh) { $r.FrameDark = $false }
+        }
+    }
+    $scripts = @()
+    foreach ($dir in 'INTRF_HD', 'exp\intrf_hd', 'dc\intrf_hd', 'ozi_ns\intrf_hd') {
+        $d = Join-Path $GameDir $dir
+        if (-not (Test-Path -LiteralPath $d)) { continue }
+        foreach ($f in [System.IO.Directory]::GetFiles($d)) {
+            $name = [System.IO.Path]::GetFileName($f); $low = $name.ToLower()
+            if ($low -match '\.(gif|bmp|spr|fin|txt|dat|bak)$') { continue }
+            $text = Read-Latin1 $f
+            $m2 = $SIZE2.Match($text); $m4 = $SIZE4.Match($text)
+            $size = $null
+            if ($m2.Success) { $size = '{0}x{1}' -f $m2.Groups[3].Value, $m2.Groups[5].Value }
+            elseif ($m4.Success -and $m4.Groups[3].Value -eq '0' -and $m4.Groups[4].Value -eq '0') { $size = '{0}x{1}' -f $m4.Groups[5].Value, $m4.Groups[6].Value }
+            if (-not $size) { continue }                       # the four sub-window dialogs (size x y w h) carry no screen size
+            $scripts += @{ Path = ($dir + '\' + $name); Size = $size; Text = $text; Name = $low }
+            if ($r.Sizes.ContainsKey($size)) { $r.Sizes[$size]++ } else { $r.Sizes[$size] = 1 }
+        }
+    }
+    $maine = @($scripts | Where-Object { $_.Name -eq 'maine' -and $_.Path -like 'INTRF_HD\*' })
+    if ($maine.Count -gt 0) { $r.Dark = ([regex] '(?im)^[ \t]*pictures[ \t]+intrf_hd/mainbut\b').IsMatch($maine[0].Text) }
+    $ref = $r.Frame
+    if (-not $ref -and $r.Sizes.Count -gt 0) { $ref = @($r.Sizes.Keys | Sort-Object { -$r.Sizes[$_] })[0] }
+    if ($ref) {
+        foreach ($sc in $scripts) {
+            if ($sc.Size -ne $ref) { $r.Problems += @{ Path = $sc.Path; Problem = 'MIXED'; Detail = ('written for {0}, the frame INTRF_HD\INTRFACE.GIF is {1}' -f $sc.Size, $ref) } }
+        }
+    }
+    if ($null -ne $r.FrameDark -and $null -ne $r.Dark -and $r.FrameDark -ne $r.Dark) {
+        $r.Problems += @{ Path = 'INTRF_HD\MAINE'; Problem = 'MIXED'; Detail = ('the {0} HUD script, the frame INTRF_HD\INTRFACE.GIF is the {1} one' -f $(if ($r.Dark) { 'dark' } else { 'light' }), $(if ($r.FrameDark) { 'dark' } else { 'light' })) }
+    }
+    foreach ($b in $Builds) {
+        if (@($b.Modes).Count -eq 0) { continue }
+        $p = Join-Path $GameDir $b.OutputName
+        if (-not (Test-Path -LiteralPath $p)) { continue }
+        $data = $null
+        try { $data = [System.IO.File]::ReadAllBytes($p) } catch { continue }
+        $bb = Find-BuildByContent $data
+        if (-not $bb) { continue }
+        $st = Get-ExeInstallState $data $bb
+        if (-not $st.Mode) { continue }                        # not a patched build (nothing of ours to compare)
+        $r.Exes += @{ Name = $b.OutputName; Mode = $st.Mode; Dark = $st.Dark }
+        if ($st.Mode -eq '640x480') { continue }               # reads the stock INTRFACE files, never the set
+        if ($ref -and $st.Mode -ne $ref) { $r.Problems += @{ Path = $b.OutputName; Problem = 'MIXED'; Detail = ('patched for {0}, the interface set in INTRF_HD is {1}' -f $st.Mode, $ref) } }
+        elseif (-not $ref) { $r.Problems += @{ Path = $b.OutputName; Problem = 'MIXED'; Detail = ('patched for {0}, but there is no INTRF_HD interface set' -f $st.Mode) } }
+        if ($null -ne $st.Dark -and $null -ne $r.Dark -and $st.Dark -ne $r.Dark) {
+            $r.Problems += @{ Path = $b.OutputName; Problem = 'MIXED'; Detail = ('patched for the {0} battlefield interface, the HUD script INTRF_HD\MAINE is the {1} one' -f $(if ($st.Dark) { 'dark' } else { 'light' }), $(if ($r.Dark) { 'dark' } else { 'light' })) }
+        }
+    }
+    return $r
+}
+
+# One line: what is installed (frame, scripts per size, HUD theme, patched exes).
+function Format-InstallSummary($Install) {
+    if (-not $Install) { return 'nothing installed' }
+    $parts = @()
+    $parts += $(if ($Install.Frame) { 'frame INTRF_HD\INTRFACE.GIF ' + $Install.Frame + $(if ($null -ne $Install.FrameDark) { $(if ($Install.FrameDark) { ' (dark)' } else { ' (light)' }) } else { '' }) } else { 'no INTRF_HD frame' })
+    foreach ($k in @($Install.Sizes.Keys | Sort-Object)) { $parts += ('{0} script(s) for {1}' -f $Install.Sizes[$k], $k) }
+    if ($null -ne $Install.Dark) { $parts += ('HUD script ' + $(if ($Install.Dark) { 'dark' } else { 'light' })) }
+    foreach ($e in @($Install.Exes)) { $parts += ('{0} patched for {1}{2}' -f $e.Name, $e.Mode, $(if ($null -ne $e.Dark) { $(if ($e.Dark) { ', dark' } else { ', light' }) } else { '' })) }
+    return ($parts -join '; ')
+}
+
+# One text line per problem, sorted by path: "MODIFIED    path   (detail)".
+function Format-IntegrityLines([object[]] $Problems) {
+    $out = @()
+    foreach ($p in @($Problems | Sort-Object { $_.Path })) { $out += ('{0,-11} {1}   ({2})' -f $p.Problem, $p.Path, $p.Detail) }
+    return $out
+}
+
+# A small unclosable "please wait" box with a marquee bar, repainted by hand (the work runs on the UI thread).
+function New-BusyBox([string] $Title, [string] $Text, $Owner) {
+    $f = New-Object System.Windows.Forms.Form
+    $f.Text = $Title; $f.FormBorderStyle = 'FixedDialog'; $f.ControlBox = $false; $f.ShowInTaskbar = $false; $f.TopMost = $true
+    $f.Size = New-Object System.Drawing.Size(560, 160)
+    $f.StartPosition = if ($Owner -and $Owner.Visible) { 'CenterParent' } else { 'CenterScreen' }
+    $f.Font = New-Object System.Drawing.Font('Segoe UI', 9)
+    $l = New-Object System.Windows.Forms.Label
+    $l.Location = '16,14'; $l.Size = '512,64'; $l.Text = $Text
+    $bar = New-Object System.Windows.Forms.ProgressBar
+    $bar.Location = '16,88'; $bar.Size = '512,20'; $bar.Style = 'Marquee'; $bar.MarqueeAnimationSpeed = 30
+    $f.Controls.AddRange(@($l, $bar))
+    if ($Owner -and $Owner.Visible) { $f.Show($Owner) } else { $f.Show() }
+    $f.Refresh(); [System.Windows.Forms.Application]::DoEvents()
+    return @{ Form = $f; Label = $l }
+}
+
+# The error popup of the integrity check (maintainer, 1 Oct 2026: "popup error, saying which files (with
+# scrollbar if necessary) are out of sync and offer to download latest build"): the list in a scrollable box,
+# the download button, the repository page, a copy button.  Modal.
+function Show-IntegrityDialog([object[]] $Problems, [string] $Title, [string] $Intro, $Owner, [string] $Remedy = '') {   # $Remedy: the 'what to do' text (the default: download the latest build)
+    Add-Type -AssemblyName System.Windows.Forms
+    Add-Type -AssemblyName System.Drawing
+    $f = New-Object System.Windows.Forms.Form
+    $f.Text = 'Dark Colony patcher - files out of sync'
+    $f.ClientSize = New-Object System.Drawing.Size(860, 600)
+    $f.FormBorderStyle = 'Sizable'; $f.MinimizeBox = $false; $f.ShowInTaskbar = $false
+    $f.MinimumSize = New-Object System.Drawing.Size(640, 420)
+    $f.StartPosition = if ($Owner -and $Owner.Visible) { 'CenterParent' } else { 'CenterScreen' }
+    $f.Font = New-Object System.Drawing.Font('Segoe UI', 9)
+    $head = New-Object System.Windows.Forms.Label
+    $head.Location = '16,12'; $head.Size = '828,28'; $head.Anchor = 'Top,Left,Right'
+    $head.ForeColor = [System.Drawing.Color]::FromArgb(192, 0, 0)
+    $head.Font = New-Object System.Drawing.Font('Segoe UI', 12, [System.Drawing.FontStyle]::Bold)
+    $head.Text = $Title
+    $lblIntro = New-Object System.Windows.Forms.Label
+    $lblIntro.Location = '16,44'; $lblIntro.Size = '828,56'; $lblIntro.Anchor = 'Top,Left,Right'
+    $lblIntro.Text = $Intro
+    $txt = New-Object System.Windows.Forms.TextBox
+    $txt.Location = '16,104'; $txt.Size = '828,376'; $txt.Anchor = 'Top,Bottom,Left,Right'
+    $txt.Multiline = $true; $txt.ReadOnly = $true; $txt.ScrollBars = 'Both'; $txt.WordWrap = $false
+    $txt.Font = New-Object System.Drawing.Font('Consolas', 9); $txt.BackColor = [System.Drawing.SystemColors]::Window
+    $txt.Text = (Format-IntegrityLines $Problems) -join "`r`n"
+    $note = New-Object System.Windows.Forms.Label
+    $note.Location = '16,488'; $note.Size = '828,58'; $note.Anchor = 'Bottom,Left,Right'
+    $note.Text = if ($Remedy) { $Remedy } else {
+                 ('What to do: download the latest build (the ZIP of the whole repository), unpack it over this folder - your saved ' +
+                  'games, DEFAULT_SERVER.TXT and the patched executables are kept - and start INSTALL.CMD again.  Nothing is patched ' +
+                  'until every file is the repository''s: a fix applied to changed data would look like a bug of the fix.') }
+    $bDl = New-Object System.Windows.Forms.Button
+    $bDl.Text = 'Download the latest build'; $bDl.Location = '16,556'; $bDl.Size = '220,32'; $bDl.Anchor = 'Bottom,Left'
+    $bDl.Font = New-Object System.Drawing.Font('Segoe UI', 9, [System.Drawing.FontStyle]::Bold)
+    $bDl.Add_Click({ Start-Process $script:RepoDownloadUrl })
+    $bPage = New-Object System.Windows.Forms.Button
+    $bPage.Text = 'Open the repository page'; $bPage.Location = '248,556'; $bPage.Size = '200,32'; $bPage.Anchor = 'Bottom,Left'
+    $bPage.Add_Click({ Start-Process $script:RepoPageUrl })
+    $bCopy = New-Object System.Windows.Forms.Button
+    $bCopy.Text = 'Copy the list'; $bCopy.Location = '460,556'; $bCopy.Size = '140,32'; $bCopy.Anchor = 'Bottom,Left'; $bCopy.Tag = $txt
+    $bCopy.Add_Click({ param($sender, $e) [System.Windows.Forms.Clipboard]::SetText($sender.Tag.Text) })
+    $bClose = New-Object System.Windows.Forms.Button
+    $bClose.Text = 'Close'; $bClose.Location = '740,556'; $bClose.Size = '104,32'; $bClose.Anchor = 'Bottom,Right'; $bClose.DialogResult = 'OK'
+    $f.AcceptButton = $bClose; $f.CancelButton = $bClose
+    $f.Controls.AddRange(@($head, $lblIntro, $txt, $note, $bDl, $bPage, $bCopy, $bClose))
+    $txt.TabStop = $false; $f.ActiveControl = $bClose          # the list is not pre-selected (a focused TextBox selects all)
+    if ($Owner -and $Owner.Visible) { [void] $f.ShowDialog($Owner) } else { [void] $f.ShowDialog() }
+    $f.Dispose()
+}
+
 function Invoke-PatchRun([string] $OriginalPath, $Build, [object[]] $Chosen, [string] $OutputPath, [string] $Mode, [string] $Theme, [scriptblock] $Progress) {
     $data = [System.IO.File]::ReadAllBytes($OriginalPath)
     $effective = @(Get-BuildPatches $Build $Mode $Theme)
@@ -15549,6 +18343,12 @@ function Invoke-PatchRun([string] $OriginalPath, $Build, [object[]] $Chosen, [st
         if ($Progress) { & $Progress ("Writing the {0} interface set ({1} battlefield interface) into INTRF_HD (scripts, backgrounds, loading screens) - this takes a few seconds..." -f $Mode, $(if ($console) { 'dark' } else { 'light' })) }
         try {
             $generated = @(Write-InterfaceSet (Split-Path -Parent ([System.IO.Path]::GetFullPath($OutputPath))) $Mode $movies $console)
+            # the written set must be the chosen size (maintainer, 1 Oct 2026: "installer must check that resources matches selected resolution")
+            $frameOut = Join-Path (Split-Path -Parent ([System.IO.Path]::GetFullPath($OutputPath))) 'INTRF_HD\INTRFACE.GIF'
+            $fb = [System.IO.File]::ReadAllBytes($frameOut); $fw = $fb[6] + 256 * $fb[7]; $fh = $fb[8] + 256 * $fb[9]
+            $wh = Get-ModeSize $Mode
+            if ($fw -ne $wh[0] -or $fh -ne $wh[1]) { $generated += ('WARNING: the written INTRF_HD\INTRFACE.GIF is a {0}x{1} picture, not {2} - report this' -f $fw, $fh, $Mode) }
+            else { $generated += ('checked: INTRF_HD\INTRFACE.GIF is a {0} picture - the written set matches the chosen resolution' -f $Mode) }
         } catch {
             $generated = @('INTERFACE SET NOT WRITTEN: ' + $_.Exception.Message)
         }
@@ -15567,6 +18367,16 @@ function Invoke-PatchRun([string] $OriginalPath, $Build, [object[]] $Chosen, [st
     if ($Build.Id -eq 'CouncilWars' -and ($ordered | Where-Object { $_.Id -eq 'online' })) {
         $dir = Split-Path -Parent ([System.IO.Path]::GetFullPath($OutputPath))
         try { $generated += Write-OnlineScreen $dir $Mode } catch { $generated += 'ONLINE screen NOT written: ' + $_.Exception.Message }
+    }
+    # Last, with every file of this run written (the ONLINE screen and the dialog copies come after the set):
+    # frame, set scripts, HUD theme and every patched game exe in the folder must agree (doc 10.60) - an older
+    # patched exe of another size left in the folder shows up here
+    if ($Mode -and $Mode -ne '640x480') {
+        try {
+            $ic = Get-InstallConsistency (Split-Path -Parent ([System.IO.Path]::GetFullPath($OutputPath)))
+            if (@($ic.Problems).Count -gt 0) { foreach ($l in (Format-IntegrityLines $ic.Problems)) { $generated += ('WARNING - still mixed after this executable''s run: ' + $l) } }
+            else { $generated += ('checked: the interface set and the patched executable(s) in the folder agree ({0})' -f (Format-InstallSummary $ic)) }
+        } catch { $generated += ('installation check failed: ' + $_.Exception.Message) }
     }
     return @{
         Generated = $generated
@@ -15745,7 +18555,8 @@ function Show-PatcherWindow([string] $PreloadPath) {
     }
     $script:gui = @{ Items = $items; Sel = -1; Step = 0; Syncing = $false; Mode = ''; Theme = ''; IncludeDeprecated = $false
                      ModeList = @(); Patches = @(); Monitor = (Get-MonitorSize); Visible = @(); Last = 0
-                     Here = $PSScriptRoot; Results = $null }     # Here = the folder this script sits in = the repository root
+                     Here = $PSScriptRoot; Results = $null     # Here = the folder this script sits in = the repository root
+                     IntegrityProblems = @(); ModeProblems = @(); Install = $null }   # the integrity check (1 Oct 2026): files out of sync / the chosen size's pictures / the installed set
     foreach ($b in $Builds) { if (@($b.Modes).Count -gt 0) { $script:gui.ModeList = @($b.Modes); break } }
     $n = $items.Count
     $mono = New-Object System.Drawing.Font('Consolas', 9)
@@ -15800,13 +18611,17 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $lblLnk.Location = '44,334'; $lblLnk.Size = '900,36'
     $lblLnk.Text = 'Named "Dark Colony Ultimate", "Dark Colony Map Editor" (and "Dark Colony" if you patch it); each starts in its game folder, where the game finds its files.  An older shortcut of the same name is replaced.'
     $lblNext = New-Object System.Windows.Forms.Label
-    $lblNext.Location = '24,540'; $lblNext.Size = '936,20'; $lblNext.Text = 'Press Next to continue.'
+    $lblNext.Location = '24,540'; $lblNext.Size = '660,24'; $lblNext.Text = 'Press Next to continue.'
     # a missing or wrong original: a big red banner here, the details and the remedies on its page
     $lblProblem = New-Object System.Windows.Forms.Label
     $lblProblem.Location = '24,378'; $lblProblem.Size = '936,156'; $lblProblem.Visible = $false
     $lblProblem.BackColor = [System.Drawing.Color]::FromArgb(192, 0, 0); $lblProblem.ForeColor = [System.Drawing.Color]::White
     $lblProblem.Font = New-Object System.Drawing.Font('Segoe UI', 10.5, [System.Drawing.FontStyle]::Bold); $lblProblem.Padding = '12,8,12,8'
-    $pWelcome.Controls.AddRange(@($lblHello, $lblFound, $chkLnk, $lblLnk, $lblNext, $lblProblem))
+    # the integrity check's button (1 Oct 2026): reopens the list of out-of-sync files with the download link
+    $btnIntegrity = New-Object System.Windows.Forms.Button
+    $btnIntegrity.Text = 'Show the out-of-sync files...'; $btnIntegrity.Location = '700,536'; $btnIntegrity.Size = '260,30'; $btnIntegrity.Visible = $false
+    $btnIntegrity.BackColor = [System.Drawing.Color]::FromArgb(192, 0, 0); $btnIntegrity.ForeColor = [System.Drawing.Color]::White; $btnIntegrity.Font = $bold
+    $pWelcome.Controls.AddRange(@($lblHello, $lblFound, $chkLnk, $lblLnk, $lblNext, $lblProblem, $btnIntegrity))
 
     # --- page 1: options - the resolution drop-down, the battlefield interface theme, the deprecated build.
     # NOTHING is preselected (maintainer, 1 Oct 2026): Next stays disabled until the resolution and - at an
@@ -15852,7 +18667,12 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $lblResPick = New-Object System.Windows.Forms.Label
     $lblResPick.Location = '24,540'; $lblResPick.Size = '936,20'; $lblResPick.Font = $bold
     $lblResPick.Text = 'Choose a screen resolution and a battlefield interface to continue.'
-    $pRes.Controls.AddRange(@($lblResIntro, $lblResL, $cmbRes, $lblResNote, $lblThemeL, $rbLight, $rbDark, $lblThemeNote, $chkDep, $lblDepNote, $lblResPick))
+    # the chosen size's pictures are not the repository's (1 Oct 2026): a red box with the list, Next stays disabled
+    $lblResProblem = New-Object System.Windows.Forms.Label
+    $lblResProblem.Location = '24,396'; $lblResProblem.Size = '936,136'; $lblResProblem.Visible = $false
+    $lblResProblem.BackColor = [System.Drawing.Color]::FromArgb(192, 0, 0); $lblResProblem.ForeColor = [System.Drawing.Color]::White
+    $lblResProblem.Font = New-Object System.Drawing.Font('Consolas', 9.5, [System.Drawing.FontStyle]::Bold); $lblResProblem.Padding = '12,8,12,8'
+    $pRes.Controls.AddRange(@($lblResIntro, $lblResL, $cmbRes, $lblResNote, $lblThemeL, $rbLight, $rbDark, $lblThemeNote, $chkDep, $lblDepNote, $lblResPick, $lblResProblem))
 
     # --- pages 2..: one per executable (the page's controls carry the executable's index in .Tag,
     # because the handlers run outside this function); a deprecated build's page exists but is shown only
@@ -15969,6 +18789,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
     # All / List / Info / Out are re-pointed to the current page's controls by Select
     $script:gui.Controls = @{ Form = $form; Title = $lblTitle; Sub = $lblSub; Welcome = $pWelcome; Found = $lblFound; Problem = $lblProblem
                               Options = $pRes; ModeBox = $cmbRes; ThemeLight = $rbLight; ThemeDark = $rbDark; DepBox = $chkDep; ModePick = $lblResPick
+                              ModeProblem = $lblResProblem; IntegrityButton = $btnIntegrity; NextLabel = $lblNext
                               Ready = $pReady; ReadyText = $txtReady
                               Done = $pDone; DoneText = $txtDone; DoneNote = $lblDone; Shortcut = $chkLnk
                               Back = $btnBack; Next = $btnNext; Cancel = $btnCancel; Apply = $btnNext
@@ -16021,12 +18842,30 @@ function Show-PatcherWindow([string] $PreloadPath) {
         if ($it.Error) { $u.ErrorTitle.Text = $it.Error.Title; $u.ErrorBody.Text = $it.Error.Body; $u.Error.BringToFront() }
         $g.Syncing = $false
         $bad = @($g.Items | Where-Object { $_.Error -and (-not $_.Build.Deprecated -or $g.IncludeDeprecated) })
-        $g.Controls.Problem.Visible = ($bad.Count -gt 0)
-        if ($bad.Count -gt 0) {
-            $g.Controls.Problem.Text = (@('PROBLEM - these originals cannot be used as they are:', '') +
-                @($bad | ForEach-Object { '    ' + $_.Build.ProductName + ':  ' + $_.Error.Title }) +
-                @('', 'Press Next: the page of each one explains what is wrong and offers to select the correct file or to download it.')) -join "`r`n"
+        $ip = @($g.IntegrityProblems)
+        $mixed = @(if ($g.Install) { $g.Install.Problems } else { @() })
+        $g.Controls.Problem.Visible = ($bad.Count -gt 0 -or $ip.Count -gt 0 -or $mixed.Count -gt 0)
+        $g.Controls.IntegrityButton.Visible = ($ip.Count -gt 0 -or $mixed.Count -gt 0)
+        # red for a blocking problem (files out of sync, a wrong original), orange for a mixed installation (patching repairs it)
+        $g.Controls.Problem.BackColor = if ($bad.Count -gt 0 -or $ip.Count -gt 0) { [System.Drawing.Color]::FromArgb(192, 0, 0) } else { [System.Drawing.Color]::FromArgb(200, 110, 0) }
+        $text = @()
+        if ($ip.Count -gt 0) {
+            # the integrity check failed (1 Oct 2026): nothing is patched until the game files are the repository's
+            $text += @(('PROBLEM - {0} game file(s) in this folder are not the files of the repository build (modified, missing or unreadable).' -f $ip.Count),
+                       'Nothing can be patched until they are.  Press "Show the out-of-sync files..." for the list and the link to the latest build.')
+            if ($bad.Count -gt 0) { $text += '' }
         }
+        if ($bad.Count -gt 0) {
+            $text += @('PROBLEM - these originals cannot be used as they are:', '') +
+                @($bad | ForEach-Object { '    ' + $_.Build.ProductName + ':  ' + $_.Error.Title }) +
+                @('', 'Press Next: the page of each one explains what is wrong and offers to select the correct file or to download it.')
+        }
+        if ($mixed.Count -gt 0) {
+            if ($text.Count -gt 0) { $text += '' }
+            $text += @(('NOTE - the interface set and the patched executable(s) in the game folder are MIXED ({0} item(s)): {1}.' -f $mixed.Count, (Format-InstallSummary $g.Install)),
+                       'That is what puts battlefield elements out of place.  Choosing the size and the interface and pressing Patch rewrites them consistently; "Show the out-of-sync files..." lists them.')
+        }
+        if ($text.Count -gt 0) { $g.Controls.Problem.Text = $text -join "`r`n" }
         $lines = @('Found:')
         foreach ($x in $g.Items) {
             $mark = if ($x.Data -and $x.IsOriginal) { 'OK ' } elseif ($x.Error) { '!! ' } else { '-- ' }
@@ -16314,6 +19153,90 @@ function Show-PatcherWindow([string] $PreloadPath) {
         & $g.ShowFix $g.Items[[int] $sender.Tag]
     }
 
+    # The integrity check (1 Oct 2026, maintainer: "installer must be sure that all files (except already patched
+    # executables) are correct before patching ... popup error, saying which files (with scrollbar if necessary)
+    # are out of sync and offer to download latest build"; then "installer must check that resources matches
+    # selected resolution").  CheckIntegrity compares every shipped file under this script's folder with the
+    # manifest (run from the entry point before the window opens, with a busy box); a failure fills
+    # IntegrityProblems: the welcome page shows the red banner and Next stays disabled, the popup lists the files.
+    # ModeProblems = the chosen size's shipped pictures that are missing, altered or of another size (Refresh
+    # recomputes them; the options page shows them and keeps Next disabled).  NotifyIntegrity shows the popup
+    # (a headless test replaces it with a recorder); GameDir = the folder the Ultimate exe is written to.
+    $script:gui.NotifyIntegrity = {
+        param([object[]] $problems, [string] $title, [string] $intro, [string] $remedy = '')
+        Show-IntegrityDialog $problems $title $intro $script:gui.Controls.Form $remedy
+    }
+    $script:gui.GameDir = {
+        $g = $script:gui
+        foreach ($x in $g.Items) { if (@($x.Build.Modes).Count -gt 0 -and $x.Out) { return (Split-Path -Parent ([System.IO.Path]::GetFullPath($x.Out))) } }
+        if ($g.Here) { return (Join-Path $g.Here 'DC - Council wars') }
+        return $null
+    }
+    $script:gui.ShowIntegrity = {
+        $g = $script:gui
+        $ip = @($g.IntegrityProblems)
+        $mp = @(if ($g.Install) { $g.Install.Problems } else { @() })
+        if ($ip.Count -eq 0 -and $mp.Count -eq 0) { return }
+        if ($ip.Count -gt 0) {
+            & $g.NotifyIntegrity ($ip + $mp) `
+                (('{0} game file(s) are out of sync with the repository build' -f $ip.Count) + $(if ($mp.Count -gt 0) { (', and the installed interface set is mixed ({0})' -f $mp.Count) } else { '' })) `
+                ('These files in "' + $g.Here + '" are not the files of the repository build: modified, missing or unreadable.  Before patching, the installer ' +
+                 'compares every shipped file - except the patched executables and the interface set it writes itself - with the list embedded in it.' +
+                 $(if ($mp.Count -gt 0) { '  The MIXED lines: interface files and patched executables written for different screen sizes or interfaces; patching rewrites them.' } else { '' }))
+        } else {
+            # the doc 10.59 case: the set and the exes were not written in one run (informational - patching repairs it)
+            & $g.NotifyIntegrity $mp ('The installed interface set is mixed ({0} item(s))' -f $mp.Count) `
+                ('In "' + (& $g.GameDir) + '" the INTRF_HD interface set and the patched executable(s) were not written in one run: ' + (Format-InstallSummary $g.Install) +
+                 '.  A HUD script written for another size than the frame puts every battlefield widget inside the map view, where the terrain paints over it - the "interface elements are not in place" picture.') `
+                ('What to do: nothing special - choose the screen resolution and the interface on the next page and press Patch: the installer rewrites the whole interface set and the ' +
+                 'executables you tick, which makes them consistent again.  Delete a patched executable you no longer use, or tick it so that it is rewritten too.')
+        }
+    }
+    $script:gui.ShowModeProblems = {
+        $g = $script:gui
+        $mp = @($g.ModeProblems)
+        if ($mp.Count -eq 0) { return }
+        & $g.NotifyIntegrity $mp ('The pictures for ' + $g.Mode + ' are out of sync with the repository build') `
+            ('The display fix for ' + $g.Mode + ' needs the five shipped pictures INTRF_HD\' + $g.Mode + '\*.GIF of exactly that size from the repository; in "' +
+             (& $g.GameDir) + '" they are not.  Choose another resolution, or download the latest build.')
+    }
+    $script:gui.CheckIntegrity = {
+        param([bool] $interactive)
+        $g = $script:gui
+        $c = $g.Controls
+        $g.IntegrityProblems = @()
+        if (-not $g.Here -or -not (Test-Path -LiteralPath (Join-Path $g.Here 'DC - Council wars'))) {
+            # not started from the repository folder: nothing to compare, the pages check the originals themselves
+            $c.NextLabel.Text = 'Not started from the repository folder (no "DC - Council wars" beside this script): the game files cannot be checked against the repository build.  Press Next to continue.'
+            return
+        }
+        $busy = $null
+        $text = 'Comparing every file of the repository build in this folder with the list embedded in the installer - a few seconds...'
+        if ($interactive) { $busy = New-BusyBox 'Checking the game files' $text $c.Form }
+        $g.Busy2 = $busy
+        try {
+            $g.IntegrityProblems = @(Get-IntegrityProblems $g.Here '' {
+                param($done, $total, $path)
+                $b = $script:gui.Busy2
+                if ($b) { $b.Label.Text = ('Comparing every file of the repository build in this folder with the list embedded in the installer...' + "`r`n`r`n" + ('{0} of {1}: {2}' -f $done, $total, $path)); $b.Form.Refresh(); [System.Windows.Forms.Application]::DoEvents() }
+            })
+            # the installation itself: frame, set scripts, HUD theme and the patched exes must agree (doc 10.59 / 10.60)
+            $g.Install = Get-InstallConsistency (& $g.GameDir)
+        } finally {
+            if ($busy) { $busy.Form.Close(); $busy.Form.Dispose() }
+            $g.Busy2 = $null
+        }
+        $ip = @($g.IntegrityProblems)
+        $mp = @(if ($g.Install) { $g.Install.Problems } else { @() })
+        $c.NextLabel.Text = if ($ip.Count -gt 0) { ('{0} game file(s) are out of sync - nothing can be patched until they are the repository''s.' -f $ip.Count) }
+                            elseif ($mp.Count -gt 0) { ('All {0} game files match, but the installed interface set is mixed ({1}) - patching rewrites it.  Press Next.' -f @(Get-Manifest).Count, $mp.Count) }
+                            else { ('All {0} game files in this folder match the repository build.  Press Next to continue.' -f @(Get-Manifest).Count) }
+        $c.NextLabel.ForeColor = if ($ip.Count -gt 0) { [System.Drawing.Color]::Firebrick } elseif ($mp.Count -gt 0) { [System.Drawing.Color]::FromArgb(200, 110, 0) } else { [System.Drawing.Color]::DarkGreen }
+        foreach ($x in $g.Items) { & $g.ShowRow $x }
+        if ($g.Step -eq 0) { $c.Next.Enabled = ($ip.Count -eq 0) }
+        if (($ip.Count -gt 0 -or $mp.Count -gt 0) -and $interactive) { & $g.ShowIntegrity }
+    }
+
     # The options page.  Refresh: every executable page is refilled for the choices (its unticked fixes
     # survive), the theme radios are live only at an HD size, Next follows the state, the status line says
     # what is still missing.  SetMode / SetTheme / SetDeprecated are the handlers' work and the test hooks.
@@ -16325,8 +19248,18 @@ function Show-PatcherWindow([string] $PreloadPath) {
         & $g.Layout
         foreach ($x in $g.Items) { & $g.Recheck $x; & $g.ShowRow $x; & $g.FillItem $x }
         if ($g.Sel -ge 0) { & $g.Select $g.Sel }
-        $ready = [bool] $g.Mode -and (-not $hd -or [bool] $g.Theme)
+        # the chosen size's shipped pictures (1 Oct 2026): missing, altered or of another size = no Next
+        $g.ModeProblems = @(Get-ModeResourceProblems (& $g.GameDir) $g.Mode)
+        $mp = @($g.ModeProblems)
+        $c.ModeProblem.Visible = ($mp.Count -gt 0)
+        if ($mp.Count -gt 0) {
+            $c.ModeProblem.Text = (@(('PROBLEM - the pictures for ' + $g.Mode + ' in the game folder are not the repository''s:'), '') +
+                @(Format-IntegrityLines $mp | Select-Object -First 5) +
+                @('', 'Choose another resolution, or download the latest build (the popup has the link).')) -join "`r`n"
+        }
+        $ready = [bool] $g.Mode -and (-not $hd -or [bool] $g.Theme) -and ($mp.Count -eq 0)
         $c.ModePick.Text = if (-not $g.Mode) { 'Choose a screen resolution and a battlefield interface to continue.' }
+                           elseif ($mp.Count -gt 0) { 'The pictures for ' + $g.Mode + ' are out of sync with the repository build - see the red box.  Choose another size, or download the latest build.' }
                            elseif (-not $ready) { 'Screen resolution: ' + (Format-ModeLabel $g.Mode $g.Monitor) + '.  Now choose the battlefield interface (light or dark) to continue.' }
                            elseif (-not $hd) { 'Screen resolution: 640x480 (original) - the game keeps its own interface.  Press Next to continue.' }
                            else { 'Screen resolution: ' + (Format-ModeLabel $g.Mode $g.Monitor) + ', ' + $g.Theme + ' battlefield interface.  Press Next to continue.' }
@@ -16342,6 +19275,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $c.ModeBox.SelectedIndex = if ($mode) { [Array]::IndexOf($g.ModeList, $mode) + 1 } else { 0 }
         $g.Syncing = $false
         & $g.Refresh
+        if (@($g.ModeProblems).Count -gt 0) { & $g.ShowModeProblems }     # the popup (1 Oct 2026); the red box stays on the page
     }
     $script:gui.SetTheme = {
         param([string] $theme)
@@ -16442,6 +19376,9 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $lines = @()
         $lines += 'Screen resolution:       ' + $(if ($g.Mode) { Format-ModeLabel $g.Mode $g.Monitor } else { 'NOT CHOSEN - go back to the options page' })
         $lines += 'Battlefield interface:   ' + $(if ($g.Mode -eq '640x480') { 'the original (640x480 keeps the stock interface)' } elseif ($g.Theme -eq 'light') { 'light (classic) - the original metal interface' } elseif ($g.Theme -eq 'dark') { 'dark - the console style of the menus' } else { 'NOT CHOSEN - go back to the options page' })
+        if ($g.Install -and @($g.Install.Problems).Count -gt 0) {
+            $lines += ('Installed interface set: MIXED ({0} item(s): {1}) - replaced by this run' -f @($g.Install.Problems).Count, (Format-InstallSummary $g.Install))
+        }
         $lines += ''
         # paths under the script's folder (the normal case) are shown relative to it, so a line fits
         $sep = [System.IO.Path]::DirectorySeparatorChar
@@ -16490,6 +19427,9 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $todo = @($g.Items | Where-Object { $_.Checked -and $_.Data })
         $refused = $null
         if ($todo.Count -eq 0) { $refused = 'No executable ticked - tick at least one (its original must be found).' }
+        # the integrity check (1 Oct 2026): nothing is patched while game files or the chosen size's pictures are out of sync
+        if (-not $refused -and @($g.IntegrityProblems).Count -gt 0) { $refused = 'The game files are out of sync with the repository build - nothing is patched until they are (see the welcome page).' }
+        if (-not $refused -and @($g.ModeProblems).Count -gt 0) { $refused = 'The pictures for ' + $g.Mode + ' are out of sync with the repository build - see the options page.' }
         foreach ($it in $todo) {
             if ($refused) { break }
             if (@($it.Build.Modes).Count -gt 0 -and -not $g.Mode) { $refused = "$($it.Build.ProductName): no screen resolution chosen - go back to the options page and choose one." }
@@ -16652,6 +19592,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $c.Done.Visible = ($step -eq $last + 1)
         $c.Next.Enabled = $true
         if ($step -eq 0) {
+            $c.Next.Enabled = (@($g.IntegrityProblems).Count -eq 0)     # the integrity check (1 Oct 2026) blocks the wizard
             $c.Title.Text = 'Welcome to the Dark Colony patcher'
             $c.Sub.Text = 'Builds Dark Colony Ultimate, the Map Editor (and, if you ask for it, the deprecated Dark Colony) from the untouched originals in this folder.'
         } elseif ($step -eq 1) {
@@ -16691,9 +19632,14 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $c.Next.Add_Click({
         $g = $script:gui
         $last = $g.Last
+        if ($g.Step -eq 0 -and @($g.IntegrityProblems).Count -gt 0) {
+            $g.Controls.Log.ForeColor = 'Firebrick'; $g.Controls.Log.Text = 'The game files are out of sync with the repository build - nothing can be patched (see the red box).'
+            & $g.ShowIntegrity; return
+        }
         if ($g.Step -eq 1) {
             $hd = [bool] $g.Mode -and $g.Mode -ne '640x480'
             if (-not $g.Mode -or ($hd -and -not $g.Theme)) { $g.Controls.Log.ForeColor = 'Firebrick'; $g.Controls.Log.Text = 'Choose a screen resolution and a battlefield interface first.'; return }
+            if (@($g.ModeProblems).Count -gt 0) { $g.Controls.Log.ForeColor = 'Firebrick'; $g.Controls.Log.Text = 'The pictures for ' + $g.Mode + ' are out of sync with the repository build - choose another size.'; & $g.ShowModeProblems; return }
         }
         if ($g.Step -lt $last) { & $g.GoTo ($g.Step + 1); return }
         if ($g.Step -eq $last) {
@@ -16705,6 +19651,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
     })
     $c.Back.Add_Click({ $g = $script:gui; if ($g.Step -gt 0) { & $g.GoTo ($g.Step - 1) } })
     $c.Cancel.Add_Click({ $script:gui.Controls.Form.Close() })
+    $c.IntegrityButton.Add_Click({ & $script:gui.ShowIntegrity })
 
     $c.Verify.Add_Click({
         $c = $script:gui.Controls
@@ -16741,6 +19688,7 @@ if ($PSCmdlet.ParameterSetName -eq 'Verify') { Get-VerifyReport $Verify | ForEac
 # No -All / -Patches: open the window (INSTALL.CMD, "Run with PowerShell", or just `.\Apply-DarkColonyPatches.ps1`)
 if (-not $All -and -not $Patches) {
     $form = Show-PatcherWindow $Original
+    & $script:gui.CheckIntegrity $true      # the integrity check (1 Oct 2026): busy box, then the popup if files are out of sync
     [void] $form.ShowDialog()
     return
 }
@@ -16776,6 +19724,13 @@ function Invoke-CliBuild([string] $OriginalFile, [string] $OutputFile) {
     if (-not $OutputFile) { $OutputFile = Join-Path (Split-Path $origPath) $build.OutputName }
     $OutputFile = Get-AbsolutePath $OutputFile
     $gameDir = Split-Path -Parent ([System.IO.Path]::GetFullPath($OutputFile))
+    # the chosen size's shipped pictures must be the repository's WxH pictures (1 Oct 2026)
+    $mp = @(Get-ModeResourceProblems $gameDir $mode)
+    if ($mp.Count -gt 0) {
+        foreach ($l in (Format-IntegrityLines $mp)) { Write-Host ('  ' + $l) -ForegroundColor Red }
+        if (-not $IgnoreIntegrity) { throw ("the pictures for {0} in '{1}' are not the repository's (above): choose another resolution, or download the latest build ({2}) and unpack it over the game folder; -IgnoreIntegrity patches anyway." -f $mode, $gameDir, $RepoDownloadUrl) }
+        Write-Warning 'continuing because -IgnoreIntegrity was given.'
+    }
     $unavailable = Get-UnavailableFixes $build $gameDir $mode $theme
     if ($All) {
         # every fix whose resources are in the target folder; the others are skipped and reported
@@ -16835,6 +19790,29 @@ function Invoke-CliBuild([string] $OriginalFile, [string] $OutputFile) {
             Write-Host ("shortcut: {0}" -f (New-GameShortcut $OutputFile $build))
         }
     }
+}
+
+# the integrity check (1 Oct 2026): every shipped file beside this script must be the repository's before anything is patched
+if ($PSScriptRoot -and (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'DC - Council wars'))) {
+    Write-Host 'checking the game files beside this script against the repository build...' -NoNewline
+    $ip = @(Get-IntegrityProblems $PSScriptRoot)
+    $ic = Get-InstallConsistency (Join-Path $PSScriptRoot 'DC - Council wars')
+    if ($ip.Count -eq 0) { Write-Host (' all {0} files match.' -f @(Get-Manifest).Count) -ForegroundColor Green }
+    if (@($ic.Problems).Count -gt 0) {
+        Write-Host ('note: the installed interface set is MIXED ({0} item(s); {1}) - a run rewrites it:' -f @($ic.Problems).Count, (Format-InstallSummary $ic)) -ForegroundColor DarkYellow
+        foreach ($l in (Format-IntegrityLines $ic.Problems)) { Write-Host ('  ' + $l) -ForegroundColor DarkYellow }
+    }
+    if ($ip.Count -gt 0) {
+        Write-Host (' {0} file(s) OUT OF SYNC:' -f $ip.Count) -ForegroundColor Red
+        foreach ($l in (Format-IntegrityLines $ip)) { Write-Host ('  ' + $l) -ForegroundColor Red }
+        if (-not $IgnoreIntegrity) {
+            throw ("nothing patched: {0} game file(s) are not the files of the repository build (listed above). Download the latest build ({1}), " +
+                   "unpack it over this folder and run again; -IgnoreIntegrity patches anyway.") -f $ip.Count, $RepoDownloadUrl
+        }
+        Write-Warning 'continuing because -IgnoreIntegrity was given.'
+    }
+} else {
+    Write-Warning 'not started from the repository folder (no "DC - Council wars" beside the script): the game files cannot be checked against the repository build.'
 }
 
 if ($Original) { Invoke-CliBuild $Original $Output; return }

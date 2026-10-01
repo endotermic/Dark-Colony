@@ -146,6 +146,40 @@ What makes it trustworthy:
       not copy an exe itself to the desktop).  An older shortcut of the
       same name is replaced.  Press "Next >".
 
+      Before this page opens, the installer CHECKS THE GAME FILES: a
+      small box counts through every file the repository ships (about
+      2500, a few seconds), comparing each with the list built into the
+      installer - except the patched executables and the INTRF_HD
+      interface set it writes itself.  All of them the same: a green
+      line at the bottom says so.  Any of them changed, missing or
+      unreadable: a popup lists them (scrollable; "Copy the list"), with
+      the button "Download the latest build" (the ZIP of the whole
+      repository; unpack it over this folder - your saved games,
+      DEFAULT_SERVER.TXT and the patched exes are kept - and start
+      INSTALL.CMD again), a red banner stays on this page with "Show the
+      out-of-sync files..." and "Next >" is disabled: nothing is patched
+      until the files are the repository's, because a fix applied to
+      changed data looks like a bug of the fix.  On the options page the
+      same check applies to the chosen resolution: its five shipped
+      pictures (INTRF_HD\<WxH>\*.GIF) must be the repository's pictures
+      of exactly that size, or a red box names them and "Next >" waits
+      for another size.
+
+      The same start-up check also looks at what is INSTALLED: the size
+      of the INTRF_HD frame picture, the size every interface script was
+      written for, the HUD script's interface (light or dark) and the
+      resolution and interface each patched executable in the game
+      folder carries.  When they disagree - a HUD script of one size
+      under the frame of another, an older patched exe of another size -
+      an ORANGE notice says so ("the interface set ... are MIXED") with
+      the popup listing the items; that is what makes battlefield
+      elements vanish or sit in the wrong place.  It does not block:
+      choose the size and the interface and press Patch, the set and
+      the executables you tick are rewritten consistently (delete or
+      tick an old patched exe you no longer use).  After patching, the
+      result lists "checked: the interface set and the patched
+      executable(s) in the folder agree".
+
    b) STEP 1 OF 4: OPTIONS.  Three choices, made once for both games
       (they share the INTRF_HD interface folder); NOTHING is
       preselected and "Next >" stays disabled until the first two are
@@ -293,6 +327,12 @@ What makes it trustworthy:
    INSTALL.CMD -Original "DC - Council wars\dc16.exe" -All -Resolution 1024x768 -Theme dark
                        (the deprecated Classic build, explicitly)
    INSTALL.CMD -Verify "DC - Council wars\Dark Colony Ultimate.exe"
+
+   The command line runs the same file check first ("checking the game
+   files beside this script against the repository build... all 2504
+   files match", or the list and "nothing patched"); -IgnoreIntegrity
+   patches anyway, and a chosen resolution whose shipped pictures are
+   wrong is refused the same way.
 
    From a PowerShell prompt write  .\Apply-DarkColonyPatches.ps1  instead
    (after  Set-ExecutionPolicy -Scope Process Bypass  if scripts are
