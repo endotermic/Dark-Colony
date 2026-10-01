@@ -13536,13 +13536,20 @@ function Edit-DialogConsole([string] $Text) {
             } elseif ($r.kind -eq 'pushb' -and ((55, 56, 57) -contains $r.id) -and -not ($r.t.Count -gt 8 -and (@($r.t[8..($r.t.Count - 1)]) -contains 'list'))) {
                 $by = [int]$r.t[4]
                 if ($quitForm) {
-                    if ($r.id -eq 56) { $msg = 2 } else { $msg = 3 }
+                    # the pair centred in the panel's interior (row 3 + 4 .. last row + 3), YES above NO, 22 px apart
+                    $innerY0 = $ordered[3].y + 4; $innerH = $ordered[$ordered.Count - 1].y - $ordered[3].y
+                    $by = $innerY0 + [int][Math]::Floor(($innerH - 74) / 2)
+                    if ($r.id -eq 56) { $msg = 2 } else { $msg = 3; $by += 48 }
                     $rebuilt[$i] = Get-TextButton $r.id ($rowX + 62) $by 180 26 $msg
-                } elseif ($r.id -eq 56) {
-                    if ($hasCancel) { $ox = $rowX + 158 } else { $ox = $rowX + 107 }
-                    $rebuilt[$i] = Get-TextButton 56 $ox $by 90 20 7
                 } else {
-                    $rebuilt[$i] = Get-TextButton 55 ($rowX + 56) $by 90 20 8
+                    # centred between the list block's bottom divider (bottom row + 16) and the panel's bottom tube (last row + 4)
+                    if ($lBottom -ge 0) { $by = $lBottom + 16 + [int][Math]::Floor(($ordered[$ordered.Count - 1].y + 4 - ($lBottom + 16) - 26) / 2) }
+                    if ($r.id -eq 56) {
+                        if ($hasCancel) { $ox = $rowX + 158 } else { $ox = $rowX + 107 }
+                        $rebuilt[$i] = Get-TextButton 56 $ox $by 90 20 7
+                    } else {
+                        $rebuilt[$i] = Get-TextButton 55 ($rowX + 56) $by 90 20 8
+                    }
                 }
             } elseif ($quitForm -and $r.kind -eq 'label' -and -not ($r.t -contains 'centre')) {
                 $drop[$i] = $true
@@ -13552,8 +13559,13 @@ function Edit-DialogConsole([string] $Text) {
     # apply the changes, drop the old box pictures and the red plates, insert the new boxes after the last picture line
     $out = New-Object System.Collections.Generic.List[string]
     $lastPicture = -1; $used = @{}
+    $bottom = $ordered[$ordered.Count - 1].y + 16     # the `size` rect must reach the last row: the engine draws nothing below it
     for ($i = 0; $i -lt $lines.Count; $i++) {
         $raw = $lines[$i]
+        $ms = [regex]::Match($raw, '^([ \t]*size[ \t]+\d+[ \t]+)(\d+)([ \t]+\d+[ \t]+)(\d+)(?=\s|$)')
+        if ($ms.Success -and [int]$ms.Groups[4].Value -lt ($bottom - [int]$ms.Groups[2].Value)) {   # (the stock objectives dialog says 272 for its 18 rows)
+            $raw = $ms.Groups[1].Value + $ms.Groups[2].Value + $ms.Groups[3].Value + [string]($bottom - [int]$ms.Groups[2].Value) + $raw.Substring($ms.Length)
+        }
         if ($rec.ContainsKey($i)) {
             $r = $rec[$i]
             if ($drop.ContainsKey($i) -or ($r.kind -eq 'picture' -and $r.t.Count -ge 8 -and $DIGITS.IsMatch($r.t[7]) -and ((14, 15, 19, 23) -contains [int]$r.t[7]))) { continue }
