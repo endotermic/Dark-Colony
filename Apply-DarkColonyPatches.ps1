@@ -11900,13 +11900,13 @@ their SHA-256; the C source they were compiled from is in the Dark-Colony-Server
         SourceNote     = 'the Dark Colony CD holds exactly this file as DC\MAPED.EXE - copy it into the "Dark Colony - Map editor" folder as maped.exe.'
         Size           = 336424
         OriginalSha256 = 'e8471a0adcade0d0562f0e38ddbc85ebbd0776f50cc7429628dee435fa6a8f7e'   # untouched original
-        PatchedSha256  = 'c72dd20588356b9cf9fd1f3279e7464392dae6e39e3d3857c167147524071852'   # every patch applied in the default resolution = the exe in the repository
+        PatchedSha256  = 'de8076dc5cf96eac0d585e2a9cb87c72fb6193dafead4dc645c8a4d30bd15291'   # every patch applied in the default resolution = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the stock size (no display fixes),
         # the others select the per-resolution variants of the 'resolution' and 'clock' fixes below
         Modes          = @()
         DefaultMode    = ''
         # SHA-256 with every fix of that resolution applied (the default one is the published exe)
-        ReferenceSha256 = @{ '' = 'c72dd20588356b9cf9fd1f3279e7464392dae6e39e3d3857c167147524071852' }
+        ReferenceSha256 = @{ '' = 'de8076dc5cf96eac0d585e2a9cb87c72fb6193dafead4dc645c8a4d30bd15291' }
         Patches        = @(
 
             # ---- blocksets: New Map: Atlantis, Training and Special block sets selectable ---------------------------------------------------------
@@ -12086,6 +12086,450 @@ One byte in the DIALOG template's style dword.
                 Edits = @(
                     # DIALOG TROOPS template style byte 2: WS_THICKFRAME (0x00040000) -> WS_SYSMENU (0x00080000), sizing border -> close box
                     @{ Offset = 0x3290A; Old = 'C4'; New = 'C8' }
+                )
+            }
+
+            # ---- race: Team Attributes: AI Type and AI Slots editable ---------------------------------------------------------
+            #  Added      : 1 Oct 2026
+            #  Made with  : tools/patch_maped.py --fix race
+            #  Documented : DC16_MAP_FILES.md section 13 (Dark-Colony-Server)
+            #  Changes    : 33 bytes in 33 edits
+            #  The remaining greyed part of the Team Attributes dialog: the AI Type edit (written as %AI - the
+            #  computer player's personality 1..4, read by the game in campaign scenarios only; in a multiplayer game
+            #  the lobby decides who is human and who is AI) and the fifteen AI Slots edits (written as %AISlots, a
+            #  line the game reads and ignores).  33 single-byte edits clear WS_DISABLED on the edits, their labels
+            #  and the two group boxes.  The dialog procedure handled every one of them all along.
+            @{
+                Id = 'race'; Name = 'Team Attributes: AI Type and AI Slots editable'; Date = '1 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_maped.py --fix race'; Doc = 'DC16_MAP_FILES.md section 13 (Dark-Colony-Server)'
+                Description = @'
+The remaining greyed part of the Team Attributes dialog: the AI Type edit (written as %AI - the
+computer player's personality 1..4, read by the game in campaign scenarios only; in a multiplayer game
+the lobby decides who is human and who is AI) and the fifteen AI Slots edits (written as %AISlots, a
+line the game reads and ignores).  33 single-byte edits clear WS_DISABLED on the edits, their labels
+and the two group boxes.  The dialog procedure handled every one of them all along.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # DIALOG RACE control id 106 "AI Type": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31543; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 107 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3156B; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 126 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3188B; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 127 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x318A7; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 128 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x318C3; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 129 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x318DF; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 130 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x318FB; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 131 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31917; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 132 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31933; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 133 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3194F; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 134 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3196B; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 135 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31987; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 136 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x319A3; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 137 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x319BF; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 138 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x319DB; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 139 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x319F7; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 140 (no text): style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31A13; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 1": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31A2F; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 2": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31A57; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 3": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31A7F; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 4": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31AA7; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 5": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31ACF; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 6": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31AF7; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 7": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31B1F; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 8": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31B47; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 9": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31B6F; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 10": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31B97; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 11": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31BBF; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 12": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31BE7; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 13": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31C0F; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 14": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31C37; Old = '58'; New = '50' }
+                    # DIALOG RACE control label "Slot 15": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31C5F; Old = '58'; New = '50' }
+                    # DIALOG RACE control id 141 "AI Slots": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31C87; Old = '58'; New = '50' }
+                )
+            }
+
+            # ---- campaign: Scenario Stats: Campaign scenario type selectable ---------------------------------------------------------
+            #  Added      : 1 Oct 2026
+            #  Made with  : tools/patch_maped.py --fix campaign
+            #  Documented : DC16_MAP_FILES.md section 13 (Dark-Colony-Server)
+            #  Changes    : 1 bytes in 1 edits
+            #  The Scenario Stats dialog shows the scenario type as two radio buttons, Multiplayer (0) and Campaign (1),
+            #  the second greyed out.  The number is the first value of the fourth line of the .SCN; the game ignores
+            #  it, but the editor itself does not: for a multiplayer scenario the save also writes the .TRO trigger
+            #  file (vent eruptions, artifact sites) and appends one commander per active team at its start position,
+            #  for a campaign scenario it writes neither (campaign missions bring their own scripts and units).  A new
+            #  map starts as type 1, so until now the only way to a multiplayer map was to press Multiplayer once; this
+            #  fix lets you switch back.  One byte.
+            @{
+                Id = 'campaign'; Name = 'Scenario Stats: Campaign scenario type selectable'; Date = '1 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_maped.py --fix campaign'; Doc = 'DC16_MAP_FILES.md section 13 (Dark-Colony-Server)'
+                Description = @'
+The Scenario Stats dialog shows the scenario type as two radio buttons, Multiplayer (0) and Campaign (1),
+the second greyed out.  The number is the first value of the fourth line of the .SCN; the game ignores
+it, but the editor itself does not: for a multiplayer scenario the save also writes the .TRO trigger
+file (vent eruptions, artifact sites) and appends one commander per active team at its start position,
+for a campaign scenario it writes neither (campaign missions bring their own scripts and units).  A new
+map starts as type 1, so until now the only way to a multiplayer map was to press Multiplayer once; this
+fix lets you switch back.  One byte.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # DIALOG TOD control id 107 "Campaign": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x31FAB; Old = '58'; New = '50' }
+                )
+            }
+
+            # ---- medfiles: File menu: Super Gen, Load MED File, Save MED File ---------------------------------------------------------
+            #  Added      : 1 Oct 2026
+            #  Made with  : tools/patch_maped.py --fix medfiles
+            #  Documented : DC16_MAP_FILES.md section 13 (Dark-Colony-Server)
+            #  Changes    : 3 bytes in 3 edits
+            #  Three greyed entries of the File menu with complete handlers.  Load MED File / Save MED File read and
+            #  write the editor's own document (Maps (*.med), a binary dump of the whole editor state - the only form
+            #  that keeps editor-only data such as trigger names); "Save Map" is the export to the game's files (.SCN,
+            #  .MAP, .MTG, .TRO, .POP and, through pmap.exe, .PTH).  Super Gen is the developers' batch export: it reads
+            #  dirlist.txt beside the editor, loads every *.map listed there with its .mtg/.scn/.pop and re-exports it.
+            #  Three single-byte edits clear MF_GRAYED in the MAINMENU resource.
+            @{
+                Id = 'medfiles'; Name = 'File menu: Super Gen, Load MED File, Save MED File'; Date = '1 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_maped.py --fix medfiles'; Doc = 'DC16_MAP_FILES.md section 13 (Dark-Colony-Server)'
+                Description = @'
+Three greyed entries of the File menu with complete handlers.  Load MED File / Save MED File read and
+write the editor's own document (Maps (*.med), a binary dump of the whole editor state - the only form
+that keeps editor-only data such as trigger names); "Save Map" is the export to the game's files (.SCN,
+.MAP, .MTG, .TRO, .POP and, through pmap.exe, .PTH).  Super Gen is the developers' batch export: it reads
+dirlist.txt beside the editor, loads every *.map listed there with its .mtg/.scn/.pop and re-exports it.
+Three single-byte edits clear MF_GRAYED in the MAINMENU resource.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # MENU MAINMENU item 237 "Super Gen": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2D21C; Old = '01'; New = '00' }
+                    # MENU MAINMENU item 233 "&Load MED File": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2D234; Old = '01'; New = '00' }
+                    # MENU MAINMENU item 103 "&Save MED File": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2D256; Old = '81'; New = '80' }
+                )
+            }
+
+            # ---- blockmenu: Block Type menu selectable ---------------------------------------------------------
+            #  Added      : 1 Oct 2026
+            #  Made with  : tools/patch_maped.py --fix blockmenu
+            #  Documented : DC16_MAP_FILES.md section 13 (Dark-Colony-Server)
+            #  Changes    : 1 bytes in 1 edits
+            #  The whole Block Type menu (the eighteen block classes 0 Default .. 17 River Left) is greyed out; its items
+            #  are handled and do exactly what the numbered toolbar buttons do.  One byte clears MF_GRAYED on the popup.
+            @{
+                Id = 'blockmenu'; Name = 'Block Type menu selectable'; Date = '1 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_maped.py --fix blockmenu'; Doc = 'DC16_MAP_FILES.md section 13 (Dark-Colony-Server)'
+                Description = @'
+The whole Block Type menu (the eighteen block classes 0 Default .. 17 River Left) is greyed out; its items
+are handled and do exactly what the numbered toolbar buttons do.  One byte clears MF_GRAYED on the popup.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # MENU MAINMENU popup "&Block Type": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2D2F8; Old = '11'; New = '10' }
+                )
+            }
+
+            # ---- teamdialogs: Team Attributes menu: City State and Troop Attributes dialogs reachable ---------------------------------------------------------
+            #  Added      : 1 Oct 2026
+            #  Made with  : tools/patch_maped.py --fix teamdialogs
+            #  Documented : DC16_MAP_FILES.md section 13 (Dark-Colony-Server)
+            #  Changes    : 4 bytes in 4 edits
+            #  The Team Attributes menu has two greyed entries, City and Troops, whose command ids (235, 236) have no
+            #  handler in the editor's window procedure at all - un-greying them would give dead menu items.  The two
+            #  dialogs they were meant to open exist and are complete, but hang on the command ids 166 and 167, which
+            #  nothing in the editor ever sends (the menu was renumbered at some point and the handlers were left
+            #  behind).  This fix clears MF_GRAYED on the two entries and changes their command ids to 166 and 167
+            #  (low byte only, four single-byte edits).  City State sets, per team, which of the five city buildings
+            #  start as buildable or prebuilt and with how many hit points, plus the start money - the five pairs of
+            #  the TEAM block that the game does read.  Troop Attributes sets a weapon and an armour level per troop
+            #  row; the file keeps only those two numbers (the game interprets them as upgrade levels of the race's
+            #  production buildings), the Buildable and Health columns are never saved and the Healer row is not
+            #  written at all.
+            @{
+                Id = 'teamdialogs'; Name = 'Team Attributes menu: City State and Troop Attributes dialogs reachable'; Date = '1 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_maped.py --fix teamdialogs'; Doc = 'DC16_MAP_FILES.md section 13 (Dark-Colony-Server)'
+                Description = @'
+The Team Attributes menu has two greyed entries, City and Troops, whose command ids (235, 236) have no
+handler in the editor's window procedure at all - un-greying them would give dead menu items.  The two
+dialogs they were meant to open exist and are complete, but hang on the command ids 166 and 167, which
+nothing in the editor ever sends (the menu was renumbered at some point and the handlers were left
+behind).  This fix clears MF_GRAYED on the two entries and changes their command ids to 166 and 167
+(low byte only, four single-byte edits).  City State sets, per team, which of the five city buildings
+start as buildable or prebuilt and with how many hit points, plus the start money - the five pairs of
+the TEAM block that the game does read.  Troop Attributes sets a weapon and an armour level per troop
+row; the file keeps only those two numbers (the game interprets them as upgrade levels of the race's
+production buildings), the Buildable and Health columns are never saved and the Healer row is not
+written at all.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # MENU MAINMENU item 235 "City": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2D6FE; Old = '01'; New = '00' }
+                    # MENU MAINMENU item "City": command id 235 -> 166 (the id its dialog handler in WndProc listens to)
+                    @{ Offset = 0x2D700; Old = 'EB'; New = 'A6' }
+                    # MENU MAINMENU item 236 "Troops": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2D70C; Old = '81'; New = '80' }
+                    # MENU MAINMENU item "Troops": command id 236 -> 167 (the id its dialog handler in WndProc listens to)
+                    @{ Offset = 0x2D70E; Old = 'EC'; New = 'A7' }
+                )
+            }
+
+            # ---- lieutenants: Troops menu: Human and Alien Leutenant placeable ---------------------------------------------------------
+            #  Added      : 1 Oct 2026
+            #  Made with  : tools/patch_maped.py --fix lieutenants
+            #  Documented : DC16_MAP_FILES.md section 13 (Dark-Colony-Server)
+            #  Changes    : 2 bytes in 2 edits
+            #  The two commander entries of the Troops menu are greyed because a multiplayer save generates the
+            #  commanders itself: one per active team, at the position set with the Start tool (the game turns it into
+            #  the owner's race), and loading a multiplayer scenario discards any commander found in the file.  With
+            #  the entries un-greyed (two single-byte edits) commanders can be placed by hand, which matters for
+            #  campaign-type scenarios, where nothing is generated.
+            @{
+                Id = 'lieutenants'; Name = 'Troops menu: Human and Alien Leutenant placeable'; Date = '1 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_maped.py --fix lieutenants'; Doc = 'DC16_MAP_FILES.md section 13 (Dark-Colony-Server)'
+                Description = @'
+The two commander entries of the Troops menu are greyed because a multiplayer save generates the
+commanders itself: one per active team, at the position set with the Start tool (the game turns it into
+the owner's race), and loading a multiplayer scenario discards any commander found in the file.  With
+the entries un-greyed (two single-byte edits) commanders can be placed by hand, which matters for
+campaign-type scenarios, where nothing is generated.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # MENU MAINMENU item 160 "Human Leutenant": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2D808; Old = '01'; New = '00' }
+                    # MENU MAINMENU item 161 "Alien Leutenant": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2D948; Old = '01'; New = '00' }
+                )
+            }
+
+            # ---- artifacts: Artifacts menu: single artifacts placeable ---------------------------------------------------------
+            #  Added      : 1 Oct 2026
+            #  Made with  : tools/patch_maped.py --fix artifacts
+            #  Documented : DC16_MAP_FILES.md section 13 (Dark-Colony-Server)
+            #  Changes    : 6 bytes in 6 edits
+            #  Solar Lens, Maktor, Lunatek, Pinball, Tektarra and Ultimate are greyed in the Artifacts menu; only
+            #  Artifact Site is selectable.  In a multiplayer map artifacts are meant to come from the sites, whose
+            #  contents the generated .TRO hands out according to the lobby's artifact setting (s(6,0)); a loose
+            #  artifact placed by hand (an object of type 63..68 lying on the map) bypasses that setting.  The
+            #  handlers are complete; six single-byte edits clear MF_GRAYED.
+            @{
+                Id = 'artifacts'; Name = 'Artifacts menu: single artifacts placeable'; Date = '1 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_maped.py --fix artifacts'; Doc = 'DC16_MAP_FILES.md section 13 (Dark-Colony-Server)'
+                Description = @'
+Solar Lens, Maktor, Lunatek, Pinball, Tektarra and Ultimate are greyed in the Artifacts menu; only
+Artifact Site is selectable.  In a multiplayer map artifacts are meant to come from the sites, whose
+contents the generated .TRO hands out according to the lobby's artifact setting (s(6,0)); a loose
+artifact placed by hand (an object of type 63..68 lying on the map) bypasses that setting.  The
+handlers are complete; six single-byte edits clear MF_GRAYED.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # MENU MAINMENU item 180 "Solar Lens": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2DA42; Old = '01'; New = '00' }
+                    # MENU MAINMENU item 181 "Maktor": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2DA5C; Old = '01'; New = '00' }
+                    # MENU MAINMENU item 182 "Lunatek": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2DA6E; Old = '01'; New = '00' }
+                    # MENU MAINMENU item 183 "Pinball": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2DA82; Old = '01'; New = '00' }
+                    # MENU MAINMENU item 184 "Tektarra": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2DA96; Old = '01'; New = '00' }
+                    # MENU MAINMENU item 185 "Ultimate": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2DAAC; Old = '01'; New = '00' }
+                )
+            }
+
+            # ---- lights: Lights menu: light objects placeable ---------------------------------------------------------
+            #  Added      : 1 Oct 2026
+            #  Made with  : tools/patch_maped.py --fix lights
+            #  Documented : DC16_MAP_FILES.md section 13 (Dark-Colony-Server)
+            #  Changes    : 1 bytes in 1 edits
+            #  The Lights menu (direction left/right/up/down, type Flicker/Medium/Bright) places the game's twelve
+            #  LIGHT objects, types 51..62, as team-8 objects; the game draws them on its light plane.  The shipped
+            #  scenarios use them in a handful of campaign maps and never in a multiplayer map.  One byte clears
+            #  MF_GRAYED on the popup.  ("Path Light" in the Objects menu is a different object, type 94.)
+            @{
+                Id = 'lights'; Name = 'Lights menu: light objects placeable'; Date = '1 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_maped.py --fix lights'; Doc = 'DC16_MAP_FILES.md section 13 (Dark-Colony-Server)'
+                Description = @'
+The Lights menu (direction left/right/up/down, type Flicker/Medium/Bright) places the game's twelve
+LIGHT objects, types 51..62, as team-8 objects; the game draws them on its light plane.  The shipped
+scenarios use them in a handful of campaign maps and never in a multiplayer map.  One byte clears
+MF_GRAYED on the popup.  ("Path Light" in the Objects menu is a different object, type 94.)
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # MENU MAINMENU popup "&Lights": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2DDE0; Old = '11'; New = '10' }
+                )
+            }
+
+            # ---- trigger: Trigger tool and Edit Trigger String ---------------------------------------------------------
+            #  Added      : 1 Oct 2026
+            #  Made with  : tools/patch_maped.py --fix trigger
+            #  Documented : DC16_MAP_FILES.md section 13 (Dark-Colony-Server)
+            #  Changes    : 2 bytes in 2 edits
+            #  The toolbar's Trigger button (greyed) paints trigger ids onto map cells; they are saved in the .MTG file,
+            #  which the game's campaign scripts test with m(x,z).  Edit Trigger String (Scenario menu, greyed) names
+            #  the current trigger.  The editor writes only its fixed multiplayer trigger templates into the .TRO, so
+            #  a script that uses the painted ids must still be written by hand - the two controls are the campaign
+            #  authors' half of that workflow.  Two single-byte edits (WS_DISABLED on the button, MF_GRAYED on the
+            #  menu entry).
+            @{
+                Id = 'trigger'; Name = 'Trigger tool and Edit Trigger String'; Date = '1 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_maped.py --fix trigger'; Doc = 'DC16_MAP_FILES.md section 13 (Dark-Colony-Server)'
+                Description = @'
+The toolbar's Trigger button (greyed) paints trigger ids onto map cells; they are saved in the .MTG file,
+which the game's campaign scripts test with m(x,z).  Edit Trigger String (Scenario menu, greyed) names
+the current trigger.  The editor writes only its fixed multiplayer trigger templates into the .TRO, so
+a script that uses the painted ids must still be written by hand - the two controls are the campaign
+authors' half of that workflow.  Two single-byte edits (WS_DISABLED on the button, MF_GRAYED on the
+menu entry).
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # MENU MAINMENU item 164 "Edit Trigger String": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2D28E; Old = '01'; New = '00' }
+                    # DIALOG TOOLMAIN control id 117 "Trigger": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3240F; Old = '58'; New = '50' }
+                )
+            }
+
+            # ---- aiflags: Flag tool and AI Flags menu (dead feature - see description) ---------------------------------------------------------
+            #  Added      : 1 Oct 2026
+            #  Made with  : tools/patch_maped.py --fix aiflags
+            #  Documented : DC16_MAP_FILES.md section 13 (Dark-Colony-Server)
+            #  Changes    : 2 bytes in 2 edits
+            #  The toolbar's Flag button and the AI Flags menu (Defense) place "AI flags" with a priority and a type.
+            #  WARNING: the editor saves such a flag as the object line "x z 47 <type-100> <priority>", and object type
+            #  47 is the Human mining tower in the shipped GAMESTAT.TXT - the released game has no flag object and its
+            #  computer player reads no map flags.  A placed flag therefore becomes a mining tower of player 0 (type
+            #  "Defense") standing on open ground.  Included because the maintainer asked for every greyed control;
+            #  leave it unticked unless you want to experiment.  Two single-byte edits.
+            @{
+                Id = 'aiflags'; Name = 'Flag tool and AI Flags menu (dead feature - see description)'; Date = '1 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                Tool = 'tools/patch_maped.py --fix aiflags'; Doc = 'DC16_MAP_FILES.md section 13 (Dark-Colony-Server)'
+                Description = @'
+The toolbar's Flag button and the AI Flags menu (Defense) place "AI flags" with a priority and a type.
+WARNING: the editor saves such a flag as the object line "x z 47 <type-100> <priority>", and object type
+47 is the Human mining tower in the shipped GAMESTAT.TXT - the released game has no flag object and its
+computer player reads no map flags.  A placed flag therefore becomes a mining tower of player 0 (type
+"Defense") standing on open ground.  Included because the maintainer asked for every greyed control;
+leave it unticked unless you want to experiment.  Two single-byte edits.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # MENU MAINMENU popup "AI Flags": flags byte 0, MF_GRAYED (0x0001) cleared - the entry is selectable
+                    @{ Offset = 0x2DB58; Old = '11'; New = '10' }
+                    # DIALOG TOOLMAIN control id 144 "Flag": style byte 3, WS_DISABLED (0x08000000) cleared - the control is usable
+                    @{ Offset = 0x3245B; Old = '58'; New = '50' }
                 )
             }
 

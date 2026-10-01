@@ -247,7 +247,12 @@ What makes it trustworthy:
                        briefings)
      Council Wars    + ozi (the DARK COLONY and OZI MISSIONS menu
                        modes)
-     map editor      blocksets, teams, healer, troopsframe
+     map editor      blocksets, teams, healer, troopsframe (the ozi_ns
+                       unlocks), then since 1 Oct 2026 race, campaign,
+                       medfiles, blockmenu, teamdialogs, lieutenants,
+                       artifacts, lights, trigger, aiflags - everything
+                       the editor shipped greyed out (aiflags is a dead
+                       feature, see its description)
      all three       + icon (the high-resolution icon; for the games also
                        the per-monitor DPI-aware manifest, so Windows never
                        scales the full-screen picture)
