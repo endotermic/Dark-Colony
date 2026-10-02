@@ -97,7 +97,7 @@ What makes it trustworthy:
    (green "Code" button -> "Download ZIP", then unpack; or
    "git clone").  You need the whole thing, not just the script:
    the fixes need the game data files that ship next to the exe
-   (for example the 1024x768 menus in INTRF_HD\, the Classic movies
+   (for example the shipped pictures in HD_SRC\<WxH>\, the Classic movies
    AVI\DCINTRO.AVI etc.).  The script checks for them: a fix whose
    files are not in the target folder is shown as "RESOURCES NOT
    FOUND", cannot be ticked and is left out.
@@ -147,7 +147,7 @@ What makes it trustworthy:
       same name is replaced.  Press "Next >".
 
    b) STEP 1 OF 4: OPTIONS.  Three choices, made once for both games
-      (they share the INTRF_HD interface folder); NOTHING is
+      (they share the interface folder of the chosen size); NOTHING is
       preselected and "Next >" stays disabled until the first two are
       made.  You can come back with "< Back".
 
@@ -162,8 +162,13 @@ What makes it trustworthy:
         The sizes with the aspect ratio of your monitor are marked
         "recommended for your screen".  Every size but 640x480 selects
         that size's variant of the display fix and makes the patcher
-        WRITE the INTRF_HD interface set for it (menus, HUD, briefing
-        lists, letterboxed backgrounds, loading screens; a few seconds).
+        WRITE the interface set for it into ITS OWN FOLDER - HD_0768P
+        for 1024x768, HD_1080P for 1920x1080, UW_1080P for 3840x1080 ...
+        (menus, HUD, briefing lists, letterboxed backgrounds, loading
+        screens; a few seconds) - and DELETE the folders of every other
+        resolution first (also the INTRF_HD folder of installs patched
+        before October 2026), so that no file of another size is left
+        anywhere.  The summary page lists what will be deleted.
 
       * "Battlefield interface" - two radio buttons (live at the HD
         sizes; at 640x480 the game keeps its own interface):
@@ -260,7 +265,7 @@ What makes it trustworthy:
    e) PATCH.  If some of the files already exist the script asks once
       before replacing them.  A small "Patching in progress" box names
       each step: executable by executable, fix by fix, then - for an HD
-      resolution - the INTRF_HD interface set (a few seconds).  Then a
+      resolution - the interface set into its folder (a few seconds).  Then a
       message box and the FINISHED page list every executable: written
       (file, size, SHA-256, "byte-identical to the exe published in the
       repository" with all fixes at 1024x768, dark interface) or failed (what went
@@ -301,8 +306,9 @@ What makes it trustworthy:
    Patch ids, in the order they are applied:
      both games      nocd,
                      resolution (ONE fix per screen size since 1 Oct
-                       2026: the screen mode, the INTRF_HD path strings
-                       and the clock hand - until then the three fixes
+                       2026: the screen mode, the path strings pointing
+                       at the size's own interface folder (HD_<height>P,
+                       2 Oct 2026) and the clock hand - until then the three fixes
                        resolution, hdpaths, clock; not at 640x480),
                      console (the DARK battlefield interface: the
                        console-style HUD, dialogs and clock dial, data
@@ -335,7 +341,7 @@ What makes it trustworthy:
                        scales the full-screen picture)
      Council Wars    + online, after icon (the ONLINE WAR button: a room
                        browser for the relay server, TLS to port 8889; the
-                       script also writes the screen INTRF_HD\ONLINE and,
+                       script also writes the screen HD_<height>P\ONLINE and,
                        if it is missing, DEFAULT_SERVER.TXT with the address
                        dark-colony-server.fly.dev - an existing file with
                        your own relay address is never overwritten)

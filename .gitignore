@@ -35,3 +35,24 @@ DC - Council wars/INTRFACE/ONLINEBG.GIF
 # the deprecated patched Classic build (1 Oct 2026): no longer shipped - the patcher writes it on request (tick it in the window,
 # -IncludeDeprecated, or -Original "DC - Council wars\dc16.exe"); a locally built copy stays out of the repository
 DC - Council wars/Dark Colony.exe
+
+# since 2 Oct 2026 every resolution's interface set lives in its own folder HD_<height>P (UW_ for the ultra-wide sizes;
+# doc 10.61): the repository ships the 1024x768 set (HD_0768P) and the patcher's inputs (HD_SRC); every other size's
+# folder is a patcher output, as is the pre-October INTRF_HD layout left behind in a working copy (the next patcher run
+# deletes it)
+/DC - Council wars/HD_[0-9][0-9][0-9][0-9]P/
+!/DC - Council wars/HD_0768P/
+/DC - Council wars/UW_[0-9][0-9][0-9][0-9]P/
+/DC - Council wars/exp/HD_[0-9][0-9][0-9][0-9]P/
+!/DC - Council wars/exp/HD_0768P/
+/DC - Council wars/exp/UW_[0-9][0-9][0-9][0-9]P/
+/DC - Council wars/dc/HD_[0-9][0-9][0-9][0-9]P/
+!/DC - Council wars/dc/HD_0768P/
+/DC - Council wars/dc/UW_[0-9][0-9][0-9][0-9]P/
+/DC - Council wars/ozi_ns/HD_[0-9][0-9][0-9][0-9]P/
+!/DC - Council wars/ozi_ns/HD_0768P/
+/DC - Council wars/ozi_ns/UW_[0-9][0-9][0-9][0-9]P/
+/DC - Council wars/INTRF_HD/
+/DC - Council wars/exp/intrf_hd/
+/DC - Council wars/dc/intrf_hd/
+/DC - Council wars/ozi_ns/intrf_hd/
