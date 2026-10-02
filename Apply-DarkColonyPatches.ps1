@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 1.0, build 20261002.1812 - generated 2026-10-02 18:12 UTC from Dark-Colony-Server d214bce+ and Dark-Colony ff69aad+.
+    Dark Colony patcher 1.1, build 20261002.1839 - generated 2026-10-02 18:39 UTC from Dark-Colony-Server 6d4b448+ and Dark-Colony e7d2eff+.
 
 
 .SYNOPSIS
@@ -184,6 +184,14 @@ param(
 )
 Set-StrictMode -Version 2
 $ErrorActionPreference = 'Stop'
+# Culture-invariant (2 Oct 2026, a player's report): this script generates byte-exact files, so nothing in it may
+# depend on the player's Windows regional format.  Under a Turkish or Azerbaijani format .NET's ToLower() turns
+# "MAINE" into "maıne" (dotless i), the HUD and intro scripts missed their branches in Write-InterfaceSet and the
+# battlefield widgets were laid out as a letterboxed menu (tabs and DAYS count drawn inside the map).  Every case
+# conversion below is the Invariant form, and the thread runs with the invariant culture (string comparison,
+# hashtable keys, regex IgnoreCase and number formatting included) for the whole run, window or command line.
+[System.Threading.Thread]::CurrentThread.CurrentCulture = [System.Globalization.CultureInfo]::InvariantCulture
+[System.Threading.Thread]::CurrentThread.CurrentUICulture = [System.Globalization.CultureInfo]::InvariantCulture
 
 # =================================================================================================
 #  DATA - the two builds and their patches
@@ -199,9 +207,9 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '1.0'
-$PatcherBuild = '20261002.1812'
-$PatcherGenerated = '2026-10-02 18:12 UTC from Dark-Colony-Server d214bce+ and Dark-Colony ff69aad+'
+$PatcherVersion = '1.1'
+$PatcherBuild = '20261002.1839'
+$PatcherGenerated = '2026-10-02 18:39 UTC from Dark-Colony-Server 6d4b448+ and Dark-Colony e7d2eff+'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -14018,7 +14026,7 @@ function ConvertFrom-HexString([string] $Hex) {
 
 function Get-Sha256Hex([byte[]] $Data) {
     $sha = [System.Security.Cryptography.SHA256]::Create()
-    try { return ([BitConverter]::ToString($sha.ComputeHash($Data)) -replace '-', '').ToLower() }
+    try { return ([BitConverter]::ToString($sha.ComputeHash($Data)) -replace '-', '').ToLowerInvariant() }
     finally { $sha.Dispose() }
 }
 
@@ -14043,7 +14051,7 @@ function Get-EditState([byte[]] $Data, $Edit) {
         if ($Data.Length -eq $Edit.Append) { return 'old' }
         if ($Data.Length -eq $Edit.Append + $Edit.Length) {
             $sha = [System.Security.Cryptography.SHA256]::Create()
-            try { $h = ([BitConverter]::ToString($sha.ComputeHash($Data, $Edit.Append, $Edit.Length)) -replace '-', '').ToLower() }
+            try { $h = ([BitConverter]::ToString($sha.ComputeHash($Data, $Edit.Append, $Edit.Length)) -replace '-', '').ToLowerInvariant() }
             finally { $sha.Dispose() }
             if ($h -eq $Edit.Sha256) { return 'new' }
         }
@@ -14110,7 +14118,7 @@ function Get-ModeSize([string] $Mode) { $p = $Mode -split 'x'; return @([int]$p[
 # patcher's inputs (the shipped pictures per size, the console banks) live in HD_SRC.  Every other size's folder is
 # deleted when a set is written (Remove-OtherInterfaceSets).
 function Get-HdFolder([string] $Mode) { $wh = Get-ModeSize $Mode; return ('{0}_{1:D4}P' -f $(if ($wh[0] * 2 -gt $wh[1] * 5) { 'UW' } else { 'HD' }), $wh[1]) }
-function Get-HdToken([string] $Mode) { return (Get-HdFolder $Mode).ToLower() }
+function Get-HdToken([string] $Mode) { return (Get-HdFolder $Mode).ToLowerInvariant() }
 $HD_SRC = 'HD_SRC'
 $HD_FOLDER_RE = [regex] '^(?i)(HD|UW)_\d{4}P$'
 # the copies the 640x480 build reads (fixes movies / ozi / music / online at the original size)
@@ -14747,7 +14755,7 @@ function Edit-Widgets([string] $Text, [scriptblock] $Move, [string[]] $Kinds) {
         $rest = if ($i -ge 0) { $ln.Substring($i) } else { '' }
         $toks = @($TOKENS.Matches($body) | ForEach-Object { $_.Value })
         $words = @($toks | Where-Object { $_.Trim().Length -gt 0 })
-        if ($words.Count -gt 0 -and $Kinds -contains $words[0].ToLower()) {
+        if ($words.Count -gt 0 -and $Kinds -contains $words[0].ToLowerInvariant()) {
             $xy = & $Move $words
             if ($xy) {
                 $n = 0
@@ -14785,12 +14793,12 @@ function Edit-PaddedScript([string] $Text, [int] $dx, [int] $dy, [int[]] $Rect) 
 
 # paint_intro._positioned: kind n desc x y [w h] rest, with n/desc/x/y integers
 function Get-Positioned([string[]] $w) {
-    if ($w.Count -lt 5 -or $POSITIONED -notcontains $w[0].ToLower()) { return $null }
+    if ($w.Count -lt 5 -or $POSITIONED -notcontains $w[0].ToLowerInvariant()) { return $null }
     for ($i = 1; $i -le 4; $i++) { if ($w[$i] -notmatch '^-?\d+$') { return $null } }
     $ww = 0; $hh = 0; $rest = @()
     if ($w.Count -ge 7 -and $w[5] -match '^\d+$' -and $w[6] -match '^\d+$') { $ww = [int]$w[5]; $hh = [int]$w[6]; if ($w.Count -gt 7) { $rest = $w[7..($w.Count-1)] } }
     elseif ($w.Count -gt 5) { $rest = $w[5..($w.Count-1)] }
-    return @{ kind = $w[0].ToLower(); n = [int]$w[1]; x = [int]$w[3]; y = [int]$w[4]; w = $ww; h = $hh; rest = @($rest) }
+    return @{ kind = $w[0].ToLowerInvariant(); n = [int]$w[1]; x = [int]$w[3]; y = [int]$w[4]; w = $ww; h = $hh; rest = @($rest) }
 }
 $LOGOS = @('DCSS', 'DCUK'); $BUTTON_SPRITES = @('LARGEBUTTON', 'MEDBUTTON'); $LOGO_CLEARANCE = 20
 # paint_intro.cw_menu_lift (24 Sep 2026, maintainer: "move DC logo, DARK COLONY logo, credentials and
@@ -14920,7 +14928,7 @@ function Edit-SceneList([string] $Text, [int] $dx, [int] $dy) {
         if ($m.Success -and $prevAvi) {
             $ln = '{0}{1}{2}{3}{4}{5}{6}' -f $m.Groups[1].Value, $m.Groups[2].Value, $m.Groups[3].Value, ([int]$m.Groups[4].Value + $dx), $m.Groups[5].Value, ([int]$m.Groups[6].Value + $dy), $m.Groups[7].Value
         }
-        $prevAvi = $ln.Trim().ToLower().EndsWith('.avi')
+        $prevAvi = $ln.Trim().ToLowerInvariant().EndsWith('.avi')
         $out.Add($ln)
     }
     return ($out -join "`n")
@@ -14932,7 +14940,7 @@ function Edit-SceneList([string] $Text, [int] $dx, [int] $dy) {
 # $Console $false (the light theme) keeps `pictures intrface/mainbut|popp` = the stock metal banks
 function Set-BackgroundHd([string] $Text, [bool] $Console = $true, [string] $Token = 'intrf_hd') {
     $t = $BG_RETARGET.Replace($Text, ('$1' + $Token + '/$2'))                 # the GIFs sit in the resolution's folder
-    if ($Console) { $t = $PIC_RETARGET.Replace($t, ('$1' + $HD_SRC.ToLower() + '/$2')) }   # the console banks ship once, in HD_SRC
+    if ($Console) { $t = $PIC_RETARGET.Replace($t, ('$1' + $HD_SRC.ToLowerInvariant() + '/$2')) }   # the console banks ship once, in HD_SRC
     return $t
 }
 
@@ -14942,7 +14950,7 @@ function Edit-DatList([string] $Text) {
     foreach ($raw in $Text.Split("`n")) {
         $cr = if ($raw.EndsWith("`r")) { "`r" } else { '' }
         $line = if ($cr) { $raw.Substring(0, $raw.Length - 1) } else { $raw }
-        if (@('dcss.fin', 'dcuk.fin', 'dcut.fin') -contains $line.Trim().ToLower()) { $line = $line.Trim().Substring(0, $line.Trim().Length - 4) + '_hd.fin' }
+        if (@('dcss.fin', 'dcuk.fin', 'dcut.fin') -contains $line.Trim().ToLowerInvariant()) { $line = $line.Trim().Substring(0, $line.Trim().Length - 4) + '_hd.fin' }
         $out.Add($line + $cr)
     }
     return ($out -join "`n")
@@ -15169,7 +15177,7 @@ function Write-InterfaceSet([string] $GameDir, [string] $Mode, [bool] $Movies, [
     $gifsToPad = @{}
     # --- INTRFACE scripts -> INTRF_HD
     foreach ($f in [System.IO.Directory]::GetFiles($intrface)) {
-        $name = [System.IO.Path]::GetFileName($f); $lname = $name.ToLower()
+        $name = [System.IO.Path]::GetFileName($f); $lname = $name.ToLowerInvariant()
         if ($lname.EndsWith('.bak') -or $lname.EndsWith('.gif') -or $lname.EndsWith('.bmp') -or $lname.EndsWith('.spr') -or $lname.EndsWith('.rmp') -or $lname.EndsWith('.rgb')) { continue }
         if ($lname -eq 'multie~1.txt') { continue }     # a stray duplicate of MULTIE nothing reads (split_hd_data DROP)
         $text = Read-Latin1 $f
@@ -15200,7 +15208,7 @@ function Write-InterfaceSet([string] $GameDir, [string] $Mode, [bool] $Movies, [
             $gs = [DcGif]::Size([System.IO.File]::ReadAllBytes($gif))
             Write-Latin1 (Join-Path $hd $name) (Set-BackgroundHd (Edit-PaddedScript $text ([int][Math]::Floor(($W - $gs[0]) / 2)) ([int][Math]::Floor(($H - $gs[1]) / 2)) @(0, 0, $W, $H)) $true $token); $written++
         }
-        $gifsToPad[[System.IO.Path]::GetFileName($gif).ToUpper()] = $gif
+        $gifsToPad[[System.IO.Path]::GetFileName($gif).ToUpperInvariant()] = $gif
     }
     # --- backgrounds: the painted / spliced ones ship per size, the rest are letterboxed here - laid
     # over BACKDROP.GIF (the main menu's planet without its bottom band) in a grey panel frame (doc 10.56)
@@ -15392,8 +15400,8 @@ function Edit-DialogConsole([string] $Text) {
     for ($i = 0; $i -lt $lines.Count; $i++) {
         $body = $lines[$i]; $p = $body.IndexOf('%'); if ($p -ge 0) { $body = $body.Substring(0, $p) }
         $t = @([regex]::Matches($body, '\S+') | ForEach-Object { $_.Value })
-        if ($t.Count -ge 5 -and $DIALOG_WIDGETS -contains $t[0].ToLower() -and $DIGITS.IsMatch($t[1]) -and $DIGITS.IsMatch($t[3]) -and $DIGITS.IsMatch($t[4])) {
-            $rec[$i] = @{ kind = $t[0].ToLower(); id = [int]$t[1]; t = $t }
+        if ($t.Count -ge 5 -and $DIALOG_WIDGETS -contains $t[0].ToLowerInvariant() -and $DIGITS.IsMatch($t[1]) -and $DIGITS.IsMatch($t[3]) -and $DIGITS.IsMatch($t[4])) {
+            $rec[$i] = @{ kind = $t[0].ToLowerInvariant(); id = [int]$t[1]; t = $t }
         }
     }
     $keys = @($rec.Keys | Sort-Object)
@@ -16353,7 +16361,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
                            $found = "nothing at $path" }
             'unreadable' { $title = "$name CANNOT BE READ"; $status = 'cannot be read'
                            $found = "$path`r`n            $why" }
-            'unknown'    { $title = "$name IS NOT $($b.OriginalName.ToUpper()) - NOT A DARK COLONY EXECUTABLE"; $status = 'NOT the original - unknown file'
+            'unknown'    { $title = "$name IS NOT $($b.OriginalName.ToUpperInvariant()) - NOT A DARK COLONY EXECUTABLE"; $status = 'NOT the original - unknown file'
                            $found = "$path`r`n            $($data.Length) bytes, SHA-256 $(Get-Sha256Hex $data)" }
             'patched'    { $title = "$name IS ALREADY PATCHED - NOT THE ORIGINAL"; $status = 'NOT the original - already patched'
                            $found = "$path`r`n            $($data.Length) bytes, SHA-256 $(Get-Sha256Hex $data) (the fixes are already in it)" }
