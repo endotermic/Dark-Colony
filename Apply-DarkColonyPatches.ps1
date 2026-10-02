@@ -6059,8 +6059,13 @@ in_text 207..210 above the two stock chat lines (15 rows apart); the stock 640x4
             #      sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
             #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
             #  exp/sprites/tranozi.spr, dc/HD_<height>P/bintroe and the rewritten main-menu script
-            #  (exp/HD_<height>P/bintroe) from the repository.  Because the .reloc insert shifts every later
-            #  relocation entry, this patch is always applied last.
+            #  (exp/HD_<height>P/bintroe) from the repository, plus the tracer-bullet data of 2 Oct 2026
+            #  (ANIMATE/TRAC.FIN, SPRITES/TRAC.SPR and the weapon-table overlays dc/gamestat/weapstat.txt,
+            #  exp/gamestat/weapstat.txt: the human trooper and the Lieutenant fire a visible streak, the Gray
+            #  trooper keeps its bolt at every weapon upgrade level and the Gray commander's pistol fires the
+            #  Gray bolt; data only, the patched exe reads the tables
+            #  through the mode prefix and the FIN through animozi.dat).  Because the .reloc insert shifts every
+            #  later relocation entry, this patch is always applied last.
             @{
                 Id = 'ozi'; Name = 'DARK COLONY and OZI MISSIONS menu modes (Council Wars only)'; Date = '10 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
@@ -6128,12 +6133,17 @@ itself uses.  Two buttons are added for it:
     sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
 REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
 exp/sprites/tranozi.spr, dc/HD_<height>P/bintroe and the rewritten main-menu script
-(exp/HD_<height>P/bintroe) from the repository.  Because the .reloc insert shifts every later
-relocation entry, this patch is always applied last.
+(exp/HD_<height>P/bintroe) from the repository, plus the tracer-bullet data of 2 Oct 2026
+(ANIMATE/TRAC.FIN, SPRITES/TRAC.SPR and the weapon-table overlays dc/gamestat/weapstat.txt,
+exp/gamestat/weapstat.txt: the human trooper and the Lieutenant fire a visible streak, the Gray
+trooper keeps its bolt at every weapon upgrade level and the Gray commander's pistol fires the
+Gray bolt; data only, the patched exe reads the tables
+through the mode prefix and the FIN through animozi.dat).  Because the .reloc insert shifts every
+later relocation entry, this patch is always applied last.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
-                # data files this fix needs next to the exe (381; listed from the repository when this
+                # data files this fix needs next to the exe (385; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'ozi_ns\alta.gif'
@@ -6516,6 +6526,10 @@ relocation entry, this patch is always applied last.
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
                     'dc\intrface\credits.txt'
+                    'ANIMATE\TRAC.FIN'
+                    'SPRITES\TRAC.SPR'
+                    'dc\gamestat\weapstat.txt'
+                    'exp\gamestat\weapstat.txt'
                     'exp\intrface\bintroe'
                 )
                 Edits = @(
@@ -6638,8 +6652,13 @@ relocation entry, this patch is always applied last.
             #      sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
             #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
             #  exp/sprites/tranozi.spr, dc/HD_<height>P/bintroe and the rewritten main-menu script
-            #  (exp/HD_<height>P/bintroe) from the repository.  Because the .reloc insert shifts every later
-            #  relocation entry, this patch is always applied last.
+            #  (exp/HD_<height>P/bintroe) from the repository, plus the tracer-bullet data of 2 Oct 2026
+            #  (ANIMATE/TRAC.FIN, SPRITES/TRAC.SPR and the weapon-table overlays dc/gamestat/weapstat.txt,
+            #  exp/gamestat/weapstat.txt: the human trooper and the Lieutenant fire a visible streak, the Gray
+            #  trooper keeps its bolt at every weapon upgrade level and the Gray commander's pistol fires the
+            #  Gray bolt; data only, the patched exe reads the tables
+            #  through the mode prefix and the FIN through animozi.dat).  Because the .reloc insert shifts every
+            #  later relocation entry, this patch is always applied last.
             @{
                 Id = 'ozi'; Name = 'DARK COLONY and OZI MISSIONS menu modes (Council Wars only)'; Date = '10 Sep 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
@@ -6707,12 +6726,17 @@ itself uses.  Two buttons are added for it:
     sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
 REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
 exp/sprites/tranozi.spr, dc/HD_<height>P/bintroe and the rewritten main-menu script
-(exp/HD_<height>P/bintroe) from the repository.  Because the .reloc insert shifts every later
-relocation entry, this patch is always applied last.
+(exp/HD_<height>P/bintroe) from the repository, plus the tracer-bullet data of 2 Oct 2026
+(ANIMATE/TRAC.FIN, SPRITES/TRAC.SPR and the weapon-table overlays dc/gamestat/weapstat.txt,
+exp/gamestat/weapstat.txt: the human trooper and the Lieutenant fire a visible streak, the Gray
+trooper keeps its bolt at every weapon upgrade level and the Gray commander's pistol fires the
+Gray bolt; data only, the patched exe reads the tables
+through the mode prefix and the FIN through animozi.dat).  Because the .reloc insert shifts every
+later relocation entry, this patch is always applied last.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('resolution')
-                # data files this fix needs next to the exe (380; listed from the repository when this
+                # data files this fix needs next to the exe (384; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                     'ozi_ns\alta.gif'
@@ -7095,6 +7119,10 @@ relocation entry, this patch is always applied last.
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
                     'dc\intrface\credits.txt'
+                    'ANIMATE\TRAC.FIN'
+                    'SPRITES\TRAC.SPR'
+                    'dc\gamestat\weapstat.txt'
+                    'exp\gamestat\weapstat.txt'
                 )
                 Edits = @(
                     # PE optional header: base-relocation directory size 0x93CC -> 0x93EC (+32)
