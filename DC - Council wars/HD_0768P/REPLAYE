@@ -32,7 +32,7 @@ banim    16  0  4 4  7 8 9 10  2 3 4 5
 in_text  31  0  312  518   56    1  0  -  read_only
 in_text  17  0  312  534   56    1  0  -  read_only
 in_text  30  0  312  230   40    1  0  -  read_only
-checkb   32  0  688  252   27   17  149   8   -
+checkb   32  0  688  252   27   17  150   150   -
 checkb   33  0  688  282   27   17  149   8   -
 checkb   34  0  688  312   27   17  149   8   -
 checkb   35  0  688  342   27   17  149   8   -
