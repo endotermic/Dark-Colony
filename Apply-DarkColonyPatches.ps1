@@ -213,7 +213,7 @@ $Builds = @(
         Shipped        = $true
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '61f6a72aaa7a7e9c1f74e53023879f465bbf473fbb9be162839aa3ccac8c94c6'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
+        PatchedSha256  = 'b1725e95e32b167f0cbc2d7e0dc906352a807fb3e6cfbddd64b34c82da475656'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -221,7 +221,7 @@ $Builds = @(
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the published one is the exe in the repository); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = 'abd40f8848b774f495b801f3415017fa63657d780cd22b5878c36c356c981cd0'; '1024x768' = '61f6a72aaa7a7e9c1f74e53023879f465bbf473fbb9be162839aa3ccac8c94c6'; '1024x768/light' = 'ceeebe9863b5ba5db638c1dc69995f36764cbc979201406912658e297f3cc58d'; '1280x1024' = '6b7830efded99e87aa32d61e6ab25701f1426a9716d1e52b66447832717600e0'; '1280x1024/light' = 'f861d208b9d01d824c824b498e174d0c2780b37b5b645af56da8d355ba942688'; '1280x720' = 'e3f65239e86ff8799f6ce6e8284d6740358db504af47500ac5c75a9298eb0c94'; '1280x720/light' = '92d1217f2dfb9fc535b4deb1b637fb77c09aa652e64098eaa4372ba32b6715da'; '1280x800' = '35c0cab204917f2409bce778984ae17bcc9a71df75f3f98b47f0e30d1f75a30e'; '1280x800/light' = '0e4436a7845fc5e9178c1498f2575888fc0262bbcbacbff947f541d5bd893be0'; '1920x1080' = '6678641c5cae909f725accce3a87046e419fccfc1c7f433bac9272676383c322'; '1920x1080/light' = '5691849b24a2376cdb0330d3d98bcf1798fb4d6c3806f445e7b38fb7d8a9e281'; '1920x1200' = 'a9394f3ca3a2a2268a7a443372b5fd88118fee4f9c2392814bbd4cada7cf3c56'; '1920x1200/light' = '98f4270d75979c829230d10573cb4a50b185a3237438afc11141195859228331'; '3840x1080' = '7a70f4805a749090f303fb45c1d0d78a1bb7ff225a52c1420e26918cbf546fca'; '3840x1080/light' = '01bad6ca068b6984de7c45ffda3772d614ea058996c83aa2eb116f5a35ba115d' }
+        ReferenceSha256 = @{ '640x480' = 'abd40f8848b774f495b801f3415017fa63657d780cd22b5878c36c356c981cd0'; '1024x768' = 'b1725e95e32b167f0cbc2d7e0dc906352a807fb3e6cfbddd64b34c82da475656'; '1024x768/light' = 'fc50a22405050298af4613d0e9ed478d9e49f16ca209c7aa2487c04d697d9eb3'; '1280x1024' = '2c5df19d98462c48adf72906e343733244dee07fe210123a8aab2c91e6303cbb'; '1280x1024/light' = '1e160482390bd5279cbff2a5861de59090ee29e0ed7a4e8aca3b1b4358829785'; '1280x720' = '48ecca5e353c1746aa959a7b5d78b596ee125be3cf9517fa066718ac5998d544'; '1280x720/light' = 'c25c9676dfa978f98e2578080159ac1c23b90570f857d13d9896acb11b8ccf55'; '1280x800' = '35c0cab204917f2409bce778984ae17bcc9a71df75f3f98b47f0e30d1f75a30e'; '1280x800/light' = '0e4436a7845fc5e9178c1498f2575888fc0262bbcbacbff947f541d5bd893be0'; '1920x1080' = '6678641c5cae909f725accce3a87046e419fccfc1c7f433bac9272676383c322'; '1920x1080/light' = '5691849b24a2376cdb0330d3d98bcf1798fb4d6c3806f445e7b38fb7d8a9e281'; '1920x1200' = 'a9394f3ca3a2a2268a7a443372b5fd88118fee4f9c2392814bbd4cada7cf3c56'; '1920x1200/light' = '98f4270d75979c829230d10573cb4a50b185a3237438afc11141195859228331'; '3840x1080' = '7a70f4805a749090f303fb45c1d0d78a1bb7ff225a52c1420e26918cbf546fca'; '3840x1080/light' = '01bad6ca068b6984de7c45ffda3772d614ea058996c83aa2eb116f5a35ba115d' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -370,7 +370,7 @@ longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive le
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 609 bytes in 198 edits
+            #  Changes    : 610 bytes in 199 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -705,6 +705,8 @@ WAR screen is read from.
                     @{ Offset = 0x9F7C; Old = '81 EB 00 07 00 00'; New = '81 EB 80 0B 00 00' }
                     # interface update: sub edx,half_viewport_x
                     @{ Offset = 0x9F8B; Old = '81 EA 00 08 00 00'; New = '81 EA 00 0E 00 00' }
+                    # camera snap y: low byte -> 0x80 when the view has an odd tile count
+                    @{ Offset = 0xA38B; Old = 'C6 80 10 01 00 00 00'; New = 'C6 80 10 01 00 00 80' }
                     # frame render: sub edx,half_viewport_y
                     @{ Offset = 0xA51C; Old = '81 EA 00 07 00 00'; New = '81 EA 80 0B 00 00' }
                     # frame render: sub edx,half_viewport_x
@@ -980,7 +982,7 @@ WAR screen is read from.
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 685 bytes in 210 edits
+            #  Changes    : 686 bytes in 211 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -1313,6 +1315,8 @@ WAR screen is read from.
                     @{ Offset = 0x9F7C; Old = '81 EB 00 07 00 00'; New = '81 EB 80 0F 00 00' }
                     # interface update: sub edx,half_viewport_x
                     @{ Offset = 0x9F8B; Old = '81 EA 00 08 00 00'; New = '81 EA 00 12 00 00' }
+                    # camera snap y: low byte -> 0x80 when the view has an odd tile count
+                    @{ Offset = 0xA38B; Old = 'C6 80 10 01 00 00 00'; New = 'C6 80 10 01 00 00 80' }
                     # frame render: sub edx,half_viewport_y
                     @{ Offset = 0xA51C; Old = '81 EA 00 07 00 00'; New = '81 EA 80 0F 00 00' }
                     # frame render: sub edx,half_viewport_x
@@ -1614,7 +1618,7 @@ WAR screen is read from.
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 668 bytes in 211 edits
+            #  Changes    : 669 bytes in 212 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -1949,6 +1953,8 @@ WAR screen is read from.
                     @{ Offset = 0x9F7C; Old = '81 EB 00 07 00 00'; New = '81 EB 80 0A 00 00' }
                     # interface update: sub edx,half_viewport_x
                     @{ Offset = 0x9F8B; Old = '81 EA 00 08 00 00'; New = '81 EA 00 12 00 00' }
+                    # camera snap y: low byte -> 0x80 when the view has an odd tile count
+                    @{ Offset = 0xA38B; Old = 'C6 80 10 01 00 00 00'; New = 'C6 80 10 01 00 00 80' }
                     # frame render: sub edx,half_viewport_y
                     @{ Offset = 0xA51C; Old = '81 EA 00 07 00 00'; New = '81 EA 80 0A 00 00' }
                     # frame render: sub edx,half_viewport_x
@@ -8147,7 +8153,7 @@ directory that lists them); their SHA-256 is checked like every other edit.
         Shipped        = $false
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '64ade351678eaf63ba4013578fe1d9c90a362f44b1a78ad4bceca39eeee08f51'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
+        PatchedSha256  = '24de980eff20cd4916125b59fa40fd60f2cd7d1f01fcb350d5f4d26e4294cbcb'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -8155,7 +8161,7 @@ directory that lists them); their SHA-256 is checked like every other edit.
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the published one is the exe in the repository); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = '5091c5ba8fc93b7a5608dcbad0cbc64011dc8e6ae0c243322c168c0d22684d28'; '1024x768' = '64ade351678eaf63ba4013578fe1d9c90a362f44b1a78ad4bceca39eeee08f51'; '1024x768/light' = 'bfbffe0acc69ddc8fb27b931647531b32b4d5504a92bb0fc70c615eeaa97197a'; '1280x1024' = 'dbb889dc0c7abf71b3e84bf2f1da2411f5f5f94da9545ffc03fa2bef7f6a1a9b'; '1280x1024/light' = '4023619d3cc240671fe83f2077fc4a03530c4f3cf771e4325c45f7dfbd8ece58'; '1280x720' = '34167be967e3ae98a7c2b23229e6e93b84cf11bba01be0b9b013a085d896a51f'; '1280x720/light' = '57908f60c59549daf51d500d3984e90408b745b00fdb01552402574f71487f30'; '1280x800' = '9741397d23a907c26bd4f9805b82eeb494843faa592d0694d9c89315456f83a0'; '1280x800/light' = 'bbbe750dfe8b81744834978db439c97abfb5f1e036fd06f0f26b37d88310808c'; '1920x1080' = '82fded12730970431147cd99491ab089caf08873c1dc572b1a327b3b79e92ca5'; '1920x1080/light' = '64770745e5d9936ea4ccf4440109d098364ce3d83e11b2f19ba5953ecf752ed7'; '1920x1200' = 'f3de67da1963280f15046b97791a9f71c9d8bfb78e1f46ceb2d60fe57f53f67f'; '1920x1200/light' = 'a05375df7d262e72d0e1d46758735fd444f17d14fac921ba1479f70c10c31502'; '3840x1080' = '2000803996a97bed0b03cc281e0f3f5427aea12ee784c542a3cab8248696f1d7'; '3840x1080/light' = '079fc02e8bd7b5d418852a250e349c1f018a48f469a91516f765333c3cd45266' }
+        ReferenceSha256 = @{ '640x480' = '5091c5ba8fc93b7a5608dcbad0cbc64011dc8e6ae0c243322c168c0d22684d28'; '1024x768' = '24de980eff20cd4916125b59fa40fd60f2cd7d1f01fcb350d5f4d26e4294cbcb'; '1024x768/light' = '9ff92e20c8c6cad9a455fa1b47b2b5ce21bbc25e9a45cfac11c869ddc92daead'; '1280x1024' = '0fc46662ffcacc83ae1697c06615aea698e440cb183fa35d53509820a457bdb1'; '1280x1024/light' = 'f77796c73979cad9e764c0441a6ce562c1173f94aa988aefd9af7e5d103ad569'; '1280x720' = '4a23b8bbfb39531e2acd2c1e3dd7dede83a9c811b6fb5d47bbb0d9217e9ba765'; '1280x720/light' = 'b958a695a83d20a507e0599c14dd5020ed3f0ae53ff6761e88a5a8fa6a209454'; '1280x800' = '9741397d23a907c26bd4f9805b82eeb494843faa592d0694d9c89315456f83a0'; '1280x800/light' = 'bbbe750dfe8b81744834978db439c97abfb5f1e036fd06f0f26b37d88310808c'; '1920x1080' = '82fded12730970431147cd99491ab089caf08873c1dc572b1a327b3b79e92ca5'; '1920x1080/light' = '64770745e5d9936ea4ccf4440109d098364ce3d83e11b2f19ba5953ecf752ed7'; '1920x1200' = 'f3de67da1963280f15046b97791a9f71c9d8bfb78e1f46ceb2d60fe57f53f67f'; '1920x1200/light' = 'a05375df7d262e72d0e1d46758735fd444f17d14fac921ba1479f70c10c31502'; '3840x1080' = '2000803996a97bed0b03cc281e0f3f5427aea12ee784c542a3cab8248696f1d7'; '3840x1080/light' = '079fc02e8bd7b5d418852a250e349c1f018a48f469a91516f765333c3cd45266' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -8302,7 +8308,7 @@ longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive le
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 606 bytes in 197 edits
+            #  Changes    : 607 bytes in 198 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -8628,6 +8634,8 @@ WAR screen is read from.
                     @{ Offset = 0x9F1C; Old = '81 EB 00 07 00 00'; New = '81 EB 80 0B 00 00' }
                     # interface update: sub edx,half_viewport_x
                     @{ Offset = 0x9F2B; Old = '81 EA 00 08 00 00'; New = '81 EA 00 0E 00 00' }
+                    # camera snap y: low byte -> 0x80 when the view has an odd tile count
+                    @{ Offset = 0xA32B; Old = 'C6 80 10 01 00 00 00'; New = 'C6 80 10 01 00 00 80' }
                     # frame render: sub edx,half_viewport_y
                     @{ Offset = 0xA4BC; Old = '81 EA 00 07 00 00'; New = '81 EA 80 0B 00 00' }
                     # frame render: sub edx,half_viewport_x
@@ -8903,7 +8911,7 @@ WAR screen is read from.
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 683 bytes in 210 edits
+            #  Changes    : 684 bytes in 211 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -9229,6 +9237,8 @@ WAR screen is read from.
                     @{ Offset = 0x9F1C; Old = '81 EB 00 07 00 00'; New = '81 EB 80 0F 00 00' }
                     # interface update: sub edx,half_viewport_x
                     @{ Offset = 0x9F2B; Old = '81 EA 00 08 00 00'; New = '81 EA 00 12 00 00' }
+                    # camera snap y: low byte -> 0x80 when the view has an odd tile count
+                    @{ Offset = 0xA32B; Old = 'C6 80 10 01 00 00 00'; New = 'C6 80 10 01 00 00 80' }
                     # frame render: sub edx,half_viewport_y
                     @{ Offset = 0xA4BC; Old = '81 EA 00 07 00 00'; New = '81 EA 80 0F 00 00' }
                     # frame render: sub edx,half_viewport_x
@@ -9530,7 +9540,7 @@ WAR screen is read from.
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 665 bytes in 210 edits
+            #  Changes    : 666 bytes in 211 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -9856,6 +9866,8 @@ WAR screen is read from.
                     @{ Offset = 0x9F1C; Old = '81 EB 00 07 00 00'; New = '81 EB 80 0A 00 00' }
                     # interface update: sub edx,half_viewport_x
                     @{ Offset = 0x9F2B; Old = '81 EA 00 08 00 00'; New = '81 EA 00 12 00 00' }
+                    # camera snap y: low byte -> 0x80 when the view has an odd tile count
+                    @{ Offset = 0xA32B; Old = 'C6 80 10 01 00 00 00'; New = 'C6 80 10 01 00 00 80' }
                     # frame render: sub edx,half_viewport_y
                     @{ Offset = 0xA4BC; Old = '81 EA 00 07 00 00'; New = '81 EA 80 0A 00 00' }
                     # frame render: sub edx,half_viewport_x
