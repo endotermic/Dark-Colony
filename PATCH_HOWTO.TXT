@@ -14,7 +14,8 @@ This repository ships two kinds of executables:
     were called dc16new.exe, engexp16new.exe, maped_ozi_ns_v1.2.exe)
         DC - Council wars\Dark Colony Ultimate.exe
             (Council Wars plus the Dark Colony, OZI and Academy
-            campaigns in its main menu, and the ONLINE WAR button)
+            campaigns in its main menu, the ONLINE WAR and the
+            REPLAY ONLINE GAME buttons)
         Dark Colony - Map editor\Dark Colony Map Editor.exe
             (the greyed-out dialog controls of the original enabled -
             what the Polish ozi_ns editor did, minus the translation)
@@ -22,8 +23,8 @@ This repository ships two kinds of executables:
     interface light (classic) or dark (console style), hidden Windows
     pointer, 32 MiB memory pool, 150 % default game speed, two-monitor
     fix, the CD music as MP3, a high-resolution icon, ... and for
-    Council Wars the DARK COLONY and OZI MISSIONS menu modes and the
-    ONLINE WAR button)
+    Council Wars the DARK COLONY and OZI MISSIONS menu modes, the
+    ONLINE WAR and REPLAY ONLINE GAME buttons)
 
     The patched Classic "Dark Colony.exe" is DEPRECATED and no longer
     shipped since 1 Oct 2026: Dark Colony Ultimate plays the whole Dark
@@ -55,9 +56,10 @@ What makes it trustworthy:
      (Two fixes append bytes to the exe instead of replacing them:
      the icon appends the icon pictures - the icon itself is
      DC - Council wars\DC_HD.ICO, open it in any image viewer - and,
-     for Dark Colony Ultimate, "online" appends the ONLINE WAR module
-     compiled from tools\online\online.c of the Dark-Colony-Server
-     repository.  Both are written as Base64 text with their SHA-256.)
+     for Dark Colony Ultimate, "online" appends the ONLINE WAR /
+     REPLAY ONLINE GAME module compiled from tools\online\online.c of
+     the Dark-Colony-Server repository.  Both are written as Base64
+     text with their SHA-256.)
 
   2) A lot of comments on every step and every line: each fix has a
      description of what it changes in the game and why, and every
@@ -340,9 +342,12 @@ What makes it trustworthy:
                        the per-monitor DPI-aware manifest, so Windows never
                        scales the full-screen picture)
      Council Wars    + online, after icon (the ONLINE WAR button: a room
-                       browser for the relay server, TLS to port 8889; the
-                       script also writes the screen HD_<height>P\ONLINE and,
-                       if it is missing, DEFAULT_SERVER.TXT with the address
+                       browser for the relay server, TLS to port 8889, and
+                       the REPLAY ONLINE GAME button: the relay's recorded
+                       battles, watched from a participant's seat; the
+                       script also writes the screens HD_<height>P\ONLINE
+                       and REPLAYE with their backgrounds and, if it is
+                       missing, DEFAULT_SERVER.TXT with the address
                        dark-colony-server.fly.dev - an existing file with
                        your own relay address is never overwritten)
    -Resolution WxH picks the screen size and is REQUIRED for the two

@@ -1,0 +1,60 @@
+size 0 0 1024 768
+pictures hd_src/knobr
+background hd_0768p/replaybg
+font 0 intrface/mfonto5
+font_offset  0 31
+font 1 intrface/mfonto2
+font_offset  1 31
+animation intrface/loadg.dat
+colour erase  0 0 0
+colour sel  0 255 0
+
+%         # desc  x    y    w    h
+list      0  0  312  246  320  258  scroll 1  selbg sel  -  remap 4
+scroll    1  0  652  283   10  186  list 0
+pushb     2  0  644  250   26   26  -11  12  list 0 -3  -  remap 0
+pushb     3  0  644  476   26   26  -11  10  list 0  3  -  remap 0
+pushb     4  0  505  591   90   26  -11 2  label centre 3 0  -  remap 0
+pushb     5  0  595  591   90   26  -11 2  label centre 2 0  -  remap 0
+label     6  0   262   188  318   20  label 1  align centre  font 1  -  remap 4
+
+gadget    7  0  644  250   26   26  UP         anim_oneoff
+gadget    8  0  644  476   26   26  DOWN       anim_stopped
+gadget    9  0  505  591   90   26  MEDBUTTON  anim_stopped
+gadget   10  0  595  591   90   26  MEDBUTTON  anim_stopped
+
+gadget   12  0  696  580  129   41  CHOB       anim_loop unmask - bg erase
+gadget   13  0  585    146  128   13  ENCC       anim_loop unmask - bg erase
+gadget   15  0   205   231   95   79  SERC       anim_loop unmask - bg erase
+
+banim    16  0  4 4  7 8 9 10  2 3 4 5
+
+in_text  31  0  312  518   56    1  0  -  read_only
+in_text  17  0  312  534   56    1  0  -  read_only
+in_text  30  0  312  230   40    1  0  -  read_only
+checkb   32  0  688  252   27   17  149   8   -
+checkb   33  0  688  282   27   17  149   8   -
+checkb   34  0  688  312   27   17  149   8   -
+checkb   35  0  688  342   27   17  149   8   -
+checkb   36  0  688  372   27   17  149   8   -
+checkb   37  0  688  402   27   17  149   8   -
+checkb   38  0  688  432   27   17  149   8   -
+checkb   39  0  688  462   27   17  149   8   -
+in_text  40  0  719  255   13    1  0  -  read_only
+in_text  41  0  719  285   13    1  0  -  read_only
+in_text  42  0  719  315   13    1  0  -  read_only
+in_text  43  0  719  345   13    1  0  -  read_only
+in_text  44  0  719  375   13    1  0  -  read_only
+in_text  45  0  719  405   13    1  0  -  read_only
+in_text  46  0  719  435   13    1  0  -  read_only
+in_text  47  0  719  465   13    1  0  -  read_only
+in_text  48  0  688  230   17    1  0  -  read_only
+
+
+
+
+textmsg 1       Replay Online Game
+textmsg 2       REPLAY
+textmsg  3  BACK
+
+end

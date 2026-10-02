@@ -1,4 +1,7 @@
 <#
+    Dark Colony patcher 1.0, build 20261002.1617 - generated 2026-10-02 16:17 UTC from Dark-Colony-Server 1a69147+ and Dark-Colony cc633d5+.
+
+
 .SYNOPSIS
     Rebuilds the patched Dark Colony executables from the untouched originals, one documented
     patch at a time, so that anyone can see exactly which bytes change and why.
@@ -192,6 +195,15 @@ $ErrorActionPreference = 'Stop'
 #  And one that grows the file (the icon and online fixes, the last ones of a build): @{ Append = <offset = the file's
 #  length before>; Sha256 = '<of the appended bytes>'; Length = <n>; Base64 = '<the appended bytes>' }.
 # =================================================================================================
+
+# Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
+# patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
+# generated from are in the header above.
+$PatcherVersion = '1.0'
+$PatcherBuild = '20261002.1617'
+$PatcherGenerated = '2026-10-02 16:17 UTC from Dark-Colony-Server 1a69147+ and Dark-Colony cc633d5+'
+$script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
+
 $Builds = @(
 
     # ---------------------------------------------------------------------------------------------
@@ -213,7 +225,7 @@ $Builds = @(
         Shipped        = $true
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'b1725e95e32b167f0cbc2d7e0dc906352a807fb3e6cfbddd64b34c82da475656'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
+        PatchedSha256  = '4c7da6306acf6dc4d79949ff6034e72b4f4d0b209526e00a28f1dfec8980e292'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -221,7 +233,7 @@ $Builds = @(
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the published one is the exe in the repository); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = 'abd40f8848b774f495b801f3415017fa63657d780cd22b5878c36c356c981cd0'; '1024x768' = 'b1725e95e32b167f0cbc2d7e0dc906352a807fb3e6cfbddd64b34c82da475656'; '1024x768/light' = 'fc50a22405050298af4613d0e9ed478d9e49f16ca209c7aa2487c04d697d9eb3'; '1280x1024' = '2c5df19d98462c48adf72906e343733244dee07fe210123a8aab2c91e6303cbb'; '1280x1024/light' = '1e160482390bd5279cbff2a5861de59090ee29e0ed7a4e8aca3b1b4358829785'; '1280x720' = '48ecca5e353c1746aa959a7b5d78b596ee125be3cf9517fa066718ac5998d544'; '1280x720/light' = 'c25c9676dfa978f98e2578080159ac1c23b90570f857d13d9896acb11b8ccf55'; '1280x800' = '35c0cab204917f2409bce778984ae17bcc9a71df75f3f98b47f0e30d1f75a30e'; '1280x800/light' = '0e4436a7845fc5e9178c1498f2575888fc0262bbcbacbff947f541d5bd893be0'; '1920x1080' = '6678641c5cae909f725accce3a87046e419fccfc1c7f433bac9272676383c322'; '1920x1080/light' = '5691849b24a2376cdb0330d3d98bcf1798fb4d6c3806f445e7b38fb7d8a9e281'; '1920x1200' = 'a9394f3ca3a2a2268a7a443372b5fd88118fee4f9c2392814bbd4cada7cf3c56'; '1920x1200/light' = '98f4270d75979c829230d10573cb4a50b185a3237438afc11141195859228331'; '3840x1080' = '7a70f4805a749090f303fb45c1d0d78a1bb7ff225a52c1420e26918cbf546fca'; '3840x1080/light' = '01bad6ca068b6984de7c45ffda3772d614ea058996c83aa2eb116f5a35ba115d' }
+        ReferenceSha256 = @{ '640x480' = 'c5c063584ed0d19b24629440959f38ee0c3d0e751c3e753b823ca0c067328baf'; '1024x768' = '4c7da6306acf6dc4d79949ff6034e72b4f4d0b209526e00a28f1dfec8980e292'; '1024x768/light' = '6bc56095d281b16b80de922703675b79d75fa5800328b2b1c6389125dc242598'; '1280x1024' = '8a3f95fc97dc708b213950630a84a5c1599ff1501b5ad375d903860e18a109e0'; '1280x1024/light' = '75af3ac600c4a534dc33044b35cd24c0025873e9a5d791b0a198a7426e32bd6e'; '1280x720' = '30d412d49dfec8337c03f7f7bbc3d00e7c3c8573dd1320313323673232d765e1'; '1280x720/light' = '86d9b586d4c81af2e7649e2cfb39ef19cb446755ad1a77d397a5489b6c4b14b5'; '1280x800' = 'eee6867a90aad6ab925caea22d201e0608528300d69dc7f2bd9a1d1fd2da3ff5'; '1280x800/light' = '25cb188192dcbcd852c86086daaafd63ae6c286c47fa6647c1b8e541d95fc855'; '1920x1080' = '4ed1d42cf8c11476b0282aa1510ccf632d9b36da757b579b1ea647e53851829a'; '1920x1080/light' = '8fceabe78205d6971641fef4625acac49989af7bbbe8f4d39afc7fe764b7d975'; '1920x1200' = '532ddd20afd696508580e16171b71b487b11040eb0d5c49e65a34494a30e05d1'; '1920x1200/light' = '76145b66fc2f90d4bed4f302fd3206fdb891c4ab8435f7210c5df4b9702b51ed'; '3840x1080' = 'e653b98184f18cd94deac1c770c62f9c382c9ac91879d7664ac36dcc410e514d'; '3840x1080/light' = '8f6f0de9583e837bd6a99b1ebf09f1d1e21afb6bb789157d438a9ad4eb305165' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -7278,14 +7290,14 @@ directory that lists them); their SHA-256 is checked like every other edit.
                 )
             }
 
-            # ---- online: ONLINE WAR: a room browser for the relay server in the main menu, TLS to port 8889 (Dark Colony Ultimate only) ---------------------------------------------------------
-            #  Added      : 29 Sep 2026
+            # ---- online: ONLINE WAR and REPLAY ONLINE GAME: a room browser and a replay browser for the relay server in the main menu, TLS to port 8889 (Dark Colony Ultimate only) ---------------------------------------------------------
+            #  Added      : 29 Sep 2026 (REPLAY ONLINE GAME 2 Oct 2026)
             #  Made with  : tools/patch_online.py (module: tools/online/online.c, built by tools/online/build.cmd)
-            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.51; docs/RELAY_SERVER_PLAN.md section 20; docs/DC16_NETWORK_PROTOCOL.md sections 4.4 and 6.9
-            #  Changes    : 12312 bytes in 6 edits
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.51 and 10.65; docs/RELAY_SERVER_PLAN.md sections 20 and 21; docs/DC16_NETWORK_PROTOCOL.md sections 4.4, 4.5, 6.9 and 6.10
+            #  Changes    : 14872 bytes in 6 edits
             #  The main menu of Dark Colony Ultimate gets an eleventh button, ONLINE WAR (top of the right column;
-            #  MULTI PLAYER WAR and ENCYCLOPEDIA move two rows down, the second row stays empty for a future replay
-            #  button).  It opens a room browser built from the LOAD GAME screen that lists the rooms of the Dark
+            #  MULTI PLAYER WAR and ENCYCLOPEDIA move two rows down) and, since 2 Oct 2026, a twelfth right under it,
+            #  REPLAY ONLINE GAME.  ONLINE WAR opens a room browser built from the LOAD GAME screen that lists the rooms of the Dark
             #  Colony Server relay - map, terrain, seats, players, bots, status - and joins the room you pick; the
             #  relay then chooses a free slot for you.  The address of the relay comes from DEFAULT_SERVER.TXT beside
             #  the exe (plain text with C++-style comments; the shipped file names dark-colony-server.fly.dev and
@@ -7302,26 +7314,35 @@ directory that lists them); their SHA-256 is checked like every other edit.
             #      nothing: it takes LoadLibraryA and GetProcAddress from the exe's own import table and resolves
             #      the Windows socket, TLS and kernel functions at run time.  Three header edits register the
             #      section (section count, section header, image size).
-            #    * the menu's accepted-id filter `cmp edx,7` -> `cmp edx,8` (button id 8 = ONLINE WAR), and the
-            #      seven NOP bytes at the end of the menu's id chain become a jump into the section (ids other than
-            #      8 return to the menu loop as before).  Nothing else in the code changes.
+            #    * the menu's accepted-id filter `cmp edx,7` -> `cmp edx,9` (button ids 8 = ONLINE WAR, 9 = REPLAY
+            #      ONLINE GAME), and the seven NOP bytes at the end of the menu's id chain become a jump into the
+            #      section (ids other than 8 and 9 return to the menu loop as before).  Nothing else in the code changes.
             #
-            #  Data: the screen script HD_<height>P\ONLINE (INTRFACE\ONLINE at 640x480) is derived from LOADGE by
-            #  this script (list widened to 56 columns, header and status lines, ENTER / BACK), and
-            #  DEFAULT_SERVER.TXT is written beside the exe when it is missing - an existing file is never
-            #  overwritten, so your own relay address stays.  The appended bytes are written below in Base64 with
-            #  their SHA-256; the C source they were compiled from is in the Dark-Colony-Server repository.
+            #  REPLAY ONLINE GAME lists the battles the relay recorded (date and time, map, terrain, seats, players,
+            #  computer players, length - the relay keeps the newest 50) and, right of the list, the eight players of
+            #  the selected battle with a radio box each (the boxes come from HD_SRC\KNOBR.SPR, the lobby's READY
+            #  boxes with an empty box added); tick one and REPLAY makes the relay play that battle back to you from
+            #  that player's seat - his fog of war, his base, the whole battle as it happened; you can scroll the map
+            #  but not act.  The same encrypted connection, the same module.
+            #
+            #  Data: the screen scripts HD_<height>P\ONLINE and REPLAYE (INTRFACE\ONLINE / REPLAYE at 640x480) are
+            #  derived from LOADGE by this script (list widened to 56 columns, header and status lines, ENTER / BACK;
+            #  the replay screen: a 40-column list and the participant pane), their backgrounds ONLINEBG.GIF /
+            #  REPLAYBG.GIF from LOADER.GIF, and DEFAULT_SERVER.TXT is written beside the exe when it is missing - an
+            #  existing file is never overwritten, so your own relay address stays.  The appended bytes are written
+            #  below in Base64 with their SHA-256; the C source they were compiled from is in the Dark-Colony-Server
+            #  repository.
             @{
-                Id = 'online'; Name = 'ONLINE WAR: a room browser for the relay server in the main menu, TLS to port 8889 (Dark Colony Ultimate only)'; Date = '29 Sep 2026'
+                Id = 'online'; Name = 'ONLINE WAR and REPLAY ONLINE GAME: a room browser and a replay browser for the relay server in the main menu, TLS to port 8889 (Dark Colony Ultimate only)'; Date = '29 Sep 2026 (REPLAY ONLINE GAME 2 Oct 2026)'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = $null
                 # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
                 Theme = $null
-                Tool = 'tools/patch_online.py (module: tools/online/online.c, built by tools/online/build.cmd)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.51; docs/RELAY_SERVER_PLAN.md section 20; docs/DC16_NETWORK_PROTOCOL.md sections 4.4 and 6.9'
+                Tool = 'tools/patch_online.py (module: tools/online/online.c, built by tools/online/build.cmd)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.51 and 10.65; docs/RELAY_SERVER_PLAN.md sections 20 and 21; docs/DC16_NETWORK_PROTOCOL.md sections 4.4, 4.5, 6.9 and 6.10'
                 Description = @'
 The main menu of Dark Colony Ultimate gets an eleventh button, ONLINE WAR (top of the right column;
-MULTI PLAYER WAR and ENCYCLOPEDIA move two rows down, the second row stays empty for a future replay
-button).  It opens a room browser built from the LOAD GAME screen that lists the rooms of the Dark
+MULTI PLAYER WAR and ENCYCLOPEDIA move two rows down) and, since 2 Oct 2026, a twelfth right under it,
+REPLAY ONLINE GAME.  ONLINE WAR opens a room browser built from the LOAD GAME screen that lists the rooms of the Dark
 Colony Server relay - map, terrain, seats, players, bots, status - and joins the room you pick; the
 relay then chooses a free slot for you.  The address of the relay comes from DEFAULT_SERVER.TXT beside
 the exe (plain text with C++-style comments; the shipped file names dark-colony-server.fly.dev and
@@ -7338,37 +7359,47 @@ What is changed in the exe:
     nothing: it takes LoadLibraryA and GetProcAddress from the exe's own import table and resolves
     the Windows socket, TLS and kernel functions at run time.  Three header edits register the
     section (section count, section header, image size).
-  * the menu's accepted-id filter `cmp edx,7` -> `cmp edx,8` (button id 8 = ONLINE WAR), and the
-    seven NOP bytes at the end of the menu's id chain become a jump into the section (ids other than
-    8 return to the menu loop as before).  Nothing else in the code changes.
+  * the menu's accepted-id filter `cmp edx,7` -> `cmp edx,9` (button ids 8 = ONLINE WAR, 9 = REPLAY
+    ONLINE GAME), and the seven NOP bytes at the end of the menu's id chain become a jump into the
+    section (ids other than 8 and 9 return to the menu loop as before).  Nothing else in the code changes.
 
-Data: the screen script HD_<height>P\ONLINE (INTRFACE\ONLINE at 640x480) is derived from LOADGE by
-this script (list widened to 56 columns, header and status lines, ENTER / BACK), and
-DEFAULT_SERVER.TXT is written beside the exe when it is missing - an existing file is never
-overwritten, so your own relay address stays.  The appended bytes are written below in Base64 with
-their SHA-256; the C source they were compiled from is in the Dark-Colony-Server repository.
+REPLAY ONLINE GAME lists the battles the relay recorded (date and time, map, terrain, seats, players,
+computer players, length - the relay keeps the newest 50) and, right of the list, the eight players of
+the selected battle with a radio box each (the boxes come from HD_SRC\KNOBR.SPR, the lobby's READY
+boxes with an empty box added); tick one and REPLAY makes the relay play that battle back to you from
+that player's seat - his fog of war, his base, the whole battle as it happened; you can scroll the map
+but not act.  The same encrypted connection, the same module.
+
+Data: the screen scripts HD_<height>P\ONLINE and REPLAYE (INTRFACE\ONLINE / REPLAYE at 640x480) are
+derived from LOADGE by this script (list widened to 56 columns, header and status lines, ENTER / BACK;
+the replay screen: a 40-column list and the participant pane), their backgrounds ONLINEBG.GIF /
+REPLAYBG.GIF from LOADER.GIF, and DEFAULT_SERVER.TXT is written beside the exe when it is missing - an
+existing file is never overwritten, so your own relay address stays.  The appended bytes are written
+below in Base64 with their SHA-256; the C source they were compiled from is in the Dark-Colony-Server
+repository.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('ozi', 'icon')
-                # data files this fix needs next to the exe (0; listed from the repository when this
+                # data files this fix needs next to the exe (1; listed from the repository when this
                 # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
+                    'HD_SRC\KNOBR.SPR'
                 )
                 Edits = @(
                     # PE header: NumberOfSections 7 -> 8 (the new .dccode section)
                     @{ Offset = 0x86; Old = '07 00'; New = '08 00' }
-                    # optional header: SizeOfImage 0x157000 -> 0x15A000
-                    @{ Offset = 0xD0; Old = '00 70 15 00'; New = '00 A0 15 00' }
-                    # section table: new header .dccode VA 0x157000 size 0x2F22, file 0xB5A00 size 0x3000, code + read + write + execute (0xE0000020), in the zero slack after the last header
-                    @{ Offset = 0x290; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '2E 64 63 63 6F 64 65 00 22 2F 00 00 00 70 15 00 00 30 00 00 00 5A 0B 00 00 00 00 00 00 00 00 00 00 00 00 00 20 00 00 E0' }
-                    # main menu id filter 0x404F9E: cmp edx,7 -> cmp edx,8 (button id 8 = ONLINE WAR reaches the id chain)
-                    @{ Offset = 0x43A0; Old = '07'; New = '08' }
-                    # end of the id chain 0x405136: 7 NOP -> jmp online_dispatch 0x559EA5 (+2 NOP); ids other than 8 continue at 0x40513D as before
-                    @{ Offset = 0x4536; Old = '90 90 90 90 90 90 90'; New = 'E9 6A 4D 15 00 90 90' }
-                    # new section .dccode at file 0xB5A00 (VA 0x557000), 12288 bytes appended: the ONLINE WAR module (12066 bytes of code and data, 295 absolute operands rebased, online_dispatch +0x2EA5, online_war +0x2C6C, module sha256 13991201b66479bd)
-                    # (Base64 of the 12288 appended bytes; decode it to see them - the ONLINE WAR module, compiled from tools/online/online.c (see the fix description))
-                    @{ Append = 0xB5A00; Sha256 = 'd650fedac9266da7263e3d25da1cb3acd73fdd21027de1ad59856148e0e1520e'; Length = 12288
-                       Base64 = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////01BUCAgICAgICAgICAgICAgICBURVJSQUlOICBTRUFUUyBQTEFZRVJTIEJPVFMgU1RBVFVTAAAAaW50cmZhY2Uvb25saW4AAC9vbmxpbgAAXE9OTElORQBCTU9ubGluZQAAAAAxMjcuMC4wLjEAAAAwMTIzNDU2Nzg5QUJDREVGAAAAAGtlcm5lbDMyLmRsbAAAAAB3czJfMzIuZGxsAABzZWN1cjMyLmRsbABDcmVhdGVGaWxlQQBSZWFkRmlsZQAAAABDbG9zZUhhbmRsZQBHZXRUaWNrQ291bnQAAAAAQ3JlYXRlVGhyZWFkAAAAAFNsZWVwAAAAR2V0TGFzdEVycm9yAAAAAFZpcnR1YWxBbGxvYwAAAABXcml0ZUZpbGUAAABTZXRGaWxlUG9pbnRlcgAAV1NBU3RhcnR1cAAAc29ja2V0AABjb25uZWN0AHNlbmQAAAAAcmVjdgAAAABzZWxlY3QAAGNsb3Nlc29ja2V0AGdldGhvc3RieW5hbWUAAABpbmV0X2FkZHIAAABodG9ucwAAAG50b2hzAAAAYmluZAAAAABsaXN0ZW4AAGFjY2VwdAAAZ2V0c29ja25hbWUAV1NBR2V0TGFzdEVycm9yAF9fV1NBRkRJc1NldAAAAABBY3F1aXJlQ3JlZGVudGlhbHNIYW5kbGVBAAAASW5pdGlhbGl6ZVNlY3VyaXR5Q29udGV4dEEAAFF1ZXJ5Q29udGV4dEF0dHJpYnV0ZXNBAEVuY3J5cHRNZXNzYWdlAABEZWNyeXB0TWVzc2FnZQAARnJlZUNvbnRleHRCdWZmZXIAAABEZWxldGVTZWN1cml0eUNvbnRleHQAAABGcmVlQ3JlZGVudGlhbHNIYW5kbGUAAAByZXNvbHZlOiB3czJfMzIuZGxsIG5vdCBsb2FkZWQAAHJlc29sdmU6IHNlY3VyMzIuZGxsIG5vdCBsb2FkZWQAcmVzb2x2ZTogYSBmdW5jdGlvbiBpcyBtaXNzaW5nIChzZWUgdGhlIFcgdGFibGUgaW4gb25saW5lLmMpAAAAAE9OTElORS5MT0cAAA0KAABUTFMgZW5jcnlwdCBmYWlsZWQgAFRMUyBkZWNyeXB0IGZhaWxlZCAAVExTIHJlbmVnb3RpYXRpb24gcmVxdWVzdGVkAE1pY3Jvc29mdCBVbmlmaWVkIFNlY3VyaXR5IFByb3RvY29sIFByb3ZpZGVyAAAAAFRMUyBjcmVkZW50aWFscyBmYWlsZWQgAFRMUyBoYW5kc2hha2UgdGltZWQgb3V0AGNvbm5lY3Rpb24gY2xvc2VkIGR1cmluZyB0aGUgVExTIGhhbmRzaGFrZQAAc2VuZCBmYWlsZWQgZHVyaW5nIHRoZSBUTFMgaGFuZHNoYWtlAAAAAFRMUyBoYW5kc2hha2UgZmFpbGVkIAAAACAoY2VydGlmaWNhdGUgbm90IHRydXN0ZWQpAAAgKGNlcnRpZmljYXRlIG5hbWUgbWlzbWF0Y2gpAAAAACAobm90IGEgVExTIHNlcnZlcjsgdHJ5IGBwbGFpbmApAAAAAFRMUyBzdHJlYW0gc2l6ZXMgZmFpbGVkAERFRkFVTFRfU0VSVkVSLlRYVAAAREVGQVVMVF9TRVJWRVIuVFhUIG5vdCBmb3VuZCBiZXNpZGUgdGhlIGdhbWUAAAAAcGxhaW4AAABub3RscwAAAERFRkFVTFRfU0VSVkVSLlRYVCBuYW1lcyBubyBzZXJ2ZXIgYWRkcmVzcwAAUHJvdG9jb2wgZXJyb3I6IGJhZCBmcmFtZSBmcm9tIHRoZSByZWxheQAAAABQcm90b2NvbCBlcnJvcjogZnJhbWUgdG9vIGxvbmcAAHByb3h5OiBhY2NlcHQgZmFpbGVkAAAAAHByb3h5OiB0aGUgZ2FtZSBjb25uZWN0ZWQAAABwcm94eTogY2xvc2luZyBib3RoIGNvbm5lY3Rpb25zAFdTQVN0YXJ0dXAgZmFpbGVkAAAAQ2Fubm90IHJlc29sdmUgAHNvY2tldCgpIGZhaWxlZABDYW5ub3QgY29ubmVjdCB0byAAADoAAAAgKGVycm9yIAAAAAApAAAAc2NyZWVuOiAAAAAAc2NyZWVuIGxvYWRlZAAAAFNlcnZlcjogbm9uZSAoc2VlIERFRkFVTFRfU0VSVkVSLlRYVCkAAABTZXJ2ZXI6IAAAAABDb25uZWN0aW5nIChubyBlbmNyeXB0aW9uKS4uLgAAAENvbm5lY3RpbmcgKFRMUykuLi4AY29ubmVjdGVkIChwbGFpbikAAABjb25uZWN0ZWQgKFRMUykAQ29ubmVjdGVkLiBTZWxlY3QgYSByb29tIGFuZCBwcmVzcyBFTlRFUi4AAABDb25uZWN0ZWQgKFRMUykuIFNlbGVjdCBhIHJvb20gYW5kIHByZXNzIEVOVEVSLgBDb25uZWN0aW9uIGxvc3QuAAAAAGNvbm5lY3Q6IAAAAE5vdCBjb25uZWN0ZWQuIFByZXNz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' }
+                    # optional header: SizeOfImage 0x157000 -> 0x15B000
+                    @{ Offset = 0xD0; Old = '00 70 15 00'; New = '00 B0 15 00' }
+                    # section table: new header .dccode VA 0x157000 size 0x3908, file 0xB5A00 size 0x3A00, code + read + write + execute (0xE0000020), in the zero slack after the last header
+                    @{ Offset = 0x290; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '2E 64 63 63 6F 64 65 00 08 39 00 00 00 70 15 00 00 3A 00 00 00 5A 0B 00 00 00 00 00 00 00 00 00 00 00 00 00 20 00 00 E0' }
+                    # main menu id filter 0x404F9E: cmp edx,7 -> cmp edx,9 (button ids 8 = ONLINE WAR and 9 = REPLAY ONLINE GAME reach the id chain)
+                    @{ Offset = 0x43A0; Old = '07'; New = '09' }
+                    # end of the id chain 0x405136: 7 NOP -> jmp online_dispatch 0x55A85C (+2 NOP); id 8 runs online_war, id 9 replay_game 0x55A849, other ids continue at 0x40513D as before
+                    @{ Offset = 0x4536; Old = '90 90 90 90 90 90 90'; New = 'E9 21 57 15 00 90 90' }
+                    # new section .dccode at file 0xB5A00 (VA 0x557000), 14848 bytes appended: the ONLINE WAR / REPLAY ONLINE GAME module (14600 bytes of code and data, 362 absolute operands rebased, online_dispatch +0x385C, online_war +0x3836, replay_game +0x3849, module sha256 b7a360dd76f28424)
+                    # (Base64 of the 14848 appended bytes; decode it to see them - the ONLINE WAR module, compiled from tools/online/online.c (see the fix description))
+                    @{ Append = 0xB5A00; Sha256 = '40b6382ee6a58b6ec3b7f409a29608d442824044326d6159907342f260bd3f9d'; Length = 14848
+                       Base64 = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP////9NQVAgICAgICAgICAgICAgICAgVEVSUkFJTiAgU0VBVFMgUExBWUVSUyBCT1RTIFNUQVRVUwAAAFdBVENIIEFTAAAAAGludHJmYWNlL29ubGluAABpbnRyZmFjZS9yZXBsYXkAL29ubGluAABcT05MSU5FAC9yZXBsYXkAXFJFUExBWUUAAAAAQk1PbmxpbmUAAAAAMTI3LjAuMC4xAAAAMDEyMzQ1Njc4OUFCQ0RFRgAAAABrZXJuZWwzMi5kbGwAAAAAd3MyXzMyLmRsbAAAc2VjdXIzMi5kbGwAQ3JlYXRlRmlsZUEAUmVhZEZpbGUAAAAAQ2xvc2VIYW5kbGUAR2V0VGlja0NvdW50AAAAAENyZWF0ZVRocmVhZAAAAABTbGVlcAAAAEdldExhc3RFcnJvcgAAAABWaXJ0dWFsQWxsb2MAAAAAV3JpdGVGaWxlAAAAU2V0RmlsZVBvaW50ZXIAAFdTQVN0YXJ0dXAAAHNvY2tldAAAY29ubmVjdABzZW5kAAAAAHJlY3YAAAAAc2VsZWN0AABjbG9zZXNvY2tldABnZXRob3N0YnluYW1lAAAAaW5ldF9hZGRyAAAAaHRvbnMAAABudG9ocwAAAGJpbmQAAAAAbGlzdGVuAABhY2NlcHQAAGdldHNvY2tuYW1lAFdTQUdldExhc3RFcnJvcgBfX1dTQUZESXNTZXQAAAAAQWNxdWlyZUNyZWRlbnRpYWxzSGFuZGxlQQAAAEluaXRpYWxpemVTZWN1cml0eUNvbnRleHRBAABRdWVyeUNvbnRleHRBdHRyaWJ1dGVzQQBFbmNyeXB0TWVzc2FnZQAARGVjcnlwdE1lc3NhZ2UAAEZyZWVDb250ZXh0QnVmZmVyAAAARGVsZXRlU2VjdXJpdHlDb250ZXh0AAAARnJlZUNyZWRlbnRpYWxzSGFuZGxlAAAAcmVzb2x2ZTogd3MyXzMyLmRsbCBub3QgbG9hZGVkAAByZXNvbHZlOiBzZWN1cjMyLmRsbCBub3QgbG9hZGVkAHJlc29sdmU6IGEgZnVuY3Rpb24gaXMgbWlzc2luZyAoc2VlIHRoZSBXIHRhYmxlIGluIG9ubGluZS5jKQAAAABPTkxJTkUuTE9HAAANCgAAVExTIGVuY3J5cHQgZmFpbGVkIABUTFMgZGVjcnlwdCBmYWlsZWQgAFRMUyByZW5lZ290aWF0aW9uIHJlcXVlc3RlZABNaWNyb3NvZnQgVW5pZmllZCBTZWN1cml0eSBQcm90b2NvbCBQcm92aWRlcgAAAABUTFMgY3JlZGVudGlhbHMgZmFpbGVkIABUTFMgaGFuZHNoYWtlIHRpbWVkIG91dABjb25uZWN0aW9uIGNsb3NlZCBkdXJpbmcgdGhlIFRMUyBoYW5kc2hha2UAAHNlbmQgZmFpbGVkIGR1cmluZyB0aGUgVExTIGhhbmRzaGFrZQAAAABUTFMgaGFuZHNoYWtlIGZhaWxlZCAAAAAgKGNlcnRpZmljYXRlIG5vdCB0cnVzdGVkKQAAIChjZXJ0aWZpY2F0ZSBuYW1lIG1pc21hdGNoKQAAAAAgKG5vdCBhIFRMUyBzZXJ2ZXI7IHRyeSBgcGxhaW5gKQAAAABUTFMgc3RyZWFtIHNpemVzIGZhaWxlZABERUZBVUxUX1NFUlZFUi5UWFQAAERFRkFVTFRfU0VSVkVSLlRYVCBub3QgZm91bmQgYmVzaWRlIHRoZSBnYW1lAAAAAHBsYWluAAAAbm90bHMAAABERUZBVUxUX1NFUlZFUi5UWFQgbmFtZXMgbm8gc2VydmVyIGFkZHJlc3MAAFByb3RvY29sIGVycm9yOiBiYWQgZnJhbWUgZnJvbSB0aGUgcmVsYXkAAAAAUHJvdG9jb2wgZXJyb3I6IGZyYW1lIHRvbyBsb25nAABtb25leSBmaXg6IHNpbSBzdGF0ZSAAAABtb25leSBmaXg6IGxvY2FsIHBsYXllciAAAAAAbW9uZXkgZml4OiBtb25leSAAAABtb25leSBmaXg6IHNwZW50IAAAAHByb3h5OiBhY2NlcHQgZmFpbGVkAAAAAHByb3h5OiB0aGUgZ2FtZSBjb25uZWN0ZWQAAABwcm94eTogY2xvc2luZyBib3RoIGNvbm5lY3Rpb25zAFdTQVN0YXJ0dXAgZmFpbGVkAAAAQ2Fubm90IHJlc29sdmUgAHNvY2tldCgpIGZhaWxlZABDYW5ub3QgY29ubmVjdCB0byAAADoAAAAgKGVycm9yIAAAAAApAAAAc2NyZWVuOiAAAAAAc2NyZWVuIGxvYWRlZAAAAFNlcnZlcjogbm9uZSAoc2VlIERFRkFVTFRfU0VSVkVSLlRYVCkAAABTZXJ2ZXI6IAAAAABDb25uZWN0aW5nIChubyBlbmNyeXB0aW9uKS4uLgAAAENvbm5lY3RpbmcgKFRMUykuLi4AY29ubmVjdGVkIChwbGFpbikAAABjb25uZWN0ZWQgKFRMUykAQ29ubmVjdGVkLiBQaWNrIGEgYmF0dGxlLCB0aWNrIGEgcGxheWVyLCBwcmVzcyBSRVBMQVkuAABDb25uZWN0ZWQgKFRMUykuIFBpY2sgYSBiYXR0bGUsIHRpY2sgYSBwbGF5ZXIsIHByZXNzIFJFUExBWS4AAAAAQ29ubmVjdGVkLiBTZWxlY3QgYSByb29tIGFuZCBwcmVzcyBFTlRFUi4AAABDb25uZWN0ZWQgKFRMUykuIFNlbGVjdCBhIHJvb20gYW5kIHByZXNzIEVOVEVSLgBDb25uZWN0aW9uIGxvc3QuAAAAAGNvbm5lY3Q6IAAAAE5vIHJlY29yZGVkIGJhdHRsZSBvbiB0aGUgc2VydmVyIHlldC4AAAByZXBsYXkgbGlzdDogZW50cmllcyAAAABOb3QgY29ubmVjdGVkLiBQcmVzcyBCQUNLIGFuZCB0cnkgYWdhaW4uAAAAAFNlbGVjdCBhIHJvb20gZmlyc3QuAAAAAEVudGVyaW5nIHJvb20gAAAuLi4AU2VsZWN0IGEgYmF0dGxlIGZpcnN0LgAAVGljayB0aGUgcGxheWVyIHRvIHdhdGNoIGFzLgAAAABTdGFydGluZyB0aGUgcmVwbGF5IGFzIABSUExBWSByZWNvcmRpbmcgAAAAAFJQTEFZIHNsb3QgAGNoZWNrYiBldmVudCBraW5kIAAAY2hlY2tiIGV2ZW50IGlkIAAAAAAtLS0gUkVQTEFZIE9OTElORSBHQU1FIHByZXNzZWQAAC0tLSBPTkxJTkUgV0FSIHByZXNzZWQAAFZpcnR1YWxBbGxvYyBmYWlsZWQA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' }
                 )
             }
         )
@@ -14082,7 +14113,7 @@ $HD_SRC = 'HD_SRC'
 $HD_FOLDER_RE = [regex] '^(?i)(HD|UW)_\d{4}P$'
 # the copies the 640x480 build reads (fixes movies / ozi / music / online at the original size)
 $STOCK_COPIES = @('exp\intrface\bintoze', 'dc\intrface\bintoze', 'ozi_ns\intrface\bintoze', 'exp\intrface\lopme', 'dc\intrface\lopme', 'ozi_ns\intrface\lopme',
-                  'GAMESTAT\HSCNDC.TXT', 'GAMESTAT\GSCNDC.TXT', 'INTRFACE\ONLINE', 'INTRFACE\ONLINEBG.GIF')
+                  'GAMESTAT\HSCNDC.TXT', 'GAMESTAT\GSCNDC.TXT', 'INTRFACE\ONLINE', 'INTRFACE\ONLINEBG.GIF', 'INTRFACE\REPLAYE', 'INTRFACE\REPLAYBG.GIF')
 
 # What a run for $Keep (a folder name, or '' for a 640x480 build) deletes: every other resolution's folder under the
 # game folder and under exp\, dc\, ozi_ns\ (HD_*P / UW_*P and the pre-October INTRF_HD / intrf_hd), plus - for an
@@ -14962,17 +14993,17 @@ function Get-TextmsgLine([int] $N, [string] $Text) {
 }
 
 function Edit-OziMenu([string] $Text) {
-    # right column: ONLINE WAR (8, 29 Sep 2026), an empty row reserved for a replay button, MULTI PLAYER WAR, ENCYCLOPEDIA, QUIT
-    $cols = @(@(1, 6, 7, 0, 2, 16, 4), @(8, $null, 3, 5, $null, $null, 12))
+    # right column: ONLINE WAR (8, 29 Sep 2026), REPLAY ONLINE GAME (9, 2 Oct 2026), MULTI PLAYER WAR, ENCYCLOPEDIA, QUIT
+    $cols = @(@(1, 6, 7, 0, 2, 16, 4), @(8, 9, 3, 5, $null, $null, 12))
     $gapAfter = @(1, 3, 5)
     $stockButtons = @(0, 1, 2, 3, 4, 5, 12, 16)
-    $stockGadgets = @(9, 10, 11, 13, 17)   # 8 is renumbered (see $renum)
-    $newButtons = @(6, 7, 8)
-    # widget ids are one object space for every kind: the plates 6, 7 and 8 of buttons 0, 1 and 2 move to
-    # 19, 20 and 24 so that the button ids 6, 7 (Dark Colony) and 8 (ONLINE WAR) are free
-    $renum = @{ 6 = 19; 7 = 20; 8 = 24 }
-    $gadgetOf = @{ 0 = 19; 1 = 20; 2 = 24; 3 = 9; 4 = 10; 5 = 11; 6 = 21; 7 = 22; 8 = 23; 12 = 13; 16 = 17 }
-    $labelOf = @{ 6 = 9; 7 = 10; 8 = 11 }
+    $stockGadgets = @(10, 11, 13, 17)   # 8 and 9 are renumbered (see $renum)
+    $newButtons = @(6, 7, 8, 9)
+    # widget ids are one object space for every kind: the plates 6, 7, 8 and 9 of buttons 0, 1, 2 and 3 move to
+    # 19, 20, 24 and 25 so that the button ids 6, 7 (Dark Colony), 8 (ONLINE WAR) and 9 (REPLAY ONLINE GAME) are free
+    $renum = @{ 6 = 19; 7 = 20; 8 = 24; 9 = 25 }
+    $gadgetOf = @{ 0 = 19; 1 = 20; 2 = 24; 3 = 25; 4 = 10; 5 = 11; 6 = 21; 7 = 22; 8 = 23; 9 = 26; 12 = 13; 16 = 17 }
+    $labelOf = @{ 6 = 9; 7 = 10; 8 = 11; 9 = 12 }
     $template = @{ 'pushb' = 16; 'gadget' = 17 }
     $banimId = 18
     # `banim` = the menu's opening wave: the first listed plate carries anim_oneoff, each finished
@@ -14982,7 +15013,7 @@ function Edit-OziMenu([string] $Text) {
     $textTemplate = 8
     $stockTopLimit = 218
     $labels = @{ 1 = 'COUNCIL WARS'; 2 = 'ACADEMY'; 3 = 'LOAD CW GAME'; 5 = 'LOAD OZI GAME'
-                 8 = 'OZI MISSIONS'; 9 = 'DARK COLONY'; 10 = 'LOAD DC GAME'; 11 = 'ONLINE WAR' }
+                 8 = 'OZI MISSIONS'; 9 = 'DARK COLONY'; 10 = 'LOAD DC GAME'; 11 = 'ONLINE WAR'; 12 = 'REPLAY ONLINE GAME' }
     $xy = @{}
     foreach ($m in ([regex] '(?m)^\s*pushb\s+(\d+)\s+\d+\s+(\d+)\s+(\d+)\s').Matches($Text)) { $xy[[int]$m.Groups[1].Value] = @([int]$m.Groups[2].Value, [int]$m.Groups[3].Value) }
     $gadgets = @{}
@@ -14990,12 +15021,12 @@ function Edit-OziMenu([string] $Text) {
     $missing = @()
     foreach ($need in $stockButtons) { if (-not $xy.ContainsKey($need)) { $missing += "pushb $need" } }
     foreach ($need in $stockGadgets) { if (-not $gadgets.ContainsKey($need)) { $missing += "gadget $need" } }
-    # the stock grid has the plates as 6, 7 and 8, this function's own output as 19, 20 and 24 (the 23 Sep
-    # form as 19, 20 and 8): each pair needs one of its two ids
+    # the stock grid has the plates as 6, 7, 8 and 9, this function's own output as 19, 20, 24 and 25 (the 23 Sep
+    # form as 19, 20, 8, 9; the 29 Sep form as 19, 20, 24, 9): each pair needs one of its two ids
     foreach ($k in @($renum.Keys | Sort-Object)) { if (-not ($gadgets.ContainsKey([int]$k) -or $gadgets.ContainsKey([int]$renum[$k]))) { $missing += ('gadget {0}/{1}' -f $k, $renum[$k]) } }
     $b = ([regex] '(?m)^\s*banim\s+18\s+\d+\s+(\d+)\s+(\d+)\s').Match($Text)
-    $pairs = @([string] $stockButtons.Count, [string] ($stockButtons.Count + 2), [string] ($stockButtons.Count + $newButtons.Count))   # stock grid, the 23 Sep form, this form
-    if (-not $b.Success -or $b.Groups[1].Value -ne $b.Groups[2].Value -or -not ($pairs -contains $b.Groups[1].Value)) { $missing += 'banim 18 with 8, 10 or 11 pairs' }
+    $pairs = @([string] $stockButtons.Count, [string] ($stockButtons.Count + 2), [string] ($stockButtons.Count + 3), [string] ($stockButtons.Count + $newButtons.Count))   # stock grid, the 23 Sep form, the 29 Sep form, this form
+    if (-not $b.Success -or $b.Groups[1].Value -ne $b.Groups[2].Value -or -not ($pairs -contains $b.Groups[1].Value)) { $missing += 'banim 18 with 8, 10, 11 or 12 pairs' }
     if ($missing.Count) { throw ("bintroe: not Classic's 2x4 button grid (missing " + ($missing -join ', ') + ')') }
     $xs = @($xy.Values | ForEach-Object { $_[0] } | Sort-Object -Unique)
     $ys = @($xy.Values | ForEach-Object { $_[1] } | Sort-Object -Unique)
@@ -15063,7 +15094,7 @@ function Edit-OziMenu([string] $Text) {
             $id = [int] $m.Groups[2].Value
             if ($kind -eq 'pushb' -and ($dropPushb -contains $id)) { continue }     # re-emitted below
             if ($kind -eq 'gadget' -and ($dropGadget -contains $id)) { continue }
-            if ($kind -eq 'gadget' -and $renum.ContainsKey($id)) {                  # free ids 6, 7 and 8
+            if ($kind -eq 'gadget' -and $renum.ContainsKey($id)) {                  # free ids 6, 7, 8 and 9
                 $line = Set-ScriptTokens $line @{ 2 = [string] $renum[$id] }
                 $id = [int] $renum[$id]
             }
@@ -15629,6 +15660,77 @@ function Edit-OnlineScript([string] $Text) {
     return ($out -join "`n")
 }
 
+# The REPLAY ONLINE GAME screen (2 Oct 2026, doc 10.65): ONLINE -> REPLAYE, the same edits as patch_online.replay_script
+# (byte-identical output): the list narrowed to 40 columns (320 px), scroll bar / UP / DOWN and their plates 72 px LEFT
+# of their stock LOADGE places, the header line 40 columns, the participant pane after it - eight `checkb` rows (cells
+# 149 off = the empty box / 8 on = the green cross of HD_SRC\KNOBR.SPR, `pictures hd_src/knobr`) 30 px apart from list
+# top + 6 at list x + 376, a 13-column read-only name right of each box, the heading in_text 48 above them - the title
+# "Replay Online Game", the button REPLAY and the background REPLAYBG.GIF.  Idempotent on its own output.
+function Edit-ReplayScript([string] $Text) {
+    $m = [regex]::Match($Text, '(?m)^\s*list\s+0\s+\d+\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s')
+    if (-not $m.Success) { throw 'ONLINE: no list 0 line' }
+    $lx = [int]$m.Groups[1].Value; $ly = [int]$m.Groups[2].Value; $lw = [int]$m.Groups[3].Value
+    if ($lw -ne 448 -and $lw -ne 320) { throw ('ONLINE: list width {0}, expected 448' -f $lw) }
+    $already = ($lw -eq 320)
+    $pane = New-Object System.Collections.Generic.List[string]
+    for ($k = 0; $k -lt 8; $k++) { $pane.Add(('checkb   {0}  0  {1}  {2}   27   17  149   8   -' -f (32 + $k), ($lx + 376), ($ly + 6 + 30 * $k))) }
+    for ($k = 0; $k -lt 8; $k++) { $pane.Add(('in_text  {0}  0  {1}  {2}   13    1  0  -  read_only' -f (40 + $k), ($lx + 407), ($ly + 6 + 30 * $k + 3))) }
+    $pane.Add(('in_text  48  0  {0}  {1}   17    1  0  -  read_only' -f ($lx + 376), ($ly - 16)))
+    $out = New-Object System.Collections.Generic.List[string]
+    foreach ($raw in $Text.Split("`n")) {
+        $cr = if ($raw.EndsWith("`r")) { "`r" } else { '' }
+        $line = if ($cr) { $raw.Substring(0, $raw.Length - 1) } else { $raw }
+        $w = [regex]::Match($line, '^\s*(\w+)\s+(\d+)\s')
+        $bgm = [regex]::Match($line, '^\s*background\s+\S+/\S+\s*$')
+        if ($bgm.Success) { $out.Add(([regex]::Replace($line, '(\S+/)\S+\s*$', '${1}replaybg')) + $cr); continue }
+        if ([regex]::IsMatch($line, '^\s*pictures\s+\S+\s*$')) { $out.Add('pictures hd_src/knobr' + $cr); continue }   # the bank with the empty box
+        if ($w.Success) {
+            $kind = $w.Groups[1].Value; $id = [int]$w.Groups[2].Value
+            if (($kind -eq 'checkb' -and $id -ge 32 -and $id -le 39) -or ($kind -eq 'in_text' -and (($id -ge 40 -and $id -le 47) -or $id -eq 48))) { continue }   # re-emitted after the header line
+            if ($kind -eq 'list' -and $id -eq 0) { $line = Set-ScriptTokens $line @{ 6 = '320' } }
+            elseif ((-not $already) -and (($kind -eq 'scroll' -and $id -eq 1) -or ($kind -eq 'pushb' -and ($id -eq 2 -or $id -eq 3)) -or ($kind -eq 'gadget' -and ($id -eq 7 -or $id -eq 8)))) {
+                $x = [int]([regex]::Match($line, '^\s*\w+\s+\d+\s+\d+\s+(\d+)').Groups[1].Value)
+                $line = Set-ScriptTokens $line @{ 4 = [string]($x - 56 - 72) }
+            }
+            elseif ($kind -eq 'in_text' -and $id -eq 30) {
+                $out.Add((Set-ScriptTokens $line @{ 6 = '40' }) + $cr)
+                foreach ($e in $pane) { $out.Add($e + $cr) }
+                continue
+            }
+            elseif ($kind -eq 'textmsg' -and $id -eq 1) { $line = Get-TextmsgLine 1 'Replay Online Game' }
+            elseif ($kind -eq 'textmsg' -and $id -eq 2) { $line = Get-TextmsgLine 2 'REPLAY' }
+        }
+        $out.Add($line + $cr)
+    }
+    return ($out -join "`n")
+}
+
+# LOADER.GIF with grey frames drawn into it (patch_online.online_background / draw_frame: a 3-px tube in the palette's
+# greys 35 / 106 / 35, a 2-px black gap, black inside, corner pixels off); $Rects = x0, y0, x1, y1 (exclusive).
+function Get-FramedBackground($Im, $Rects) {
+    $greyIdx = foreach ($g in 35, 106, 35, 0) {
+        $best = -1; $bestD = 999
+        for ($i = 0; $i -lt 256; $i++) {
+            $r = $Im.Palette[3 * $i]
+            if ($r -eq $Im.Palette[3 * $i + 1] -and $r -eq $Im.Palette[3 * $i + 2] -and [Math]::Abs([int]$r - $g) -lt $bestD) { $bestD = [Math]::Abs([int]$r - $g); $best = $i }
+        }
+        $best
+    }
+    $px = [byte[]] $Im.Pixels.Clone()
+    foreach ($r in $Rects) {
+        $x0 = $r[0]; $y0 = $r[1]; $x1 = $r[2]; $y1 = $r[3]
+        for ($y = $y0; $y -lt $y1; $y++) {
+            for ($x = $x0; $x -lt $x1; $x++) {
+                if (($x -eq $x0 -or $x -eq ($x1 - 1)) -and ($y -eq $y0 -or $y -eq ($y1 - 1))) { continue }
+                $d = [Math]::Min([Math]::Min($x - $x0, $x1 - 1 - $x), [Math]::Min($y - $y0, $y1 - 1 - $y))
+                $v = if ($d -lt 3) { $greyIdx[$d] } else { $greyIdx[3] }
+                $px[$y * $Im.Width + $x] = [byte]$v
+            }
+        }
+    }
+    return [DcGif]::Encode('GIF87a', $Im.Width, $Im.Height, $Im.Palette, $px)
+}
+
 # DEFAULT_SERVER.TXT as the repository ships it (the same bytes as patch_online.DEFAULT_SERVER_TEXT).
 $DefaultServerText = (@('/*', ' * DEFAULT_SERVER.TXT - the relay server that ONLINE WAR connects to.', ' *', ' * Dark Colony Ultimate reads this file when you press ONLINE WAR in the main menu.', ' * It connects to the address below with TLS encryption on port 8889 (the Dark Colony', ' * Server relay, https://github.com/endotermic/Dark-Colony-Server), shows the rooms the', ' * relay offers - map, terrain, seats, players, bots, status - and joins the room you pick.', ' *', ' * Usage:', ' *   - one address, optionally with a port:      my.relay.example.org:8889', ' *   - the word "plain" after the address turns the encryption off, for a relay on your own', ' *     network without a certificate (the plain relay port is 8888):', ' *                                                 192.168.1.10 plain', ' *   - comments in the C++ style are ignored: "//" to the end of a line, or a block like this one.', ' *', ' * Keep one address in the file. MULTI PLAYER WAR (the in-game host / CONNECT TO SERVER', ' * screens) does not read this file.', ' */', '', 'dark-colony-server.fly.dev') -join "`r`n") + "`r`n"
 
@@ -15643,42 +15745,33 @@ function Write-OnlineScreen([string] $GameDir, [string] $Mode) {
     Write-Latin1 $dst $t
     $lines = @(('wrote {0}\ONLINE (the ONLINE WAR room screen, derived from LOADGE)' -f $sub))
     # the background: LOADER.GIF with three grey frames - header + list, the scroll bar with its buttons, the server
-    # and status lines (patch_online.online_background / frame_rects: a 3-px tube in the palette's greys 35 / 106 / 35,
-    # a 2-px black gap, black inside, corner pixels off)
+    # and status lines (patch_online.online_background / frame_rects)
     $loader = Find-CI (Join-Path $GameDir $sub) 'LOADER.GIF'
     if (-not $loader) { throw 'LOADER.GIF is missing' }
     Initialize-GifCodec    # at 640x480 no interface set is built, so the codec may not be compiled yet
     $lm = [regex]::Match($t, '(?m)^\s*list\s+0\s+\d+\s+(\d+)\s+(\d+)\s+\d+\s+(\d+)\s')
     $lx = [int]$lm.Groups[1].Value; $ly = [int]$lm.Groups[2].Value; $lh = [int]$lm.Groups[3].Value
     $im = [DcGif]::Decode([System.IO.File]::ReadAllBytes($loader))
-    $greyIdx = foreach ($g in 35, 106, 35, 0) {
-        $best = -1; $bestD = 999
-        for ($i = 0; $i -lt 256; $i++) {
-            $r = $im.Palette[3 * $i]
-            if ($r -eq $im.Palette[3 * $i + 1] -and $r -eq $im.Palette[3 * $i + 2] -and [Math]::Abs([int]$r - $g) -lt $bestD) { $bestD = [Math]::Abs([int]$r - $g); $best = $i }
-        }
-        $best
-    }
     $b = $ly + $lh; $ux = $lx + 448 + 12
     # every coordinate in its own parentheses: inside @( , ) the comma binds before + and -
     $rects = @(@(($lx - 6), ($ly - 22), ($lx + 448 + 6), ($b + 3)), @(($ux - 4), $ly, ($ux + 26 + 4), ($b + 2)), @(($lx - 6), ($b + 8), ($lx + 448 + 6), ($b + 52)))
-    $px = $im.Pixels
-    foreach ($r in $rects) {
-        $x0 = $r[0]; $y0 = $r[1]; $x1 = $r[2]; $y1 = $r[3]
-        for ($y = $y0; $y -lt $y1; $y++) {
-            for ($x = $x0; $x -lt $x1; $x++) {
-                if (($x -eq $x0 -or $x -eq ($x1 - 1)) -and ($y -eq $y0 -or $y -eq ($y1 - 1))) { continue }
-                $d = [Math]::Min([Math]::Min($x - $x0, $x1 - 1 - $x), [Math]::Min($y - $y0, $y1 - 1 - $y))
-                $v = if ($d -lt 3) { $greyIdx[$d] } else { $greyIdx[3] }
-                $px[$y * $im.Width + $x] = [byte]$v
-            }
-        }
-    }
-    $bgOut = [DcGif]::Encode('GIF87a', $im.Width, $im.Height, $im.Palette, $px)
     $bgDst = Find-CI (Join-Path $GameDir $sub) 'ONLINEBG.GIF'
     if (-not $bgDst) { $bgDst = Join-Path (Join-Path $GameDir $sub) 'ONLINEBG.GIF' }
-    [System.IO.File]::WriteAllBytes($bgDst, $bgOut)
+    [System.IO.File]::WriteAllBytes($bgDst, (Get-FramedBackground $im $rects))
     $lines += ('wrote {0}\ONLINEBG.GIF (the screen background: LOADER.GIF with grey frames around the list, the scroll bar and the text lines)' -f $sub)
+    # REPLAY ONLINE GAME (2 Oct 2026, doc 10.65): the second screen from the ONLINE script, its background with the
+    # list frame (40 columns), the scroll bar's frame, the participant pane's frame and the full-width text frame
+    $rt = Edit-ReplayScript $t
+    $rDst = Find-CI (Join-Path $GameDir $sub) 'REPLAYE'
+    if (-not $rDst) { $rDst = Join-Path (Join-Path $GameDir $sub) 'REPLAYE' }
+    Write-Latin1 $rDst $rt
+    $lines += ('wrote {0}\REPLAYE (the REPLAY ONLINE GAME screen, derived from ONLINE)' -f $sub)
+    $rux = $lx + 320 + 12
+    $rRects = @(@(($lx - 6), ($ly - 22), ($lx + 320 + 6), ($b + 3)), @(($rux - 4), $ly, ($rux + 26 + 4), ($b + 2)), @(($lx + 368), ($ly - 22), ($lx + 518), ($b + 3)), @(($lx - 6), ($b + 8), ($lx + 518), ($b + 52)))
+    $rBgDst = Find-CI (Join-Path $GameDir $sub) 'REPLAYBG.GIF'
+    if (-not $rBgDst) { $rBgDst = Join-Path (Join-Path $GameDir $sub) 'REPLAYBG.GIF' }
+    [System.IO.File]::WriteAllBytes($rBgDst, (Get-FramedBackground $im $rRects))
+    $lines += ('wrote {0}\REPLAYBG.GIF (the replay screen background: frames around the list, the scroll bar, the participant pane and the text lines)' -f $sub)
     if (-not (Find-CI $GameDir 'DEFAULT_SERVER.TXT')) {
         Write-Latin1 (Join-Path $GameDir 'DEFAULT_SERVER.TXT') $DefaultServerText
         $lines += 'wrote DEFAULT_SERVER.TXT (dark-colony-server.fly.dev; an existing file is never overwritten)'
@@ -15853,6 +15946,7 @@ function Get-RequirementLines($Build, $Patch) {
 }
 
 function Write-PatchList([switch] $WithEdits) {
+    Write-Host ("Dark Colony patcher {0}, build {1} (generated {2})" -f $PatcherVersion, $PatcherBuild, $PatcherGenerated) -ForegroundColor Cyan
     foreach ($b in $Builds) {
         Write-Host ''
         Write-Host ("=== {0}: {1}" -f $b.Id, $b.Title) -ForegroundColor Cyan
@@ -15945,7 +16039,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $bold = New-Object System.Drawing.Font('Segoe UI', 9, [System.Drawing.FontStyle]::Bold)
 
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = 'Dark Colony patcher'
+    $form.Text = "Dark Colony patcher $PatcherVersion (build $PatcherBuild)"
     $form.ClientSize = New-Object System.Drawing.Size(984, 700)
     $form.FormBorderStyle = 'FixedDialog'; $form.MaximizeBox = $false
     $form.StartPosition = 'CenterScreen'
@@ -15993,7 +16087,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $lblLnk.Location = '44,334'; $lblLnk.Size = '900,36'
     $lblLnk.Text = 'Named "Dark Colony Ultimate", "Dark Colony Map Editor" (and "Dark Colony" if you patch it); each starts in its game folder, where the game finds its files.  An older shortcut of the same name is replaced.'
     $lblNext = New-Object System.Windows.Forms.Label
-    $lblNext.Location = '24,540'; $lblNext.Size = '936,20'; $lblNext.Text = 'Press Next to continue.'
+    $lblNext.Location = '24,540'; $lblNext.Size = '936,20'; $lblNext.Text = "Press Next to continue.          Dark Colony patcher $PatcherVersion, build $PatcherBuild (generated $PatcherGenerated)"
     # a missing or wrong original: a big red banner here, the details and the remedies on its page
     $lblProblem = New-Object System.Windows.Forms.Label
     $lblProblem.Location = '24,378'; $lblProblem.Size = '936,156'; $lblProblem.Visible = $false
@@ -16819,6 +16913,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $skipped = @(& $g.SkippedLines)
         if ($skipped.Count -gt 0) { $text += "`r`n`r`nNot patched: " + ($skipped -join ', ') }
         if ($ok -gt 0) { $text += "`r`n`r`nStart the games with the desktop shortcuts or the files above." }
+        $text += "`r`n`r`nDark Colony patcher $PatcherVersion, build $PatcherBuild"
         if ($interactive) { & $g.Notify $text $title $icon }
         return $results
     }
@@ -16963,6 +17058,7 @@ function Invoke-CliBuild([string] $OriginalFile, [string] $OutputFile) {
     $origPath = (Resolve-Path $OriginalFile).Path
     $data = [System.IO.File]::ReadAllBytes($origPath)
     $sha = Get-Sha256Hex $data
+    if (-not $script:BannerShown) { $script:BannerShown = $true; Write-Host ("Dark Colony patcher {0}, build {1} (generated {2})" -f $PatcherVersion, $PatcherBuild, $PatcherGenerated) -ForegroundColor Cyan; Write-Host '' }
     Write-Host ("input : {0}" -f $origPath)
     Write-Host ("        {0} bytes, SHA-256 {1}" -f $data.Length, $sha)
 

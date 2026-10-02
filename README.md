@@ -24,6 +24,14 @@ without a certificate, which then uses the plain port 8888). `ONLINE.LOG` beside
 step of a connection attempt. MULTI PLAYER WAR (the in-game host and CONNECT TO SERVER screens) is
 unchanged. The server side is the sister repository [Dark-Colony-Server](https://github.com/endotermic/Dark-Colony-Server).
 
+**REPLAY ONLINE GAME** (the button under ONLINE WAR, since 2 Oct 2026) lists the battles the relay
+recorded - date and time (UTC), map, terrain, seats, players, computer players, length; the relay keeps
+the newest 50 - and, right of the list, the eight players of the selected battle with a radio box each.
+Tick one and REPLAY plays that battle back to you from that player's seat: the same lobby, then the battle
+exactly as it happened, with that player's fog of war and base; you can scroll the map and open the
+dialogs, nothing else, and QUIT ends the viewing. The relay's bots are named `AI Mercenary`, `AI
+Marauder`, ... and can be watched too.
+
 ## Are the patched executables safe? Build them yourself
 
 `Dark Colony Ultimate.exe` and `Dark Colony Map Editor.exe` in this repository are the original 1997/98 binaries with a handful of byte patches (no CD check, 1024x768, cursor fix, 150 % default game speed, the dark console-style battlefield interface, ...). **The patched Classic `Dark Colony.exe` is deprecated and no longer shipped since 1 Oct 2026** (the untouched original `dc16.exe` stays): `Dark Colony Ultimate.exe` plays the whole Dark Colony campaign (DARK COLONY / LOAD DC GAME / ACADEMY in its main menu) with every fix, so the separate Classic executable is no longer needed; the patcher writes it only on request - the checkbox on its options page, `-IncludeDeprecated`, or `-Original "DC - Council wars\dc16.exe"` on the command line. A hand-modified exe cannot be signed and some antivirus heuristics dislike it, so the whole modification is made transparent and reproducible by one file, `Apply-DarkColonyPatches.ps1`, in the root of this repository:
