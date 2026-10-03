@@ -326,7 +326,10 @@ What makes it trustworthy:
                      menuorder (the menu opens logo, title, buttons,
                        credits instead of buttons first),
                      chat (six battlefield chat lines instead of two,
-                       each new line plays the mission-message sound)
+                       each new line plays the mission-message sound),
+                     netsave (no Save Game cell and no F11 save dialog
+                       in a network battle, 3 Oct 2026: such a save
+                       could never rejoin the relay game)
      Dark Colony     + movies (the Classic intro and endings under
                        their DC* names), sounds (WAV files read from
                        the game root, not from exp\; the Classic

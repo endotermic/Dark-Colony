@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 1.3, build 20261003.1448 - generated 2026-10-03 14:48 UTC from Dark-Colony-Server fa08b94+ and Dark-Colony 23a7c7b+.
+    Dark Colony patcher 1.4, build 20261003.1523 - generated 2026-10-03 15:23 UTC from Dark-Colony-Server 9ded50a+ and Dark-Colony 4138b49+.
 
 
 .SYNOPSIS
@@ -207,9 +207,9 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '1.3'
-$PatcherBuild = '20261003.1448'
-$PatcherGenerated = '2026-10-03 14:48 UTC from Dark-Colony-Server fa08b94+ and Dark-Colony 23a7c7b+'
+$PatcherVersion = '1.4'
+$PatcherBuild = '20261003.1523'
+$PatcherGenerated = '2026-10-03 15:23 UTC from Dark-Colony-Server 9ded50a+ and Dark-Colony 4138b49+'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -233,7 +233,7 @@ $Builds = @(
         Shipped        = $true
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '35346be9e26a289538aa150bfd71dcce7b82fb6c3e1ca660ed4fadf5aaba8325'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
+        PatchedSha256  = 'b3d3ead8756a8f360a83879b755ed13c013e1c11d4e6b2ba00aacdd23381a3f3'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -241,7 +241,7 @@ $Builds = @(
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the published one is the exe in the repository); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = '96b9cc80aef1c463b7945c18b15aa7ba6c3d63f72ade61114a7b93259dddcd32'; '1024x768' = '35346be9e26a289538aa150bfd71dcce7b82fb6c3e1ca660ed4fadf5aaba8325'; '1024x768/light' = '6accd206a1eed9b19aba8d719107828404a86c7e5bd92fb91db128c18286419d'; '1280x1024' = '1d4d20b75663f3868a20659d62e4b4b3946ff96ff862ca8eb8982b8c0fc3e2ef'; '1280x1024/light' = 'd900107b703eb2be57fe9fb23b9e76ed0b886ade808329a4ecdccda5736eeb8e'; '1280x720' = '688725f4d0142eb00e2c9ef5825c107a81a0807fef40300968754c6314c14041'; '1280x720/light' = '6f093b6c2f147a7b82b63d71a67177edcd3d1f90c5fc626d66d75a657a0e6c9b'; '1280x800' = '118e81349f4ee49d67312f151d2e74d78512a6ef193b05cd98d4f79530453059'; '1280x800/light' = '450f5d4003105d8b04e7fb13794afbd9b33d04dabff2b0a06b04d60439cfbbf9'; '1920x1080' = 'c16c8ebd5d11682261d9e9c92814484399b504de38c8e7bb9dda8fc0f1106e71'; '1920x1080/light' = '17b3b8e955b199a6646e17ae31770c8dd28961fcf813bb66e83271b0229eb071'; '1920x1200' = 'a77254a51e5ca40df490f0f37b83782acfe6069db68e5df97ebf32f7d247370d'; '1920x1200/light' = 'ac609fba4f2bfb76df68d61baa87dab2ebe14d7c8cedf608c2f7adc5a0a42701'; '3840x1080' = '88026ae126778e0128de506a80e1554afd1306c3828407532d75b8be09fd2f32'; '3840x1080/light' = '73fbde2d52b621e6974a7fc92ccf7a3bc2edfc9b76c3d5bde372fcb7c6991305' }
+        ReferenceSha256 = @{ '640x480' = '62a285087013dbce232b7144101c6e184375176fc77fee96b2e6304fd47e1190'; '1024x768' = 'b3d3ead8756a8f360a83879b755ed13c013e1c11d4e6b2ba00aacdd23381a3f3'; '1024x768/light' = 'eb79fba74975e6802d244d22d83e14c1c9184664d8e96aaee6326da1d80ac4a0'; '1280x1024' = '104cd4dd843255ef607b2bd4b3a78e16e9d2ab90db52fe347cf368f5d1155877'; '1280x1024/light' = 'a9150cea4bc510e48c7e73a2167a6a56ccab6eb0486e010058789acf21c30076'; '1280x720' = 'f030664e7517cabe4272244763156f1171595a2e9493e3f7c2998430cfdb8c2f'; '1280x720/light' = '7719bebc71f07f62f344d97e4c4cb8954422b730968a24f2eb6b2e14975ea6ee'; '1280x800' = 'b7ba318c5c6109863e7d23efff04bdbac151ce750240a4fc8c7ec14425873c5c'; '1280x800/light' = '6e40bab4547d255f51d69b43a6157c9699764eaefba4d978edb0d513771840c0'; '1920x1080' = 'a0e071a9fc4318dadcb3fddb1b10785fdbca06f094ad4eaa3b0d9976306287e1'; '1920x1080/light' = 'c49edcb56b0ff8ff769b01122c1750056d2bb8187ad48a7b9708001f3b1164c9'; '1920x1200' = '9bc36c4ab31381eb8e012ecad8b88990f3d1e5f975e32c83ed1a011d2205028e'; '1920x1200/light' = 'b17f2cd53e1d2518f4108ae5c00fa1c0f2761810c37e71dfbd25f9cb81cc80a3'; '3840x1080' = 'b822964cbbd48d36764b5b2ab61cde53252c2003ca3dea6479b655cbb7edc7aa'; '3840x1080/light' = '58ce9c0abb2ec2290681a1e566fb881c88e925d2e9e0c901cf2de8cb98b02113' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -6023,6 +6023,70 @@ in_text 207..210 above the two stock chat lines (15 rows apart); the stock 640x4
                 )
             }
 
+            # ---- netsave: No save in a network battle: the Save Game cell hidden, F11 inert ---------------------------------------------------------
+            #  Added      : 3 Oct 2026
+            #  Made with  : tools/patch_netsave.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.68
+            #  Changes    : 114 bytes in 6 edits
+            #  The Game Option tab of a network battle offered the same Save Game cell (and the F11 key) as a
+            #  campaign battle, and the file it wrote (save\<name>.dcg, game type 2 in its header) showed up in the
+            #  main menu's LOAD GAME list as "Multiplayer".  Loading it never rejoined the relay game: the stock code
+            #  resumes a network save as the host of an in-process network with the lobby skipped, so the battle came
+            #  back with every other player's base standing still - a solo continuation against frozen opponents.
+            #  This fix switches saving off while the game type is 2 (network game): at battle start the Save Game
+            #  cell (widget 63) is disabled through the same per-widget flag the game uses to hide the Allies cell in
+            #  campaign battles - the tab switch does not touch it, the cell is neither drawn nor clickable - and the
+            #  save dialog's entry returns at once when the game type is 2, which covers F11 and the ? key as well.
+            #  Campaign, skirmish and training battles save as before.  Two 5-byte jumps in place (the end of the
+            #  game start's network branch, the dialog's first five bytes) and two small stubs (55 + 34 bytes) in the
+            #  wave loader's CD attempt, dead code since the "No CD" fix (required); the displaced absolute operand's
+            #  relocation entry is neutralised and the dead code's one entry is re-pointed to the stub's operand, so
+            #  the relocation table stays exact.  Same bytes at +0x60 in Council Wars.
+            @{
+                Id = 'netsave'; Name = 'No save in a network battle: the Save Game cell hidden, F11 inert'; Date = '3 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
+                Theme = $null
+                Tool = 'tools/patch_netsave.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.68'
+                Description = @'
+The Game Option tab of a network battle offered the same Save Game cell (and the F11 key) as a
+campaign battle, and the file it wrote (save\<name>.dcg, game type 2 in its header) showed up in the
+main menu's LOAD GAME list as "Multiplayer".  Loading it never rejoined the relay game: the stock code
+resumes a network save as the host of an in-process network with the lobby skipped, so the battle came
+back with every other player's base standing still - a solo continuation against frozen opponents.
+This fix switches saving off while the game type is 2 (network game): at battle start the Save Game
+cell (widget 63) is disabled through the same per-widget flag the game uses to hide the Allies cell in
+campaign battles - the tab switch does not touch it, the cell is neither drawn nor clickable - and the
+save dialog's entry returns at once when the game type is 2, which covers F11 and the ? key as well.
+Campaign, skirmish and training battles save as before.  Two 5-byte jumps in place (the end of the
+game start's network branch, the dialog's first five bytes) and two small stubs (55 + 34 bytes) in the
+wave loader's CD attempt, dead code since the "No CD" fix (required); the displaced absolute operand's
+relocation entry is neutralised and the dead code's one entry is re-pointed to the stub's operand, so
+the relocation table stays exact.  Same bytes at +0x60 in Council Wars.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('nocd')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # game start, network branch end: mov edx,94h; mov eax,[hud_ip 0x004ab1c4]; xor ebx,ebx; call 0x00424468; jmp 0x0041ed05 -> jmp stub_a 0x00452b65; 14 x nop
+                    @{ Offset = 0x1E0E1; Old = 'BA 94 00 00 00 A1 C4 B1 4A 00 31 DB E8 76 57 00 00 EB 11'; New = 'E9 7F 3E 03 00 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # save dialog entry: push ebx,ecx,edx,esi,edi -> jmp stub_b 0x00452b9c
+                    @{ Offset = 0x31B68; Old = '53 51 52 56 57'; New = 'E9 2F 04 02 00' }
+                    # stub_a over the dead CD attempt: the displaced call, then if [ebp-4]->544h->14F0h (game type) == 2: widget_enable 0x00424488 (ip, 63, 0) = the Save Game cell disabled; jmp 0x0041ed05
+                    @{ Offset = 0x51F65; Old = '8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8D BD F2 FB FF FF 89 DE 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C'; New = 'A1 C4 B1 4A 00 BA 94 00 00 00 31 DB 50 E8 F1 18 FD FF 58 8B 55 FC 8B 92 44 05 00 00 81 BA F0 14 00 00 02 00 00 00 75 0A BA 3F 00 00 00 E8 F1 18 FD FF E9 69 C1 FC FF' }
+                    # stub_b: if client->gs->544h->14F0h == 2 return (no save dialog in a network battle), else the five pushes and jmp 0x0043276d
+                    @{ Offset = 0x51F9C; Old = '00 75 E8 5F 6A 00 8D 45 F2 50 8D 85 F2 FB FF FF 50 2E FF 15 C8 04 48 00 89 C6 83 F8 FF 75 6B E8 C0 32'; New = '51 8B 48 0C 8B 89 44 05 00 00 81 B9 F0 14 00 00 02 00 00 00 59 74 0A 53 51 52 56 57 E9 B0 FB FD FF C3' }
+                    # .reloc table: entry 3CE7 (type 3 HIGHLOW, page offset 0xCE7) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x98D7E; Old = 'E7 3C'; New = 'E7 0C' }
+                    # .reloc table: entry 3BB0 -> 3B66: the absolute operand moved from page offset 0xBB0 to 0xB66, entry follows it
+                    @{ Offset = 0x9C314; Old = 'B0 3B'; New = '66 3B' }
+                )
+            }
+
             # ---- ozi @ 640x480: DARK COLONY and OZI MISSIONS menu modes (Council Wars only) ---------------------------------------------------------
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
@@ -8271,12 +8335,12 @@ directory that lists them); their SHA-256 is checked like every other edit.
         RepoUrl        = 'https://github.com/endotermic/Dark-Colony/blob/main/DC%20-%20Council%20wars/dc16.exe'
         SourceNote     = 'NOT from the Dark Colony CD: its DC\DC16.EXE is the August 1997 build (660480 bytes), which these fixes do not fit - they need dc16.exe of the January 1998 update (659456 bytes), so take it from our repository.'
         # $null, or why this build is deprecated (1 Oct 2026): the window skips it unless ticked, -All unless -IncludeDeprecated
-        Deprecated     = 'Dark Colony Ultimate.exe plays the whole Dark Colony campaign (DARK COLONY, LOAD GAME, ACADEMY in its main menu) with every fix, so a separate Dark Colony.exe is no longer needed; it is kept for players who want the Classic executable on its own.'
+        Deprecated     = 'Dark Colony Ultimate.exe plays the whole Dark Colony campaign (ACADEMY and DARK COLONY in its main menu, saves under LOAD GAME) with every fix, so a separate Dark Colony.exe is no longer needed; it is kept for players who want the Classic executable on its own.'
         # $false = the repository no longer ships this build's patched exe (the deprecated Dark Colony, 1 Oct 2026)
         Shipped        = $false
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = 'ae34e1d53484c3ea2aa818068f6b453628e5edfa3a11f1b645e93c915890c1a0'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
+        PatchedSha256  = '739e12190a23e585c00f25c4f9eadc0c4d49d8a6b2dc52c83f958b3c2a22269b'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -8284,7 +8348,7 @@ directory that lists them); their SHA-256 is checked like every other edit.
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the published one is the exe in the repository); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = '6fd7ac389cc0fb6d661369be1922f72665fc13b856afc2996aa95ea6ba2c921f'; '1024x768' = 'ae34e1d53484c3ea2aa818068f6b453628e5edfa3a11f1b645e93c915890c1a0'; '1024x768/light' = 'a73a4a31c3be49a0290b685dea2474a729edc2cfbd77c171ed79ca16f010fe68'; '1280x1024' = '5b9c6f525c0cc573b369c1e9f2e1c3a1822f29f9bb31b064694b706ddf7dd61b'; '1280x1024/light' = '88ec649b835ed00e7e792457988509d4ed6153075f592b25caf434149588da6a'; '1280x720' = '15cfe83c219d0b419befbbee04e856a857c2c3551637c0fd781aeae9dc3276c1'; '1280x720/light' = '87b74113a1a8e1e6e0cf21e75f975c506fd2edc264b3fb364845c8bda4f122ff'; '1280x800' = '0e0026bca9d8ce5abd0be1fa6041b63af5286c88d8496581622953f9b75313a9'; '1280x800/light' = '6becb4c4e9c31eb25a474911fe355b6703d33ec8477db0b8891991af2b418108'; '1920x1080' = '56a18debef1cd31fc4c737408c79544229cde52b9fe31d9fd76643e6d63a7681'; '1920x1080/light' = 'd71343284a1376ad3e29e5d53668d8a1331cbc433dede6935571c30259d73970'; '1920x1200' = '0be209334a8f8be8d274038e34247e73327b1cae80079fd0661c334f62a37928'; '1920x1200/light' = '9efa4f041a7856ccf789028b8e815e6dc2da3aaddd0e2b69719cbfd6f975e070'; '3840x1080' = '488207c1ee71396e4ef68f3b6850988bba2e2cb900a718354e00f133896babef'; '3840x1080/light' = '0efd74f9f8000ccd3e1ec1f289254efaa2aa0d632e73a5a6cbcb3f997fb4224b' }
+        ReferenceSha256 = @{ '640x480' = 'b08db16440fd520ca6b3d7f5570426a32b57c718f4a7b5a25e3e119afb0e8f3e'; '1024x768' = '739e12190a23e585c00f25c4f9eadc0c4d49d8a6b2dc52c83f958b3c2a22269b'; '1024x768/light' = '8e28cf62605a2043565d7d1584d683e2af6075bd70d3102776c75dec7a8e61b8'; '1280x1024' = 'f682130d9999f90bd20561f40af9dd6cb20471500d1fb7ec2492399b70879e4f'; '1280x1024/light' = '8b1fdbb87e9013262ad33f75f0cd12de4c1402043da3ebc8c2ebbf7a588d89e5'; '1280x720' = '4e5e847646daa065bacc06ef9c7d90f011b7c6a70fae160d43cabe8b0b926f3d'; '1280x720/light' = '55f164e0a03c93b7245b0a323969194276f2a653acab992639b21a6d845ca498'; '1280x800' = '11f4e157ef72c71859407c9fb8843d78fbc7894377be6e87d5db613c4810d757'; '1280x800/light' = '0760336c8c13413c250c524a322f9f2d3f75cddaf9aa4f78aa169563bef97b71'; '1920x1080' = '7b2445b3bd1ae09527246944b1d1b74b63d4554cfadc7c61e47e88effcd07ec0'; '1920x1080/light' = '4a1a8cd56d2199e68bd4b019638e9b8c175a9e616da4ec6dc872c071ca9cf30c'; '1920x1200' = '29d66063428579654067d57c0384a7e737fb229f8b70122b79613c6518851118'; '1920x1200/light' = 'b7c0bf4569399a68a53e8d2d1609b4793a798cb7be7cd16fdc570808f19bae7c'; '3840x1080' = '4a0eab846ccc831677849e46033c0bf94a269ff7ea1f13ae0b92422770bf8ef4'; '3840x1080/light' = '713f791c00ef0d724e7910dc34cdee9a932c8594ed93cad5f68a1b2b77b721d1' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -13806,6 +13870,70 @@ in_text 207..210 above the two stock chat lines (15 rows apart); the stock 640x4
                     @{ Offset = 0x1CF0F; Old = 'FF 86 10 03 00 00'; New = 'E8 EF 19 01 00 90' }
                     # stub + helper in the palette NOP room: stub: inc [esi+310h]; mov [esi+314h],7FFFFFFF; ret.  helper: if marker, display->play_sound(187 = sound\msg.wav, 1); ret
                     @{ Offset = 0x2E903; Old = '90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90'; New = 'FF 86 10 03 00 00 C7 86 14 03 00 00 FF FF FF 7F C3 81 B8 14 03 00 00 FF FF FF 7F 75 15 8B 5D F8 8B 5B 08 50 B8 BB 00 00 00 BA 01 00 00 00 FF 53 7C 58 C3' }
+                )
+            }
+
+            # ---- netsave: No save in a network battle: the Save Game cell hidden, F11 inert ---------------------------------------------------------
+            #  Added      : 3 Oct 2026
+            #  Made with  : tools/patch_netsave.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.68
+            #  Changes    : 114 bytes in 6 edits
+            #  The Game Option tab of a network battle offered the same Save Game cell (and the F11 key) as a
+            #  campaign battle, and the file it wrote (save\<name>.dcg, game type 2 in its header) showed up in the
+            #  main menu's LOAD GAME list as "Multiplayer".  Loading it never rejoined the relay game: the stock code
+            #  resumes a network save as the host of an in-process network with the lobby skipped, so the battle came
+            #  back with every other player's base standing still - a solo continuation against frozen opponents.
+            #  This fix switches saving off while the game type is 2 (network game): at battle start the Save Game
+            #  cell (widget 63) is disabled through the same per-widget flag the game uses to hide the Allies cell in
+            #  campaign battles - the tab switch does not touch it, the cell is neither drawn nor clickable - and the
+            #  save dialog's entry returns at once when the game type is 2, which covers F11 and the ? key as well.
+            #  Campaign, skirmish and training battles save as before.  Two 5-byte jumps in place (the end of the
+            #  game start's network branch, the dialog's first five bytes) and two small stubs (55 + 34 bytes) in the
+            #  wave loader's CD attempt, dead code since the "No CD" fix (required); the displaced absolute operand's
+            #  relocation entry is neutralised and the dead code's one entry is re-pointed to the stub's operand, so
+            #  the relocation table stays exact.  Same bytes at +0x60 in Council Wars.
+            @{
+                Id = 'netsave'; Name = 'No save in a network battle: the Save Game cell hidden, F11 inert'; Date = '3 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
+                Theme = $null
+                Tool = 'tools/patch_netsave.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.68'
+                Description = @'
+The Game Option tab of a network battle offered the same Save Game cell (and the F11 key) as a
+campaign battle, and the file it wrote (save\<name>.dcg, game type 2 in its header) showed up in the
+main menu's LOAD GAME list as "Multiplayer".  Loading it never rejoined the relay game: the stock code
+resumes a network save as the host of an in-process network with the lobby skipped, so the battle came
+back with every other player's base standing still - a solo continuation against frozen opponents.
+This fix switches saving off while the game type is 2 (network game): at battle start the Save Game
+cell (widget 63) is disabled through the same per-widget flag the game uses to hide the Allies cell in
+campaign battles - the tab switch does not touch it, the cell is neither drawn nor clickable - and the
+save dialog's entry returns at once when the game type is 2, which covers F11 and the ? key as well.
+Campaign, skirmish and training battles save as before.  Two 5-byte jumps in place (the end of the
+game start's network branch, the dialog's first five bytes) and two small stubs (55 + 34 bytes) in the
+wave loader's CD attempt, dead code since the "No CD" fix (required); the displaced absolute operand's
+relocation entry is neutralised and the dead code's one entry is re-pointed to the stub's operand, so
+the relocation table stays exact.  Same bytes at +0x60 in Council Wars.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('nocd')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # game start, network branch end: mov edx,94h; mov eax,[hud_ip 0x004ab1c4]; xor ebx,ebx; call 0x00424408; jmp 0x0041eca5 -> jmp stub_a 0x00452b05; 14 x nop
+                    @{ Offset = 0x1E081; Old = 'BA 94 00 00 00 A1 C4 B1 4A 00 31 DB E8 76 57 00 00 EB 11'; New = 'E9 7F 3E 03 00 90 90 90 90 90 90 90 90 90 90 90 90 90 90' }
+                    # save dialog entry: push ebx,ecx,edx,esi,edi -> jmp stub_b 0x00452b3c
+                    @{ Offset = 0x31B08; Old = '53 51 52 56 57'; New = 'E9 2F 04 02 00' }
+                    # stub_a over the dead CD attempt: the displaced call, then if [ebp-4]->544h->14F0h (game type) == 2: widget_enable 0x00424428 (ip, 63, 0) = the Save Game cell disabled; jmp 0x0041eca5
+                    @{ Offset = 0x51F05; Old = '8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 8D BD F2 FB FF FF 89 DE 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C'; New = 'A1 C4 B1 4A 00 BA 94 00 00 00 31 DB 50 E8 F1 18 FD FF 58 8B 55 FC 8B 92 44 05 00 00 81 BA F0 14 00 00 02 00 00 00 75 0A BA 3F 00 00 00 E8 F1 18 FD FF E9 69 C1 FC FF' }
+                    # stub_b: if client->gs->544h->14F0h == 2 return (no save dialog in a network battle), else the five pushes and jmp 0x0043270d
+                    @{ Offset = 0x51F3C; Old = '00 75 E8 5F 6A 00 8D 45 F2 50 8D 85 F2 FB FF FF 50 2E FF 15 C8 04 48 00 89 C6 83 F8 FF 75 6B E8 40 33'; New = '51 8B 48 0C 8B 89 44 05 00 00 81 B9 F0 14 00 00 02 00 00 00 59 74 0A 53 51 52 56 57 E9 B0 FB FD FF C3' }
+                    # .reloc table: entry 3C87 (type 3 HIGHLOW, page offset 0xC87) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x98B7E; Old = '87 3C'; New = '87 0C' }
+                    # .reloc table: entry 3B50 -> 3B06: the absolute operand moved from page offset 0xB50 to 0xB06, entry follows it
+                    @{ Offset = 0x9C114; Old = '50 3B'; New = '06 3B' }
                 )
             }
 
