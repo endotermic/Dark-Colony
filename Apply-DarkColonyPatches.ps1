@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 1.2, build 20261003.1044 - generated 2026-10-03 10:44 UTC from Dark-Colony-Server 017ee0f+ and Dark-Colony 37542ea+.
+    Dark Colony patcher 1.3, build 20261003.1448 - generated 2026-10-03 14:48 UTC from Dark-Colony-Server fa08b94+ and Dark-Colony 23a7c7b+.
 
 
 .SYNOPSIS
@@ -207,9 +207,9 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '1.2'
-$PatcherBuild = '20261003.1044'
-$PatcherGenerated = '2026-10-03 10:44 UTC from Dark-Colony-Server 017ee0f+ and Dark-Colony 37542ea+'
+$PatcherVersion = '1.3'
+$PatcherBuild = '20261003.1448'
+$PatcherGenerated = '2026-10-03 14:48 UTC from Dark-Colony-Server fa08b94+ and Dark-Colony 23a7c7b+'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -233,7 +233,7 @@ $Builds = @(
         Shipped        = $true
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '05c430051f5c7a1573f8a21eb7df810834dc8e96d5d900a85d6b29b15acb5627'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
+        PatchedSha256  = '35346be9e26a289538aa150bfd71dcce7b82fb6c3e1ca660ed4fadf5aaba8325'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -241,7 +241,7 @@ $Builds = @(
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the published one is the exe in the repository); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = '54d8e425c07af9a97bf94f169a61534a0a5e4fbd4a933cae8ed071d4e5664459'; '1024x768' = '05c430051f5c7a1573f8a21eb7df810834dc8e96d5d900a85d6b29b15acb5627'; '1024x768/light' = '2a73d0c77116a293fc109330bfa5ace68ac43e761533ee22873a194bb0beafb2'; '1280x1024' = 'e182cf24a0bbeecc0e32f60df1d897ac77da4aa85530357ed9165ddd2d90fff2'; '1280x1024/light' = '9451ae88dcfda0be2a24bc54bb1064e153df8922772a0de930f64867953b464d'; '1280x720' = 'a1387aa440f617df19d298aa615636cc37fb1c103bdbe055f6970403d6226597'; '1280x720/light' = '6bbc44b3a8b07a059231a572269ec0f86fdae977598aa56128b3dba366e09197'; '1280x800' = '250578db96a56414552ee9c0945ffca37698ed95b541044e1cd18e430de3721d'; '1280x800/light' = '041abe02193c8b7bb6e63de6cb6befb19f28753cef0511cbe5835ec6e69d99ad'; '1920x1080' = '3b848add9fdeaa3686b3224cea359777094a7b91eee4527581390a5276e49311'; '1920x1080/light' = 'ec86d797215b5004457ee34c831bab4a28f331b56539c05d671695392f825844'; '1920x1200' = '4a91cb133237bc532bdcc8f4af3b425c3e6baa233ca1e44a8857e96268f3bb4d'; '1920x1200/light' = '06678119fb69361f7e9bdcf57416ce70bbde5ab150ffbfaa22d7ff76d1614a8c'; '3840x1080' = '0204d99946df625fc5d5ad8c033cc0d2dc77fb7d0108175ab579309a284f12e9'; '3840x1080/light' = 'bea947a1a7d7d9a512e4a92b131838e096e1d98f94d720f05f3377d2137488ee' }
+        ReferenceSha256 = @{ '640x480' = '96b9cc80aef1c463b7945c18b15aa7ba6c3d63f72ade61114a7b93259dddcd32'; '1024x768' = '35346be9e26a289538aa150bfd71dcce7b82fb6c3e1ca660ed4fadf5aaba8325'; '1024x768/light' = '6accd206a1eed9b19aba8d719107828404a86c7e5bd92fb91db128c18286419d'; '1280x1024' = '1d4d20b75663f3868a20659d62e4b4b3946ff96ff862ca8eb8982b8c0fc3e2ef'; '1280x1024/light' = 'd900107b703eb2be57fe9fb23b9e76ed0b886ade808329a4ecdccda5736eeb8e'; '1280x720' = '688725f4d0142eb00e2c9ef5825c107a81a0807fef40300968754c6314c14041'; '1280x720/light' = '6f093b6c2f147a7b82b63d71a67177edcd3d1f90c5fc626d66d75a657a0e6c9b'; '1280x800' = '118e81349f4ee49d67312f151d2e74d78512a6ef193b05cd98d4f79530453059'; '1280x800/light' = '450f5d4003105d8b04e7fb13794afbd9b33d04dabff2b0a06b04d60439cfbbf9'; '1920x1080' = 'c16c8ebd5d11682261d9e9c92814484399b504de38c8e7bb9dda8fc0f1106e71'; '1920x1080/light' = '17b3b8e955b199a6646e17ae31770c8dd28961fcf813bb66e83271b0229eb071'; '1920x1200' = 'a77254a51e5ca40df490f0f37b83782acfe6069db68e5df97ebf32f7d247370d'; '1920x1200/light' = 'ac609fba4f2bfb76df68d61baa87dab2ebe14d7c8cedf608c2f7adc5a0a42701'; '3840x1080' = '88026ae126778e0128de506a80e1554afd1306c3828407532d75b8be09fd2f32'; '3840x1080/light' = '73fbde2d52b621e6974a7fc92ccf7a3bc2edfc9b76c3d5bde372fcb7c6991305' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -390,7 +390,7 @@ longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive le
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 610 bytes in 199 edits
+            #  Changes    : 609 bytes in 198 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -687,8 +687,6 @@ WAR screen is read from.
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA DD 02 00 00' }
                     # menu: intro credits text y 200
                     @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 82 01 00 00' }
-                    # menu: intro credits text height 100 -> 94 (above the seven-row menu)
-                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 5E' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA 74 01 00 00' }
                     # menu: network screen globe y 24
@@ -1638,7 +1636,7 @@ WAR screen is read from.
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 669 bytes in 212 edits
+            #  Changes    : 668 bytes in 211 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -1935,8 +1933,6 @@ WAR screen is read from.
                     @{ Offset = 0x3BF3; Old = 'BA 1D 02 00 00'; New = 'BA 5D 03 00 00' }
                     # menu: intro credits text y 200
                     @{ Offset = 0x4299; Old = 'BB E6 00 00 00'; New = 'BB 73 01 00 00' }
-                    # menu: intro credits text height 100 -> 76 (above the seven-row menu)
-                    @{ Offset = 0x429E; Old = '6A 64'; New = '6A 4C' }
                     # menu: intro credits text x 178
                     @{ Offset = 0x42A0; Old = 'BA B2 00 00 00'; New = 'BA F4 01 00 00' }
                     # menu: network screen globe y 24
@@ -5539,7 +5535,7 @@ the others.  Windows treats both separators alike.
             #  options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
             #  values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
             #  order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
-            #  COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+            #  COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and CUSTOM NET WAR (MULTI PLAYER WAR until 3 Oct 2026) play ALL (the menu fix writes it) - and the
             #  dialog changes it at any time, with the music switching at once.  Two small in-place edits route
             #  the dialog's new buttons and value text into the rewritten routines; the dialog script with the
             #  new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
@@ -5581,7 +5577,7 @@ Dark Colony Ultimate (since 25 Sep 2026) plays both discs and lets you choose: i
 options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
 values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
 order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
-COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and CUSTOM NET WAR (MULTI PLAYER WAR until 3 Oct 2026) play ALL (the menu fix writes it) - and the
 dialog changes it at any time, with the music switching at once.  Two small in-place edits route
 the dialog's new buttons and value text into the rewritten routines; the dialog script with the
 new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
@@ -5737,7 +5733,7 @@ silent, as it does today.
             #  options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
             #  values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
             #  order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
-            #  COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+            #  COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and CUSTOM NET WAR (MULTI PLAYER WAR until 3 Oct 2026) play ALL (the menu fix writes it) - and the
             #  dialog changes it at any time, with the music switching at once.  Two small in-place edits route
             #  the dialog's new buttons and value text into the rewritten routines; the dialog script with the
             #  new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
@@ -5779,7 +5775,7 @@ Dark Colony Ultimate (since 25 Sep 2026) plays both discs and lets you choose: i
 options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
 values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
 order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
-COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and CUSTOM NET WAR (MULTI PLAYER WAR until 3 Oct 2026) play ALL (the menu fix writes it) - and the
 dialog changes it at any time, with the music switching at once.  Two small in-place edits route
 the dialog's new buttons and value text into the rewritten routines; the dialog script with the
 new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
@@ -6067,10 +6063,12 @@ in_text 207..210 above the two stock chat lines (15 rows apart); the stock 640x4
             #      them to 19 and 20 and gives the new buttons the plates 21 and 22
             #    * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
             #      sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
-            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder (since 3 Oct 2026
+            #      the menu has ONE load button, id 2, whose picker fix online replaces by a browser over all three
+            #      save folders; the handlers of ids 7 and 4 stay in the exe, unreachable).  The stub and
             #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
             #      and their four absolute slot addresses add four more entries to the .reloc insert
-            #    * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
+            #    * MULTI PLAYER WAR (labelled CUSTOM NET WAR since 3 Oct 2026) goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
             #      VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
             #      it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
             #      The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
@@ -6081,12 +6079,14 @@ in_text 207..210 above the two stock chat lines (15 rows apart); the stock 640x4
             #      commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
             #    * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
             #      -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
-            #      the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
-            #      planet's crescent and the artwork is exactly 217 rows.  The two string operands the call
-            #      carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026): the
-            #      menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
-            #      or as low as H-72 allows, and the `resolution` fix writes the box's height (94 rows at
-            #      1024x768, 76 at 1280x720, the stock 100 from 1280x800 up).  The whole Council Wars menu
+            #      the seven-row menu of 23 Sep - 3 Oct 2026 was 217 rows tall and the black band of the 640x480
+            #      backdrop between the planet's crescent and the artwork is exactly 217 rows (the five-row menu
+            #      since 3 Oct 2026 would leave room again; the box stays removed there).  The two string operands
+            #      the call carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026):
+            #      the menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
+            #      or as low as H-72 allows, and the `resolution` fix writes the box's height where the block
+            #      shortens it (the seven-row block: 94 rows at 1024x768, 76 at 1280x720; the five-row block fits
+            #      everywhere, so the box keeps its stock 100 rows at every size).  The whole Council Wars menu
             #      cluster - logo, title, box, buttons - sits 15 rows higher than the letterbox rule at the HD
             #      sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
             #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
@@ -6141,10 +6141,12 @@ itself uses.  Two buttons are added for it:
     them to 19 and 20 and gives the new buttons the plates 21 and 22
   * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
     sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
-    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder (since 3 Oct 2026
+    the menu has ONE load button, id 2, whose picker fix online replaces by a browser over all three
+    save folders; the handlers of ids 7 and 4 stay in the exe, unreachable).  The stub and
     the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
     and their four absolute slot addresses add four more entries to the .reloc insert
-  * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
+  * MULTI PLAYER WAR (labelled CUSTOM NET WAR since 3 Oct 2026) goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
     VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
     it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
     The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
@@ -6155,12 +6157,14 @@ itself uses.  Two buttons are added for it:
     commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
   * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
     -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
-    the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
-    planet's crescent and the artwork is exactly 217 rows.  The two string operands the call
-    carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026): the
-    menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
-    or as low as H-72 allows, and the `resolution` fix writes the box's height (94 rows at
-    1024x768, 76 at 1280x720, the stock 100 from 1280x800 up).  The whole Council Wars menu
+    the seven-row menu of 23 Sep - 3 Oct 2026 was 217 rows tall and the black band of the 640x480
+    backdrop between the planet's crescent and the artwork is exactly 217 rows (the five-row menu
+    since 3 Oct 2026 would leave room again; the box stays removed there).  The two string operands
+    the call carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026):
+    the menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
+    or as low as H-72 allows, and the `resolution` fix writes the box's height where the block
+    shortens it (the seven-row block: 94 rows at 1024x768, 76 at 1280x720; the five-row block fits
+    everywhere, so the box keeps its stock 100 rows at every size).  The whole Council Wars menu
     cluster - logo, title, box, buttons - sits 15 rows higher than the letterbox rule at the HD
     sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
 REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
@@ -6660,10 +6664,12 @@ later relocation entry, this patch is always applied last.
             #      them to 19 and 20 and gives the new buttons the plates 21 and 22
             #    * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
             #      sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
-            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+            #      LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder (since 3 Oct 2026
+            #      the menu has ONE load button, id 2, whose picker fix online replaces by a browser over all three
+            #      save folders; the handlers of ids 7 and 4 stay in the exe, unreachable).  The stub and
             #      the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
             #      and their four absolute slot addresses add four more entries to the .reloc insert
-            #    * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
+            #    * MULTI PLAYER WAR (labelled CUSTOM NET WAR since 3 Oct 2026) goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
             #      VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
             #      it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
             #      The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
@@ -6674,12 +6680,14 @@ later relocation entry, this patch is always applied last.
             #      commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
             #    * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
             #      -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
-            #      the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
-            #      planet's crescent and the artwork is exactly 217 rows.  The two string operands the call
-            #      carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026): the
-            #      menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
-            #      or as low as H-72 allows, and the `resolution` fix writes the box's height (94 rows at
-            #      1024x768, 76 at 1280x720, the stock 100 from 1280x800 up).  The whole Council Wars menu
+            #      the seven-row menu of 23 Sep - 3 Oct 2026 was 217 rows tall and the black band of the 640x480
+            #      backdrop between the planet's crescent and the artwork is exactly 217 rows (the five-row menu
+            #      since 3 Oct 2026 would leave room again; the box stays removed there).  The two string operands
+            #      the call carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026):
+            #      the menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
+            #      or as low as H-72 allows, and the `resolution` fix writes the box's height where the block
+            #      shortens it (the seven-row block: 94 rows at 1024x768, 76 at 1280x720; the five-row block fits
+            #      everywhere, so the box keeps its stock 100 rows at every size).  The whole Council Wars menu
             #      cluster - logo, title, box, buttons - sits 15 rows higher than the letterbox rule at the HD
             #      sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
             #  REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
@@ -6734,10 +6742,12 @@ itself uses.  Two buttons are added for it:
     them to 19 and 20 and gives the new buttons the plates 21 and 22
   * the two handlers go into the 59 NOP bytes the old PLAY INTRO body left behind: DARK COLONY
     sets "campaign, not training" and enters the campaign runner through tramp_dc_campaign,
-    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder.  The stub and
+    LOAD DC GAME goes through tramp_dc_load, so it always lists the SAVE/ folder (since 3 Oct 2026
+    the menu has ONE load button, id 2, whose picker fix online replaces by a browser over all three
+    save folders; the handlers of ids 7 and 4 stay in the exe, unreachable).  The stub and
     the two trampolines are 97 more bytes of the code section's zero tail (VA 0x47F340..0x47F3AA),
     and their four absolute slot addresses add four more entries to the .reloc insert
-  * MULTI PLAYER WAR goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
+  * MULTI PLAYER WAR (labelled CUSTOM NET WAR since 3 Oct 2026) goes through a fourth trampoline, tramp_dc_net (25 Sep 2026; 10 bytes at
     VA 0x47F3B0, relative operands only): a network game always starts in the Dark Colony mode, so
     it reads the Classic balance tables from the game root like dc16.exe and the relay server do.
     The menu's mode is sticky, and after OZI MISSIONS a network game loaded the pack's tables and
@@ -6748,12 +6758,14 @@ itself uses.  Two buttons are added for it:
     commanders of all three campaigns now rally in their STAND pose, as in Dark Colony
   * at 640x480 only, the scrolling credits box is removed (main.c bintro's TTY create, 45 bytes
     -> NOPs, the call is `ret 20h` so the stack balances, and the matching destroy count 1 -> 0):
-    the seven-row menu is 217 rows tall and the black band of the 640x480 backdrop between the
-    planet's crescent and the artwork is exactly 217 rows.  The two string operands the call
-    carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026): the
-    menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
-    or as low as H-72 allows, and the `resolution` fix writes the box's height (94 rows at
-    1024x768, 76 at 1280x720, the stock 100 from 1280x800 up).  The whole Council Wars menu
+    the seven-row menu of 23 Sep - 3 Oct 2026 was 217 rows tall and the black band of the 640x480
+    backdrop between the planet's crescent and the artwork is exactly 217 rows (the five-row menu
+    since 3 Oct 2026 would leave room again; the box stays removed there).  The two string operands
+    the call carried become type 0 relocation padding.  At the HD sizes the box stays (24 Sep 2026):
+    the menu block is placed 120 rows under the title instead - 11 px, the stock 100-row box, 9 px -
+    or as low as H-72 allows, and the `resolution` fix writes the box's height where the block
+    shortens it (the seven-row block: 94 rows at 1024x768, 76 at 1280x720; the five-row block fits
+    everywhere, so the box keeps its stock 100 rows at every size).  The whole Council Wars menu
     cluster - logo, title, box, buttons - sits 15 rows higher than the letterbox rule at the HD
     sizes (same day; 0 at 1280x720, where the DC logo already touches the planet's crescent).
 REQUIRES the "DC - Council wars/ozi_ns/" overlay folder, exp/animozi.dat, exp/animate/tranozi.fin,
@@ -7310,13 +7322,13 @@ directory that lists them); their SHA-256 is checked like every other edit.
                 )
             }
 
-            # ---- online: ONLINE WAR and REPLAY ONLINE GAME: a room browser and a replay browser for the relay server in the main menu, TLS to port 8889 (Dark Colony Ultimate only) ---------------------------------------------------------
-            #  Added      : 29 Sep 2026 (REPLAY ONLINE GAME 2 Oct 2026)
+            # ---- online: ONLINE WAR, REPLAY ONLINE GAME and one LOAD GAME for every campaign: a room browser and a replay browser for the relay server, TLS to port 8889, and a save browser over save/, esave/ and ozisave/ (Dark Colony Ultimate only) ---------------------------------------------------------
+            #  Added      : 29 Sep 2026 (REPLAY ONLINE GAME 2 Oct 2026, LOAD GAME 3 Oct 2026)
             #  Made with  : tools/patch_online.py (module: tools/online/online.c, built by tools/online/build.cmd)
-            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.51 and 10.65; docs/RELAY_SERVER_PLAN.md sections 20 and 21; docs/DC16_NETWORK_PROTOCOL.md sections 4.4, 4.5, 6.9 and 6.10
-            #  Changes    : 15384 bytes in 6 edits
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.51, 10.65 and 10.67; docs/RELAY_SERVER_PLAN.md sections 20 and 21; docs/DC16_NETWORK_PROTOCOL.md sections 4.4, 4.5, 6.9 and 6.10
+            #  Changes    : 18972 bytes in 7 edits
             #  The main menu of Dark Colony Ultimate gets an eleventh button, ONLINE WAR (top of the right column;
-            #  MULTI PLAYER WAR and ENCYCLOPEDIA move two rows down) and, since 2 Oct 2026, a twelfth right under it,
+            #  MULTI PLAYER WAR - CUSTOM NET WAR since 3 Oct 2026 - and ENCYCLOPEDIA move two rows down) and, since 2 Oct 2026, a twelfth right under it,
             #  REPLAY ONLINE GAME.  ONLINE WAR opens a room browser built from the LOAD GAME screen that lists the rooms of the Dark
             #  Colony Server relay - map, terrain, seats, players, bots, status - and joins the room you pick; the
             #  relay then chooses a free slot for you.  The name and the address of the relay come from DEFAULT_SERVER.TXT
@@ -7325,7 +7337,7 @@ directory that lists them); their SHA-256 is checked like every other edit.
             #  relay; both screens show the two values above the connection state).  The connection is
             #  TLS-encrypted with Windows' own Schannel (port 8889; the certificate is checked against the host
             #  name), and the game's stock lobby and battle code then run unchanged through a small loopback proxy
-            #  inside the process, so MULTI PLAYER WAR and the network play itself are untouched.
+            #  inside the process, so CUSTOM NET WAR (the former MULTI PLAYER WAR button) and the network play itself are untouched.
             #
             #  What is changed in the exe:
             #    * a NEW SECTION ".dccode" is appended at the end of the file (after fix icon's ".dcicon", which is
@@ -7337,7 +7349,18 @@ directory that lists them); their SHA-256 is checked like every other edit.
             #      section (section count, section header, image size).
             #    * the menu's accepted-id filter `cmp edx,7` -> `cmp edx,9` (button ids 8 = ONLINE WAR, 9 = REPLAY
             #      ONLINE GAME), and the seven NOP bytes at the end of the menu's id chain become a jump into the
-            #      section (ids other than 8 and 9 return to the menu loop as before).  Nothing else in the code changes.
+            #      section (ids other than 8 and 9 return to the menu loop as before).
+            #    * the stock LOAD GAME code's call of its one-folder picker screen (0x403ABC) is pointed at the
+            #      module's save browser (3 Oct 2026).  Nothing else in the code changes.
+            #
+            #  LOAD GAME (3 Oct 2026) is the ONE load button of the menu, last in the left column: it lists the saves
+            #  of every campaign together - the folders save\ (ACADEMY and DARK COLONY), esave\ (COUNCIL WARS) and
+            #  ozisave\ (OZI MISSIONS) stay as they are, every save keeps its folder - newest first, one row per save:
+            #  date, time, the name you gave it and the campaign (Academy, Dark Colony, Council wars, Ozi missions;
+            #  the game type in the save's header tells an ACADEMY save from a DARK COLONY one, a multiplayer game
+            #  saved in battle says Multiplayer).  LOAD switches the game to the save's campaign mode and the stock
+            #  code loads the file and resumes exactly as the three former load buttons did.  The buttons LOAD DC GAME
+            #  and LOAD OZI GAME are gone from the menu (their handlers stay in the exe, unreachable).
             #
             #  REPLAY ONLINE GAME lists the battles the relay recorded (date and time, map, terrain, seats, players,
             #  computer players, length - the relay keeps the newest 50) and, right of the list, the eight players of
@@ -7347,24 +7370,25 @@ directory that lists them); their SHA-256 is checked like every other edit.
             #  that player's seat - his fog of war, his base, the whole battle as it happened; you can scroll the map
             #  but not act.  The same encrypted connection, the same module.
             #
-            #  Data: the screen scripts HD_<height>P\ONLINE and REPLAYE (INTRFACE\ONLINE / REPLAYE at 640x480) are
-            #  derived from LOADGE by this script (list widened to 56 columns, header, name, server and status lines,
-            #  ENTER / BACK; the replay screen: a 40-column list and the participant pane), their backgrounds ONLINEBG.GIF /
+            #  Data: the screen scripts HD_<height>P\ONLINE, REPLAYE and LOADALLE (INTRFACE\ONLINE / REPLAYE / LOADALLE at
+            #  640x480) are derived from LOADGE by this script (list widened to 56 columns, header, name, server and status
+            #  lines, ENTER / BACK; the replay screen: a 40-column list and the participant pane; the load screen: ONLINE
+            #  with the title Load Game and the button LOAD), their backgrounds ONLINEBG.GIF /
             #  REPLAYBG.GIF from LOADER.GIF, and DEFAULT_SERVER.TXT is written beside the exe when it is missing or still
             #  holds only the shipped address in its first, bare form - a file with your own relay address is never
             #  overwritten.  The appended bytes are written
             #  below in Base64 with their SHA-256; the C source they were compiled from is in the Dark-Colony-Server
             #  repository.
             @{
-                Id = 'online'; Name = 'ONLINE WAR and REPLAY ONLINE GAME: a room browser and a replay browser for the relay server in the main menu, TLS to port 8889 (Dark Colony Ultimate only)'; Date = '29 Sep 2026 (REPLAY ONLINE GAME 2 Oct 2026)'
+                Id = 'online'; Name = 'ONLINE WAR, REPLAY ONLINE GAME and one LOAD GAME for every campaign: a room browser and a replay browser for the relay server, TLS to port 8889, and a save browser over save/, esave/ and ozisave/ (Dark Colony Ultimate only)'; Date = '29 Sep 2026 (REPLAY ONLINE GAME 2 Oct 2026, LOAD GAME 3 Oct 2026)'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = $null
                 # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
                 Theme = $null
-                Tool = 'tools/patch_online.py (module: tools/online/online.c, built by tools/online/build.cmd)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.51 and 10.65; docs/RELAY_SERVER_PLAN.md sections 20 and 21; docs/DC16_NETWORK_PROTOCOL.md sections 4.4, 4.5, 6.9 and 6.10'
+                Tool = 'tools/patch_online.py (module: tools/online/online.c, built by tools/online/build.cmd)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.51, 10.65 and 10.67; docs/RELAY_SERVER_PLAN.md sections 20 and 21; docs/DC16_NETWORK_PROTOCOL.md sections 4.4, 4.5, 6.9 and 6.10'
                 Description = @'
 The main menu of Dark Colony Ultimate gets an eleventh button, ONLINE WAR (top of the right column;
-MULTI PLAYER WAR and ENCYCLOPEDIA move two rows down) and, since 2 Oct 2026, a twelfth right under it,
+MULTI PLAYER WAR - CUSTOM NET WAR since 3 Oct 2026 - and ENCYCLOPEDIA move two rows down) and, since 2 Oct 2026, a twelfth right under it,
 REPLAY ONLINE GAME.  ONLINE WAR opens a room browser built from the LOAD GAME screen that lists the rooms of the Dark
 Colony Server relay - map, terrain, seats, players, bots, status - and joins the room you pick; the
 relay then chooses a free slot for you.  The name and the address of the relay come from DEFAULT_SERVER.TXT
@@ -7373,7 +7397,7 @@ dark-colony-server.fly.dev and explains how to point the game at another relay o
 relay; both screens show the two values above the connection state).  The connection is
 TLS-encrypted with Windows' own Schannel (port 8889; the certificate is checked against the host
 name), and the game's stock lobby and battle code then run unchanged through a small loopback proxy
-inside the process, so MULTI PLAYER WAR and the network play itself are untouched.
+inside the process, so CUSTOM NET WAR (the former MULTI PLAYER WAR button) and the network play itself are untouched.
 
 What is changed in the exe:
   * a NEW SECTION ".dccode" is appended at the end of the file (after fix icon's ".dcicon", which is
@@ -7385,7 +7409,18 @@ What is changed in the exe:
     section (section count, section header, image size).
   * the menu's accepted-id filter `cmp edx,7` -> `cmp edx,9` (button ids 8 = ONLINE WAR, 9 = REPLAY
     ONLINE GAME), and the seven NOP bytes at the end of the menu's id chain become a jump into the
-    section (ids other than 8 and 9 return to the menu loop as before).  Nothing else in the code changes.
+    section (ids other than 8 and 9 return to the menu loop as before).
+  * the stock LOAD GAME code's call of its one-folder picker screen (0x403ABC) is pointed at the
+    module's save browser (3 Oct 2026).  Nothing else in the code changes.
+
+LOAD GAME (3 Oct 2026) is the ONE load button of the menu, last in the left column: it lists the saves
+of every campaign together - the folders save\ (ACADEMY and DARK COLONY), esave\ (COUNCIL WARS) and
+ozisave\ (OZI MISSIONS) stay as they are, every save keeps its folder - newest first, one row per save:
+date, time, the name you gave it and the campaign (Academy, Dark Colony, Council wars, Ozi missions;
+the game type in the save's header tells an ACADEMY save from a DARK COLONY one, a multiplayer game
+saved in battle says Multiplayer).  LOAD switches the game to the save's campaign mode and the stock
+code loads the file and resumes exactly as the three former load buttons did.  The buttons LOAD DC GAME
+and LOAD OZI GAME are gone from the menu (their handlers stay in the exe, unreachable).
 
 REPLAY ONLINE GAME lists the battles the relay recorded (date and time, map, terrain, seats, players,
 computer players, length - the relay keeps the newest 50) and, right of the list, the eight players of
@@ -7395,9 +7430,10 @@ watched - its client would control the lobby); tick one and REPLAY makes the rel
 that player's seat - his fog of war, his base, the whole battle as it happened; you can scroll the map
 but not act.  The same encrypted connection, the same module.
 
-Data: the screen scripts HD_<height>P\ONLINE and REPLAYE (INTRFACE\ONLINE / REPLAYE at 640x480) are
-derived from LOADGE by this script (list widened to 56 columns, header, name, server and status lines,
-ENTER / BACK; the replay screen: a 40-column list and the participant pane), their backgrounds ONLINEBG.GIF /
+Data: the screen scripts HD_<height>P\ONLINE, REPLAYE and LOADALLE (INTRFACE\ONLINE / REPLAYE / LOADALLE at
+640x480) are derived from LOADGE by this script (list widened to 56 columns, header, name, server and status
+lines, ENTER / BACK; the replay screen: a 40-column list and the participant pane; the load screen: ONLINE
+with the title Load Game and the button LOAD), their backgrounds ONLINEBG.GIF /
 REPLAYBG.GIF from LOADER.GIF, and DEFAULT_SERVER.TXT is written beside the exe when it is missing or still
 holds only the shipped address in its first, bare form - a file with your own relay address is never
 overwritten.  The appended bytes are written
@@ -7414,18 +7450,20 @@ repository.
                 Edits = @(
                     # PE header: NumberOfSections 7 -> 8 (the new .dccode section)
                     @{ Offset = 0x86; Old = '07 00'; New = '08 00' }
-                    # optional header: SizeOfImage 0x157000 -> 0x15B000
-                    @{ Offset = 0xD0; Old = '00 70 15 00'; New = '00 B0 15 00' }
-                    # section table: new header .dccode VA 0x157000 size 0x3B08, file 0xB5A00 size 0x3C00, code + read + write + execute (0xE0000020), in the zero slack after the last header
-                    @{ Offset = 0x290; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '2E 64 63 63 6F 64 65 00 08 3B 00 00 00 70 15 00 00 3C 00 00 00 5A 0B 00 00 00 00 00 00 00 00 00 00 00 00 00 20 00 00 E0' }
+                    # optional header: SizeOfImage 0x157000 -> 0x15C000
+                    @{ Offset = 0xD0; Old = '00 70 15 00'; New = '00 C0 15 00' }
+                    # section table: new header .dccode VA 0x157000 size 0x49D3, file 0xB5A00 size 0x4A00, code + read + write + execute (0xE0000020), in the zero slack after the last header
+                    @{ Offset = 0x290; Old = '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'; New = '2E 64 63 63 6F 64 65 00 D3 49 00 00 00 70 15 00 00 4A 00 00 00 5A 0B 00 00 00 00 00 00 00 00 00 00 00 00 00 20 00 00 E0' }
+                    # LOAD GAME 0x403AA4: `call 0x40388C` (the stock one-folder picker) at 0x403ABC -> call load_game_picker 0x55B8F0: the saves of every campaign in one list, the mode follows the chosen save's folder
+                    @{ Offset = 0x2EBC; Old = 'E8 CB FD FF FF'; New = 'E8 2F 7E 15 00' }
                     # main menu id filter 0x404F9E: cmp edx,7 -> cmp edx,9 (button ids 8 = ONLINE WAR and 9 = REPLAY ONLINE GAME reach the id chain)
                     @{ Offset = 0x43A0; Old = '07'; New = '09' }
-                    # end of the id chain 0x405136: 7 NOP -> jmp online_dispatch 0x55AA63 (+2 NOP); id 8 runs online_war, id 9 replay_game 0x55AA50, other ids continue at 0x40513D as before
-                    @{ Offset = 0x4536; Old = '90 90 90 90 90 90 90'; New = 'E9 28 59 15 00 90 90' }
-                    # new section .dccode at file 0xB5A00 (VA 0x557000), 15360 bytes appended: the ONLINE WAR / REPLAY ONLINE GAME module (15112 bytes of code and data, 370 absolute operands rebased, online_dispatch +0x3A63, online_war +0x3A3D, replay_game +0x3A50, module sha256 200a339e944eb7f0)
-                    # (Base64 of the 15360 appended bytes; decode it to see them - the ONLINE WAR module, compiled from tools/online/online.c (see the fix description))
-                    @{ Append = 0xB5A00; Sha256 = '84b549a91bd864e5907915a72a95539cca187830586023512b75225294d64480'; Length = 15360
-                       Base64 = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP////9NQVAgICAgICAgICAgICAgICAgVEVSUkFJTiAgU0VBVFMgUExBWUVSUyBCT1RTIFNUQVRVUwAAAFdBVENIIEFTAAAAAGludHJmYWNlL29ubGluAABpbnRyZmFjZS9yZXBsYXkAL29ubGluAABcT05MSU5FAC9yZXBsYXkAXFJFUExBWUUAAAAAQk1PbmxpbmUAAAAAMTI3LjAuMC4xAAAAMDEyMzQ1Njc4OUFCQ0RFRgAAAABrZXJuZWwzMi5kbGwAAAAAd3MyXzMyLmRsbAAAc2VjdXIzMi5kbGwAQ3JlYXRlRmlsZUEAUmVhZEZpbGUAAAAAQ2xvc2VIYW5kbGUAR2V0VGlja0NvdW50AAAAAENyZWF0ZVRocmVhZAAAAABTbGVlcAAAAEdldExhc3RFcnJvcgAAAABWaXJ0dWFsQWxsb2MAAAAAV3JpdGVGaWxlAAAAU2V0RmlsZVBvaW50ZXIAAFdTQVN0YXJ0dXAAAHNvY2tldAAAY29ubmVjdABzZW5kAAAAAHJlY3YAAAAAc2VsZWN0AABjbG9zZXNvY2tldABnZXRob3N0YnluYW1lAAAAaW5ldF9hZGRyAAAAaHRvbnMAAABudG9ocwAAAGJpbmQAAAAAbGlzdGVuAABhY2NlcHQAAGdldHNvY2tuYW1lAFdTQUdldExhc3RFcnJvcgBfX1dTQUZESXNTZXQAAAAAQWNxdWlyZUNyZWRlbnRpYWxzSGFuZGxlQQAAAEluaXRpYWxpemVTZWN1cml0eUNvbnRleHRBAABRdWVyeUNvbnRleHRBdHRyaWJ1dGVzQQBFbmNyeXB0TWVzc2FnZQAARGVjcnlwdE1lc3NhZ2UAAEZyZWVDb250ZXh0QnVmZmVyAAAARGVsZXRlU2VjdXJpdHlDb250ZXh0AAAARnJlZUNyZWRlbnRpYWxzSGFuZGxlAAAAcmVzb2x2ZTogd3MyXzMyLmRsbCBub3QgbG9hZGVkAAByZXNvbHZlOiBzZWN1cjMyLmRsbCBub3QgbG9hZGVkAHJlc29sdmU6IGEgZnVuY3Rpb24gaXMgbWlzc2luZyAoc2VlIHRoZSBXIHRhYmxlIGluIG9ubGluZS5jKQAAAABPTkxJTkUuTE9HAAANCgAAVExTIGVuY3J5cHQgZmFpbGVkIABUTFMgZGVjcnlwdCBmYWlsZWQgAFRMUyByZW5lZ290aWF0aW9uIHJlcXVlc3RlZABNaWNyb3NvZnQgVW5pZmllZCBTZWN1cml0eSBQcm90b2NvbCBQcm92aWRlcgAAAABUTFMgY3JlZGVudGlhbHMgZmFpbGVkIABUTFMgaGFuZHNoYWtlIHRpbWVkIG91dABjb25uZWN0aW9uIGNsb3NlZCBkdXJpbmcgdGhlIFRMUyBoYW5kc2hha2UAAHNlbmQgZmFpbGVkIGR1cmluZyB0aGUgVExTIGhhbmRzaGFrZQAAAABUTFMgaGFuZHNoYWtlIGZhaWxlZCAAAAAgKGNlcnRpZmljYXRlIG5vdCB0cnVzdGVkKQAAIChjZXJ0aWZpY2F0ZSBuYW1lIG1pc21hdGNoKQAAAAAgKG5vdCBhIFRMUyBzZXJ2ZXI7IHRyeSBgcGxhaW5gKQAAAABUTFMgc3RyZWFtIHNpemVzIGZhaWxlZABwbGFpbgAAAG5vdGxzAAAAREVGQVVMVF9TRVJWRVIuVFhUAABERUZBVUxUX1NFUlZFUi5UWFQgbm90IGZvdW5kIGJlc2lkZSB0aGUgZ2FtZQAAAABuYW1lAAAAAGFkZHJlc3MAc2VydmVyAABob3N0AAAAAERFRkFVTFRfU0VSVkVSLlRYVCBuYW1lcyBubyBzZXJ2ZXIgYWRkcmVzcwAAUHJvdG9jb2wgZXJyb3I6IGJhZCBmcmFtZSBmcm9tIHRoZSByZWxheQAAAABQcm90b2NvbCBlcnJvcjogZnJhbWUgdG9vIGxvbmcAAG1vbmV5IGZpeDogc2ltIHN0YXRlIAAAAG1vbmV5IGZpeDogbG9jYWwgcGxheWVyIAAAAABtb25leSBmaXg6IG1vbmV5IAAAAG1vbmV5IGZpeDogc3BlbnQgAAAAcHJveHk6IGFjY2VwdCBmYWlsZWQAAAAAcHJveHk6IHRoZSBnYW1lIGNvbm5lY3RlZAAAAHByb3h5OiBjbG9zaW5nIGJvdGggY29ubmVjdGlvbnMAV1NBU3RhcnR1cCBmYWlsZWQAAABDYW5ub3QgcmVzb2x2ZSAAc29ja2V0KCkgZmFpbGVkAENhbm5vdCBjb25uZWN0IHRvIAAAOgAAACAoZXJyb3IgAAAAACkAAABzY3JlZW46IAAAAABzY3JlZW4gbG9hZGVkAAAATmFtZTogbm9uZSAoc2VlIERFRkFVTFRfU0VSVkVSLlRYVCkAU2VydmVyOiBub25lIChzZWUgREVGQVVMVF9TRVJWRVIuVFhUKQAAAE5hbWU6IAAALQAAAFNlcnZlcjogAAAAAENvbm5lY3RpbmcgKG5vIGVuY3J5cHRpb24pLi4uAAAAQ29ubmVjdGluZyAoVExTKS4uLgBjb25uZWN0ZWQgKHBsYWluKQAAAGNvbm5lY3RlZCAoVExTKQBDb25uZWN0ZWQuIFBpY2sgYSBiYXR0bGUsIHRpY2sgYSBwbGF5ZXIsIHByZXNzIFJFUExBWS4AAENvbm5lY3RlZCAoVExTKS4gUGljayBhIGJhdHRsZSwgdGljayBhIHBsYXllciwgUkVQTEFZLgAAQ29ubmVjdGVkLiBTZWxlY3QgYSByb29tIGFuZCBwcmVzcyBFTlRFUi4AAABDb25uZWN0ZWQgKFRMUykuIFNlbGVjdCBhIHJvb20gYW5kIHByZXNzIEVOVEVSLgBDb25uZWN0aW9uIGxvc3QuAAAAAGNvbm5lY3Q6IAAAAE5vIHJlY29yZGVkIGJhdHRsZSBvbiB0aGUgc2VydmVyIHlldC4AAAByZXBsYXkgbGlzdDogZW50cmllcyAAAABOb3QgY29ubmVjdGVkLiBQcmVzcyBCQUNLIGFuZCB0cnkgYWdhaW4uAAAAAFNlbGVjdCBhIHJvb20gZmlyc3QuAAAAAEVudGVyaW5nIHJvb20gAAAuLi4AU2VsZWN0IGEgYmF0dGxlIGZpcnN0LgAAVGljayB0aGUgcGxheWVyIHRvIHdhdGNoIGFzLgAAAABTdGFydGluZyB0aGUgcmVwbGF5IGFzIABSUExBWSByZWNvcmRpbmcgAAAAAFJQTEFZIHNsb3QgAGNoZWNrYiBldmVudCBraW5kIAAAY2hlY2tiIGV2ZW50IGlkIAAAAAAtLS0g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' }
+                    # end of the id chain 0x405136: 7 NOP -> jmp online_dispatch 0x55B90B (+2 NOP); id 8 runs online_war, id 9 replay_game 0x55B8DD, other ids continue at 0x40513D as before
+                    @{ Offset = 0x4536; Old = '90 90 90 90 90 90 90'; New = 'E9 D0 67 15 00 90 90' }
+                    # new section .dccode at file 0xB5A00 (VA 0x557000), 18944 bytes appended: the ONLINE WAR / REPLAY ONLINE GAME / LOAD GAME module (18899 bytes of code and data, 466 absolute operands rebased, online_dispatch +0x490B, online_war +0x48CA, replay_game +0x48DD, load_game_picker +0x48F0, module sha256 e4072d827951e649)
+                    # (Base64 of the 18944 appended bytes; decode it to see them - the ONLINE WAR / REPLAY ONLINE GAME / LOAD GAME module, compiled from tools/online/online.c (see the fix description))
+                    @{ Append = 0xB5A00; Sha256 = '9682a8232f7775cf825773a97184f9c0c41ce8c6f31f18ed5be54a41ba5f0a25'; Length = 18944
+                       Base64 = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP////9NQVAgICAgICAgICAgICAgICAgVEVSUkFJTiAgU0VBVFMgUExBWUVSUyBCT1RTIFNUQVRVUwAAAFdBVENIIEFTAAAAAGludHJmYWNlL29ubGluAABpbnRyZmFjZS9yZXBsYXkAaW50cmZhY2UvbG9hZGFsbAAAAAAvb25saW4AAFxPTkxJTkUAL3JlcGxheQBcUkVQTEFZRQAAAAAvbG9hZGFsbAAAAABcTE9BREFMTEUAAABCTU9ubGluZQAAAAAxMjcuMC4wLjEAAACgeFUAqHhVALB4VQAuZGNnAAAAAERBVEUgICAgIFRJTUUgICBOQU1FICAgICAgICAgICAgICAgICAgICAgICAgQ0FNUEFJR04AAAAAc2F2ZQAAAABlc2F2ZQAAAG96aXNhdmUAMDEyMzQ1Njc4OUFCQ0RFRgAAAABrZXJuZWwzMi5kbGwAAAAAd3MyXzMyLmRsbAAAc2VjdXIzMi5kbGwAQ3JlYXRlRmlsZUEAUmVhZEZpbGUAAAAAQ2xvc2VIYW5kbGUAR2V0VGlja0NvdW50AAAAAENyZWF0ZVRocmVhZAAAAABTbGVlcAAAAEdldExhc3RFcnJvcgAAAABWaXJ0dWFsQWxsb2MAAAAAV3JpdGVGaWxlAAAAU2V0RmlsZVBvaW50ZXIAAEZpbmRGaXJzdEZpbGVBAABGaW5kTmV4dEZpbGVBAAAARmluZENsb3NlAAAARmlsZVRpbWVUb0xvY2FsRmlsZVRpbWUARmlsZVRpbWVUb1N5c3RlbVRpbWUAAAAAV1NBU3RhcnR1cAAAc29ja2V0AABjb25uZWN0AHNlbmQAAAAAcmVjdgAAAABzZWxlY3QAAGNsb3Nlc29ja2V0AGdldGhvc3RieW5hbWUAAABpbmV0X2FkZHIAAABodG9ucwAAAG50b2hzAAAAYmluZAAAAABsaXN0ZW4AAGFjY2VwdAAAZ2V0c29ja25hbWUAV1NBR2V0TGFzdEVycm9yAF9fV1NBRkRJc1NldAAAAABBY3F1aXJlQ3JlZGVudGlhbHNIYW5kbGVBAAAASW5pdGlhbGl6ZVNlY3VyaXR5Q29udGV4dEEAAFF1ZXJ5Q29udGV4dEF0dHJpYnV0ZXNBAEVuY3J5cHRNZXNzYWdlAABEZWNyeXB0TWVzc2FnZQAARnJlZUNvbnRleHRCdWZmZXIAAABEZWxldGVTZWN1cml0eUNvbnRleHQAAABGcmVlQ3JlZGVudGlhbHNIYW5kbGUAAAByZXNvbHZlOiB3czJfMzIuZGxsIG5vdCBsb2FkZWQAAHJlc29sdmU6IHNlY3VyMzIuZGxsIG5vdCBsb2FkZWQAcmVzb2x2ZTogYSBmdW5jdGlvbiBpcyBtaXNzaW5nIChzZWUgdGhlIFcgdGFibGUgaW4gb25saW5lLmMpAAAAAE9OTElORS5MT0cAAA0KAABUTFMgZW5jcnlwdCBmYWlsZWQgAFRMUyBkZWNyeXB0IGZhaWxlZCAAVExTIHJlbmVnb3RpYXRpb24gcmVxdWVzdGVkAE1pY3Jvc29mdCBVbmlmaWVkIFNlY3VyaXR5IFByb3RvY29sIFByb3ZpZGVyAAAAAFRMUyBjcmVkZW50aWFscyBmYWlsZWQgAFRMUyBoYW5kc2hha2UgdGltZWQgb3V0AGNvbm5lY3Rpb24gY2xvc2VkIGR1cmluZyB0aGUgVExTIGhhbmRzaGFrZQAAc2VuZCBmYWlsZWQgZHVyaW5nIHRoZSBUTFMgaGFuZHNoYWtlAAAAAFRMUyBoYW5kc2hha2UgZmFpbGVkIAAAACAoY2VydGlmaWNhdGUgbm90IHRydXN0ZWQpAAAgKGNlcnRpZmljYXRlIG5hbWUgbWlzbWF0Y2gpAAAAACAobm90IGEgVExTIHNlcnZlcjsgdHJ5IGBwbGFpbmApAAAAAFRMUyBzdHJlYW0gc2l6ZXMgZmFpbGVkAHBsYWluAAAAbm90bHMAAABERUZBVUxUX1NFUlZFUi5UWFQAAERFRkFVTFRfU0VSVkVSLlRYVCBub3QgZm91bmQgYmVzaWRlIHRoZSBnYW1lAAAAAG5hbWUAAAAAYWRkcmVzcwBzZXJ2ZXIAAGhvc3QAAAAAREVGQVVMVF9TRVJWRVIuVFhUIG5hbWVzIG5vIHNlcnZlciBhZGRyZXNzAABQcm90b2NvbCBlcnJvcjogYmFkIGZyYW1lIGZyb20gdGhlIHJlbGF5AAAAAFByb3RvY29sIGVycm9yOiBmcmFtZSB0b28gbG9uZwAAbW9uZXkgZml4OiBzaW0gc3RhdGUgAAAAbW9uZXkgZml4OiBsb2NhbCBwbGF5ZXIgAAAAAG1vbmV5IGZpeDogbW9uZXkgAAAAbW9uZXkgZml4OiBzcGVudCAAAABwcm94eTogYWNjZXB0IGZhaWxlZAAAAABwcm94eTogdGhlIGdhbWUgY29ubmVjdGVkAAAAcHJveHk6IGNsb3NpbmcgYm90aCBjb25uZWN0aW9ucwBXU0FTdGFydHVwIGZhaWxlZAAAAENhbm5vdCByZXNvbHZlIABzb2NrZXQoKSBmYWlsZWQAQ2Fubm90IGNvbm5lY3QgdG8gAAA6AAAAIChlcnJvciAAAAAAKQAAAHNjcmVlbjogAAAAAHNjcmVlbiBsb2FkZWQAAABOYW1lOiBub25lIChzZWUgREVGQVVMVF9TRVJWRVIuVFhUKQBTZXJ2ZXI6IG5vbmUgKHNlZSBERUZBVUxUX1NFUlZFUi5UWFQpAAAATmFtZTogAAAtAAAAU2VydmVyOiAAAAAAQ29ubmVjdGluZyAobm8gZW5jcnlwdGlvbikuLi4AAABDb25uZWN0aW5nIChUTFMpLi4uAGNvbm5lY3RlZCAocGxhaW4pAAAAY29ubmVjdGVkIChUTFMpAENvbm5lY3RlZC4gUGljayBhIGJhdHRsZSwgdGljayBhIHBsYXllciwgcHJlc3MgUkVQTEFZLgAAQ29ubmVjdGVkIChUTFMpLiBQaWNrIGEgYmF0dGxlLCB0aWNrIGEgcGxheWVyLCBSRVBMQVkuAABDb25uZWN0ZWQuIFNlbGVjdCBhIHJvb20gYW5kIHByZXNzIEVOVEVSLgAAAENvbm5lY3RlZCAoVExTKS4gU2VsZWN0IGEgcm9vbSBhbmQgcHJlc3MgRU5URVIuAENvbm5lY3Rpb24gbG9zdC4AAAAAY29ubmVjdDogAAAATm8gcmVjb3JkZWQgYmF0dGxlIG9uIHRoZSBzZXJ2ZXIgeWV0LgAAAHJlcGxheSBsaXN0OiBlbnRyaWVzIAAAAE5vdCBjb25uZWN0ZWQuIFByZXNzIEJBQ0sgYW5kIHRyeSBhZ2Fpbi4AAAAAU2VsZWN0IGEgcm9vbSBmaXJzdC4AAAAARW50ZXJpbmcgcm9vbSAAAC4uLgBTZWxlY3QgYSBiYXR0bGUgZmlyc3QuAABUaWNrIHRoZSBwbGF5ZXIgdG8gd2F0Y2ggYXMuAAAAAFN0YXJ0aW5nIHRoZSByZXBsYXkgYXMgAFJQTEFZIHJlY29yZGluZyAAAAAAUlBMQVkgc2xvdCAAY2hlY2tiIGV2ZW50IGtpbmQgAABjaGVja2IgZXZlbnQgaWQgAAAAAENvdW5jaWwgd2FycwAAAABPemkgbWlzc2lvbnMAAAAAQWNhZGVteQBNdWx0aXBsYXllcgBVbmtub3duAERhcmsgQ29sb255AC8AAABcKgAALgAAACAAAAAgIAAAc2F2ZXMgZm91bmQgAAAAAFNhdmVzOiAAIChzYXZlIAAsIGVzYXZlIAAAAAAsIG96aXNhdmUgAABGaWxlOiAtAFNlbGVjdCBhIHNhdmUgYW5kIHByZXNzIExPQUQuAAAATm8gc2F2ZWQgZ2FtZSBmb3VuZC4AAAAARmlsZTogAABTZWxlY3QgYSBzYXZlIGZpcnN0LgAAAABMb2FkaW5nIAAAAABMT0FEIAAAAFZpcnR1YWxBbGxvYyBmYWlsZWQALS0tIExPQUQgR0FNRSBwcmVzc2VkAAAALS0tIFJFUExBWSBPTkxJTkUgR0FNRSBwcmVzc2VkAAAtLS0gT05MSU5FIFdBUiBwcmVzc2VkAABjb25maWc6IAAAAABjb25maWc6IG5hbWUgAAAAY29uZmlnOiBob3N0IAAAAGNvbmZpZzogcG9ydCAAAABjb25maWc6IHBsYWluIAAAYmFjayB0byB0aGUgbWVudQAAAABSRVBMQVlJTkcgc2xvdCAARU5URVJJTkcgc2xvdCAAAGxvb3BiYWNrIGxpc3RlbmVyIGZhaWxlZAAAAABsb29wYmFjayBwb3J0IAAAY2FsbGluZyB0aGUgZ2FtZSdzIG5ldHdvcmsgZW50cnksIHRjcCBuZXQgb2JqZWN0IAAAAG5ldHdvcmsgZW50cnkgcmV0dXJuZWQgAAAAAACQ48BqAAAAAA0AAACIAAAACCUAAAgXAAAYAAAAA4ADgNgkAAAgAAAA+CQAABAAAADNQwAA1EMAAG5EAAB+RAAArUQAALhEAADnRAAA8kQAAAAQAACkFAAAkCUAALAzAAAAAAAAABAAAIQHAAAuYnNz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' }
                 )
             }
         )
@@ -8233,7 +8271,7 @@ directory that lists them); their SHA-256 is checked like every other edit.
         RepoUrl        = 'https://github.com/endotermic/Dark-Colony/blob/main/DC%20-%20Council%20wars/dc16.exe'
         SourceNote     = 'NOT from the Dark Colony CD: its DC\DC16.EXE is the August 1997 build (660480 bytes), which these fixes do not fit - they need dc16.exe of the January 1998 update (659456 bytes), so take it from our repository.'
         # $null, or why this build is deprecated (1 Oct 2026): the window skips it unless ticked, -All unless -IncludeDeprecated
-        Deprecated     = 'Dark Colony Ultimate.exe plays the whole Dark Colony campaign (DARK COLONY, LOAD DC GAME, ACADEMY in its main menu) with every fix, so a separate Dark Colony.exe is no longer needed; it is kept for players who want the Classic executable on its own.'
+        Deprecated     = 'Dark Colony Ultimate.exe plays the whole Dark Colony campaign (DARK COLONY, LOAD GAME, ACADEMY in its main menu) with every fix, so a separate Dark Colony.exe is no longer needed; it is kept for players who want the Classic executable on its own.'
         # $false = the repository no longer ships this build's patched exe (the deprecated Dark Colony, 1 Oct 2026)
         Shipped        = $false
         Size           = 659456
@@ -13489,7 +13527,7 @@ the others.  Windows treats both separators alike.
             #  options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
             #  values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
             #  order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
-            #  COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+            #  COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and CUSTOM NET WAR (MULTI PLAYER WAR until 3 Oct 2026) play ALL (the menu fix writes it) - and the
             #  dialog changes it at any time, with the music switching at once.  Two small in-place edits route
             #  the dialog's new buttons and value text into the rewritten routines; the dialog script with the
             #  new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
@@ -13531,7 +13569,7 @@ Dark Colony Ultimate (since 25 Sep 2026) plays both discs and lets you choose: i
 options dialog (the Options button of the Game Option tab) gets a MUSIC row with "-" / "+" and the
 values DC (the Dark Colony disc), CW (the Council Wars disc) and ALL (all eight tracks in a random
 order, reshuffled after each round).  The campaign you start sets the default - ACADEMY and DARK
-COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and MULTI PLAYER WAR play ALL (the menu fix writes it) - and the
+COLONY play DC, COUNCIL WARS plays CW, OZI MISSIONS and CUSTOM NET WAR (MULTI PLAYER WAR until 3 Oct 2026) play ALL (the menu fix writes it) - and the
 dialog changes it at any time, with the music switching at once.  Two small in-place edits route
 the dialog's new buttons and value text into the rewritten routines; the dialog script with the
 new row is written beside the exe for the three campaign modes (exp\, dc\ and ozi_ns\ copies
@@ -14151,7 +14189,7 @@ $HD_SRC = 'HD_SRC'
 $HD_FOLDER_RE = [regex] '^(?i)(HD|UW)_\d{4}P$'
 # the copies the 640x480 build reads (fixes movies / ozi / music / online at the original size)
 $STOCK_COPIES = @('exp\intrface\bintoze', 'dc\intrface\bintoze', 'ozi_ns\intrface\bintoze', 'exp\intrface\lopme', 'dc\intrface\lopme', 'ozi_ns\intrface\lopme',
-                  'GAMESTAT\HSCNDC.TXT', 'GAMESTAT\GSCNDC.TXT', 'INTRFACE\ONLINE', 'INTRFACE\ONLINEBG.GIF', 'INTRFACE\REPLAYE', 'INTRFACE\REPLAYBG.GIF')
+                  'GAMESTAT\HSCNDC.TXT', 'GAMESTAT\GSCNDC.TXT', 'INTRFACE\ONLINE', 'INTRFACE\ONLINEBG.GIF', 'INTRFACE\REPLAYE', 'INTRFACE\REPLAYBG.GIF', 'INTRFACE\LOADALLE')
 
 # What a run for $Keep (a folder name, or '' for a 640x480 build) deletes: every other resolution's folder under the
 # game folder and under exp\, dc\, ozi_ns\ (HD_*P / UW_*P and the pre-October INTRF_HD / intrf_hd), plus - for an
@@ -14984,36 +15022,41 @@ function Edit-DatList([string] $Text) {
     return ($out -join "`n")
 }
 
-# build_ozi_overlay.menu_layout (23 Sep 2026, maintainer's order): the patched Council Wars menu has
-# five rows, the second column only on rows 1, 3 and 5.  The numbers are the exe's button ids, which
-# pick the handler (patch_ozi_menu.py rewires 16 and 4 to the pack), so only positions and labels move:
+# build_ozi_overlay.menu_layout (23 Sep 2026, maintainer's order; 3 Oct 2026: one LOAD GAME button):
+# the patched Council Wars menu has five rows.  The numbers are the exe's button ids, which pick the
+# handler (patch_ozi_menu.py rewires 16 to the pack and adds 6; patch_online.py adds 8 and 9 and
+# replaces button 2's picker by the save browser over every campaign's folder), so only positions
+# and labels move:
 #
-#     ACADEMY       (1)   MULTI PLAYER WAR (3)
-#     COUNCIL WARS  (0)
-#     LOAD CW GAME  (2)   ENCYCLOPEDIA     (5)
-#     OZI MISSIONS (16)
-#     LOAD OZI GAME (4)   QUIT            (12)
-# The patched Council Wars main menu (doc 10.35 and 10.36), the PowerShell twin of
-# tools/build_ozi_overlay.py menu_layout()/menu_script(): Classic's 2x4 button grid becomes seven
-# rows in the left column - ACADEMY, the two Dark Colony entries, the two Council Wars entries and
-# the two pack entries - with MULTI PLAYER WAR and ENCYCLOPEDIA at the top of the second column and
-# QUIT on its last row, a gap of half a button height (12 px) after rows 1, 3 and 5 and the same
+#     ACADEMY       (1)   ONLINE WAR         (8)
+#     DARK COLONY   (6)   REPLAY ONLINE GAME (9)
+#     COUNCIL WARS  (0)   CUSTOM NET WAR     (3)
+#     OZI MISSIONS (16)   ENCYCLOPEDIA       (5)
+#
+#     LOAD GAME     (2)   QUIT              (12)
+# The patched Council Wars main menu (doc 10.35, 10.36 and 10.67), the PowerShell twin of
+# tools/build_ozi_overlay.py menu_layout()/menu_script(): Classic's 2x4 button grid becomes five
+# rows per column - the four campaigns and the one LOAD GAME button on the left, the three screens
+# that are not a campaign, ENCYCLOPEDIA and QUIT on the right (from 23 Sep to 3 Oct 2026 seven rows:
+# a load button under each campaign; LOAD DC GAME 7 and LOAD OZI GAME 4 leave the script, their
+# plates and labels with them) - a gap of half a button height (12 px) after row 4 and the same
 # gap between the columns, after which the block is re-centred on the screen.  Vertically the rows
 # hang from the DCUT title gadget (24 Sep 2026, maintainer: "return back credentials [credits] for
 # higher than 640x480 resolutions"): the first row 120 rows under it - 11 px, the stock 100-row
 # credits box, 9 px - unless the bottom row would pass H-72 (the stock 640x480 bottom row 408,
 # 2-3 px above the bottom artwork every backdrop starts at H-45); then the block stops there and
-# the box gets shorter (the `resolution` fix writes its height: 94 rows at 1024x768, 76 at
-# 1280x720, 100 from 1280x800 up).  At 640x480 that is the whole 217-row band, so the block grows
-# upwards from row 408, the `ozi` fix removes the box, and the gap shrinks by a pixel so that the
-# first row still clears the planet's crescent (rows 198..217).  Both anchors depend only on the
+# the box gets shorter (the `resolution` fix writes its height; the seven-row block needed 94 rows
+# at 1024x768 and 76 at 1280x720, the five-row block fits under the stock 100 everywhere).  At
+# 640x480 the block grows upwards from row 408, the `ozi` fix removes the box (the seven-row block
+# filled the 217-row band), and the gap shrinks by a pixel if the first row would touch the planet's
+# crescent (rows 198..217).  Both anchors depend only on the
 # title and the screen size, so applying this twice changes nothing.  The whole Council Wars cluster
 # (title included, so the block follows) and the H-72 cap sit Get-MenuLift rows higher at the HD sizes.
-# The two Dark Colony buttons are ids 6 and 7, which the stock script used for the LARGEBUTTON
-# gadgets of buttons 0 and 1; those move to 19 and 20, the new plates are 21 and 22, and `banim`
-# pairs all ten.  The new lines are cloned from the script's own `pushb 16` / `gadget 17` /
-# `textmsg 8` so they keep its field layout.  The untouched exe keeps Classic's 2x4 grid and labels
-# in exp\intrface\bintroe (doc 10.35).
+# DARK COLONY is id 6, which the stock script used for the LARGEBUTTON gadget of button 0; the plates
+# of buttons 0..3 move to 19, 20, 24 and 25, the new plates are 21 (DARK COLONY), 23 (ONLINE WAR) and
+# 26 (REPLAY ONLINE GAME), and `banim` pairs all ten.  The new lines are cloned from the script's own
+# `pushb 16` / `gadget 17` / `textmsg 8` so they keep its field layout.  The untouched exe keeps
+# Classic's 2x4 grid and labels in exp\intrface\bintroe (doc 10.35).
 function Set-ScriptTokens([string] $Line, $Changes) {
     $toks = @($TOKENS.Matches($Line) | ForEach-Object { $_.Value })
     $n = 0
@@ -15031,12 +15074,14 @@ function Get-TextmsgLine([int] $N, [string] $Text) {
 }
 
 function Edit-OziMenu([string] $Text) {
-    # right column: ONLINE WAR (8, 29 Sep 2026), REPLAY ONLINE GAME (9, 2 Oct 2026), MULTI PLAYER WAR, ENCYCLOPEDIA, QUIT
-    $cols = @(@(1, 6, 7, 0, 2, 16, 4), @(8, 9, 3, 5, $null, $null, 12))
-    $gapAfter = @(1, 3, 5)
+    # left column: the four campaigns and LOAD GAME (2); right column: ONLINE WAR (8, 29 Sep 2026), REPLAY ONLINE GAME
+    # (9, 2 Oct 2026), CUSTOM NET WAR (= MULTI PLAYER WAR, renamed 3 Oct 2026), ENCYCLOPEDIA, QUIT (3 Oct 2026: one load button, build_ozi_overlay.OZI_COLUMNS)
+    $cols = @(@(1, 6, 0, 16, 2), @(8, 9, 3, 5, 12))
+    $gapAfter = @(4)
     $stockButtons = @(0, 1, 2, 3, 4, 5, 12, 16)
     $stockGadgets = @(10, 11, 13, 17)   # 8 and 9 are renumbered (see $renum)
-    $newButtons = @(6, 7, 8, 9)
+    $newButtons = @(6, 8, 9)
+    $droppedButtons = @(4, 7)           # LOAD OZI GAME and LOAD DC GAME: their pushb, plate and label leave the script (3 Oct 2026)
     # widget ids are one object space for every kind: the plates 6, 7, 8 and 9 of buttons 0, 1, 2 and 3 move to
     # 19, 20, 24 and 25 so that the button ids 6, 7 (Dark Colony), 8 (ONLINE WAR) and 9 (REPLAY ONLINE GAME) are free
     $renum = @{ 6 = 19; 7 = 20; 8 = 24; 9 = 25 }
@@ -15050,20 +15095,28 @@ function Edit-OziMenu([string] $Text) {
     $plateFirst = 'anim_oneoff'; $plateRest = 'anim_stopped'
     $textTemplate = 8
     $stockTopLimit = 218
-    $labels = @{ 1 = 'COUNCIL WARS'; 2 = 'ACADEMY'; 3 = 'LOAD CW GAME'; 5 = 'LOAD OZI GAME'
+    # 3 = the stock LOAD GAME text again (LOAD CW GAME from 23 Sep to 3 Oct 2026); 5 = button 4's stock text, so that an
+    # older output gets the stock line back; 10 = LOAD DC GAME, kept only for the drop list
+    # 4 = CUSTOM NET WAR (was MULTI PLAYER WAR; maintainer, 3 Oct 2026: "rename 'multiplayer war' to 'CUSTOM NET WAR'")
+    $labels = @{ 1 = 'COUNCIL WARS'; 2 = 'ACADEMY'; 3 = 'LOAD GAME'; 4 = 'CUSTOM NET WAR'; 5 = 'SINGLE PLAYER WAR'
                  8 = 'OZI MISSIONS'; 9 = 'DARK COLONY'; 10 = 'LOAD DC GAME'; 11 = 'ONLINE WAR'; 12 = 'REPLAY ONLINE GAME' }
     $xy = @{}
     foreach ($m in ([regex] '(?m)^\s*pushb\s+(\d+)\s+\d+\s+(\d+)\s+(\d+)\s').Matches($Text)) { $xy[[int]$m.Groups[1].Value] = @([int]$m.Groups[2].Value, [int]$m.Groups[3].Value) }
     $gadgets = @{}
     foreach ($m in ([regex] '(?m)^\s*gadget\s+(\d+)\s').Matches($Text)) { $gadgets[[int]$m.Groups[1].Value] = $true }
     $missing = @()
-    foreach ($need in $stockButtons) { if (-not $xy.ContainsKey($need)) { $missing += "pushb $need" } }
-    foreach ($need in $stockGadgets) { if (-not $gadgets.ContainsKey($need)) { $missing += "gadget $need" } }
+    $droppedGadgets = @($droppedButtons | ForEach-Object { [int] $gadgetOf[[int]$_] })
+    # this function's own output lacks the dropped buttons and their plates
+    foreach ($need in $stockButtons) { if (-not $xy.ContainsKey($need) -and -not ($droppedButtons -contains $need)) { $missing += "pushb $need" } }
+    foreach ($need in $stockGadgets) { if (-not $gadgets.ContainsKey($need) -and -not ($droppedGadgets -contains $need)) { $missing += "gadget $need" } }
     # the stock grid has the plates as 6, 7, 8 and 9, this function's own output as 19, 20, 24 and 25 (the 23 Sep
     # form as 19, 20, 8, 9; the 29 Sep form as 19, 20, 24, 9): each pair needs one of its two ids
     foreach ($k in @($renum.Keys | Sort-Object)) { if (-not ($gadgets.ContainsKey([int]$k) -or $gadgets.ContainsKey([int]$renum[$k]))) { $missing += ('gadget {0}/{1}' -f $k, $renum[$k]) } }
     $b = ([regex] '(?m)^\s*banim\s+18\s+\d+\s+(\d+)\s+(\d+)\s').Match($Text)
-    $pairs = @([string] $stockButtons.Count, [string] ($stockButtons.Count + 2), [string] ($stockButtons.Count + 3), [string] ($stockButtons.Count + $newButtons.Count))   # stock grid, the 23 Sep form, the 29 Sep form, this form
+    $placed = 0
+    foreach ($col in $cols) { foreach ($id in $col) { if ($null -ne $id) { $placed++ } } }
+    # stock grid (8), the 23 Sep form (10), the 29 Sep form (11), the 2 Oct form (12), this form (10 placed buttons)
+    $pairs = @([string] $stockButtons.Count, [string] ($stockButtons.Count + 2), [string] ($stockButtons.Count + 3), [string] ($stockButtons.Count + 4), [string] $placed)
     if (-not $b.Success -or $b.Groups[1].Value -ne $b.Groups[2].Value -or -not ($pairs -contains $b.Groups[1].Value)) { $missing += 'banim 18 with 8, 10, 11 or 12 pairs' }
     if ($missing.Count) { throw ("bintroe: not Classic's 2x4 button grid (missing " + ($missing -join ', ') + ')') }
     $xs = @($xy.Values | ForEach-Object { $_[0] } | Sort-Object -Unique)
@@ -15118,9 +15171,10 @@ function Edit-OziMenu([string] $Text) {
     # the wave order: by column x, then by row y (one integer key so 5.1 and 7 sort alike)
     $banimOrder = @(@($place.Keys) | Sort-Object { $place[[int]$_][0] * 100000 + $place[[int]$_][1] } | ForEach-Object { [int] $_ })
     $firstPlate = [int] $gadgetOf[[int]$banimOrder[0]]
-    $dropPushb = @($newButtons)
-    $dropGadget = @($newButtons | ForEach-Object { [int] $gadgetOf[[int]$_] })
-    $dropText = @($newButtons | ForEach-Object { [int] $labelOf[[int]$_] })
+    # the lines re-emitted after their template line, and the two dropped load buttons' lines, which simply leave
+    $dropPushb = @($newButtons + $droppedButtons)
+    $dropGadget = @(($newButtons + $droppedButtons) | ForEach-Object { [int] $gadgetOf[[int]$_] })
+    $dropText = @(($newButtons + $droppedButtons) | Where-Object { $labelOf.ContainsKey([int]$_) } | ForEach-Object { [int] $labelOf[[int]$_] })
     $out = New-Object System.Collections.Generic.List[string]
     foreach ($raw in $Text.Split("`n")) {
         $cr = if ($raw.EndsWith("`r")) { "`r" } else { '' }
@@ -15771,7 +15825,7 @@ function Get-FramedBackground($Im, $Rects) {
 }
 
 # DEFAULT_SERVER.TXT as the repository ships it (the same bytes as patch_online.DEFAULT_SERVER_TEXT; `name=` / `address=` lines since 3 Oct 2026).
-$DefaultServerText = (@('/*', ' * DEFAULT_SERVER.TXT - the relay server behind ONLINE WAR and REPLAY ONLINE GAME.', ' *', ' * Dark Colony Ultimate reads this file when you press one of those two buttons in the main', ' * menu. It connects to the address below with TLS encryption on port 8889 (the Dark Colony', ' * Server relay), shows the rooms or the recorded battles the relay offers and joins the one', ' * you pick. Both screens show the name and the address from this file above the connection', ' * state.', ' *', ' * Fields, one per line:', ' *   name=<how the screens call this server>          any text; here the relay''s project page', ' *   address=<host or IP address>[:port]              the port defaults to 8889 (TLS)', ' *   plain                                            optional: no encryption, for a relay on', ' *                                                    your own network without a certificate', ' *                                                    (the plain relay port is 8888)', ' * Comments in the C++ style are ignored: "//" at the start of a line or after a space runs to', ' * the end of the line (so an address like https://... is kept), or a block like this one.', ' * A file holding only an address (the form before 3 Oct 2026) is still understood.', ' *', ' * Keep one server in the file. MULTI PLAYER WAR (the in-game host / CONNECT TO SERVER', ' * screens) does not read this file.', ' */', '', 'name=https://github.com/endotermic/Dark-Colony-Server', 'address=dark-colony-server.fly.dev') -join "`r`n") + "`r`n"
+$DefaultServerText = (@('/*', ' * DEFAULT_SERVER.TXT - the relay server behind ONLINE WAR and REPLAY ONLINE GAME.', ' *', ' * Dark Colony Ultimate reads this file when you press one of those two buttons in the main', ' * menu. It connects to the address below with TLS encryption on port 8889 (the Dark Colony', ' * Server relay), shows the rooms or the recorded battles the relay offers and joins the one', ' * you pick. Both screens show the name and the address from this file above the connection', ' * state.', ' *', ' * Fields, one per line:', ' *   name=<how the screens call this server>          any text; here the relay''s project page', ' *   address=<host or IP address>[:port]              the port defaults to 8889 (TLS)', ' *   plain                                            optional: no encryption, for a relay on', ' *                                                    your own network without a certificate', ' *                                                    (the plain relay port is 8888)', ' * Comments in the C++ style are ignored: "//" at the start of a line or after a space runs to', ' * the end of the line (so an address like https://... is kept), or a block like this one.', ' * A file holding only an address (the form before 3 Oct 2026) is still understood.', ' *', ' * Keep one server in the file. CUSTOM NET WAR (the in-game host / CONNECT TO SERVER', ' * screens) does not read this file.', ' */', '', 'name=https://github.com/endotermic/Dark-Colony-Server', 'address=dark-colony-server.fly.dev') -join "`r`n") + "`r`n"
 
 # Patching order (3 Oct 2026): of the executables that share the game folder, Dark Colony is patched first and Dark
 # Colony Ultimate LAST.  Every game build rebuilds the resolution's interface folder from scratch (Write-InterfaceSet),
@@ -15783,6 +15837,22 @@ function Sort-ForPatching([object[]] $Items, [scriptblock] $BuildOf) {
     $first = @(); $last = @()
     foreach ($i in $Items) { if ((Get-PatchOrder (& $BuildOf $i)) -eq 0) { $first += $i } else { $last += $i } }
     return @($first + $last)
+}
+
+# The LOAD GAME screen of every campaign (3 Oct 2026, doc 10.67): ONLINE -> LOADALLE, the same edit as
+# patch_online.loadall_script (byte-identical output): the title "Load Game" and the button LOAD; the list, the
+# header line, the three text lines and the background ONLINEBG.GIF stay ONLINE's.  Idempotent on its own output.
+function Edit-LoadAllScript([string] $Text) {
+    $out = New-Object System.Collections.Generic.List[string]
+    foreach ($raw in $Text.Split("`n")) {
+        $cr = if ($raw.EndsWith("`r")) { "`r" } else { '' }
+        $line = if ($cr) { $raw.Substring(0, $raw.Length - 1) } else { $raw }
+        $t = [regex]::Match($line, '^\s*textmsg\s+(\d+)\s')
+        if ($t.Success -and $t.Groups[1].Value -eq '1') { $line = Get-TextmsgLine 1 'Load Game' }
+        elseif ($t.Success -and $t.Groups[1].Value -eq '2') { $line = Get-TextmsgLine 2 'LOAD' }
+        $out.Add($line + $cr)
+    }
+    return ($out -join "`n")
 }
 
 function Write-OnlineScreen([string] $GameDir, [string] $Mode) {
@@ -15823,6 +15893,11 @@ function Write-OnlineScreen([string] $GameDir, [string] $Mode) {
     if (-not $rBgDst) { $rBgDst = Join-Path (Join-Path $GameDir $sub) 'REPLAYBG.GIF' }
     [System.IO.File]::WriteAllBytes($rBgDst, (Get-FramedBackground $im $rRects))
     $lines += ('wrote {0}\REPLAYBG.GIF (the replay screen background: frames around the list, the scroll bar, the participant pane and the text lines)' -f $sub)
+    # LOAD GAME (3 Oct 2026, doc 10.67): the third screen from the ONLINE script; it shares ONLINEBG.GIF
+    $lDst = Find-CI (Join-Path $GameDir $sub) 'LOADALLE'
+    if (-not $lDst) { $lDst = Join-Path (Join-Path $GameDir $sub) 'LOADALLE' }
+    Write-Latin1 $lDst (Edit-LoadAllScript $t)
+    $lines += ('wrote {0}\LOADALLE (the LOAD GAME screen of every campaign, derived from ONLINE)' -f $sub)
     # DEFAULT_SERVER.TXT: written when missing - and a file of the first form (before 3 Oct 2026) that still names only
     # the shipped relay is upgraded to the name= / address= form (patch_online.bare_shipped_config: comments off, exactly
     # one token, dark-colony-server.fly.dev); anything else is the player's own setting and stays

@@ -14,7 +14,8 @@ This repository ships two kinds of executables:
     were called dc16new.exe, engexp16new.exe, maped_ozi_ns_v1.2.exe)
         DC - Council wars\Dark Colony Ultimate.exe
             (Council Wars plus the Dark Colony, OZI and Academy
-            campaigns in its main menu, the ONLINE WAR and the
+            campaigns in its main menu, one LOAD GAME button for the
+            saves of all of them, the ONLINE WAR and the
             REPLAY ONLINE GAME buttons)
         Dark Colony - Map editor\Dark Colony Map Editor.exe
             (the greyed-out dialog controls of the original enabled -
@@ -57,7 +58,7 @@ What makes it trustworthy:
      the icon appends the icon pictures - the icon itself is
      DC - Council wars\DC_HD.ICO, open it in any image viewer - and,
      for Dark Colony Ultimate, "online" appends the ONLINE WAR /
-     REPLAY ONLINE GAME module compiled from tools\online\online.c of
+     REPLAY ONLINE GAME / LOAD GAME module compiled from tools\online\online.c of
      the Dark-Colony-Server repository.  Both are written as Base64
      text with their SHA-256.)
 

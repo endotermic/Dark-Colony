@@ -23,8 +23,8 @@ terrain, seats, players, bots, status - and joins the room you pick; the relay c
 and the usual lobby follows. To use another relay edit that file (`address=host[:port]`, and the word
 `plain` on a line of its own for a LAN relay without a certificate, which then uses the plain port 8888;
 a file of the earlier form holding just the address is still understood). `ONLINE.LOG` beside the exe records each
-step of a connection attempt. MULTI PLAYER WAR (the in-game host and CONNECT TO SERVER screens) is
-unchanged. The server side is the sister repository [Dark-Colony-Server](https://github.com/endotermic/Dark-Colony-Server).
+step of a connection attempt. CUSTOM NET WAR (the in-game host and CONNECT TO SERVER screens; the button was called MULTI PLAYER WAR
+until 3 Oct 2026) is unchanged. The server side is the sister repository [Dark-Colony-Server](https://github.com/endotermic/Dark-Colony-Server).
 
 **REPLAY ONLINE GAME** (the button under ONLINE WAR, since 2 Oct 2026) lists the battles the relay
 recorded - date and time (UTC), map, terrain, seats, players, computer players, length; the relay keeps
@@ -34,9 +34,19 @@ exactly as it happened, with that player's fog of war and base; you can scroll t
 dialogs, nothing else, and QUIT ends the viewing. The relay's bots are named `AI Mercenary`, `AI
 Marauder`, ... and can be watched too.
 
+## Loading a saved game: one LOAD GAME button
+
+Since 3 Oct 2026 the Ultimate menu has **one LOAD GAME button** (last in the left column; the left column is
+ACADEMY, DARK COLONY, COUNCIL WARS, OZI MISSIONS, LOAD GAME, the right column ONLINE WAR, REPLAY ONLINE GAME,
+CUSTOM NET WAR, ENCYCLOPEDIA, QUIT). Its screen lists the saves of every campaign together, newest first - date,
+time, the name you gave the save and the campaign: Academy, Dark Colony, Council wars or Ozi missions (a
+multiplayer game saved in battle says Multiplayer) - and LOAD resumes the chosen one in its own campaign. The
+save files stay where the game writes them: `save\` (ACADEMY and DARK COLONY), `esave\` (COUNCIL WARS) and
+`ozisave\` (OZI MISSIONS). The battlefield save dialog (F11) is unchanged.
+
 ## Are the patched executables safe? Build them yourself
 
-`Dark Colony Ultimate.exe` and `Dark Colony Map Editor.exe` in this repository are the original 1997/98 binaries with a handful of byte patches (no CD check, 1024x768, cursor fix, 150 % default game speed, the dark console-style battlefield interface, ...). **The patched Classic `Dark Colony.exe` is deprecated and no longer shipped since 1 Oct 2026** (the untouched original `dc16.exe` stays): `Dark Colony Ultimate.exe` plays the whole Dark Colony campaign (DARK COLONY / LOAD DC GAME / ACADEMY in its main menu) with every fix, so the separate Classic executable is no longer needed; the patcher writes it only on request - the checkbox on its options page, `-IncludeDeprecated`, or `-Original "DC - Council wars\dc16.exe"` on the command line. A hand-modified exe cannot be signed and some antivirus heuristics dislike it, so the whole modification is made transparent and reproducible by one file, `Apply-DarkColonyPatches.ps1`, in the root of this repository:
+`Dark Colony Ultimate.exe` and `Dark Colony Map Editor.exe` in this repository are the original 1997/98 binaries with a handful of byte patches (no CD check, 1024x768, cursor fix, 150 % default game speed, the dark console-style battlefield interface, ...). **The patched Classic `Dark Colony.exe` is deprecated and no longer shipped since 1 Oct 2026** (the untouched original `dc16.exe` stays): `Dark Colony Ultimate.exe` plays the whole Dark Colony campaign (DARK COLONY / ACADEMY in its main menu, LOAD GAME lists their saves with the others') with every fix, so the separate Classic executable is no longer needed; the patcher writes it only on request - the checkbox on its options page, `-IncludeDeprecated`, or `-Original "DC - Council wars\dc16.exe"` on the command line. A hand-modified exe cannot be signed and some antivirus heuristics dislike it, so the whole modification is made transparent and reproducible by one file, `Apply-DarkColonyPatches.ps1`, in the root of this repository:
 
 - it is a plain PowerShell script; open it in any text editor and read it. It needs nothing but Windows itself (Windows PowerShell 5.1 or PowerShell 7) - no Python, no downloads, no external tools, no network access
 - every fix is a list of byte edits written out as data: file offset, old bytes, new bytes and the reason for the change, with a paragraph explaining what the fix does and where it is documented

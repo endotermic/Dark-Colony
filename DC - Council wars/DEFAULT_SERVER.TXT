@@ -17,7 +17,7 @@
  * the end of the line (so an address like https://... is kept), or a block like this one.
  * A file holding only an address (the form before 3 Oct 2026) is still understood.
  *
- * Keep one server in the file. MULTI PLAYER WAR (the in-game host / CONNECT TO SERVER
+ * Keep one server in the file. CUSTOM NET WAR (the in-game host / CONNECT TO SERVER
  * screens) does not read this file.
  */
 
