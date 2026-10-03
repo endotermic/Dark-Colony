@@ -29,8 +29,9 @@ gadget   15  0   205   231   95   79  SERC       anim_loop unmask - bg erase
 
 banim    16  0  4 4  7 8 9 10  2 3 4 5
 
-in_text  31  0  312  518   56    1  0  -  read_only
-in_text  17  0  312  534   56    1  0  -  read_only
+in_text  49  0  312  518   56    1  0  -  read_only
+in_text  31  0  312  534   56    1  0  -  read_only
+in_text  17  0  312  550   56    1  0  -  read_only
 in_text  30  0  312  230   40    1  0  -  read_only
 checkb   32  0  688  252   27   17  150   150   -
 checkb   33  0  688  282   27   17  149   8   -
@@ -53,7 +54,7 @@ in_text  48  0  688  230   17    1  0  -  read_only
 
 
 
-textmsg 1       Replay Online Game
+textmsg 1       Online Replay
 textmsg 2       REPLAY
 textmsg  3  BACK
 

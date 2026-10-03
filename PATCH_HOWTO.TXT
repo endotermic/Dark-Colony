@@ -347,9 +347,13 @@ What makes it trustworthy:
                        battles, watched from a participant's seat; the
                        script also writes the screens HD_<height>P\ONLINE
                        and REPLAYE with their backgrounds and, if it is
-                       missing, DEFAULT_SERVER.TXT with the address
-                       dark-colony-server.fly.dev - an existing file with
-                       your own relay address is never overwritten)
+                       missing, DEFAULT_SERVER.TXT with the fields
+                       name=https://github.com/endotermic/Dark-Colony-Server
+                       and address=dark-colony-server.fly.dev, shown as the
+                       Name: and Server: lines of both screens - a file of
+                       the earlier form that still holds only the shipped
+                       address is upgraded, an existing file with your own
+                       relay address is never overwritten)
    -Resolution WxH picks the screen size and is REQUIRED for the two
    games - there is no default (640x480 = the original size; the
    published exes are 1024x768; -List shows the sizes), -Theme light

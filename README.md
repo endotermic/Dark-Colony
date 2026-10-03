@@ -15,12 +15,14 @@ Repository contains:
 ## Playing online: ONLINE WAR
 
 `Dark Colony Ultimate.exe` has an **ONLINE WAR** button at the top of the main menu's right column
-(since 29 Sep 2026). It reads the relay's address from **`DC - Council wars/DEFAULT_SERVER.TXT`**
-(plain text with C++-style comments; it ships with `dark-colony-server.fly.dev`), connects to it with
-TLS on port 8889, shows the rooms the relay offers - map, terrain, seats, players, bots, status - and
-joins the room you pick; the relay chooses a free slot for you and the usual lobby follows. To use
-another relay edit that file (`host[:port]`, and the word `plain` after the address for a LAN relay
-without a certificate, which then uses the plain port 8888). `ONLINE.LOG` beside the exe records each
+(since 29 Sep 2026). It reads the relay's name and address from **`DC - Council wars/DEFAULT_SERVER.TXT`**
+(plain text with C++-style comments and two fields, `name=https://github.com/endotermic/Dark-Colony-Server`
+and `address=dark-colony-server.fly.dev`; both are shown above the connection state on the ONLINE WAR and
+REPLAY ONLINE GAME screens), connects to it with TLS on port 8889, shows the rooms the relay offers - map,
+terrain, seats, players, bots, status - and joins the room you pick; the relay chooses a free slot for you
+and the usual lobby follows. To use another relay edit that file (`address=host[:port]`, and the word
+`plain` on a line of its own for a LAN relay without a certificate, which then uses the plain port 8888;
+a file of the earlier form holding just the address is still understood). `ONLINE.LOG` beside the exe records each
 step of a connection attempt. MULTI PLAYER WAR (the in-game host and CONNECT TO SERVER screens) is
 unchanged. The server side is the sister repository [Dark-Colony-Server](https://github.com/endotermic/Dark-Colony-Server).
 

@@ -29,8 +29,9 @@ gadget   15  0   205   231   95   79  SERC       anim_loop unmask - bg erase
 
 banim    16  0  4 4  7 8 9 10  2 3 4 5
 
-in_text  31  0  312  518   56    1  0  -  read_only
-in_text  17  0  312  534   56    1  0  -  read_only
+in_text  49  0  312  518   56    1  0  -  read_only
+in_text  31  0  312  534   56    1  0  -  read_only
+in_text  17  0  312  550   56    1  0  -  read_only
 in_text  30  0  312  230   56    1  0  -  read_only
 
 
