@@ -329,7 +329,14 @@ What makes it trustworthy:
                        each new line plays the mission-message sound),
                      netsave (no Save Game cell and no F11 save dialog
                        in a network battle, 3 Oct 2026: such a save
-                       could never rejoin the relay game)
+                       could never rejoin the relay game),
+                     fps (frame limiter, 3 Oct 2026: never more than 60
+                       frames per second - under Wine the battlefield
+                       scroll and the cursor animation ran six times
+                       too fast; a 60 Hz Windows monitor is unchanged),
+                     pointer (battlefield pointer animation at the menus'
+                       pace, 3 Oct 2026: advanced every 33 ms instead of
+                       every frame; independent of fps)
      Dark Colony     + movies (the Classic intro and endings under
                        their DC* names), sounds (WAV files read from
                        the game root, not from exp\; the Classic

@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 1.4, build 20261003.1523 - generated 2026-10-03 15:23 UTC from Dark-Colony-Server 9ded50a+ and Dark-Colony 4138b49+.
+    Dark Colony patcher 1.6, build 20261003.1822 - generated 2026-10-03 18:22 UTC from Dark-Colony-Server aeaeae5+ and Dark-Colony c77d671+.
 
 
 .SYNOPSIS
@@ -207,9 +207,9 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '1.4'
-$PatcherBuild = '20261003.1523'
-$PatcherGenerated = '2026-10-03 15:23 UTC from Dark-Colony-Server 9ded50a+ and Dark-Colony 4138b49+'
+$PatcherVersion = '1.6'
+$PatcherBuild = '20261003.1822'
+$PatcherGenerated = '2026-10-03 18:22 UTC from Dark-Colony-Server aeaeae5+ and Dark-Colony c77d671+'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -233,7 +233,7 @@ $Builds = @(
         Shipped        = $true
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'b3d3ead8756a8f360a83879b755ed13c013e1c11d4e6b2ba00aacdd23381a3f3'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
+        PatchedSha256  = '3cba8b55a6650764af6aab231722f40acf2d44a820e6873dcf04674dc76cfd46'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -241,7 +241,7 @@ $Builds = @(
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the published one is the exe in the repository); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = '62a285087013dbce232b7144101c6e184375176fc77fee96b2e6304fd47e1190'; '1024x768' = 'b3d3ead8756a8f360a83879b755ed13c013e1c11d4e6b2ba00aacdd23381a3f3'; '1024x768/light' = 'eb79fba74975e6802d244d22d83e14c1c9184664d8e96aaee6326da1d80ac4a0'; '1280x1024' = '104cd4dd843255ef607b2bd4b3a78e16e9d2ab90db52fe347cf368f5d1155877'; '1280x1024/light' = 'a9150cea4bc510e48c7e73a2167a6a56ccab6eb0486e010058789acf21c30076'; '1280x720' = 'f030664e7517cabe4272244763156f1171595a2e9493e3f7c2998430cfdb8c2f'; '1280x720/light' = '7719bebc71f07f62f344d97e4c4cb8954422b730968a24f2eb6b2e14975ea6ee'; '1280x800' = 'b7ba318c5c6109863e7d23efff04bdbac151ce750240a4fc8c7ec14425873c5c'; '1280x800/light' = '6e40bab4547d255f51d69b43a6157c9699764eaefba4d978edb0d513771840c0'; '1920x1080' = 'a0e071a9fc4318dadcb3fddb1b10785fdbca06f094ad4eaa3b0d9976306287e1'; '1920x1080/light' = 'c49edcb56b0ff8ff769b01122c1750056d2bb8187ad48a7b9708001f3b1164c9'; '1920x1200' = '9bc36c4ab31381eb8e012ecad8b88990f3d1e5f975e32c83ed1a011d2205028e'; '1920x1200/light' = 'b17f2cd53e1d2518f4108ae5c00fa1c0f2761810c37e71dfbd25f9cb81cc80a3'; '3840x1080' = 'b822964cbbd48d36764b5b2ab61cde53252c2003ca3dea6479b655cbb7edc7aa'; '3840x1080/light' = '58ce9c0abb2ec2290681a1e566fb881c88e925d2e9e0c901cf2de8cb98b02113' }
+        ReferenceSha256 = @{ '640x480' = 'be1b3fa06441ed412a2ef2044d51045a3d01732eb03165e61691a90d27d36f33'; '1024x768' = '3cba8b55a6650764af6aab231722f40acf2d44a820e6873dcf04674dc76cfd46'; '1024x768/light' = '7ad1744c2ecca9350626cf871428212a58c27f55b57dca6a454f2b453d628fad'; '1280x1024' = 'be362a3994cec357f0eb0cd907d58683874d37e357d19351df0475398b840776'; '1280x1024/light' = 'aeb70f442e2e79bcf9d1b320034638ecc8b6d389a062b7f202f04b7d402e0d5f'; '1280x720' = '1201c61c835e5e51b0f3c18ab70ec0c33c50f1deb1b55a9c7421ab1d267c6b47'; '1280x720/light' = '96af16756e575c4b5589ce704074c530c78c806e0ca1fc0277758a87922846c2'; '1280x800' = 'e6dc8526006871df98b013df9c623435065a8e07be1a78abb527ae6f1c86ea58'; '1280x800/light' = 'acabf15b5257badfbc5b142241e04e2cc4a12b45d6a4e73fbdaf3a4852ec60ca'; '1920x1080' = '4cd717fe2f69ebe3f34d60cd327205b0da33736a9c7059b5174c33cd946baa7a'; '1920x1080/light' = '4f54e2025b78cdebfe97ca6939c70d727c9c2ada8ffe4a51105e96f60816c114'; '1920x1200' = '2957df4b332131513de5e3444c96b2c583b26a23a8fdbe7fc5e2dd437e710fc3'; '1920x1200/light' = 'f45cb8aa1643c08367e30973f6b735a320082d8885103fdf145f76ea3fc86f4f'; '3840x1080' = '16624e2cde5f4a3d473d8aa54ea113ae8e2d4003afef0e603623127f47ff9964'; '3840x1080/light' = '98c28fb9a16fcfd365c7326c04cb2261c84ed3758007830377c5049e3e2ebb9a' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -6087,6 +6087,166 @@ the relocation table stays exact.  Same bytes at +0x60 in Council Wars.
                 )
             }
 
+            # ---- fps: Frame limiter: never more than 60 frames per second (Wine, monitors above 60 Hz) ---------------------------------------------------------
+            #  Added      : 3 Oct 2026
+            #  Made with  : tools/patch_fps.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.69
+            #  Changes    : 186 bytes in 21 edits
+            #  The game has no frame limiter: the only thing that paces its main loop is the DirectDraw Flip at
+            #  the end of each frame, which on Windows waits for the monitor's vertical blank - 60 frames per second
+            #  on most monitors, and the 1997 code counts on that: the battlefield scrolls one tile per frame once
+            #  the pointer has rested at an edge, and the cursor animation advances once per frame.  Under Wine the
+            #  flip returns at once (a Wine virtual desktop, Xvfb and gamescope have no vertical blank to wait for)
+            #  and the loop was measured at 350-380 frames per second: the map crosses in a quarter of a second, the
+            #  cursor flickers.  A Windows monitor above 60 Hz has the same problem in proportion (2.4 times too fast
+            #  at 144 Hz).  The simulation itself, the network and the menus are clock-driven and were never
+            #  affected.  This fix makes the end of each frame wait until 16 ms have passed since the previous one:
+            #  the frame routine's epilogue jumps to a 132-byte stub that reads the clock (timeGetTime) and, only
+            #  when the frame was faster than that, raises the timer resolution (timeBeginPeriod 1, looked up in
+            #  winmm.dll at that moment - without it a plain Windows process sleeps 15.6 ms at a time), sleeps in
+            #  1 ms steps until the 16 ms are up and releases the resolution again (timeEndPeriod).  On a 60 Hz
+            #  Windows monitor the flip has already taken the 16 ms, so nothing changes there.  The stub and its
+            #  three names live in the three assert bodies of the palette remap that the "two-monitor start-up" fix
+            #  (ddraw, required) turned into dead code; the timestamp lives in the unused page slack of the exe's
+            #  import section; the 20 relocation entries of the dead bodies' absolute operands become padding and
+            #  the new code has none (it finds its own address), so the relocation table stays exact.  Same code in
+            #  both games (at +0x60 in Council Wars).
+            @{
+                Id = 'fps'; Name = 'Frame limiter: never more than 60 frames per second (Wine, monitors above 60 Hz)'; Date = '3 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
+                Theme = $null
+                Tool = 'tools/patch_fps.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.69'
+                Description = @'
+The game has no frame limiter: the only thing that paces its main loop is the DirectDraw Flip at
+the end of each frame, which on Windows waits for the monitor's vertical blank - 60 frames per second
+on most monitors, and the 1997 code counts on that: the battlefield scrolls one tile per frame once
+the pointer has rested at an edge, and the cursor animation advances once per frame.  Under Wine the
+flip returns at once (a Wine virtual desktop, Xvfb and gamescope have no vertical blank to wait for)
+and the loop was measured at 350-380 frames per second: the map crosses in a quarter of a second, the
+cursor flickers.  A Windows monitor above 60 Hz has the same problem in proportion (2.4 times too fast
+at 144 Hz).  The simulation itself, the network and the menus are clock-driven and were never
+affected.  This fix makes the end of each frame wait until 16 ms have passed since the previous one:
+the frame routine's epilogue jumps to a 132-byte stub that reads the clock (timeGetTime) and, only
+when the frame was faster than that, raises the timer resolution (timeBeginPeriod 1, looked up in
+winmm.dll at that moment - without it a plain Windows process sleeps 15.6 ms at a time), sleeps in
+1 ms steps until the 16 ms are up and releases the resolution again (timeEndPeriod).  On a 60 Hz
+Windows monitor the flip has already taken the 16 ms, so nothing changes there.  The stub and its
+three names live in the three assert bodies of the palette remap that the "two-monitor start-up" fix
+(ddraw, required) turned into dead code; the timestamp lives in the unused page slack of the exe's
+import section; the 20 relocation entries of the dead bodies' absolute operands become padding and
+the new code has none (it finds its own address), so the relocation table stays exact.  Same code in
+both games (at +0x60 in Council Wars).
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('ddraw')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # present epilogue: lea esp -> jmp frame limiter: the epilogue of present() (after the Flip, also reached from the error paths and the minimised idle stub) runs the limiter first
+                    @{ Offset = 0x2D701; Old = '8D A5 82 00 00 00'; New = 'E9 F3 10 00 00 90' }
+                    # remap dead body 1 (frame limiter, part 1): lea esp,[ebp+82h]; push eax; call $+5; pop esi; now = timeGetTime(); if now - last < 16: GetModuleHandleA("winmm.dll"), GetProcAddress("timeBeginPeriod")(1) if found; then Sleep(1)+timeGetTime() until 16 ms passed (loop continues in body 2); jmp +5 over the live ddraw jump
+                    @{ Offset = 0x2E7F9; Old = '8B 0D B4 49 4A 00 51 E8 A1 CA 04 00 83 C4 08 68 E0 56 48 00 68 05 04 00 00 68 E4 56 48 00 68 EC 56 48 00 8B 1D B4 49 4A 00 53 BA E0 56 48 00 B9 05 04 00 00 E8 74 CA 04 00 83 C4 14 A1 B4 49 4A 00 BB E4 56 48 00 E8 83 CA 04 00 E8 8E CA 04 00 31 C0 E8 3E CC 04 00 E9 91 00 00 00'; New = '8D A5 82 00 00 00 50 E8 00 00 00 00 5E E8 6B FD 04 00 89 C2 2B 86 EB 2B 05 00 83 F8 10 73 60 8D 86 9E 00 00 00 50 E8 66 FB 04 00 89 C7 85 C0 74 15 8D 86 A8 00 00 00 50 57 E8 97 FC 04 00 85 C0 74 04 6A 01 FF D0 6A 01 E8 22 FC 04 00 E8 2B FD 04 00 89 C2 2B 86 EB 2B 05 00 EB 05' }
+                    # remap dead body 2 (frame limiter, part 2): cmp/jb back to the wait loop; GetProcAddress("timeEndPeriod")(1) if the module was found; store: last = now; pop eax; jmp back into present()'s epilogue
+                    @{ Offset = 0x2E85A; Old = '68 09 04 00 00 68 E4 56 48 00 68 EC 56 48 00 A1 B4 49 4A 00 50 B9 09 04 00 00 BB E4 56 48 00 E8 28 CA 04 00 83 C4 14 A1 B4 49'; New = '83 F8 10 72 E0 85 FF 74 15 8D 86 B8 00 00 00 50 57 E8 5E FC 04 00 85 C0 74 04 6A 01 FF D0 89 96 EB 2B 05 00 58 E9 83 EE FF FF' }
+                    # remap dead body 3 (the three winmm names): the three names the limiter looks up at run time: "winmm.dll", "timeBeginPeriod", "timeEndPeriod"
+                    @{ Offset = 0x2E8A3; Old = '68 0C 04 00 00 68 E4 56 48 00 68 EC 56 48 00 8B 15 B4 49 4A 00 52 B9 0C 04 00 00 BB E4 56 48 00 E8 DE C9 04 00 83 C4 14'; New = '77 69 6E 6D 6D 2E 64 6C 6C 00 74 69 6D 65 42 65 67 69 6E 50 65 72 69 6F 64 00 74 69 6D 65 45 6E 64 50 65 72 69 6F 64 00' }
+                    # .reloc table: entry 33FB (type 3 HIGHLOW, page offset 0x3FB) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A1F2; Old = 'FB 33'; New = 'FB 03' }
+                    # .reloc table: entry 3409 (type 3 HIGHLOW, page offset 0x409) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A1F4; Old = '09 34'; New = '09 04' }
+                    # .reloc table: entry 3413 (type 3 HIGHLOW, page offset 0x413) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A1F6; Old = '13 34'; New = '13 04' }
+                    # .reloc table: entry 3418 (type 3 HIGHLOW, page offset 0x418) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A1F8; Old = '18 34'; New = '18 04' }
+                    # .reloc table: entry 341E (type 3 HIGHLOW, page offset 0x41E) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A1FA; Old = '1E 34'; New = '1E 04' }
+                    # .reloc table: entry 3424 (type 3 HIGHLOW, page offset 0x424) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A1FC; Old = '24 34'; New = '24 04' }
+                    # .reloc table: entry 3436 (type 3 HIGHLOW, page offset 0x436) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A1FE; Old = '36 34'; New = '36 04' }
+                    # .reloc table: entry 343B (type 3 HIGHLOW, page offset 0x43B) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A200; Old = '3B 34'; New = '3B 04' }
+                    # .reloc table: entry 3460 (type 3 HIGHLOW, page offset 0x460) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A204; Old = '60 34'; New = '60 04' }
+                    # .reloc table: entry 3465 (type 3 HIGHLOW, page offset 0x465) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A206; Old = '65 34'; New = '65 04' }
+                    # .reloc table: entry 346A (type 3 HIGHLOW, page offset 0x46A) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A208; Old = '6A 34'; New = '6A 04' }
+                    # .reloc table: entry 3475 (type 3 HIGHLOW, page offset 0x475) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A20A; Old = '75 34'; New = '75 04' }
+                    # .reloc table: entry 3482 (type 3 HIGHLOW, page offset 0x482) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A20C; Old = '82 34'; New = '82 04' }
+                    # .reloc table: entry 34A9 (type 3 HIGHLOW, page offset 0x4A9) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A212; Old = 'A9 34'; New = 'A9 04' }
+                    # .reloc table: entry 34AE (type 3 HIGHLOW, page offset 0x4AE) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A214; Old = 'AE 34'; New = 'AE 04' }
+                    # .reloc table: entry 34B4 (type 3 HIGHLOW, page offset 0x4B4) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A216; Old = 'B4 34'; New = 'B4 04' }
+                    # .reloc table: entry 34BF (type 3 HIGHLOW, page offset 0x4BF) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A218; Old = 'BF 34'; New = 'BF 04' }
+                )
+            }
+
+            # ---- pointer: Battlefield pointer animation at the pace of the menus (every 33 ms instead of every frame) ---------------------------------------------------------
+            #  Added      : 3 Oct 2026
+            #  Made with  : tools/patch_pointer.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.70
+            #  Changes    : 41 bytes in 6 edits
+            #  In a battle the game advances the pointer's animation once per frame, so at 60 frames per second the
+            #  crosshair's three-frame cycle turns ten times a second (30 cursor changes per second), while every menu
+            #  screen advances the same animation only when 33 ms have passed since the last step.  This fix gives the
+            #  battlefield the menus' pace: the client's cursor-advance call goes through a 35-byte gate that reads the
+            #  clock (timeGetTime) and lets the step through only when 33 ms have passed, so the pointer animates every
+            #  second frame (15 changes per second).  The gate lives in the free tails of the two dead assert bodies the
+            #  "two-monitor start-up" fix (ddraw, required) left in the palette remap; its timestamp sits in the unused page
+            #  slack of the import section next to the frame limiter's; the tails' three relocation entries are re-pointed to
+            #  the gate's two absolute operands (the third becomes padding), so the relocation table stays exact.  Same code
+            #  in both games (at +0x60 in Council Wars).  Independent of the frame limiter (fps).
+            @{
+                Id = 'pointer'; Name = 'Battlefield pointer animation at the pace of the menus (every 33 ms instead of every frame)'; Date = '3 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
+                Theme = $null
+                Tool = 'tools/patch_pointer.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.70'
+                Description = @'
+In a battle the game advances the pointer's animation once per frame, so at 60 frames per second the
+crosshair's three-frame cycle turns ten times a second (30 cursor changes per second), while every menu
+screen advances the same animation only when 33 ms have passed since the last step.  This fix gives the
+battlefield the menus' pace: the client's cursor-advance call goes through a 35-byte gate that reads the
+clock (timeGetTime) and lets the step through only when 33 ms have passed, so the pointer animates every
+second frame (15 changes per second).  The gate lives in the free tails of the two dead assert bodies the
+"two-monitor start-up" fix (ddraw, required) left in the palette remap; its timestamp sits in the unused page
+slack of the import section next to the frame limiter's; the tails' three relocation entries are re-pointed to
+the gate's two absolute operands (the third becomes padding), so the relocation table stays exact.  Same code
+in both games (at +0x60 in Council Wars).  Independent of the frame limiter (fps).
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('ddraw')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # client display: call cursor_advance -> call gate: the per-frame cursor advance of the battlefield goes through the 33 ms gate
+                    @{ Offset = 0xA769; Old = 'E8 6E 79 01 00'; New = 'E8 16 41 02 00' }
+                    # gate, part 1 (tail of remap dead body 2): push eax; now = timeGetTime(); if now - last < 33 ms: skip; else cont
+                    @{ Offset = 0x2E884; Old = '4A 00 BA E0 56 48 00 E8 37 CA 04 00 E8 42 CA 04 00 31 C0 E8 F2'; New = '50 E8 EC FC 04 00 89 C2 2B 05 F4 1F 48 00 83 F8 21 72 40 EB 32' }
+                    # gate, part 2 (tail of remap dead body 3): cont: last = now; pop eax; jmp cursor_advance 0x422C7C.  skip: pop eax; ret
+                    @{ Offset = 0x2E8CB; Old = 'A1 B4 49 4A 00 BA E0 56 48 00 E8 ED C9 04'; New = '89 15 F4 1F 48 00 58 E9 05 38 FF FF 58 C3' }
+                    # .reloc table: entry 3487 -> 348E: the absolute operand moved from page offset 0x487 to 0x48E, entry follows it
+                    @{ Offset = 0x9A20E; Old = '87 34'; New = '8E 34' }
+                    # .reloc table: entry 34CC -> 34CD: the absolute operand moved from page offset 0x4CC to 0x4CD, entry follows it
+                    @{ Offset = 0x9A21A; Old = 'CC 34'; New = 'CD 34' }
+                    # .reloc table: entry 34D1 (type 3 HIGHLOW, page offset 0x4D1) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A21C; Old = 'D1 34'; New = 'D1 04' }
+                )
+            }
+
             # ---- ozi @ 640x480: DARK COLONY and OZI MISSIONS menu modes (Council Wars only) ---------------------------------------------------------
             #  Added      : 10 Sep 2026
             #  Made with  : tools/patch_ozi_menu.py
@@ -8340,7 +8500,7 @@ directory that lists them); their SHA-256 is checked like every other edit.
         Shipped        = $false
         Size           = 659456
         OriginalSha256 = '7c003f85d902dc025d05ab4c5b8f754cd7568bafdf60af6866e8dbcc9b2d57f1'   # untouched original
-        PatchedSha256  = '739e12190a23e585c00f25c4f9eadc0c4d49d8a6b2dc52c83f958b3c2a22269b'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
+        PatchedSha256  = 'd24244061459a34683b7fd31bcd8132117bccafb76ac3055dd5361bb2f4a7f7c'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository (if shipped)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -8348,7 +8508,7 @@ directory that lists them); their SHA-256 is checked like every other edit.
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the published one is the exe in the repository); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = 'b08db16440fd520ca6b3d7f5570426a32b57c718f4a7b5a25e3e119afb0e8f3e'; '1024x768' = '739e12190a23e585c00f25c4f9eadc0c4d49d8a6b2dc52c83f958b3c2a22269b'; '1024x768/light' = '8e28cf62605a2043565d7d1584d683e2af6075bd70d3102776c75dec7a8e61b8'; '1280x1024' = 'f682130d9999f90bd20561f40af9dd6cb20471500d1fb7ec2492399b70879e4f'; '1280x1024/light' = '8b1fdbb87e9013262ad33f75f0cd12de4c1402043da3ebc8c2ebbf7a588d89e5'; '1280x720' = '4e5e847646daa065bacc06ef9c7d90f011b7c6a70fae160d43cabe8b0b926f3d'; '1280x720/light' = '55f164e0a03c93b7245b0a323969194276f2a653acab992639b21a6d845ca498'; '1280x800' = '11f4e157ef72c71859407c9fb8843d78fbc7894377be6e87d5db613c4810d757'; '1280x800/light' = '0760336c8c13413c250c524a322f9f2d3f75cddaf9aa4f78aa169563bef97b71'; '1920x1080' = '7b2445b3bd1ae09527246944b1d1b74b63d4554cfadc7c61e47e88effcd07ec0'; '1920x1080/light' = '4a1a8cd56d2199e68bd4b019638e9b8c175a9e616da4ec6dc872c071ca9cf30c'; '1920x1200' = '29d66063428579654067d57c0384a7e737fb229f8b70122b79613c6518851118'; '1920x1200/light' = 'b7c0bf4569399a68a53e8d2d1609b4793a798cb7be7cd16fdc570808f19bae7c'; '3840x1080' = '4a0eab846ccc831677849e46033c0bf94a269ff7ea1f13ae0b92422770bf8ef4'; '3840x1080/light' = '713f791c00ef0d724e7910dc34cdee9a932c8594ed93cad5f68a1b2b77b721d1' }
+        ReferenceSha256 = @{ '640x480' = '67c71ef954b14081dad8fceea4290c65bedb1f80a425f8ac77a0106801c59e2e'; '1024x768' = 'd24244061459a34683b7fd31bcd8132117bccafb76ac3055dd5361bb2f4a7f7c'; '1024x768/light' = '3a53818b923c94024adf3ccca200222a1c64592742a84136415065ebeae1ccd5'; '1280x1024' = 'f80c855ddf39c7783ae5ebb23bd7552e39ed49f3f2590a58564398959d12125d'; '1280x1024/light' = 'f191e4606646b9a447a58c31ee2f077c1302ec532c076f390e08cc7f2e62d8d1'; '1280x720' = '063676a7c1565bf08da344319af921d237d180e80b8e4e406224f2ced99c0826'; '1280x720/light' = '5e7c2d38e448c87dc038f27d67b8b5412df6186e9114e4d93897acb771300b24'; '1280x800' = '3ce1fe82f07f738813b9cd9e8adf61915ec12c255ea73a3d0c3754a24fb83e64'; '1280x800/light' = '7f43a4c541571ebae13d72d310d22fdf9d100f93ec8006bb57cce2cc46ce416d'; '1920x1080' = '658336b7e0d29cca73105fe5139da0a783e602db13aa7bfb5e47cc45c2ac2143'; '1920x1080/light' = '7d56fb61b2bc22a7b4010a162429a2e54f2f4508ec0a6666afdd212398b85615'; '1920x1200' = '948af16b13a54108437106a6684b560b40925a2d075ddf11f5f0dd6e4e6d1d56'; '1920x1200/light' = 'b916a2fe1313ec217e3d017efec522773eaf45d5e1ad12e94fb1e89fa398cc35'; '3840x1080' = '12d1fe981920409c4af8de2b3fe2ef2afb47089da50adad1c566c7836bdbdb38'; '3840x1080/light' = '5e5e692f1ecba664d53545f19a56737f0e8621e0de1d023cebe43f60e26d93b6' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -13934,6 +14094,166 @@ the relocation table stays exact.  Same bytes at +0x60 in Council Wars.
                     @{ Offset = 0x98B7E; Old = '87 3C'; New = '87 0C' }
                     # .reloc table: entry 3B50 -> 3B06: the absolute operand moved from page offset 0xB50 to 0xB06, entry follows it
                     @{ Offset = 0x9C114; Old = '50 3B'; New = '06 3B' }
+                )
+            }
+
+            # ---- fps: Frame limiter: never more than 60 frames per second (Wine, monitors above 60 Hz) ---------------------------------------------------------
+            #  Added      : 3 Oct 2026
+            #  Made with  : tools/patch_fps.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.69
+            #  Changes    : 186 bytes in 21 edits
+            #  The game has no frame limiter: the only thing that paces its main loop is the DirectDraw Flip at
+            #  the end of each frame, which on Windows waits for the monitor's vertical blank - 60 frames per second
+            #  on most monitors, and the 1997 code counts on that: the battlefield scrolls one tile per frame once
+            #  the pointer has rested at an edge, and the cursor animation advances once per frame.  Under Wine the
+            #  flip returns at once (a Wine virtual desktop, Xvfb and gamescope have no vertical blank to wait for)
+            #  and the loop was measured at 350-380 frames per second: the map crosses in a quarter of a second, the
+            #  cursor flickers.  A Windows monitor above 60 Hz has the same problem in proportion (2.4 times too fast
+            #  at 144 Hz).  The simulation itself, the network and the menus are clock-driven and were never
+            #  affected.  This fix makes the end of each frame wait until 16 ms have passed since the previous one:
+            #  the frame routine's epilogue jumps to a 132-byte stub that reads the clock (timeGetTime) and, only
+            #  when the frame was faster than that, raises the timer resolution (timeBeginPeriod 1, looked up in
+            #  winmm.dll at that moment - without it a plain Windows process sleeps 15.6 ms at a time), sleeps in
+            #  1 ms steps until the 16 ms are up and releases the resolution again (timeEndPeriod).  On a 60 Hz
+            #  Windows monitor the flip has already taken the 16 ms, so nothing changes there.  The stub and its
+            #  three names live in the three assert bodies of the palette remap that the "two-monitor start-up" fix
+            #  (ddraw, required) turned into dead code; the timestamp lives in the unused page slack of the exe's
+            #  import section; the 20 relocation entries of the dead bodies' absolute operands become padding and
+            #  the new code has none (it finds its own address), so the relocation table stays exact.  Same code in
+            #  both games (at +0x60 in Council Wars).
+            @{
+                Id = 'fps'; Name = 'Frame limiter: never more than 60 frames per second (Wine, monitors above 60 Hz)'; Date = '3 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
+                Theme = $null
+                Tool = 'tools/patch_fps.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.69'
+                Description = @'
+The game has no frame limiter: the only thing that paces its main loop is the DirectDraw Flip at
+the end of each frame, which on Windows waits for the monitor's vertical blank - 60 frames per second
+on most monitors, and the 1997 code counts on that: the battlefield scrolls one tile per frame once
+the pointer has rested at an edge, and the cursor animation advances once per frame.  Under Wine the
+flip returns at once (a Wine virtual desktop, Xvfb and gamescope have no vertical blank to wait for)
+and the loop was measured at 350-380 frames per second: the map crosses in a quarter of a second, the
+cursor flickers.  A Windows monitor above 60 Hz has the same problem in proportion (2.4 times too fast
+at 144 Hz).  The simulation itself, the network and the menus are clock-driven and were never
+affected.  This fix makes the end of each frame wait until 16 ms have passed since the previous one:
+the frame routine's epilogue jumps to a 132-byte stub that reads the clock (timeGetTime) and, only
+when the frame was faster than that, raises the timer resolution (timeBeginPeriod 1, looked up in
+winmm.dll at that moment - without it a plain Windows process sleeps 15.6 ms at a time), sleeps in
+1 ms steps until the 16 ms are up and releases the resolution again (timeEndPeriod).  On a 60 Hz
+Windows monitor the flip has already taken the 16 ms, so nothing changes there.  The stub and its
+three names live in the three assert bodies of the palette remap that the "two-monitor start-up" fix
+(ddraw, required) turned into dead code; the timestamp lives in the unused page slack of the exe's
+import section; the 20 relocation entries of the dead bodies' absolute operands become padding and
+the new code has none (it finds its own address), so the relocation table stays exact.  Same code in
+both games (at +0x60 in Council Wars).
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('ddraw')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # present epilogue: lea esp -> jmp frame limiter: the epilogue of present() (after the Flip, also reached from the error paths and the minimised idle stub) runs the limiter first
+                    @{ Offset = 0x2D6A1; Old = '8D A5 82 00 00 00'; New = 'E9 F3 10 00 00 90' }
+                    # remap dead body 1 (frame limiter, part 1): lea esp,[ebp+82h]; push eax; call $+5; pop esi; now = timeGetTime(); if now - last < 16: GetModuleHandleA("winmm.dll"), GetProcAddress("timeBeginPeriod")(1) if found; then Sleep(1)+timeGetTime() until 16 ms passed (loop continues in body 2); jmp +5 over the live ddraw jump
+                    @{ Offset = 0x2E799; Old = '8B 0D B4 49 4A 00 51 E8 A1 CA 04 00 83 C4 08 68 D8 56 48 00 68 05 04 00 00 68 DC 56 48 00 68 E4 56 48 00 8B 1D B4 49 4A 00 53 BA D8 56 48 00 B9 05 04 00 00 E8 74 CA 04 00 83 C4 14 A1 B4 49 4A 00 BB DC 56 48 00 E8 83 CA 04 00 E8 8E CA 04 00 31 C0 E8 3E CC 04 00 E9 91 00 00 00'; New = '8D A5 82 00 00 00 50 E8 00 00 00 00 5E E8 6B FD 04 00 89 C2 2B 86 4B 2C 05 00 83 F8 10 73 60 8D 86 9E 00 00 00 50 E8 66 FB 04 00 89 C7 85 C0 74 15 8D 86 A8 00 00 00 50 57 E8 97 FC 04 00 85 C0 74 04 6A 01 FF D0 6A 01 E8 22 FC 04 00 E8 2B FD 04 00 89 C2 2B 86 4B 2C 05 00 EB 05' }
+                    # remap dead body 2 (frame limiter, part 2): cmp/jb back to the wait loop; GetProcAddress("timeEndPeriod")(1) if the module was found; store: last = now; pop eax; jmp back into present()'s epilogue
+                    @{ Offset = 0x2E7FA; Old = '68 09 04 00 00 68 DC 56 48 00 68 E4 56 48 00 A1 B4 49 4A 00 50 B9 09 04 00 00 BB DC 56 48 00 E8 28 CA 04 00 83 C4 14 A1 B4 49'; New = '83 F8 10 72 E0 85 FF 74 15 8D 86 B8 00 00 00 50 57 E8 5E FC 04 00 85 C0 74 04 6A 01 FF D0 89 96 4B 2C 05 00 58 E9 83 EE FF FF' }
+                    # remap dead body 3 (the three winmm names): the three names the limiter looks up at run time: "winmm.dll", "timeBeginPeriod", "timeEndPeriod"
+                    @{ Offset = 0x2E843; Old = '68 0C 04 00 00 68 DC 56 48 00 68 E4 56 48 00 8B 15 B4 49 4A 00 52 B9 0C 04 00 00 BB DC 56 48 00 E8 DE C9 04 00 83 C4 14'; New = '77 69 6E 6D 6D 2E 64 6C 6C 00 74 69 6D 65 42 65 67 69 6E 50 65 72 69 6F 64 00 74 69 6D 65 45 6E 64 50 65 72 69 6F 64 00' }
+                    # .reloc table: entry 339B (type 3 HIGHLOW, page offset 0x39B) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x99FF6; Old = '9B 33'; New = '9B 03' }
+                    # .reloc table: entry 33A9 (type 3 HIGHLOW, page offset 0x3A9) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x99FF8; Old = 'A9 33'; New = 'A9 03' }
+                    # .reloc table: entry 33B3 (type 3 HIGHLOW, page offset 0x3B3) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x99FFA; Old = 'B3 33'; New = 'B3 03' }
+                    # .reloc table: entry 33B8 (type 3 HIGHLOW, page offset 0x3B8) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x99FFC; Old = 'B8 33'; New = 'B8 03' }
+                    # .reloc table: entry 33BE (type 3 HIGHLOW, page offset 0x3BE) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x99FFE; Old = 'BE 33'; New = 'BE 03' }
+                    # .reloc table: entry 33C4 (type 3 HIGHLOW, page offset 0x3C4) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A000; Old = 'C4 33'; New = 'C4 03' }
+                    # .reloc table: entry 33D6 (type 3 HIGHLOW, page offset 0x3D6) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A002; Old = 'D6 33'; New = 'D6 03' }
+                    # .reloc table: entry 33DB (type 3 HIGHLOW, page offset 0x3DB) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A004; Old = 'DB 33'; New = 'DB 03' }
+                    # .reloc table: entry 3400 (type 3 HIGHLOW, page offset 0x400) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A008; Old = '00 34'; New = '00 04' }
+                    # .reloc table: entry 3405 (type 3 HIGHLOW, page offset 0x405) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A00A; Old = '05 34'; New = '05 04' }
+                    # .reloc table: entry 340A (type 3 HIGHLOW, page offset 0x40A) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A00C; Old = '0A 34'; New = '0A 04' }
+                    # .reloc table: entry 3415 (type 3 HIGHLOW, page offset 0x415) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A00E; Old = '15 34'; New = '15 04' }
+                    # .reloc table: entry 3422 (type 3 HIGHLOW, page offset 0x422) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A010; Old = '22 34'; New = '22 04' }
+                    # .reloc table: entry 3449 (type 3 HIGHLOW, page offset 0x449) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A016; Old = '49 34'; New = '49 04' }
+                    # .reloc table: entry 344E (type 3 HIGHLOW, page offset 0x44E) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A018; Old = '4E 34'; New = '4E 04' }
+                    # .reloc table: entry 3454 (type 3 HIGHLOW, page offset 0x454) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A01A; Old = '54 34'; New = '54 04' }
+                    # .reloc table: entry 345F (type 3 HIGHLOW, page offset 0x45F) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A01C; Old = '5F 34'; New = '5F 04' }
+                )
+            }
+
+            # ---- pointer: Battlefield pointer animation at the pace of the menus (every 33 ms instead of every frame) ---------------------------------------------------------
+            #  Added      : 3 Oct 2026
+            #  Made with  : tools/patch_pointer.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.70
+            #  Changes    : 41 bytes in 6 edits
+            #  In a battle the game advances the pointer's animation once per frame, so at 60 frames per second the
+            #  crosshair's three-frame cycle turns ten times a second (30 cursor changes per second), while every menu
+            #  screen advances the same animation only when 33 ms have passed since the last step.  This fix gives the
+            #  battlefield the menus' pace: the client's cursor-advance call goes through a 35-byte gate that reads the
+            #  clock (timeGetTime) and lets the step through only when 33 ms have passed, so the pointer animates every
+            #  second frame (15 changes per second).  The gate lives in the free tails of the two dead assert bodies the
+            #  "two-monitor start-up" fix (ddraw, required) left in the palette remap; its timestamp sits in the unused page
+            #  slack of the import section next to the frame limiter's; the tails' three relocation entries are re-pointed to
+            #  the gate's two absolute operands (the third becomes padding), so the relocation table stays exact.  Same code
+            #  in both games (at +0x60 in Council Wars).  Independent of the frame limiter (fps).
+            @{
+                Id = 'pointer'; Name = 'Battlefield pointer animation at the pace of the menus (every 33 ms instead of every frame)'; Date = '3 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
+                Theme = $null
+                Tool = 'tools/patch_pointer.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.70'
+                Description = @'
+In a battle the game advances the pointer's animation once per frame, so at 60 frames per second the
+crosshair's three-frame cycle turns ten times a second (30 cursor changes per second), while every menu
+screen advances the same animation only when 33 ms have passed since the last step.  This fix gives the
+battlefield the menus' pace: the client's cursor-advance call goes through a 35-byte gate that reads the
+clock (timeGetTime) and lets the step through only when 33 ms have passed, so the pointer animates every
+second frame (15 changes per second).  The gate lives in the free tails of the two dead assert bodies the
+"two-monitor start-up" fix (ddraw, required) left in the palette remap; its timestamp sits in the unused page
+slack of the import section next to the frame limiter's; the tails' three relocation entries are re-pointed to
+the gate's two absolute operands (the third becomes padding), so the relocation table stays exact.  Same code
+in both games (at +0x60 in Council Wars).  Independent of the frame limiter (fps).
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('ddraw')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # client display: call cursor_advance -> call gate: the per-frame cursor advance of the battlefield goes through the 33 ms gate
+                    @{ Offset = 0xA709; Old = 'E8 6E 79 01 00'; New = 'E8 16 41 02 00' }
+                    # gate, part 1 (tail of remap dead body 2): push eax; now = timeGetTime(); if now - last < 33 ms: skip; else cont
+                    @{ Offset = 0x2E824; Old = '4A 00 BA D8 56 48 00 E8 37 CA 04 00 E8 42 CA 04 00 31 C0 E8 F2'; New = '50 E8 EC FC 04 00 89 C2 2B 05 F4 1F 48 00 83 F8 21 72 40 EB 32' }
+                    # gate, part 2 (tail of remap dead body 3): cont: last = now; pop eax; jmp cursor_advance 0x422C7C.  skip: pop eax; ret
+                    @{ Offset = 0x2E86B; Old = 'A1 B4 49 4A 00 BA D8 56 48 00 E8 ED C9 04'; New = '89 15 F4 1F 48 00 58 E9 05 38 FF FF 58 C3' }
+                    # .reloc table: entry 3427 -> 342E: the absolute operand moved from page offset 0x427 to 0x42E, entry follows it
+                    @{ Offset = 0x9A012; Old = '27 34'; New = '2E 34' }
+                    # .reloc table: entry 346C -> 346D: the absolute operand moved from page offset 0x46C to 0x46D, entry follows it
+                    @{ Offset = 0x9A01E; Old = '6C 34'; New = '6D 34' }
+                    # .reloc table: entry 3471 (type 3 HIGHLOW, page offset 0x471) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9A020; Old = '71 34'; New = '71 04' }
                 )
             }
 
