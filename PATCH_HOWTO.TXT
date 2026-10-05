@@ -492,3 +492,35 @@ What makes it trustworthy:
    Which file of the game comes from which disc is the list
    tools\disc_manifest.json there (tools\discs.py builds it from the
    two CD images); the installer carries the same list.
+
+
+---------------------------------------------------------------------
+  LICENSE
+---------------------------------------------------------------------
+
+   The installer - INSTALL.CMD, the script patcher\Apply-DarkColony-
+   Patches.ps1, the data files in patcher\game and patcher\editor that
+   this project made, and the tools and notes in the Dark-Colony-Server
+   repository - is free software under the GNU Affero General Public
+   License, version 3 (AGPLv3; the text is the file LICENSE of the
+   Dark-Colony-Ultimate repository).  You may use, change and share
+   it, as long as your version stays open under the same license.
+
+   NOT covered by that license, because they are not ours:
+
+   * the game itself - Dark Colony and The Council Wars are the
+     property of their rights holders; the installer distributes none
+     of their files and takes the game from YOUR discs;
+   * the files of the ozi_ns mission pack in patcher\game\ozi_ns and
+     the pack's units in patcher\game\exp, by ozi_ns (darkcolony.pl),
+     carried with the author's work credited;
+   * the map editor's Borland runtime DLLs in patcher\editor, Borland
+     redistributables;
+   * pictures derived from the game's own art (the menu backdrops with
+     the DC logo, the metal HUD frame, the HUD banks with the original
+     unit portraits): our work on their art, shared as a mod of their
+     game.
+
+   The patched executables the installer writes on your PC are the
+   original 1997/98 programs with our byte changes - yours to play,
+   not ours to license.
