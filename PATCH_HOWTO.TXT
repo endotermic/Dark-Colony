@@ -25,7 +25,9 @@ This repository ships two kinds of executables:
     (no CD at all, 1024x768 or another resolution, the battlefield
     interface light (classic) or dark (console style), hidden Windows
     pointer, 32 MiB memory pool, 150 % default game speed, two-monitor
-    fix, the CD music as MP3, a high-resolution icon, ... and for
+    fix, the CD music as MP3, a high-resolution icon, no intro movie
+    at start-up (DARK COLONY and COUNCIL WARS play their own intro
+    when pressed), ... and for
     Council Wars the DARK COLONY and OZI MISSIONS menu modes, the
     ONLINE WAR and REPLAY ONLINE GAME buttons)
 

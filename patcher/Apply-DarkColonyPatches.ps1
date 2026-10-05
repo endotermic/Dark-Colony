@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 2.3, build 20261005.1256 - generated 2026-10-05 12:56 UTC from Dark-Colony-Server a329267+ and Dark-Colony 05d429d+.
+    Dark Colony patcher 2.4, build 20261005.1334 - generated 2026-10-05 13:34 UTC from Dark-Colony-Server c098686+ and Dark-Colony 7f62f4d+.
 
 
 .SYNOPSIS
@@ -234,9 +234,9 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '2.3'
-$PatcherBuild = '20261005.1256'
-$PatcherGenerated = '2026-10-05 12:56 UTC from Dark-Colony-Server a329267+ and Dark-Colony 05d429d+'
+$PatcherVersion = '2.4'
+$PatcherBuild = '20261005.1334'
+$PatcherGenerated = '2026-10-05 13:34 UTC from Dark-Colony-Server c098686+ and Dark-Colony 7f62f4d+'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -256,7 +256,7 @@ $Builds = @(
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '3cba8b55a6650764af6aab231722f40acf2d44a820e6873dcf04674dc76cfd46'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository
+        PatchedSha256  = '165b609a379a1fac721305ee91837741a09ae8d998fb0f1d24a1fc57fe7ed7c4'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -264,7 +264,7 @@ $Builds = @(
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the published one is the exe in the repository); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = 'be1b3fa06441ed412a2ef2044d51045a3d01732eb03165e61691a90d27d36f33'; '1024x768' = '3cba8b55a6650764af6aab231722f40acf2d44a820e6873dcf04674dc76cfd46'; '1024x768/light' = '7ad1744c2ecca9350626cf871428212a58c27f55b57dca6a454f2b453d628fad'; '1280x1024' = 'be362a3994cec357f0eb0cd907d58683874d37e357d19351df0475398b840776'; '1280x1024/light' = 'aeb70f442e2e79bcf9d1b320034638ecc8b6d389a062b7f202f04b7d402e0d5f'; '1280x720' = '1201c61c835e5e51b0f3c18ab70ec0c33c50f1deb1b55a9c7421ab1d267c6b47'; '1280x720/light' = '96af16756e575c4b5589ce704074c530c78c806e0ca1fc0277758a87922846c2'; '1280x800' = 'e6dc8526006871df98b013df9c623435065a8e07be1a78abb527ae6f1c86ea58'; '1280x800/light' = 'acabf15b5257badfbc5b142241e04e2cc4a12b45d6a4e73fbdaf3a4852ec60ca'; '1920x1080' = '4cd717fe2f69ebe3f34d60cd327205b0da33736a9c7059b5174c33cd946baa7a'; '1920x1080/light' = '4f54e2025b78cdebfe97ca6939c70d727c9c2ada8ffe4a51105e96f60816c114'; '1920x1200' = '2957df4b332131513de5e3444c96b2c583b26a23a8fdbe7fc5e2dd437e710fc3'; '1920x1200/light' = 'f45cb8aa1643c08367e30973f6b735a320082d8885103fdf145f76ea3fc86f4f'; '3840x1080' = '16624e2cde5f4a3d473d8aa54ea113ae8e2d4003afef0e603623127f47ff9964'; '3840x1080/light' = '98c28fb9a16fcfd365c7326c04cb2261c84ed3758007830377c5049e3e2ebb9a' }
+        ReferenceSha256 = @{ '640x480' = '01fc077c1a88dd2c014f0c4a419b72547d13d49e706a530a5ef42b45ba3820bb'; '1024x768' = '165b609a379a1fac721305ee91837741a09ae8d998fb0f1d24a1fc57fe7ed7c4'; '1024x768/light' = 'b5986b072244207b70c7b34f191488c8f14194043521e318f67544f81fbd48d8'; '1280x1024' = 'eb643a9908423429bd3ceac7b9c14131314d1297b5df72c31b2a5c1377165cb3'; '1280x1024/light' = '8e4d7d0ca3891db7bf406756ab538e3d7cc824b2efafa7476986d18d2a0bf7dd'; '1280x720' = 'e407c7f391580537b89eaf7ce7b4e62e726fa9168bd09917716fbc2811694ca1'; '1280x720/light' = '467cdc75bc2d65eff5f676cb01d8009d40954c3a65f2a5f25ef0abf1ea30c754'; '1280x800' = 'dff78ff5382db9f08811643cd1a95f9811d039dfa721b98686811480dd87f003'; '1280x800/light' = '8a33c8625681eb81338c703a84c0afc145abc85acbac91f29adef8dcb2027e33'; '1920x1080' = '176dcc6825f53b377eed8c31d01b321a5258705d6601c15b36240c1b636950d4'; '1920x1080/light' = 'd16eacb3bb62374dd978ffc4143fa545b18e36ded1ee505f16f02519895dd058'; '1920x1200' = '8bb20919e8d53af157e171ce3c5296755d7505f38eb2207a6a89be9f0e71132d'; '1920x1200/light' = '8329c0acb9a9cb231cd134f638aa607ea7cfb4984c6a8917ade27b63b5f9a929'; '3840x1080' = 'baf48bcd56b50cfc68aa7a38755002d988cb7ff9875a9d0884b2fcefaeb1c748'; '3840x1080/light' = '26cdd03254b765e477780084688e1a6fc3fa359b1a257743d3f6a38d68d27a08' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -7458,6 +7458,68 @@ later relocation entry, this patch is always applied last.
                     @{ Offset = 0xA0030; Old = 'C0 00 00 00'; New = 'E0 00 00 00' }
                     # .reloc table: insert 16 HIGHLOW entries (3243, 3254, 3265, 3276, 328A, 3293, 32A4, 32B5, 32C6, 32DA, 3343, 3354, 3365, 3376, 338A, 33B7) at the end of the page-0x7F000 block; bytes 0xA00EC..0xA0DE0 move up by 32, the 32 zero slack bytes 0xA0DE0..0xA0E00 at the end of the section are dropped
                     @{ Insert = 0xA00EC; Bytes = '43 32 54 32 65 32 76 32 8A 32 93 32 A4 32 B5 32 C6 32 DA 32 43 33 54 33 65 33 76 33 8A 33 B7 33'; Before = '00 80 08 00 48 00 00 00 E8 3D EC 3D F0 3D F4 3D F8 3D FC 3D 00 3E 04 3E 48 3E 50 3E 58 3E 60 3E'; SectionEnd = 0xA0E00 }
+                )
+            }
+
+            # ---- intro: No intro movie at start-up; DARK COLONY and COUNCIL WARS play their own intro (Dark Colony Ultimate only) ---------------------------------------------------------
+            #  Added      : 5 Oct 2026
+            #  Made with  : tools/patch_intro.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.74
+            #  Changes    : 100 bytes in 5 edits
+            #  The game started with the Council Wars intro (avi/intro.avi) before the main menu, whatever the player
+            #  was going to do, and the Dark Colony intro - on the Dark Colony disc, kept beside the Council Wars one as
+            #  AVI/DCINTRO.AVI since both games share the folder - was never played by this build.  Now the main menu
+            #  comes up at once, DARK COLONY plays avi/dcintro.avi and COUNCIL WARS plays avi/intro.avi, each right
+            #  before its campaign's race and name screen.  ACADEMY, OZI MISSIONS and LOAD GAME play nothing.  SPACE
+            #  skips a movie as before; a missing movie file is skipped silently.
+            #  How: the 95 bytes of main() that built "avi/" + "intro.avi" and called the movie player become a jump
+            #  to the menu loop and hold the new code: two small trampolines (one per button: push edx; call the
+            #  button's mode stub of fix ozi; call common with the movie path inline) and a common tail (pop the path
+            #  into edx, save eax, call the movie player with eax = the menu object, restore, jump to the campaign
+            #  runner).  The COUNCIL WARS and DARK COLONY handlers call these trampolines instead of fix ozi's
+            #  plain ones (which set the mode and enter the campaign); ACADEMY keeps the plain one.  The two absolute
+            #  operands the old bytes held lose their .reloc entries (type 0); the new code has none.  Requires fix ozi
+            #  (its mode stubs and trampolines).
+            @{
+                Id = 'intro'; Name = 'No intro movie at start-up; DARK COLONY and COUNCIL WARS play their own intro (Dark Colony Ultimate only)'; Date = '5 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
+                Theme = $null
+                Tool = 'tools/patch_intro.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.74'
+                Description = @'
+The game started with the Council Wars intro (avi/intro.avi) before the main menu, whatever the player
+was going to do, and the Dark Colony intro - on the Dark Colony disc, kept beside the Council Wars one as
+AVI/DCINTRO.AVI since both games share the folder - was never played by this build.  Now the main menu
+comes up at once, DARK COLONY plays avi/dcintro.avi and COUNCIL WARS plays avi/intro.avi, each right
+before its campaign's race and name screen.  ACADEMY, OZI MISSIONS and LOAD GAME play nothing.  SPACE
+skips a movie as before; a missing movie file is skipped silently.
+How: the 95 bytes of main() that built "avi/" + "intro.avi" and called the movie player become a jump
+to the menu loop and hold the new code: two small trampolines (one per button: push edx; call the
+button's mode stub of fix ozi; call common with the movie path inline) and a common tail (pop the path
+into edx, save eax, call the movie player with eax = the menu object, restore, jump to the campaign
+runner).  The COUNCIL WARS and DARK COLONY handlers call these trampolines instead of fix ozi's
+plain ones (which set the mode and enter the campaign); ACADEMY keeps the plain one.  The two absolute
+operands the old bytes held lose their .reloc entries (type 0); the new code has none.  Requires fix ozi
+(its mode stubs and trampolines).
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @('ozi')
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # COUNCIL WARS handler: call tramp_cw_campaign 0x0047f2e0 -> call tramp_cw_intro 0x00405369 (mode exp/, the Council Wars intro, then the campaign)
+                    @{ Offset = 0x4465; Old = 'E8 76 A2 07 00'; New = 'E8 FF 02 00 00' }
+                    # DARK COLONY handler: call tramp_dc_campaign 0x0047f390 -> call tramp_dc_intro 0x00405382 (mode dc/, the Dark Colony intro, then the campaign)
+                    @{ Offset = 0x4516; Old = 'E8 75 A2 07 00'; New = 'E8 67 02 00 00' }
+                    # main: the start-up intro ("avi/" + "intro.avi" built in a local buffer, play_movie 0x00401028) -> jmp to the menu loop 0x004053c6; the freed 93 bytes hold tramp_cw_intro (0x00405369: push edx; call stub_cw_set 0x0047f290; call common; "avi/intro.avi"), tramp_dc_intro (0x00405382: push edx; call stub_dc_set 0x0047f340; call common; "avi/dcintro.avi") and common (0x0040539d: pop edx = the path; push eax; call play_movie; pop eax; pop edx; jmp campaign runner 0x00401c08)
+                    @{ Offset = 0x4767; Old = 'BE F2 46 4A 00 8D BD 00 FF FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD 00 FF FF FF 8D 95 00 FF FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 89 D8 E8 62 BC FF FF'; New = 'EB 5D 52 E8 21 9F 07 00 E8 29 00 00 00 61 76 69 2F 69 6E 74 72 6F 2E 61 76 69 00 52 E8 B8 9F 07 00 E8 10 00 00 00 61 76 69 2F 64 63 69 6E 74 72 6F 2E 61 76 69 00 5A 50 E8 84 BC FF FF 58 5A E9 5D C8 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
+                    # .reloc table: entry 3368 (type 3 HIGHLOW, page offset 0x368) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97C1C; Old = '68 33'; New = '68 03' }
+                    # .reloc table: entry 338D (type 3 HIGHLOW, page offset 0x38D) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x97C1E; Old = '8D 33'; New = '8D 03' }
                 )
             }
 
