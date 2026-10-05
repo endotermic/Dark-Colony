@@ -6,9 +6,11 @@ This repository ships two kinds of executables:
 
   * the UNTOUCHED ORIGINALS from 1997/98 (both games run from the
     "DC - Council wars" folder since 15 Sep 2026)
-        DC - Council wars\dc16.exe              Dark Colony
         DC - Council wars\ENGEXP16.EXE          The Council Wars
         Dark Colony - Map editor\maped.exe      the map editor
+    (the untouched Classic dc16.exe of January 1998 is kept in the
+    folder too, but the installer does not patch it any more - see
+    below)
 
   * the PATCHED ones that you normally play (until 25 Sep 2026 they
     were called dc16new.exe, engexp16new.exe, maped_ozi_ns_v1.2.exe)
@@ -27,11 +29,11 @@ This repository ships two kinds of executables:
     Council Wars the DARK COLONY and OZI MISSIONS menu modes, the
     ONLINE WAR and REPLAY ONLINE GAME buttons)
 
-    The patched Classic "Dark Colony.exe" is DEPRECATED and no longer
-    shipped since 1 Oct 2026: Dark Colony Ultimate plays the whole Dark
-    Colony campaign, so the separate Classic executable is no longer
-    needed.  The patcher still writes it, but only when you ask for it
-    (its original dc16.exe stays in the repository).
+    The patched Classic "Dark Colony.exe" was deprecated on 1 Oct 2026
+    and REMOVED from the installer on 5 Oct 2026: Dark Colony Ultimate
+    plays the whole Dark Colony campaign (DARK COLONY and ACADEMY in its
+    main menu, their saves under LOAD GAME), so the separate Classic
+    executable is not needed.  The installer knows two executables.
 
 A hand-modified exe cannot be digitally signed, so some antivirus
 programs dislike it and some players do not trust it.  That is why
@@ -107,8 +109,7 @@ What makes it trustworthy:
       .cue image or a real CD they are ripped and encoded to MP3 with
       Windows' own encoder - an .iso holds the data track only, so
       there the music is left out), adds its own files and builds the
-      executables there.  Not on the discs at all: the 1998 dc16.exe
-      of the deprecated Dark Colony build.
+      executables there.
 
    b) THE FULL REPOSITORY from
 
@@ -153,18 +154,16 @@ What makes it trustworthy:
    you choose the screen resolution and the battlefield interface,
    press "Next >" through the pages and "Patch" once:
 
-   a) WELCOME.  A greeting, the list of the three originals the script
+   a) WELCOME.  A greeting, the list of the two originals the script
       found in the folder above patcher\ ("OK" = the untouched original,
       its SHA-256 checked):
 
           Dark Colony Ultimate         DC - Council wars\ENGEXP16.EXE
           Dark Colony Map Editor       Dark Colony - Map editor\maped.exe
-          Dark Colony                  DC - Council wars\dc16.exe
-                                       (DEPRECATED - only if asked for)
 
       the option "Put a shortcut to each patched executable on the
-      desktop" (ticked): shortcuts named "Dark Colony Ultimate", "Dark
-      Colony Map Editor" (and "Dark Colony" if you patch it), each
+      desktop" (ticked): shortcuts named "Dark Colony Ultimate" and "Dark
+      Colony Map Editor", each
       starting in its game folder, where the game finds its files (do
       not copy an exe itself to the desktop); an older shortcut of the
       same name is replaced.  And the checkbox
@@ -209,10 +208,9 @@ What makes it trustworthy:
       same folder.  A wrong disc, a missing file or a disc of another
       language is reported in red on the page, nothing is written.
 
-   b) STEP 1 OF 4 (2 OF 5 with the discs): OPTIONS.  Three choices, made once for both games
-      (they share the interface folder of the chosen size); NOTHING is
-      preselected and "Next >" stays disabled until the first two are
-      made.  You can come back with "< Back".
+   b) STEP 1 OF 4 (2 OF 5 with the discs): OPTIONS.  Two choices, made
+      once; NOTHING is preselected and "Next >" stays disabled until
+      both are made.  You can come back with "< Back".
 
       * "Screen resolution" - a drop-down:
 
@@ -248,18 +246,10 @@ What makes it trustworthy:
         executables published in the repository are the dark 1024x768
         build.
 
-      * "Also patch the deprecated Dark Colony (dc16.exe -> Dark
-        Colony.exe)" - unticked.  Dark Colony Ultimate plays the whole
-        Dark Colony campaign with every fix, so the separate Classic
-        executable is no longer needed and no longer shipped.  Leave
-        the box unticked and its page does not appear at all; tick it
-        and the installer gets a fourth executable page (STEP 4 OF 5).
-
    c) STEP 2 OF 4: DARK COLONY ULTIMATE,
       STEP 3 OF 4: DARK COLONY MAP EDITOR
-      (and STEP 4 OF 5: DARK COLONY when its box is ticked; one step
-      more each with the discs page) - one page
-      per executable:
+      (one step more each with the discs page) - one page per
+      executable:
 
       * "Patch <name>" (ticked) - untick it to leave that executable
         alone.
@@ -298,8 +288,7 @@ What makes it trustworthy:
       cannot be used: it is missing, it is already patched, it is a
       changed copy (another size or SHA-256 than the original), or it is
       no Dark Colony executable at all.  The Welcome page lists every
-      such file in red as well (the deprecated one only when asked
-      for).  The box shows
+      such file in red as well.  The box shows
       what was found and what is expected (size and SHA-256), and
       offers:
 
@@ -310,21 +299,19 @@ What makes it trustworthy:
           under the name and folder the box names, then select it;
         * the original disc: the Council Wars CD has EXPENG\ENGEXP16.EXE
           and the Dark Colony CD has DC\MAPED.EXE, both exactly the
-          right files - but NOT dc16.exe: the CD's DC\DC16.EXE is the
-          August 1997 build, and the fixes need the January 1998 update
-          (659456 bytes), which only the repository has.
+          right files.
 
       Until the right file is chosen that executable is not patched (its
       "Patch <name>" box is locked); the others can still be.
 
-   d) STEP 4 OF 4 (5 OF 5, 6 OF 6): READY TO PATCH.  A summary of everything
+   d) STEP 4 OF 4 (5 OF 5 with the discs): READY TO PATCH.  A summary of everything
       that is about to happen - the disc install if chosen (both discs,
       the folder, the file count), the resolution and the battlefield
       interface, every executable (original ->
       output, how many fixes, which ones were left out and why, whether
       the interface set is written, whether an existing file is
-      replaced) or why it is not patched (deprecated and not asked for,
-      unticked, no usable original), and the desktop shortcuts.  Nothing has been written
+      replaced) or why it is not patched (unticked, no usable
+      original), and the desktop shortcuts.  Nothing has been written
       yet; "< Back" changes anything.  Here "Next >" reads "Patch".
 
    e) PATCH.  If some of the files already exist the script asks once
@@ -352,8 +339,8 @@ What makes it trustworthy:
 
    "Inspect an exe..." checks any Dark Colony executable and tells you
    which build it is and which fixes it already carries - use it on the
-   downloaded "Dark Colony Ultimate.exe" / "Dark Colony.exe" if you want
-   to know what is in them.
+   downloaded "Dark Colony Ultimate.exe" if you want to know what is in
+   it.
 
 
 ---------------------------------------------------------------------
@@ -365,13 +352,11 @@ What makes it trustworthy:
 
    INSTALL.CMD -All -Resolution 1024x768 -Theme dark -DesktopShortcut
                        Dark Colony Ultimate and the map editor, like the
-                       window; add -IncludeDeprecated for Dark Colony too
+                       window
    INSTALL.CMD -List                      list the fixes
    INSTALL.CMD -List -Detail              ... with every byte edit
    INSTALL.CMD -Original "DC - Council wars\ENGEXP16.EXE" -All -Resolution 1920x1200 -Theme light
    INSTALL.CMD -Original "DC - Council wars\ENGEXP16.EXE" -Resolution 640x480 -Patches nocd
-   INSTALL.CMD -Original "DC - Council wars\dc16.exe" -All -Resolution 1024x768 -Theme dark
-                       (the deprecated Classic build, explicitly)
    INSTALL.CMD -Verify "DC - Council wars\Dark Colony Ultimate.exe"
    INSTALL.CMD -InstallDir "%USERPROFILE%\Documents\Dark Colony" -CouncilWarsDisc D:\ -DarkColonyDisc "E:\Dark Colony.iso" -All -Resolution 1920x1080 -Theme dark -DesktopShortcut
                        the game from the two discs (images or drives)
@@ -450,8 +435,7 @@ What makes it trustworthy:
    an HD size (the published exes are dark), -Output sets
    the target file (with -Original only), -Overwrite allows replacing
    existing files, -DesktopShortcut adds the desktop shortcuts the
-   window's checkbox makes, -IncludeDeprecated makes "-All" without
-   -Original patch the deprecated Dark Colony as well.
+   window's checkbox makes.
 
 
 ---------------------------------------------------------------------

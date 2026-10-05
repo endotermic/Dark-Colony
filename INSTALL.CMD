@@ -19,10 +19,10 @@ rem  the map editor, Ready to patch, Finished).  Choose the screen resolution an
 rem  interface - light (classic) or dark (console style) - once (nothing is preselected; 640x480 is the
 rem  original), the originals of this folder (ENGEXP16.EXE, maped.exe) are ticked with all their fixes,
 rem  and Patch writes "Dark Colony Ultimate.exe" and "Dark Colony Map Editor.exe" beside them and a
-rem  desktop shortcut of the same name to each.  The deprecated Classic "Dark Colony.exe" (dc16.exe) is
-rem  no longer shipped and is written only when its box on the options page is ticked.
+rem  desktop shortcut of the same name to each.  (The deprecated Classic "Dark Colony.exe" left the
+rem  installer on 5 Oct 2026: Dark Colony Ultimate plays the whole Dark Colony campaign.)
 rem  Nothing else is installed.  From a command prompt the command-line options work too:
-rem     INSTALL.CMD -All -Resolution 1024x768 -Theme dark -DesktopShortcut    (like the window; -IncludeDeprecated adds Dark Colony)
+rem     INSTALL.CMD -All -Resolution 1024x768 -Theme dark -DesktopShortcut    (like the window)
 rem     INSTALL.CMD -InstallDir "%USERPROFILE%\Documents\Dark Colony" -CouncilWarsDisc D:\ -DarkColonyDisc "E:\Dark Colony.iso" -All -Resolution 1920x1080 -Theme dark
 rem                                                                           (the game from the two discs, then patched there)
 rem     INSTALL.CMD -List
