@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 2.5, build 20261005.1354 - generated 2026-10-05 13:54 UTC from Dark-Colony-Server 411979a+ and Dark-Colony 167e5a6+.
+    Dark Colony patcher 2.6, build 20261005.1520 - generated 2026-10-05 15:20 UTC from Dark-Colony-Server 9271a09+ and Dark-Colony da0a414+.
 
 
 .SYNOPSIS
@@ -42,8 +42,8 @@
       * for an HD resolution the script also WRITES the interface data the patched exe reads
         (INTRF_HD\, exp\intrf_hd\, ozi_ns\intrf_hd\: menu scripts, HUD script, briefing lists,
         letterboxed backgrounds, loading screens) from the stock 640x480 files of the game folder and
-        the four pictures per size that ship with the game (INTRF_HD\<WxH>\INTRG.GIF, INTRO.GIF,
-        BACKDROP.GIF, INTRFACE.GIF; the menu screens are laid over BACKDROP.GIF, the main menu's planet
+        the four pictures per size that ship with the game (HD_SRC\<WxH>\INTRG.GIF, BACKDROP.GIF,
+        INTRFACE.GIF, INTRFACE_LIGHT.GIF; the menu screens are laid over BACKDROP.GIF, the main menu's planet
         without its bottom band, inside a grey panel frame).  Re-encoding the GIF backgrounds needs a small GIF reader/writer: its C# SOURCE
         TEXT is in this file and is compiled in memory by Add-Type when the set is built, with the
         .NET compiler that is part of Windows (no download, no install, ~2 s).  Doing the same in
@@ -234,9 +234,9 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '2.5'
-$PatcherBuild = '20261005.1354'
-$PatcherGenerated = '2026-10-05 13:54 UTC from Dark-Colony-Server 411979a+ and Dark-Colony 167e5a6+'
+$PatcherVersion = '2.6'
+$PatcherBuild = '20261005.1520'
+$PatcherGenerated = '2026-10-05 15:20 UTC from Dark-Colony-Server 9271a09+ and Dark-Colony da0a414+'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -464,8 +464,8 @@ longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive le
             #  REQUIRES the interface data built for 1024x768 next to the exe in the folder HD_0768P/ - one
             #  folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
             #  Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-            #  files and the five pictures per size that ship with the game (HD_SRC\1024x768\INTRG.GIF,
-            #  INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+            #  files and the four pictures per size that ship with the game (HD_SRC\1024x768\INTRG.GIF,
+            #  BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
             #  INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
             #  HUD script, briefing lists, letterboxed backgrounds, the two loading screens
             #  HD_0768P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1024x768 canvas),
@@ -478,8 +478,8 @@ longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive le
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = '1024x768'
                 # applying this fix also GENERATES the INTRF_HD interface set for this size from the stock files
-                # (Write-InterfaceSet); these five pictures cannot be derived and ship with the game (two HUD frames: dark / light)
-                SetSources = @('HD_SRC\1024x768\INTRG.GIF', 'HD_SRC\1024x768\INTRO.GIF', 'HD_SRC\1024x768\BACKDROP.GIF', 'HD_SRC\1024x768\INTRFACE.GIF', 'HD_SRC\1024x768\INTRFACE_LIGHT.GIF')
+                # (Write-InterfaceSet); these four pictures cannot be derived and ship with the game (two HUD frames: dark / light)
+                SetSources = @('HD_SRC\1024x768\INTRG.GIF', 'HD_SRC\1024x768\BACKDROP.GIF', 'HD_SRC\1024x768\INTRFACE.GIF', 'HD_SRC\1024x768\INTRFACE_LIGHT.GIF')
                 # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
                 Theme = $null
                 Tool = 'tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58'
@@ -534,8 +534,8 @@ also renames the dial's bank - that is the separate fix "console" below.)
 REQUIRES the interface data built for 1024x768 next to the exe in the folder HD_0768P/ - one
 folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
 Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-files and the five pictures per size that ship with the game (HD_SRC\1024x768\INTRG.GIF,
-INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+files and the four pictures per size that ship with the game (HD_SRC\1024x768\INTRG.GIF,
+BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
 INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
 HUD script, briefing lists, letterboxed backgrounds, the two loading screens
 HD_0768P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1024x768 canvas),
@@ -562,6 +562,7 @@ WAR screen is read from.
                     'INTRFACE\GTSUX.GIF'
                     'INTRFACE\INTRG.DAT'
                     'INTRFACE\INTRO.DAT'
+                    'INTRFACE\INTRO.GIF'
                     'INTRFACE\INTROE'
                     'INTRFACE\IPXNAMEE'
                     'INTRFACE\LOAD.BMP'
@@ -614,7 +615,6 @@ WAR screen is read from.
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
                     'HD_SRC\1024x768\INTRG.GIF'
-                    'HD_SRC\1024x768\INTRO.GIF'
                     'HD_SRC\1024x768\BACKDROP.GIF'
                     'HD_SRC\1024x768\INTRFACE.GIF'
                     'HD_SRC\1024x768\INTRFACE_LIGHT.GIF'
@@ -1074,8 +1074,8 @@ WAR screen is read from.
             #  REQUIRES the interface data built for 1280x1024 next to the exe in the folder HD_1024P/ - one
             #  folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
             #  Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-            #  files and the five pictures per size that ship with the game (HD_SRC\1280x1024\INTRG.GIF,
-            #  INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+            #  files and the four pictures per size that ship with the game (HD_SRC\1280x1024\INTRG.GIF,
+            #  BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
             #  INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
             #  HUD script, briefing lists, letterboxed backgrounds, the two loading screens
             #  HD_1024P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1280x1024 canvas),
@@ -1088,8 +1088,8 @@ WAR screen is read from.
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = '1280x1024'
                 # applying this fix also GENERATES the INTRF_HD interface set for this size from the stock files
-                # (Write-InterfaceSet); these five pictures cannot be derived and ship with the game (two HUD frames: dark / light)
-                SetSources = @('HD_SRC\1280x1024\INTRG.GIF', 'HD_SRC\1280x1024\INTRO.GIF', 'HD_SRC\1280x1024\BACKDROP.GIF', 'HD_SRC\1280x1024\INTRFACE.GIF', 'HD_SRC\1280x1024\INTRFACE_LIGHT.GIF')
+                # (Write-InterfaceSet); these four pictures cannot be derived and ship with the game (two HUD frames: dark / light)
+                SetSources = @('HD_SRC\1280x1024\INTRG.GIF', 'HD_SRC\1280x1024\BACKDROP.GIF', 'HD_SRC\1280x1024\INTRFACE.GIF', 'HD_SRC\1280x1024\INTRFACE_LIGHT.GIF')
                 # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
                 Theme = $null
                 Tool = 'tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58'
@@ -1144,8 +1144,8 @@ also renames the dial's bank - that is the separate fix "console" below.)
 REQUIRES the interface data built for 1280x1024 next to the exe in the folder HD_1024P/ - one
 folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
 Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-files and the five pictures per size that ship with the game (HD_SRC\1280x1024\INTRG.GIF,
-INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+files and the four pictures per size that ship with the game (HD_SRC\1280x1024\INTRG.GIF,
+BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
 INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
 HUD script, briefing lists, letterboxed backgrounds, the two loading screens
 HD_1024P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1280x1024 canvas),
@@ -1172,6 +1172,7 @@ WAR screen is read from.
                     'INTRFACE\GTSUX.GIF'
                     'INTRFACE\INTRG.DAT'
                     'INTRFACE\INTRO.DAT'
+                    'INTRFACE\INTRO.GIF'
                     'INTRFACE\INTROE'
                     'INTRFACE\IPXNAMEE'
                     'INTRFACE\LOAD.BMP'
@@ -1224,7 +1225,6 @@ WAR screen is read from.
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
                     'HD_SRC\1280x1024\INTRG.GIF'
-                    'HD_SRC\1280x1024\INTRO.GIF'
                     'HD_SRC\1280x1024\BACKDROP.GIF'
                     'HD_SRC\1280x1024\INTRFACE.GIF'
                     'HD_SRC\1280x1024\INTRFACE_LIGHT.GIF'
@@ -1710,8 +1710,8 @@ WAR screen is read from.
             #  REQUIRES the interface data built for 1280x720 next to the exe in the folder HD_0720P/ - one
             #  folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
             #  Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-            #  files and the five pictures per size that ship with the game (HD_SRC\1280x720\INTRG.GIF,
-            #  INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+            #  files and the four pictures per size that ship with the game (HD_SRC\1280x720\INTRG.GIF,
+            #  BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
             #  INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
             #  HUD script, briefing lists, letterboxed backgrounds, the two loading screens
             #  HD_0720P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1280x720 canvas),
@@ -1724,8 +1724,8 @@ WAR screen is read from.
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = '1280x720'
                 # applying this fix also GENERATES the INTRF_HD interface set for this size from the stock files
-                # (Write-InterfaceSet); these five pictures cannot be derived and ship with the game (two HUD frames: dark / light)
-                SetSources = @('HD_SRC\1280x720\INTRG.GIF', 'HD_SRC\1280x720\INTRO.GIF', 'HD_SRC\1280x720\BACKDROP.GIF', 'HD_SRC\1280x720\INTRFACE.GIF', 'HD_SRC\1280x720\INTRFACE_LIGHT.GIF')
+                # (Write-InterfaceSet); these four pictures cannot be derived and ship with the game (two HUD frames: dark / light)
+                SetSources = @('HD_SRC\1280x720\INTRG.GIF', 'HD_SRC\1280x720\BACKDROP.GIF', 'HD_SRC\1280x720\INTRFACE.GIF', 'HD_SRC\1280x720\INTRFACE_LIGHT.GIF')
                 # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
                 Theme = $null
                 Tool = 'tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58'
@@ -1780,8 +1780,8 @@ also renames the dial's bank - that is the separate fix "console" below.)
 REQUIRES the interface data built for 1280x720 next to the exe in the folder HD_0720P/ - one
 folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
 Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-files and the five pictures per size that ship with the game (HD_SRC\1280x720\INTRG.GIF,
-INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+files and the four pictures per size that ship with the game (HD_SRC\1280x720\INTRG.GIF,
+BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
 INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
 HUD script, briefing lists, letterboxed backgrounds, the two loading screens
 HD_0720P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1280x720 canvas),
@@ -1808,6 +1808,7 @@ WAR screen is read from.
                     'INTRFACE\GTSUX.GIF'
                     'INTRFACE\INTRG.DAT'
                     'INTRFACE\INTRO.DAT'
+                    'INTRFACE\INTRO.GIF'
                     'INTRFACE\INTROE'
                     'INTRFACE\IPXNAMEE'
                     'INTRFACE\LOAD.BMP'
@@ -1860,7 +1861,6 @@ WAR screen is read from.
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
                     'HD_SRC\1280x720\INTRG.GIF'
-                    'HD_SRC\1280x720\INTRO.GIF'
                     'HD_SRC\1280x720\BACKDROP.GIF'
                     'HD_SRC\1280x720\INTRFACE.GIF'
                     'HD_SRC\1280x720\INTRFACE_LIGHT.GIF'
@@ -2346,8 +2346,8 @@ WAR screen is read from.
             #  REQUIRES the interface data built for 1280x800 next to the exe in the folder HD_0800P/ - one
             #  folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
             #  Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-            #  files and the five pictures per size that ship with the game (HD_SRC\1280x800\INTRG.GIF,
-            #  INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+            #  files and the four pictures per size that ship with the game (HD_SRC\1280x800\INTRG.GIF,
+            #  BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
             #  INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
             #  HUD script, briefing lists, letterboxed backgrounds, the two loading screens
             #  HD_0800P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1280x800 canvas),
@@ -2360,8 +2360,8 @@ WAR screen is read from.
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = '1280x800'
                 # applying this fix also GENERATES the INTRF_HD interface set for this size from the stock files
-                # (Write-InterfaceSet); these five pictures cannot be derived and ship with the game (two HUD frames: dark / light)
-                SetSources = @('HD_SRC\1280x800\INTRG.GIF', 'HD_SRC\1280x800\INTRO.GIF', 'HD_SRC\1280x800\BACKDROP.GIF', 'HD_SRC\1280x800\INTRFACE.GIF', 'HD_SRC\1280x800\INTRFACE_LIGHT.GIF')
+                # (Write-InterfaceSet); these four pictures cannot be derived and ship with the game (two HUD frames: dark / light)
+                SetSources = @('HD_SRC\1280x800\INTRG.GIF', 'HD_SRC\1280x800\BACKDROP.GIF', 'HD_SRC\1280x800\INTRFACE.GIF', 'HD_SRC\1280x800\INTRFACE_LIGHT.GIF')
                 # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
                 Theme = $null
                 Tool = 'tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58'
@@ -2416,8 +2416,8 @@ also renames the dial's bank - that is the separate fix "console" below.)
 REQUIRES the interface data built for 1280x800 next to the exe in the folder HD_0800P/ - one
 folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
 Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-files and the five pictures per size that ship with the game (HD_SRC\1280x800\INTRG.GIF,
-INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+files and the four pictures per size that ship with the game (HD_SRC\1280x800\INTRG.GIF,
+BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
 INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
 HUD script, briefing lists, letterboxed backgrounds, the two loading screens
 HD_0800P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1280x800 canvas),
@@ -2444,6 +2444,7 @@ WAR screen is read from.
                     'INTRFACE\GTSUX.GIF'
                     'INTRFACE\INTRG.DAT'
                     'INTRFACE\INTRO.DAT'
+                    'INTRFACE\INTRO.GIF'
                     'INTRFACE\INTROE'
                     'INTRFACE\IPXNAMEE'
                     'INTRFACE\LOAD.BMP'
@@ -2496,7 +2497,6 @@ WAR screen is read from.
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
                     'HD_SRC\1280x800\INTRG.GIF'
-                    'HD_SRC\1280x800\INTRO.GIF'
                     'HD_SRC\1280x800\BACKDROP.GIF'
                     'HD_SRC\1280x800\INTRFACE.GIF'
                     'HD_SRC\1280x800\INTRFACE_LIGHT.GIF'
@@ -2980,8 +2980,8 @@ WAR screen is read from.
             #  REQUIRES the interface data built for 1920x1080 next to the exe in the folder HD_1080P/ - one
             #  folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
             #  Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-            #  files and the five pictures per size that ship with the game (HD_SRC\1920x1080\INTRG.GIF,
-            #  INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+            #  files and the four pictures per size that ship with the game (HD_SRC\1920x1080\INTRG.GIF,
+            #  BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
             #  INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
             #  HUD script, briefing lists, letterboxed backgrounds, the two loading screens
             #  HD_1080P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1920x1080 canvas),
@@ -2994,8 +2994,8 @@ WAR screen is read from.
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = '1920x1080'
                 # applying this fix also GENERATES the INTRF_HD interface set for this size from the stock files
-                # (Write-InterfaceSet); these five pictures cannot be derived and ship with the game (two HUD frames: dark / light)
-                SetSources = @('HD_SRC\1920x1080\INTRG.GIF', 'HD_SRC\1920x1080\INTRO.GIF', 'HD_SRC\1920x1080\BACKDROP.GIF', 'HD_SRC\1920x1080\INTRFACE.GIF', 'HD_SRC\1920x1080\INTRFACE_LIGHT.GIF')
+                # (Write-InterfaceSet); these four pictures cannot be derived and ship with the game (two HUD frames: dark / light)
+                SetSources = @('HD_SRC\1920x1080\INTRG.GIF', 'HD_SRC\1920x1080\BACKDROP.GIF', 'HD_SRC\1920x1080\INTRFACE.GIF', 'HD_SRC\1920x1080\INTRFACE_LIGHT.GIF')
                 # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
                 Theme = $null
                 Tool = 'tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58'
@@ -3050,8 +3050,8 @@ also renames the dial's bank - that is the separate fix "console" below.)
 REQUIRES the interface data built for 1920x1080 next to the exe in the folder HD_1080P/ - one
 folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
 Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-files and the five pictures per size that ship with the game (HD_SRC\1920x1080\INTRG.GIF,
-INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+files and the four pictures per size that ship with the game (HD_SRC\1920x1080\INTRG.GIF,
+BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
 INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
 HUD script, briefing lists, letterboxed backgrounds, the two loading screens
 HD_1080P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1920x1080 canvas),
@@ -3078,6 +3078,7 @@ WAR screen is read from.
                     'INTRFACE\GTSUX.GIF'
                     'INTRFACE\INTRG.DAT'
                     'INTRFACE\INTRO.DAT'
+                    'INTRFACE\INTRO.GIF'
                     'INTRFACE\INTROE'
                     'INTRFACE\IPXNAMEE'
                     'INTRFACE\LOAD.BMP'
@@ -3130,7 +3131,6 @@ WAR screen is read from.
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
                     'HD_SRC\1920x1080\INTRG.GIF'
-                    'HD_SRC\1920x1080\INTRO.GIF'
                     'HD_SRC\1920x1080\BACKDROP.GIF'
                     'HD_SRC\1920x1080\INTRFACE.GIF'
                     'HD_SRC\1920x1080\INTRFACE_LIGHT.GIF'
@@ -3614,8 +3614,8 @@ WAR screen is read from.
             #  REQUIRES the interface data built for 1920x1200 next to the exe in the folder HD_1200P/ - one
             #  folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
             #  Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-            #  files and the five pictures per size that ship with the game (HD_SRC\1920x1200\INTRG.GIF,
-            #  INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+            #  files and the four pictures per size that ship with the game (HD_SRC\1920x1200\INTRG.GIF,
+            #  BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
             #  INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
             #  HUD script, briefing lists, letterboxed backgrounds, the two loading screens
             #  HD_1200P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1920x1200 canvas),
@@ -3628,8 +3628,8 @@ WAR screen is read from.
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = '1920x1200'
                 # applying this fix also GENERATES the INTRF_HD interface set for this size from the stock files
-                # (Write-InterfaceSet); these five pictures cannot be derived and ship with the game (two HUD frames: dark / light)
-                SetSources = @('HD_SRC\1920x1200\INTRG.GIF', 'HD_SRC\1920x1200\INTRO.GIF', 'HD_SRC\1920x1200\BACKDROP.GIF', 'HD_SRC\1920x1200\INTRFACE.GIF', 'HD_SRC\1920x1200\INTRFACE_LIGHT.GIF')
+                # (Write-InterfaceSet); these four pictures cannot be derived and ship with the game (two HUD frames: dark / light)
+                SetSources = @('HD_SRC\1920x1200\INTRG.GIF', 'HD_SRC\1920x1200\BACKDROP.GIF', 'HD_SRC\1920x1200\INTRFACE.GIF', 'HD_SRC\1920x1200\INTRFACE_LIGHT.GIF')
                 # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
                 Theme = $null
                 Tool = 'tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58'
@@ -3684,8 +3684,8 @@ also renames the dial's bank - that is the separate fix "console" below.)
 REQUIRES the interface data built for 1920x1200 next to the exe in the folder HD_1200P/ - one
 folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
 Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-files and the five pictures per size that ship with the game (HD_SRC\1920x1200\INTRG.GIF,
-INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+files and the four pictures per size that ship with the game (HD_SRC\1920x1200\INTRG.GIF,
+BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
 INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
 HUD script, briefing lists, letterboxed backgrounds, the two loading screens
 HD_1200P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 1920x1200 canvas),
@@ -3712,6 +3712,7 @@ WAR screen is read from.
                     'INTRFACE\GTSUX.GIF'
                     'INTRFACE\INTRG.DAT'
                     'INTRFACE\INTRO.DAT'
+                    'INTRFACE\INTRO.GIF'
                     'INTRFACE\INTROE'
                     'INTRFACE\IPXNAMEE'
                     'INTRFACE\LOAD.BMP'
@@ -3764,7 +3765,6 @@ WAR screen is read from.
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
                     'HD_SRC\1920x1200\INTRG.GIF'
-                    'HD_SRC\1920x1200\INTRO.GIF'
                     'HD_SRC\1920x1200\BACKDROP.GIF'
                     'HD_SRC\1920x1200\INTRFACE.GIF'
                     'HD_SRC\1920x1200\INTRFACE_LIGHT.GIF'
@@ -4248,8 +4248,8 @@ WAR screen is read from.
             #  REQUIRES the interface data built for 3840x1080 next to the exe in the folder UW_1080P/ - one
             #  folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
             #  Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-            #  files and the five pictures per size that ship with the game (HD_SRC\3840x1080\INTRG.GIF,
-            #  INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+            #  files and the four pictures per size that ship with the game (HD_SRC\3840x1080\INTRG.GIF,
+            #  BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
             #  INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
             #  HUD script, briefing lists, letterboxed backgrounds, the two loading screens
             #  UW_1080P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 3840x1080 canvas),
@@ -4262,8 +4262,8 @@ WAR screen is read from.
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = '3840x1080'
                 # applying this fix also GENERATES the INTRF_HD interface set for this size from the stock files
-                # (Write-InterfaceSet); these five pictures cannot be derived and ship with the game (two HUD frames: dark / light)
-                SetSources = @('HD_SRC\3840x1080\INTRG.GIF', 'HD_SRC\3840x1080\INTRO.GIF', 'HD_SRC\3840x1080\BACKDROP.GIF', 'HD_SRC\3840x1080\INTRFACE.GIF', 'HD_SRC\3840x1080\INTRFACE_LIGHT.GIF')
+                # (Write-InterfaceSet); these four pictures cannot be derived and ship with the game (two HUD frames: dark / light)
+                SetSources = @('HD_SRC\3840x1080\INTRG.GIF', 'HD_SRC\3840x1080\BACKDROP.GIF', 'HD_SRC\3840x1080\INTRFACE.GIF', 'HD_SRC\3840x1080\INTRFACE_LIGHT.GIF')
                 # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
                 Theme = $null
                 Tool = 'tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58'
@@ -4318,8 +4318,8 @@ also renames the dial's bank - that is the separate fix "console" below.)
 REQUIRES the interface data built for 3840x1080 next to the exe in the folder UW_1080P/ - one
 folder per resolution (2 Oct 2026), so a set of another size can never be read by mistake.
 Applying this fix makes the patcher WRITE that set (Write-InterfaceSet) from the stock 640x480
-files and the five pictures per size that ship with the game (HD_SRC\3840x1080\INTRG.GIF,
-INTRO.GIF, BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
+files and the four pictures per size that ship with the game (HD_SRC\3840x1080\INTRG.GIF,
+BACKDROP.GIF, and the HUD frame INTRFACE.GIF for the dark battlefield interface or
 INTRFACE_LIGHT.GIF for the light one - the theme is chosen with the resolution): menu scripts,
 HUD script, briefing lists, letterboxed backgrounds, the two loading screens
 UW_1080P\LOAD.BMP / LOAD2.BMP (the 640x480 picture centred on a black 3840x1080 canvas),
@@ -4346,6 +4346,7 @@ WAR screen is read from.
                     'INTRFACE\GTSUX.GIF'
                     'INTRFACE\INTRG.DAT'
                     'INTRFACE\INTRO.DAT'
+                    'INTRFACE\INTRO.GIF'
                     'INTRFACE\INTROE'
                     'INTRFACE\IPXNAMEE'
                     'INTRFACE\LOAD.BMP'
@@ -4398,7 +4399,6 @@ WAR screen is read from.
                     'ozi_ns\gamestat\hxscene.txt'
                     'ozi_ns\gamestat\gxscene.txt'
                     'HD_SRC\3840x1080\INTRG.GIF'
-                    'HD_SRC\3840x1080\INTRO.GIF'
                     'HD_SRC\3840x1080\BACKDROP.GIF'
                     'HD_SRC\3840x1080\INTRFACE.GIF'
                     'HD_SRC\3840x1080\INTRFACE_LIGHT.GIF'
@@ -8943,11 +8943,13 @@ function Write-LoadingScreens([string] $GameDir, [string] $Mode) {
 #  (pad_background.py, paint_intro.py, hud_layout.py, split_hd_data.py, build_ozi_overlay.py), reproduced here line by line; the output is byte-identical for every text
 #  file and pixel-identical for every picture, checked against the tools' output for all sizes.
 #
-#  Four pictures per size cannot be derived and ship with the game: INTRF_HD\<WxH>\INTRG.GIF and
-#  INTRO.GIF (the procedurally painted main-menu planet, with the Take 2 / SSI bottom bands),
+#  Four pictures per size cannot be derived and ship with the game: HD_SRC\<WxH>\INTRG.GIF (the
+#  procedurally painted main-menu planet, with the Take 2 bottom band; until 5 Oct 2026 also INTRO.GIF,
+#  the same scene with the SSI band for the Classic menu - no screen Dark Colony Ultimate reaches draws
+#  it, so the stock picture is letterboxed like every other screen since then, doc 10.76),
 #  BACKDROP.GIF (the same planet without a band: since 1 Oct 2026 the ground of every letterboxed
 #  menu screen, which sits on it in a grey panel frame instead of on black - doc 10.56) and
-#  INTRFACE.GIF (the HUD frame).
+#  INTRFACE.GIF / INTRFACE_LIGHT.GIF (the dark / light HUD frame).
 #
 #  ---- A NOTE ON THE COMPILED CODE BELOW ------------------------------------------------------------
 #  The 15 menu backgrounds are GIF files.  The game's loader (gifload.c) insists that the picture is
@@ -9728,7 +9730,7 @@ function Write-InterfaceSet([string] $GameDir, [string] $Mode, [bool] $Console =
     $intrface = Join-Path $GameDir 'INTRFACE'; $hd = Join-Path $GameDir $folder; $gamestat = Join-Path $GameDir 'GAMESTAT'
     $src = Join-Path (Join-Path $GameDir $HD_SRC) $Mode
     $frame = if ($Console) { 'INTRFACE.GIF' } else { 'INTRFACE_LIGHT.GIF' }
-    foreach ($need in 'INTRG.GIF', 'INTRO.GIF', 'BACKDROP.GIF', $frame) { if (-not (Find-CI $src $need)) { throw "$HD_SRC\$Mode\$need is missing: the painted backdrops and HUD frames for $Mode ship with the game and cannot be generated" } }
+    foreach ($need in 'INTRG.GIF', 'BACKDROP.GIF', $frame) { if (-not (Find-CI $src $need)) { throw "$HD_SRC\$Mode\$need is missing: the painted backdrops and HUD frames for $Mode ship with the game and cannot be generated" } }
     # the maintainer's rule (2 Oct 2026): no file of another resolution stays anywhere - every other size's folder, the
     # pre-October INTRF_HD set and the 640x480 copies go, and this size's folder is rebuilt from scratch
     $lines += Remove-OtherInterfaceSets $GameDir $folder
@@ -9774,8 +9776,9 @@ function Write-InterfaceSet([string] $GameDir, [string] $Mode, [bool] $Console =
         $gifsToPad[[System.IO.Path]::GetFileName($gif).ToUpperInvariant()] = $gif
     }
     # --- backgrounds: the painted / spliced ones ship per size, the rest are letterboxed here - laid
-    # over BACKDROP.GIF (the main menu's planet without its bottom band) in a grey panel frame (doc 10.56)
-    foreach ($shipped in 'INTRG.GIF', 'INTRO.GIF', 'BACKDROP.GIF') {
+    # over BACKDROP.GIF (the main menu's planet without its bottom band) in a grey panel frame (doc 10.56).
+    # INTRO.GIF, the Classic menu's dress, is one of the letterboxed ones since 5 Oct 2026 (doc 10.76)
+    foreach ($shipped in 'INTRG.GIF', 'BACKDROP.GIF') {
         $gifsToPad.Remove($shipped)
         [System.IO.File]::Copy((Find-CI $src $shipped), (Join-Path $hd $shipped), $true); $written++
     }
