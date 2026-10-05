@@ -103,10 +103,14 @@ What makes it trustworthy:
 
 1) Get the installer.  Two ways:
 
-   a) THE INSTALLER PACKAGE (ModDB) - INSTALL.CMD, this file and the
-      folder patcher\ (the script Apply-DarkColonyPatches.ps1 and its
-      own data files: patcher\game, patcher\editor).  It holds nothing
-      of the game itself.  You need your ORIGINAL DISCS, "Dark Colony"
+   a) THE INSTALLER PACKAGE - INSTALL.CMD, this file and the folder
+      patcher\ (the script Apply-DarkColonyPatches.ps1 and its own data
+      files: patcher\game, patcher\editor), published on ModDB and as
+      the repository
+
+        https://github.com/endotermic/Dark-Colony-Ultimate
+
+      ("Code" -> "Download ZIP").  It holds nothing of the game itself.  You need your ORIGINAL DISCS, "Dark Colony"
       and "Dark Colony: The Council Wars" - the CDs in a drive, or
       disc images of them (.iso, .bin with its .cue).  The installer
       copies the game from the discs into a folder of your choice
