@@ -2,27 +2,40 @@
   DARK COLONY / COUNCIL WARS  -  HOW TO PATCH THE GAME YOURSELF
 =====================================================================
 
-This repository ships the UNTOUCHED ORIGINALS and the installer; the
-PATCHED executables and their interface data are NOT in the repository
-(since 5 Oct 2026) - the installer builds them on your PC:
+This file belongs to the INSTALLER PACKAGE - INSTALL.CMD, this file and
+the folder patcher\ - published on ModDB and as the repository
+Dark-Colony-Ultimate, and carried in the root of the full Dark-Colony
+repository as well.  The package holds NOTHING of the game itself: no
+original executable, no game data, no music and no patched executable.
+The game comes from YOUR two original discs - or is already there when
+the package sits in the full Dark-Colony repository (see "HOWTO" 1b);
+the installer copies it into a game folder when needed and builds the
+patched executables there, on your PC.  The installer knows two
+executables:
 
-  * the UNTOUCHED ORIGINALS from 1997/98 (both games run from the
-    "DC - Council wars" folder since 15 Sep 2026)
-        DC - Council wars\ENGEXP16.EXE          The Council Wars
-        Dark Colony - Map editor\maped.exe      the map editor
-    (the untouched Classic dc16.exe of January 1998 is kept in the
-    folder too, but the installer does not patch it any more - see
-    below)
+  * the UNTOUCHED ORIGINALS from 1997/98, taken from your discs
+        ENGEXP16.EXE     The Council Wars (EXPENG\ENGEXP16.EXE on the
+                         Council Wars CD)
+        maped.exe        the map editor (DC\MAPED.EXE on the Dark
+                         Colony CD)
+    In a disc install they land in the install folder ("Dark Colony"
+    in your Documents by default) and its "Map editor" sub-folder; in
+    the full Dark-Colony repository they are
+        DC - Council wars\ENGEXP16.EXE
+        Dark Colony - Map editor\maped.exe
+    (that repository also keeps the untouched Classic dc16.exe of
+    January 1998, which is not on the discs; the installer does not
+    patch it any more - see below)
 
-  * the PATCHED ones that you normally play - written by the installer,
-    never downloaded (until 25 Sep 2026 they were called dc16new.exe,
-    engexp16new.exe, maped_ozi_ns_v1.2.exe)
-        DC - Council wars\Dark Colony Ultimate.exe
+  * the PATCHED ones that you normally play - written by the installer
+    next to their originals, never downloaded (until 25 Sep 2026 they
+    were called engexp16new.exe and maped_ozi_ns_v1.2.exe)
+        Dark Colony Ultimate.exe
             (Council Wars plus the Dark Colony, OZI and Academy
             campaigns in its main menu, one LOAD GAME button for the
             saves of all of them, the ONLINE WAR and the
             REPLAY ONLINE GAME buttons)
-        Dark Colony - Map editor\Dark Colony Map Editor.exe
+        Dark Colony Map Editor.exe
             (the greyed-out dialog controls of the original enabled -
             what the Polish ozi_ns editor did, minus the translation)
     (no CD at all, 1024x768 or another resolution, the battlefield
@@ -30,26 +43,26 @@ PATCHED executables and their interface data are NOT in the repository
     pointer, 32 MiB memory pool, 150 % default game speed, two-monitor
     fix, the CD music as MP3, a high-resolution icon, no intro movie
     at start-up (DARK COLONY and COUNCIL WARS play their own intro
-    when pressed), ... and for
-    Council Wars the DARK COLONY and OZI MISSIONS menu modes, the
-    ONLINE WAR and REPLAY ONLINE GAME buttons)
+    when pressed), the DARK COLONY and OZI MISSIONS menu modes, the
+    ONLINE WAR and REPLAY ONLINE GAME buttons, ...)
 
-    The patched Classic "Dark Colony.exe" was deprecated on 1 Oct 2026
-    and REMOVED from the installer on 5 Oct 2026: Dark Colony Ultimate
-    plays the whole Dark Colony campaign (DARK COLONY and ACADEMY in its
-    main menu, their saves under LOAD GAME), so the separate Classic
-    executable is not needed.  The installer knows two executables.
+    The patched Classic "Dark Colony.exe" (from dc16.exe) was
+    deprecated on 1 Oct 2026 and REMOVED from the installer on 5 Oct
+    2026: Dark Colony Ultimate plays the whole Dark Colony campaign
+    (DARK COLONY and ACADEMY in its main menu, their saves under LOAD
+    GAME), so the separate Classic executable is not needed.
 
 A hand-modified exe cannot be digitally signed, so some antivirus
 programs dislike it and some players do not trust it.  That is why
-the repository contains a PATCHING SCRIPT that lets you build the
-patched executables yourself, from the originals, on your own PC:
+the patched executables are not distributed at all: the repository
+contains a PATCHING SCRIPT that builds them, from the originals, on
+your own PC:
 
-        Apply-DarkColonyPatches.ps1     (in the root of the repository)
+        patcher\Apply-DarkColonyPatches.ps1
 
 and a small starter for it, the file you double-click:
 
-        INSTALL.CMD
+        INSTALL.CMD     (in the root of the repository)
 
 What makes it trustworthy:
 
@@ -63,10 +76,10 @@ What makes it trustworthy:
      byte".  Nothing is hidden, nothing is downloaded, no network.
      (Two fixes append bytes to the exe instead of replacing them:
      the icon appends the icon pictures - the icon itself is
-     DC - Council wars\DC_HD.ICO, open it in any image viewer - and,
-     for Dark Colony Ultimate, "online" appends the ONLINE WAR /
-     REPLAY ONLINE GAME / LOAD GAME module compiled from tools\online\online.c of
-     the Dark-Colony-Server repository.  Both are written as Base64
+     patcher\game\DC_HD.ICO, open it in any image viewer - and, for
+     Dark Colony Ultimate, "online" appends the ONLINE WAR / REPLAY
+     ONLINE GAME / LOAD GAME module compiled from tools\online\online.c
+     of the Dark-Colony-Server repository.  Both are written as Base64
      text with their SHA-256.)
 
   2) A lot of comments on every step and every line: each fix has a
@@ -74,12 +87,15 @@ What makes it trustworthy:
      single byte edit has a comment.
 
   3) The patched executables are ALWAYS created from the original
-     executables.  The originals are never modified.  Before a byte
-     is written the script checks that the file still holds the
-     documented old byte at that position; if anything does not match,
-     nothing is written.  After writing it shows the SHA-256 checksum
-     of every result - with all fixes selected each is byte-identical
-     to the exe published in the repository and the script says so.
+     executables.  The originals are never modified.  The script first
+     checks the SHA-256 of the original, and before a byte is written
+     it checks that the file still holds the documented old byte at
+     that position; if anything does not match, nothing is written.
+     After writing it shows the SHA-256 checksum of every result.  The
+     script carries the SHA-256 of the REFERENCE BUILD of every
+     resolution and interface (the files the maintainer's tools
+     produce); with all fixes selected your result is byte-identical
+     to it and the script says so.
 
   4) Simple usage: an installer window - choose the screen resolution
      and the battlefield interface once, the executables are already
@@ -89,12 +105,92 @@ What makes it trustworthy:
      10 and 11).
 
   5) The starter INSTALL.CMD is a few lines of text too (open it in
-     Notepad): it runs the .ps1 beside it with PowerShell and
-     "-ExecutionPolicy Bypass" for that one run, because Windows
-     refuses to run a downloaded PowerShell script otherwise.  It
-     changes no setting of your PC and installs nothing: the "install"
-     is the two patched exes, their interface data and their desktop
-     shortcuts.
+     Notepad): it runs patcher\Apply-DarkColonyPatches.ps1 with
+     PowerShell and "-ExecutionPolicy Bypass" for that one run, because
+     Windows refuses to run a downloaded PowerShell script otherwise.
+     It changes no setting of your PC and installs nothing: the
+     "install" is the game folder, the two patched exes, their
+     interface data and their desktop shortcuts.
+
+
+---------------------------------------------------------------------
+  WHAT IS IN THE PACKAGE
+---------------------------------------------------------------------
+
+   INSTALL.CMD          the starter (double-click it)
+   PATCH_HOWTO.TXT      this file
+   patcher\             the patcher and its data files, see below
+
+   The Dark-Colony-Ultimate repository adds README.md (the short
+   version of this file), CHANGELOG.md (every fix - the bug it repairs
+   or the feature it adds, with its date - and the installer's own
+   history), LICENSE (the GNU Affero General Public License v3) and
+   .gitattributes (keeps INSTALL.CMD's Windows line endings in every
+   checkout and ZIP).  The full Dark-Colony repository adds the game.
+
+   patcher\Apply-DarkColonyPatches.ps1
+        the patcher (version 2.6, build 20261005.1520, generated on
+        5 Oct 2026 from the Dark-Colony-Server and Dark-Colony
+        repositories): the two builds with every fix and every byte
+        edit, the list of which game file comes from which disc, the
+        disc reader, the GIF codec that builds the interface sets,
+        the installer window and the command line - all in one text
+        file.
+
+   patcher\game\        the project's own data files for the GAME
+                        folder.  Before Dark Colony Ultimate is
+                        patched the whole folder is copied into the
+                        game folder (a file that is already there and
+                        identical is left alone):
+        HD_SRC\<WxH>\   the four painted pictures per screen size -
+                        INTRG.GIF (the main menu's planet), BACKDROP.GIF
+                        (the same planet without its bottom band, under
+                        every pre-battle screen), INTRFACE.GIF (the dark
+                        HUD frame), INTRFACE_LIGHT.GIF (the classic metal
+                        frame) -
+                        for 1024x768, 1280x1024, 1280x720, 1280x800,
+                        1920x1080, 1920x1200 and 3840x1080; the
+                        interface set of the chosen size is built from
+                        them and from the game's own 640x480 files
+        HD_SRC\KNOBR.SPR, MAINBUT.SPR, POPP.SPR
+                        the console-style banks of the dark interface
+                        (unit plates, dialog buttons, radio boxes)
+        SPRITES\CLOCK.SPR
+                        the day/night clock dial redrawn for the dark
+                        interface (fix "console")
+        SPRITES\DCSS_HD.SPR, DCUK_HD.SPR, DCUT_HD.SPR and
+        ANIMATE\DCSS_HD.FIN, DCUK_HD.FIN, DCUT_HD.FIN
+                        the logo animations re-baked for the HD sizes
+        SPRITES\TRAC.SPR, ANIMATE\TRAC.FIN,
+        dc\gamestat\weapstat.txt, exp\gamestat\weapstat.txt
+                        the tracer bullets and the weapon tables that
+                        fire them (data of fix "ozi")
+        DC_HD.ICO       the high-resolution icon (fix "icon")
+        DEFAULT_SERVER.TXT
+                        the relay server ONLINE WAR and REPLAY ONLINE
+                        GAME connect to (fix "online")
+        exp\intrface\bintroe
+                        the rewritten main-menu script
+        exp\animozi.dat, exp\animate\, exp\sprites\
+                        the units of the ozi_ns pack (dalg, reae,
+                        spyo, tranozi)
+        ozi_ns\         the ozi_ns mission pack: the 22 missions
+                        (scenario\council and scenario\globo, 11
+                        each), their briefings (mission\*.wav), story
+                        texts (intrface\), balance tables (gamestat\)
+                        and sounds (sound\)
+
+   patcher\editor\      the same for the MAP EDITOR folder:
+        BWCC.DLL, BWCC32.DLL, CW3215MT.DLL
+                        the Borland runtime DLLs the editor needs
+        scenario\atlantis.set
+                        the Atlantis block set (fix "blocksets")
+
+   NOT in the package, by design: the game (every file of the two
+   discs, including ENGEXP16.EXE, maped.exe and the movies), the
+   Classic dc16.exe, the MP3 soundtrack (ripped from your discs at
+   install time), any patched executable, and the interface-set
+   folders HD_<height>P (built on your PC by the installer).
 
 
 ---------------------------------------------------------------------
@@ -103,21 +199,19 @@ What makes it trustworthy:
 
 1) Get the installer.  Two ways:
 
-   a) THE INSTALLER PACKAGE - INSTALL.CMD, this file and the folder
-      patcher\ (the script Apply-DarkColonyPatches.ps1 and its own data
-      files: patcher\game, patcher\editor), published on ModDB and as
-      the repository
+   a) THE INSTALLER PACKAGE - the repository
 
         https://github.com/endotermic/Dark-Colony-Ultimate
 
-      ("Code" -> "Download ZIP").  It holds nothing of the game itself.  You need your ORIGINAL DISCS, "Dark Colony"
-      and "Dark Colony: The Council Wars" - the CDs in a drive, or
-      disc images of them (.iso, .bin with its .cue).  The installer
-      copies the game from the discs into a folder of your choice
-      ("Dark Colony" in your Documents by default), rips the music
-      (both CDs carry the soundtrack as audio tracks 2-5; from a .bin /
-      .cue image or a real CD they are ripped and encoded to MP3 with
-      Windows' own encoder - an .iso holds the data track only, so
+      ("Code" -> "Download ZIP"), or the same package from ModDB.  It
+      holds nothing of the game itself.  You need your ORIGINAL DISCS,
+      "Dark Colony" and "Dark Colony: The Council Wars" - the CDs in a
+      drive, or disc images of them (.iso, .bin with its .cue).  The
+      installer copies the game from the discs into a folder of your
+      choice ("Dark Colony" in your Documents by default), rips the
+      music (both CDs carry the soundtrack as audio tracks 2-5; from a
+      .bin / .cue image or a real CD they are ripped and encoded to MP3
+      with Windows' own encoder - an .iso holds the data track only, so
       there the music is left out), adds its own files and builds the
       executables there.
 
@@ -127,14 +221,12 @@ What makes it trustworthy:
 
       (green "Code" button -> "Download ZIP", then unpack; or
       "git clone"): the game folder "DC - Council wars", the map
-      editor folder and the same installer package.  The game folders
-      hold everything the shipped executables read, so the download
-      plays as it is; patcher\game and patcher\editor carry a copy of
-      the patcher's own data files, which the installer copies into
-      the game folders when it patches (on the repository that changes
-      nothing - the files are already there).  A fix whose files are
-      neither in the game folder nor in patcher\ is shown as "RESOURCES
-      NOT FOUND", cannot be ticked and is left out.
+      editor folder "Dark Colony - Map editor" and the same installer
+      package (INSTALL.CMD, PATCH_HOWTO.TXT, patcher\).  The game
+      folders hold the untouched originals and the game's data, so
+      the installer finds everything in place and no discs are needed;
+      the copy of patcher\game and patcher\editor changes nothing
+      there, the files are already in the game folders.
 
 2) In the root of the unpacked folder, DOUBLE-CLICK
 
@@ -165,36 +257,38 @@ What makes it trustworthy:
    press "Next >" through the pages and "Patch" once:
 
    a) WELCOME.  A greeting, the list of the two originals the script
-      found in the folder above patcher\ ("OK" = the untouched original,
-      its SHA-256 checked):
+      looks for in the folder above patcher\ ("OK" = the untouched
+      original, its SHA-256 checked):
 
           Dark Colony Ultimate         DC - Council wars\ENGEXP16.EXE
           Dark Colony Map Editor       Dark Colony - Map editor\maped.exe
 
-      the option "Put a shortcut to each patched executable on the
-      desktop" (ticked): shortcuts named "Dark Colony Ultimate" and "Dark
-      Colony Map Editor", each
-      starting in its game folder, where the game finds its files (do
-      not copy an exe itself to the desktop); an older shortcut of the
-      same name is replaced.  And the checkbox
+      (the layout of the full Dark-Colony repository; with the
+      installer package on its own the originals come from the discs
+      in the next step), the option "Put a shortcut to each patched
+      executable on the desktop" (ticked): shortcuts named "Dark
+      Colony Ultimate" and "Dark Colony Map Editor", each starting in
+      its game folder, where the game finds its files (do not copy an
+      exe itself to the desktop); an older shortcut of the same name
+      is replaced.  And the checkbox
 
           "Install the game first, from my original Dark Colony and
            Council Wars discs (no game folder yet)"
 
       - ticked by itself when no game folder was found beside the
-      installer (the ModDB package on its own).  Ticked, the wizard
-      gets the GAME DISCS page below as step 1 and every other step
-      moves one down.  Press "Next >".
+      installer (the installer package on its own).  Ticked, the
+      wizard gets the GAME DISCS page below as step 1 and every other
+      step moves one down.  Press "Next >".
 
    a2) STEP 1 OF 5: GAME DISCS (only with the checkbox).  Three rows:
 
-          Council Wars disc   the "Dark Colony: The Council Wars" CD
-                              (volume COUNCILWARS): EXPENG\ENGEXP16.EXE,
-                              the expansion, the Classic data it shares
-          Dark Colony disc    the original "Dark Colony" CD (volume
-                              DCUK): the missions, the encyclopedia, the
-                              cursors, the briefings, the Classic
-                              movies, the map editor
+          Council Wars disc   the "Dark Colony: The Council Wars" CD:
+                              EXPENG\ENGEXP16.EXE, the expansion, the
+                              Classic data it shares
+          Dark Colony disc    the original "Dark Colony" CD: the
+                              missions, the encyclopedia, the cursors,
+                              the briefings, the Classic movies, the
+                              map editor
           Install into        a new or empty folder; "Dark Colony" in
                               your Documents by default
 
@@ -207,13 +301,15 @@ What makes it trustworthy:
       kbit/s, Windows' own encoder) into MUSIC\ and exp\music\ at the
       Patch step, so the "music" fix has its files.  An .iso image or a
       mounted .iso has no audio tracks; the page then says that the
-      music is left out (copy the eight MP3 files from the repository
-      instead).  "Next >" reads the discs, checks that they are the
-      right ones (the English Council Wars disc: ENGEXP16.EXE is
-      verified by SHA-256), checks the audio tracks and the MP3 encoder,
-      and takes ENGEXP16.EXE and maped.exe from them into the install
-      folder; the game itself (about 480 MB, some 2260 files) and the
-      music are copied when you press "Patch".  Files already in the folder with the right
+      music is left out (the "music" fix is then skipped - it needs
+      the eight MP3 files, which are not in the package).  "Next >"
+      reads the discs, checks that they are the right ones (the
+      English Council Wars disc: ENGEXP16.EXE is verified by SHA-256),
+      checks the audio tracks and the MP3 encoder, and takes
+      ENGEXP16.EXE and maped.exe from them into the install folder
+      (maped.exe into its "Map editor" sub-folder); the game itself
+      (about 480 MB, some 2260 files) and the music are copied when
+      you press "Patch".  Files already in the folder with the right
       size are kept, so an interrupted install can be resumed into the
       same folder.  A wrong disc, a missing file or a disc of another
       language is reported in red on the page, nothing is written.
@@ -225,8 +321,7 @@ What makes it trustworthy:
       * "Screen resolution" - a drop-down:
 
           640x480 (original)   - the game as it shipped: no display fix
-          1024x768 (4:3)       - the size of the executables published
-                                 in the repository
+          1024x768 (4:3)       - the size of the reference build
           1280x1024 (5:4), 1280x720 (16:9), 1280x800 (16:10),
           1920x1080 (16:9), 1920x1200 (16:10), 3840x1080 (32:9)
 
@@ -253,8 +348,8 @@ What makes it trustworthy:
 
         Data only, plus one 14-byte fix ("console") that points the
         exe at the redrawn clock dial for the dark interface.  The
-        executables published in the repository are the dark 1024x768
-        build.
+        reference build is the dark 1024x768 one; the script knows the
+        reference SHA-256 of every size in both interfaces.
 
    c) STEP 2 OF 4: DARK COLONY ULTIMATE,
       STEP 3 OF 4: DARK COLONY MAP EDITOR
@@ -267,22 +362,24 @@ What makes it trustworthy:
         under it, and a "Browse..." button that picks another copy of
         THAT original (for example when the script did not find it).
       * "Screen resolution: ...; battlefield interface: ..." - the
-        choices of the options page (the game pages; press "< Back" to
+        choices of the options page (the game page; press "< Back" to
         change them).
       * the fixes of this executable, all ticked, with "Select all
-        fixes".  With all fixes the result is exactly the exe published
-        in the repository (at 1024x768, dark interface).  Click on a fix to read, in
-        the box on the right, what it changes and to see its byte
-        edits.  Fixes that only work together are listed as such; the
-        script refuses to write if you select one without the other.
+        fixes (result = the reference build)".  Click on a fix to
+        read, in the box on the right, what it changes and to see its
+        byte edits.  Fixes that only work together are listed as such;
+        the script refuses to write if you select one without the
+        other.
 
         A fix labelled "[RESOURCES NOT FOUND]" needs data files that
-        are not in the folder the exe is written to (the Classic movies
-        AVI\DCINTRO.AVI, DCAENDING.AVI, DCHENDING.AVI, the OZI mission
-        pack in ozi_ns\, the stock INTRFACE\ files the interface set
-        is built from).  It cannot be ticked, "Select all fixes" skips
-        it, and the box on the right says which files are missing.  Use
-        the complete repository and the label disappears.
+        are neither in the folder the exe is written to nor in
+        patcher\game / patcher\editor.  With this package that is the
+        "music" fix when the eight MP3 tracks are missing (an .iso
+        image, no encoder), or a fix whose stock game files (the
+        INTRFACE\ files the interface set is built from, the exp\
+        folder, ...) are missing from an incomplete game folder.  It
+        cannot be ticked, "Select all fixes" skips it, and the box on
+        the right says which files are missing.
 
         To get the ORIGINAL 640x480 game that just does not ask for the
         CD, choose 640x480 (original) on the options page and tick only
@@ -303,21 +400,22 @@ What makes it trustworthy:
       offers:
 
         * "Select the correct file..." - pick an untouched copy;
-        * "Download from our repository" - opens the file's page on
-          https://github.com/endotermic/Dark-Colony in your browser
-          (the script itself downloads nothing): download it, save it
-          under the name and folder the box names, then select it;
+        * "Download from our repository" - opens the file's page in the
+          full repository https://github.com/endotermic/Dark-Colony in
+          your browser (the script itself downloads nothing): download
+          it, save it under the name and folder the box names, then
+          select it;
         * the original disc: the Council Wars CD has EXPENG\ENGEXP16.EXE
           and the Dark Colony CD has DC\MAPED.EXE, both exactly the
-          right files.
+          right files (or tick the disc install on the Welcome page).
 
       Until the right file is chosen that executable is not patched (its
-      "Patch <name>" box is locked); the others can still be.
+      "Patch <name>" box is locked); the other can still be.
 
-   d) STEP 4 OF 4 (5 OF 5 with the discs): READY TO PATCH.  A summary of everything
-      that is about to happen - the disc install if chosen (both discs,
-      the folder, the file count), the resolution and the battlefield
-      interface, every executable (original ->
+   d) STEP 4 OF 4 (5 OF 5 with the discs): READY TO PATCH.  A summary
+      of everything that is about to happen - the disc install if
+      chosen (both discs, the folder, the file count), the resolution
+      and the battlefield interface, every executable (original ->
       output, how many fixes, which ones were left out and why, whether
       the interface set is written, whether an existing file is
       replaced) or why it is not patched (unticked, no usable
@@ -332,25 +430,26 @@ What makes it trustworthy:
       executable the patcher's own files copied into its folder
       (patcher\game -> the game folder, patcher\editor -> the editor's),
       fix by fix, then - for an HD resolution - the interface set into
-      its folder (a few seconds).  Then a
-      message box and the FINISHED page list every executable: written
-      (file, size, SHA-256, "byte-identical to the exe published in the
-      repository" with all fixes at 1024x768, dark interface) or failed (what went
-      wrong, and that nothing was written), its desktop shortcut, and
-      the skipped ones, and the soundtrack lines ("Dark Colony
-      soundtrack: 4 of 4 tracks ripped ...").  Without the music (an
-      .iso image, or a Windows "N" edition without the Media Feature
-      Pack, which has no MP3 encoder) Dark Colony Ultimate gets 20 of
-      its 21 fixes and its line says so instead of "byte-identical".
-      Press "Close".
+      its folder (a few seconds).  Then a message box and the FINISHED
+      page list every executable: written (file, size, SHA-256,
+      "byte-identical to the reference build" when every fix of the
+      chosen size and interface went in) or failed (what went wrong,
+      and that nothing was written), its desktop shortcut, and the
+      skipped ones, and the soundtrack lines ("Dark Colony soundtrack:
+      4 of 4 tracks ripped ...").  Without the music (an .iso image, or
+      a Windows "N" edition without the Media Feature Pack, which has
+      no MP3 encoder) Dark Colony Ultimate gets every fix but "music"
+      (21 of its 22 with the dark interface, 20 of 21 with the light
+      one) and its line says so instead of "byte-identical".  Press
+      "Close".
 
    f) Start the games with the desktop shortcuts, or with the files
       just written.
 
    "Inspect an exe..." checks any Dark Colony executable and tells you
-   which build it is and which fixes it already carries - use it on the
-   downloaded "Dark Colony Ultimate.exe" if you want to know what is in
-   it.
+   which build it is and which fixes it already carries - use it on an
+   exe written earlier, or on one somebody gave you, if you want to
+   know what is in it.
 
 
 ---------------------------------------------------------------------
@@ -362,30 +461,35 @@ What makes it trustworthy:
 
    INSTALL.CMD -All -Resolution 1024x768 -Theme dark -DesktopShortcut
                        Dark Colony Ultimate and the map editor, like the
-                       window
+                       window (a game folder beside the package)
    INSTALL.CMD -List                      list the fixes
    INSTALL.CMD -List -Detail              ... with every byte edit
    INSTALL.CMD -Original "DC - Council wars\ENGEXP16.EXE" -All -Resolution 1920x1200 -Theme light
    INSTALL.CMD -Original "DC - Council wars\ENGEXP16.EXE" -Resolution 640x480 -Patches nocd
    INSTALL.CMD -Verify "DC - Council wars\Dark Colony Ultimate.exe"
-   INSTALL.CMD -InstallDir "%USERPROFILE%\Documents\Dark Colony" -CouncilWarsDisc D:\ -DarkColonyDisc "E:\Dark Colony.iso" -All -Resolution 1920x1080 -Theme dark -DesktopShortcut
+   INSTALL.CMD -InstallDir "%USERPROFILE%\Documents\Dark Colony" -CouncilWarsDisc D:\ -DarkColonyDisc "E:\Dark Colony.bin" -All -Resolution 1920x1080 -Theme dark -DesktopShortcut
                        the game from the two discs (images or drives)
                        into that folder, then Dark Colony Ultimate and
                        the map editor built there (like the window with
                        its checkbox ticked; -InstallDir, -CouncilWarsDisc
                        and -DarkColonyDisc belong together, with -All)
 
-   From a PowerShell prompt write  .\patcher\Apply-DarkColonyPatches.ps1  instead
-   (after  Set-ExecutionPolicy -Scope Process Bypass  if scripts are
-   blocked).  Relative paths are taken from the current folder.
+   The "DC - Council wars\..." paths are those of the full Dark-Colony
+   repository; after a disc install the originals are
+   "<install folder>\ENGEXP16.EXE" and "<install folder>\Map editor\
+   maped.exe".  From a PowerShell prompt write
+   .\patcher\Apply-DarkColonyPatches.ps1  instead (after
+   Set-ExecutionPolicy -Scope Process Bypass  if scripts are blocked).
+   Relative paths are taken from the current folder.
 
    Patch ids, in the order they are applied:
-     both games      nocd,
-                     resolution (ONE fix per screen size since 1 Oct
+     Dark Colony     nocd,
+     Ultimate        resolution (ONE fix per screen size since 1 Oct
                        2026: the screen mode, the path strings pointing
                        at the size's own interface folder (HD_<height>P,
-                       2 Oct 2026) and the clock hand - until then the three fixes
-                       resolution, hdpaths, clock; not at 640x480),
+                       2 Oct 2026) and the clock hand - until then the
+                       three fixes resolution, hdpaths, clock; not at
+                       640x480),
                      console (the DARK battlefield interface: the
                        console-style HUD, dialogs and clock dial, data
                        written with the interface set + one 14-byte
@@ -409,43 +513,51 @@ What makes it trustworthy:
                        too fast; a 60 Hz Windows monitor is unchanged),
                      pointer (battlefield pointer animation at the menus'
                        pace, 3 Oct 2026: advanced every 33 ms instead of
-                       every frame; independent of fps)
-     Dark Colony     + movies (the Classic intro and endings under
-                       their DC* names), sounds (WAV files read from
-                       the game root, not from exp\; the Classic
-                       briefings)
-     Council Wars    + ozi (the DARK COLONY and OZI MISSIONS menu
-                       modes)
+                       every frame; independent of fps),
+                     ozi (the DARK COLONY and OZI MISSIONS menu modes),
+                     intro (5 Oct 2026: no intro movie at start-up;
+                       DARK COLONY plays avi\dcintro.avi and COUNCIL
+                       WARS avi\intro.avi right before its campaign;
+                       needs ozi),
+                     icon (the high-resolution icon and the per-monitor
+                       DPI-aware manifest, so Windows never scales the
+                       full-screen picture),
+                     online, last (the ONLINE WAR button: a room
+                       browser for the relay server, TLS to port 8889,
+                       the REPLAY ONLINE GAME button: the relay's
+                       recorded battles, watched from a participant's
+                       seat, and the one LOAD GAME browser over save\,
+                       esave\ and ozisave\; the script also writes the
+                       screens HD_<height>P\ONLINE and REPLAYE with
+                       their backgrounds and, if it is missing,
+                       DEFAULT_SERVER.TXT with the fields
+                       name=https://github.com/endotermic/Dark-Colony-Server
+                       and address=dark-colony-server.fly.dev, shown as
+                       the Name: and Server: lines of both screens - a
+                       file of the earlier form that still holds only
+                       the shipped address is upgraded, an existing file
+                       with your own relay address is never overwritten)
+                     = 22 fixes with the dark interface, 21 with the
+                       light one (no console), 20 at 640x480 (no
+                       resolution, no console)
      map editor      blocksets, teams, healer, troopsframe (the ozi_ns
                        unlocks), then since 1 Oct 2026 race, campaign,
                        medfiles, blockmenu, teamdialogs, lieutenants,
                        artifacts, lights, trigger, aiflags - everything
                        the editor shipped greyed out (aiflags is a dead
-                       feature, see its description)
-     all three       + icon (the high-resolution icon; for the games also
-                       the per-monitor DPI-aware manifest, so Windows never
-                       scales the full-screen picture)
-     Council Wars    + online, after icon (the ONLINE WAR button: a room
-                       browser for the relay server, TLS to port 8889, and
-                       the REPLAY ONLINE GAME button: the relay's recorded
-                       battles, watched from a participant's seat; the
-                       script also writes the screens HD_<height>P\ONLINE
-                       and REPLAYE with their backgrounds and, if it is
-                       missing, DEFAULT_SERVER.TXT with the fields
-                       name=https://github.com/endotermic/Dark-Colony-Server
-                       and address=dark-colony-server.fly.dev, shown as the
-                       Name: and Server: lines of both screens - a file of
-                       the earlier form that still holds only the shipped
-                       address is upgraded, an existing file with your own
-                       relay address is never overwritten)
-   -Resolution WxH picks the screen size and is REQUIRED for the two
-   games - there is no default (640x480 = the original size; the
-   published exes are 1024x768; -List shows the sizes), -Theme light
-   or -Theme dark picks the battlefield interface and is REQUIRED at
-   an HD size (the published exes are dark), -Output sets
-   the target file (with -Original only), -Overwrite allows replacing
-   existing files, -DesktopShortcut adds the desktop shortcuts the
-   window's checkbox makes.
+                       feature, see its description) - and icon (the
+                       high-resolution icon) = 15 fixes
+   -Resolution WxH picks the screen size and is REQUIRED for the game -
+   there is no default (640x480 = the original size; the reference
+   build is 1024x768; -List shows the sizes), -Theme light or -Theme
+   dark picks the battlefield interface and is REQUIRED at an HD size
+   (the reference build is dark), -Output sets the target file (with
+   -Original only), -Overwrite allows replacing existing files,
+   -DesktopShortcut adds the desktop shortcuts the window's checkbox
+   makes, -Force patches an original whose SHA-256 is not the known
+   one (the per-byte checks stay on), -IgnoreMissingData applies a
+   fix although its data files are missing (the exe then fails or
+   draws garbage - for experiments only).
 
 
 ---------------------------------------------------------------------
@@ -465,16 +577,20 @@ What makes it trustworthy:
    * "the disc reader could not be compiled" / "the GIF reader/writer
      could not be compiled": the script compiles two small C# helpers
      with the .NET compiler that ships with Windows (Add-Type) - a
-     managed PC may block that.  Mount the disc images (double-click an
-     .iso) and point the installer at the drive letters; the interface
-     set then still needs the compiler, so use the repository's files.
+     managed PC may block that.  For the discs: mount the disc images
+     (double-click an .iso) and point the installer at the drive
+     letters.  For the interface set there is no way around the
+     compiler: the exe is still written, the HD_<height>P folder is
+     not - run the installer on a PC where Add-Type works and copy the
+     game folder's HD_<height>P, exp\HD_<height>P, dc\HD_<height>P and
+     ozi_ns\HD_<height>P folders over.
 
    * "... cannot be loaded because running scripts is disabled" even
-     then: your PC is managed (school or company rules).  The
-     repository carries no patched exe (since 5 Oct 2026), so run the
-     installer on an unmanaged PC and copy the written files over -
-     "Inspect an exe" / -Verify on any PC that can run the script shows
-     what a copy carries.
+     then: your PC is managed (school or company rules).  There is no
+     patched exe to download anywhere, so run the installer on an
+     unmanaged PC and copy the written game folder over - "Inspect an
+     exe" / -Verify on any PC that can run the script shows what a
+     copy carries.
 
 
 ---------------------------------------------------------------------
@@ -488,10 +604,14 @@ What makes it trustworthy:
 
    folder docs\ (DC16_DISPLAY_AND_RESOLUTION.md in particular) and the
    Python patch tools in tools\.  The .ps1 script is generated from
-   those tools, so it always matches the committed executables.
-   Which file of the game comes from which disc is the list
+   those tools (tools\gen_apply_script.py) by replaying them on the
+   originals and diffing after every step, so the reference SHA-256
+   values in it are exactly the builds those tools produce.  Which
+   file of the game comes from which disc is the list
    tools\disc_manifest.json there (tools\discs.py builds it from the
-   two CD images); the installer carries the same list.
+   two CD images); the installer carries the same list.  This
+   repository is refreshed from the two sister repositories with
+   tools\publish_installer.py of Dark-Colony-Server.
 
 
 ---------------------------------------------------------------------
@@ -503,8 +623,8 @@ What makes it trustworthy:
    this project made, and the tools and notes in the Dark-Colony-Server
    repository - is free software under the GNU Affero General Public
    License, version 3 (AGPLv3; the text is the file LICENSE of the
-   Dark-Colony-Ultimate repository).  You may use, change and share
-   it, as long as your version stays open under the same license.
+   Dark-Colony-Ultimate repository).  You may use, change and share it,
+   as long as your version stays open under the same license.
 
    NOT covered by that license, because they are not ours:
 
