@@ -35,25 +35,24 @@ DC - Council wars/INTRFACE/REPLAYE
 DC - Council wars/INTRFACE/REPLAYBG.GIF
 DC - Council wars/INTRFACE/LOADALLE
 
-# the deprecated patched Classic build (1 Oct 2026): no longer shipped - the patcher writes it on request (tick it in the window,
-# -IncludeDeprecated, or -Original "DC - Council wars\dc16.exe"); a locally built copy stays out of the repository
+# the deprecated patched Classic build (1 Oct 2026, removed from the installer 5 Oct 2026): a copy built by the Python tools stays out
 DC - Council wars/Dark Colony.exe
 
 # since 2 Oct 2026 every resolution's interface set lives in its own folder HD_<height>P (UW_ for the ultra-wide sizes;
-# doc 10.61): the repository ships the 1024x768 set (HD_0768P) and the patcher's inputs (HD_SRC); every other size's
-# folder is a patcher output, as is the pre-October INTRF_HD layout left behind in a working copy (the next patcher run
-# deletes it)
+# doc 10.61), and since 5 Oct 2026 the repository ships NO patcher output at all (maintainer: "wipe out a patched files from
+# repo. customer must generate all of them by themselves!"): the patched executables, every resolution's interface folder
+# (the 1024x768 set HD_0768P was committed 2-5 Oct 2026), the OZI save-folder marker and the pre-October INTRF_HD layout
+# are written by the installer - INSTALL.CMD builds them from the untouched originals and the resources in patcher/
+/DC - Council wars/Dark Colony Ultimate.exe
+/Dark Colony - Map editor/Dark Colony Map Editor.exe
+/DC - Council wars/ozisave/ozisave.txt
 /DC - Council wars/HD_[0-9][0-9][0-9][0-9]P/
-!/DC - Council wars/HD_0768P/
 /DC - Council wars/UW_[0-9][0-9][0-9][0-9]P/
 /DC - Council wars/exp/HD_[0-9][0-9][0-9][0-9]P/
-!/DC - Council wars/exp/HD_0768P/
 /DC - Council wars/exp/UW_[0-9][0-9][0-9][0-9]P/
 /DC - Council wars/dc/HD_[0-9][0-9][0-9][0-9]P/
-!/DC - Council wars/dc/HD_0768P/
 /DC - Council wars/dc/UW_[0-9][0-9][0-9][0-9]P/
 /DC - Council wars/ozi_ns/HD_[0-9][0-9][0-9][0-9]P/
-!/DC - Council wars/ozi_ns/HD_0768P/
 /DC - Council wars/ozi_ns/UW_[0-9][0-9][0-9][0-9]P/
 /DC - Council wars/INTRF_HD/
 /DC - Council wars/exp/intrf_hd/

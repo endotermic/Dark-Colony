@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 2.4, build 20261005.1334 - generated 2026-10-05 13:34 UTC from Dark-Colony-Server c098686+ and Dark-Colony 7f62f4d+.
+    Dark Colony patcher 2.5, build 20261005.1354 - generated 2026-10-05 13:54 UTC from Dark-Colony-Server 411979a+ and Dark-Colony 167e5a6+.
 
 
 .SYNOPSIS
@@ -26,11 +26,11 @@
       * the SHA-256 of the input must match the known original (override with -Force, the
         per-byte checks stay on)
       * after writing it prints the SHA-256 of the result; with every patch selected the result
-        is byte-identical to the executable published in the repository and the script says so
+        is byte-identical to the generator's reference build and the script says so (the repository ships no patched file since 5 Oct 2026 - every player builds them with this script)
       * the screen resolution is chosen ONCE, explicitly: the window's first step (radio buttons, none
         preselected) or -Resolution on the command line (required for the games): 640x480 (original),
         1024x768, 1280x1024, 1280x720, 1280x800, 1920x1080, 1920x1200, 3840x1080; the sizes with your
-        monitor's aspect ratio are marked "recommended for your screen"; the exes published in the
+        monitor's aspect ratio are marked "recommended for your screen"; the reference builds of the
         repository are the 1024x768 build.  Everything the size changes is ONE fix per size
         ("WxH display: screen mode, interface data from INTRF_HD, clock hand")
       * the battlefield interface is chosen with it (-Theme light|dark, required at an HD size; the
@@ -38,7 +38,7 @@
         clock dial (the shipped INTRF_HD\<WxH>\INTRFACE_LIGHT.GIF as the frame); DARK is the console
         style of the menus drawn 28-30 Sep 2026 (INTRFACE.GIF, the INTRF_HD banks, the console dialog
         layouts) plus the one-edit fix "console" that points the exe at the redrawn clock dial.  The
-        published exes are the dark 1024x768 build; 640x480 (original) has no theme to choose
+        generator are the dark 1024x768 build; 640x480 (original) has no theme to choose
       * for an HD resolution the script also WRITES the interface data the patched exe reads
         (INTRF_HD\, exp\intrf_hd\, ozi_ns\intrf_hd\: menu scripts, HUD script, briefing lists,
         letterboxed backgrounds, loading screens) from the stock 640x480 files of the game folder and
@@ -113,7 +113,7 @@
 
 .PARAMETER Resolution
     Screen resolution to patch for - REQUIRED for the game, there is no default (1 Oct 2026):
-    640x480 (the original size: no display fix), 1024x768 (the published exes), 1280x1024, 1280x720,
+    640x480 (the original size: no display fix), 1024x768 (the reference builds), 1280x1024, 1280x720,
     1280x800, 1920x1080, 1920x1200 or 3840x1080 (32:9).  The 'resolution' fix (screen mode, INTRF_HD
     paths, clock hand) exists once per HD size; all sizes share the one INTRF_HD data folder, which
     the patcher fills with the set built for the chosen size.  The window asks the same question on
@@ -234,9 +234,9 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '2.4'
-$PatcherBuild = '20261005.1334'
-$PatcherGenerated = '2026-10-05 13:34 UTC from Dark-Colony-Server c098686+ and Dark-Colony 7f62f4d+'
+$PatcherVersion = '2.5'
+$PatcherBuild = '20261005.1354'
+$PatcherGenerated = '2026-10-05 13:54 UTC from Dark-Colony-Server 411979a+ and Dark-Colony 167e5a6+'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -256,13 +256,13 @@ $Builds = @(
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '165b609a379a1fac721305ee91837741a09ae8d998fb0f1d24a1fc57fe7ed7c4'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository
+        PatchedSha256  = '165b609a379a1fac721305ee91837741a09ae8d998fb0f1d24a1fc57fe7ed7c4'   # every patch applied at the reference resolution (1024x768, dark interface) = the generator's reference build (the repository ships no patched file since 5 Oct 2026)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
         Modes          = @('640x480', '1024x768', '1280x1024', '1280x720', '1280x800', '1920x1080', '1920x1200', '3840x1080')
         PublishedMode  = '1024x768'
-        # SHA-256 with every fix of that resolution applied (the published one is the exe in the repository); 'WxH' = the
+        # SHA-256 with every fix of that resolution applied (the generator's reference builds); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
         ReferenceSha256 = @{ '640x480' = '01fc077c1a88dd2c014f0c4a419b72547d13d49e706a530a5ef42b45ba3820bb'; '1024x768' = '165b609a379a1fac721305ee91837741a09ae8d998fb0f1d24a1fc57fe7ed7c4'; '1024x768/light' = 'b5986b072244207b70c7b34f191488c8f14194043521e318f67544f81fbd48d8'; '1280x1024' = 'eb643a9908423429bd3ceac7b9c14131314d1297b5df72c31b2a5c1377165cb3'; '1280x1024/light' = '8e4d7d0ca3891db7bf406756ab538e3d7cc824b2efafa7476986d18d2a0bf7dd'; '1280x720' = 'e407c7f391580537b89eaf7ce7b4e62e726fa9168bd09917716fbc2811694ca1'; '1280x720/light' = '467cdc75bc2d65eff5f676cb01d8009d40954c3a65f2a5f25ef0abf1ea30c754'; '1280x800' = 'dff78ff5382db9f08811643cd1a95f9811d039dfa721b98686811480dd87f003'; '1280x800/light' = '8a33c8625681eb81338c703a84c0afc145abc85acbac91f29adef8dcb2027e33'; '1920x1080' = '176dcc6825f53b377eed8c31d01b321a5258705d6601c15b36240c1b636950d4'; '1920x1080/light' = 'd16eacb3bb62374dd978ffc4143fa545b18e36ded1ee505f16f02519895dd058'; '1920x1200' = '8bb20919e8d53af157e171ce3c5296755d7505f38eb2207a6a89be9f0e71132d'; '1920x1200/light' = '8329c0acb9a9cb231cd134f638aa607ea7cfb4984c6a8917ade27b63b5f9a929'; '3840x1080' = 'baf48bcd56b50cfc68aa7a38755002d988cb7ff9875a9d0884b2fcefaeb1c748'; '3840x1080/light' = '26cdd03254b765e477780084688e1a6fc3fa359b1a257743d3f6a38d68d27a08' }
         Patches        = @(
@@ -4850,7 +4850,7 @@ WAR screen is read from.
             #  scripts keep the stock banks INTRFACE\MAINBUT.SPR / POPP.SPR and the stock dialog layouts (plus
             #  the MUSIC row for Dark Colony Ultimate), and the exe keeps "sprites/cloc".  Only at the HD sizes:
             #  at 640x480 (original) the game keeps its own interface and the theme is not asked.  The exes
-            #  published in the repository are the dark 1024x768 build.
+            #  of the generator - the reference the script compares its output with - are the dark 1024x768 build; the repository ships no patched file since 5 Oct 2026, every player builds them with this script.
             @{
                 Id = 'console'; Name = 'Dark battlefield interface: the console-style HUD, dialogs and clock dial'; Date = '28-30 Sep 2026 (a choice since 1 Oct 2026)'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
@@ -4877,7 +4877,7 @@ HD_SRC\<WxH>\INTRFACE_LIGHT.GIF (the metal frame spliced to the size by hud_layo
 scripts keep the stock banks INTRFACE\MAINBUT.SPR / POPP.SPR and the stock dialog layouts (plus
 the MUSIC row for Dark Colony Ultimate), and the exe keeps "sprites/cloc".  Only at the HD sizes:
 at 640x480 (original) the game keeps its own interface and the theme is not asked.  The exes
-published in the repository are the dark 1024x768 build.
+of the generator - the reference the script compares its output with - are the dark 1024x768 build; the repository ships no patched file since 5 Oct 2026, every player builds them with this script.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('resolution')
@@ -7790,13 +7790,13 @@ repository.
         SourceNote     = 'the Dark Colony CD holds exactly this file as DC\MAPED.EXE - copy it into the "Dark Colony - Map editor" folder as maped.exe.'
         Size           = 336424
         OriginalSha256 = 'e8471a0adcade0d0562f0e38ddbc85ebbd0776f50cc7429628dee435fa6a8f7e'   # untouched original
-        PatchedSha256  = 'de8076dc5cf96eac0d585e2a9cb87c72fb6193dafead4dc645c8a4d30bd15291'   # every patch applied at the published resolution (1024x768, dark interface) = the exe in the repository
+        PatchedSha256  = 'de8076dc5cf96eac0d585e2a9cb87c72fb6193dafead4dc645c8a4d30bd15291'   # every patch applied at the reference resolution (1024x768, dark interface) = the generator's reference build (the repository ships no patched file since 5 Oct 2026)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
         Modes          = @()
         PublishedMode  = ''
-        # SHA-256 with every fix of that resolution applied (the published one is the exe in the repository); 'WxH' = the
+        # SHA-256 with every fix of that resolution applied (the generator's reference builds); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
         ReferenceSha256 = @{ '' = 'de8076dc5cf96eac0d585e2a9cb87c72fb6193dafead4dc645c8a4d30bd15291' }
         Patches        = @(
@@ -8786,7 +8786,7 @@ function Resolve-Mode($Build, [string] $Mode) {
     if ($modes.Count -eq 0) { return '' }
     if (-not $Mode) {
         $mon = Get-MonitorSize
-        throw ("choose the screen resolution for {0} with -Resolution <WxH>: {1}. 640x480 is the original size (no display fix); the executables published in the repository are the {2} build." -f
+        throw ("choose the screen resolution for {0} with -Resolution <WxH>: {1}. 640x480 is the original size (no display fix); the reference builds are the {2} build." -f
                $Build.ProductName, (($modes | ForEach-Object { Format-ModeLabel $_ $mon }) -join ', '), $Build.PublishedMode)
     }
     if ($modes -notcontains $Mode) { throw ("unknown resolution '{0}' for {1}; valid: {2}" -f $Mode, $Build.Id, ($modes -join ', ')) }
@@ -8834,7 +8834,7 @@ function Get-VerifyReport([string] $Path) {
     $b = Find-BuildByContent $data
     if (-not $b) { $lines += 'Not a build this script knows (neither size nor code layout match).'; return $lines }
     $lines += ('build: {0}' -f $b.Title)
-    if ($sha -eq $b.PatchedSha256) { $lines += '= the fully patched executable published in the repository (1024x768, dark battlefield interface).' }
+    if ($sha -eq $b.PatchedSha256) { $lines += '= the fully patched reference build (1024x768, dark battlefield interface).' }
     else { foreach ($k in @($b.ReferenceSha256.Keys)) { if ($k -and $b.ReferenceSha256[$k] -eq $sha) { $lines += ('= every fix applied for {0} (the reference build of the generator{1}).' -f $k.Replace('/light', ', light battlefield interface'), ', not the published exe') } } }
     $lines += ''
     # a fix with per-resolution variants (resolution) is reported once, with the variant found
@@ -10478,7 +10478,7 @@ function Invoke-PatchRun([string] $OriginalPath, $Build, [object[]] $Chosen, [st
         Mode      = $Mode
         Complete  = ($ordered.Count -eq $effective.Count)
         Matches   = ($outSha -eq $ref)                      # = the reference build for this resolution
-        Published = ($outSha -eq $Build.PatchedSha256)      # = the exe in the repository
+        Published = ($outSha -eq $Build.PatchedSha256)      # = the reference build at the reference resolution (1024x768 dark)
     }
 }
 
@@ -10570,7 +10570,7 @@ function Write-PatchList([switch] $WithEdits) {
         Write-Host ("    original {0} ({1} bytes)  SHA-256 {2}" -f $b.OriginalName, $b.Size, $b.OriginalSha256)
         Write-Host ("    all patches -> {0}         SHA-256 {1}" -f $b.OutputName, $b.PatchedSha256)
         if (@($b.Modes).Count -gt 0) {
-            Write-Host ("    resolutions (choose one with -Resolution, no default): {0}; the published exe is the dark {1} build. Reference SHA-256 with every fix of that resolution (-Theme dark), and without fix console (-Theme light):" -f (($b.Modes | ForEach-Object { Format-ModeLabel $_ (Get-MonitorSize) }) -join ', '), $b.PublishedMode)
+            Write-Host ("    resolutions (choose one with -Resolution, no default): {0}; the reference build is the dark {1} one. Reference SHA-256 with every fix of that resolution (-Theme dark), and without fix console (-Theme light):" -f (($b.Modes | ForEach-Object { Format-ModeLabel $_ (Get-MonitorSize) }) -join ', '), $b.PublishedMode)
             foreach ($k in @($b.ReferenceSha256.Keys | Sort-Object)) { Write-Host ("      {0,-16} {1}" -f $k, $b.ReferenceSha256[$k]) }
         }
         $n = 0
@@ -13681,7 +13681,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $lblResIntro = New-Object System.Windows.Forms.Label
     $lblResIntro.Location = '24,14'; $lblResIntro.Size = '936,36'
     $lblResIntro.Text = ('These two choices are made once, here; you can come back ' +
-                         'to this page with "< Back".  The executables published in the repository are the 1024x768 build with the dark interface.')
+                         'to this page with "< Back".  The generator''s reference builds are the 1024x768 build with the dark interface.')
     $lblResL = New-Object System.Windows.Forms.Label
     $lblResL.Text = 'Screen resolution:'; $lblResL.Location = '40,62'; $lblResL.AutoSize = $true; $lblResL.Font = $bold
     $cmbRes = New-Object System.Windows.Forms.ComboBox
@@ -14512,7 +14512,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
                         $res.Kind = 'error'
                         $res.Line = "$name - the exe was written, but the data files it needs were NOT:`r`n    " + ($notWritten -join "`r`n    ") + "`r`n    The game would fail at start-up with it; fix the cause (a read-only or locked folder?) and patch again."
                     } elseif ($r.Complete -and $r.Published) {
-                        $res.Line = "$name - all $($r.Applied.Count) fixes$modeText, byte-identical to the exe published in the repository"
+                        $res.Line = "$name - all $($r.Applied.Count) fixes$modeText, byte-identical to the reference build"
                     } elseif ($r.Complete -and $r.Matches) {
                         $res.Line = "$name - all $($r.Applied.Count) fixes$modeText, byte-identical to the reference build"
                     } elseif ($r.Complete) {
@@ -14781,11 +14781,11 @@ function Invoke-CliBuild([string] $OriginalFile, [string] $OutputFile) {
     Write-Host ("        {0} bytes, SHA-256 {1}" -f $r.Size, $r.Sha256)
     foreach ($gl in @($r.Generated)) { Write-Host ("        " + $gl) }
     if ($r.Complete) {
-        if ($r.Published) { Write-Host '        byte-identical to the executable published in the repository.' -ForegroundColor Green }
+        if ($r.Published) { Write-Host '        byte-identical to the reference build (1024x768, dark battlefield interface).' -ForegroundColor Green }
         elseif ($r.Matches) { Write-Host ("        byte-identical to the reference build for {0}{1} (every fix of that resolution{2})." -f $mode, $(if ($theme) { ", $theme interface" } else { '' }), '') -ForegroundColor Green }
         else { Write-Warning 'all patches applied but the SHA-256 differs from the reference build - report this.' }
     } else {
-        Write-Host ("        {0} of {1} patches applied ({2}); a partial build has no published reference hash." -f $r.Applied.Count, $available.Count, (($r.Applied | ForEach-Object { $_.Id }) -join ', '))
+        Write-Host ("        {0} of {1} patches applied ({2}); a partial build has no reference hash." -f $r.Applied.Count, $available.Count, (($r.Applied | ForEach-Object { $_.Id }) -join ', '))
         $skipped = @($available | Where-Object { $p = $_; -not ($r.Applied | Where-Object { $_.Id -eq $p.Id }) -and $unavailable.ContainsKey($p.Id) } | ForEach-Object { $_.Id })
         if ($skipped.Count -gt 0) { Write-Host ("        not applied, resources not found: {0}" -f ($skipped -join ', ')) -ForegroundColor DarkYellow }
     }

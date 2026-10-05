@@ -2,7 +2,9 @@
   DARK COLONY / COUNCIL WARS  -  HOW TO PATCH THE GAME YOURSELF
 =====================================================================
 
-This repository ships two kinds of executables:
+This repository ships the UNTOUCHED ORIGINALS and the installer; the
+PATCHED executables and their interface data are NOT in the repository
+(since 5 Oct 2026) - the installer builds them on your PC:
 
   * the UNTOUCHED ORIGINALS from 1997/98 (both games run from the
     "DC - Council wars" folder since 15 Sep 2026)
@@ -12,8 +14,9 @@ This repository ships two kinds of executables:
     folder too, but the installer does not patch it any more - see
     below)
 
-  * the PATCHED ones that you normally play (until 25 Sep 2026 they
-    were called dc16new.exe, engexp16new.exe, maped_ozi_ns_v1.2.exe)
+  * the PATCHED ones that you normally play - written by the installer,
+    never downloaded (until 25 Sep 2026 they were called dc16new.exe,
+    engexp16new.exe, maped_ozi_ns_v1.2.exe)
         DC - Council wars\Dark Colony Ultimate.exe
             (Council Wars plus the Dark Colony, OZI and Academy
             campaigns in its main menu, one LOAD GAME button for the
@@ -90,7 +93,8 @@ What makes it trustworthy:
      "-ExecutionPolicy Bypass" for that one run, because Windows
      refuses to run a downloaded PowerShell script otherwise.  It
      changes no setting of your PC and installs nothing: the "install"
-     is the three patched exes and their desktop shortcuts.
+     is the two patched exes, their interface data and their desktop
+     shortcuts.
 
 
 ---------------------------------------------------------------------
@@ -462,10 +466,11 @@ What makes it trustworthy:
      set then still needs the compiler, so use the repository's files.
 
    * "... cannot be loaded because running scripts is disabled" even
-     then: your PC is managed (school or company rules).  Play the
-     patched exes from the repository: they are the bytes the script
-     writes with all fixes at 1024x768, dark interface ("Inspect an exe" / -Verify
-     shows it on any PC that can run the script).
+     then: your PC is managed (school or company rules).  The
+     repository carries no patched exe (since 5 Oct 2026), so run the
+     installer on an unmanaged PC and copy the written files over -
+     "Inspect an exe" / -Verify on any PC that can run the script shows
+     what a copy carries.
 
 
 ---------------------------------------------------------------------
