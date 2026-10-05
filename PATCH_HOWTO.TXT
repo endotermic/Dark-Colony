@@ -93,17 +93,37 @@ What makes it trustworthy:
   HOWTO
 ---------------------------------------------------------------------
 
-1) Get the FULL repository from
+1) Get the installer.  Two ways:
+
+   a) THE INSTALLER PACKAGE (ModDB) - INSTALL.CMD, this file and the
+      folder patcher\ (the script Apply-DarkColonyPatches.ps1 and its
+      own data files: patcher\game, patcher\editor).  It holds nothing
+      of the game itself.  You need your ORIGINAL DISCS, "Dark Colony"
+      and "Dark Colony: The Council Wars" - the CDs in a drive, or
+      disc images of them (.iso, .bin with its .cue).  The installer
+      copies the game from the discs into a folder of your choice
+      ("Dark Colony" in your Documents by default), rips the music
+      (both CDs carry the soundtrack as audio tracks 2-5; from a .bin /
+      .cue image or a real CD they are ripped and encoded to MP3 with
+      Windows' own encoder - an .iso holds the data track only, so
+      there the music is left out), adds its own files and builds the
+      executables there.  Not on the discs at all: the 1998 dc16.exe
+      of the deprecated Dark Colony build.
+
+   b) THE FULL REPOSITORY from
 
         https://github.com/endotermic/Dark-Colony
 
-   (green "Code" button -> "Download ZIP", then unpack; or
-   "git clone").  You need the whole thing, not just the script:
-   the fixes need the game data files that ship next to the exe
-   (for example the shipped pictures in HD_SRC\<WxH>\, the Classic movies
-   AVI\DCINTRO.AVI etc.).  The script checks for them: a fix whose
-   files are not in the target folder is shown as "RESOURCES NOT
-   FOUND", cannot be ticked and is left out.
+      (green "Code" button -> "Download ZIP", then unpack; or
+      "git clone"): the game folder "DC - Council wars", the map
+      editor folder and the same installer package.  The game folders
+      hold everything the shipped executables read, so the download
+      plays as it is; patcher\game and patcher\editor carry a copy of
+      the patcher's own data files, which the installer copies into
+      the game folders when it patches (on the repository that changes
+      nothing - the files are already there).  A fix whose files are
+      neither in the game folder nor in patcher\ is shown as "RESOURCES
+      NOT FOUND", cannot be ticked and is left out.
 
 2) In the root of the unpacked folder, DOUBLE-CLICK
 
@@ -134,22 +154,62 @@ What makes it trustworthy:
    press "Next >" through the pages and "Patch" once:
 
    a) WELCOME.  A greeting, the list of the three originals the script
-      found beside itself ("OK" = the untouched original, its SHA-256
-      checked):
+      found in the folder above patcher\ ("OK" = the untouched original,
+      its SHA-256 checked):
 
           Dark Colony Ultimate         DC - Council wars\ENGEXP16.EXE
           Dark Colony Map Editor       Dark Colony - Map editor\maped.exe
           Dark Colony                  DC - Council wars\dc16.exe
                                        (DEPRECATED - only if asked for)
 
-      and the option "Put a shortcut to each patched executable on the
+      the option "Put a shortcut to each patched executable on the
       desktop" (ticked): shortcuts named "Dark Colony Ultimate", "Dark
       Colony Map Editor" (and "Dark Colony" if you patch it), each
       starting in its game folder, where the game finds its files (do
-      not copy an exe itself to the desktop).  An older shortcut of the
-      same name is replaced.  Press "Next >".
+      not copy an exe itself to the desktop); an older shortcut of the
+      same name is replaced.  And the checkbox
 
-   b) STEP 1 OF 4: OPTIONS.  Three choices, made once for both games
+          "Install the game first, from my original Dark Colony and
+           Council Wars discs (no game folder yet)"
+
+      - ticked by itself when no game folder was found beside the
+      installer (the ModDB package on its own).  Ticked, the wizard
+      gets the GAME DISCS page below as step 1 and every other step
+      moves one down.  Press "Next >".
+
+   a2) STEP 1 OF 5: GAME DISCS (only with the checkbox).  Three rows:
+
+          Council Wars disc   the "Dark Colony: The Council Wars" CD
+                              (volume COUNCILWARS): EXPENG\ENGEXP16.EXE,
+                              the expansion, the Classic data it shares
+          Dark Colony disc    the original "Dark Colony" CD (volume
+                              DCUK): the missions, the encyclopedia, the
+                              cursors, the briefings, the Classic
+                              movies, the map editor
+          Install into        a new or empty folder; "Dark Colony" in
+                              your Documents by default
+
+      For a disc, "Image file..." picks a disc image (.iso, .bin, .cue)
+      and "Drive / folder..." the drive letter of a mounted image or a
+      real CD (or a folder holding the disc's files).  Both discs are
+      needed; a .bin is read directly, no mounting - and it is the
+      .bin / .cue image or the real CD that carries the MUSIC: the four
+      audio tracks of each disc are ripped and encoded to MP3 (192
+      kbit/s, Windows' own encoder) into MUSIC\ and exp\music\ at the
+      Patch step, so the "music" fix has its files.  An .iso image or a
+      mounted .iso has no audio tracks; the page then says that the
+      music is left out (copy the eight MP3 files from the repository
+      instead).  "Next >" reads the discs, checks that they are the
+      right ones (the English Council Wars disc: ENGEXP16.EXE is
+      verified by SHA-256), checks the audio tracks and the MP3 encoder,
+      and takes ENGEXP16.EXE and maped.exe from them into the install
+      folder; the game itself (about 480 MB, some 2260 files) and the
+      music are copied when you press "Patch".  Files already in the folder with the right
+      size are kept, so an interrupted install can be resumed into the
+      same folder.  A wrong disc, a missing file or a disc of another
+      language is reported in red on the page, nothing is written.
+
+   b) STEP 1 OF 4 (2 OF 5 with the discs): OPTIONS.  Three choices, made once for both games
       (they share the interface folder of the chosen size); NOTHING is
       preselected and "Next >" stays disabled until the first two are
       made.  You can come back with "< Back".
@@ -197,7 +257,8 @@ What makes it trustworthy:
 
    c) STEP 2 OF 4: DARK COLONY ULTIMATE,
       STEP 3 OF 4: DARK COLONY MAP EDITOR
-      (and STEP 4 OF 5: DARK COLONY when its box is ticked) - one page
+      (and STEP 4 OF 5: DARK COLONY when its box is ticked; one step
+      more each with the discs page) - one page
       per executable:
 
       * "Patch <name>" (ticked) - untick it to leave that executable
@@ -256,8 +317,9 @@ What makes it trustworthy:
       Until the right file is chosen that executable is not patched (its
       "Patch <name>" box is locked); the others can still be.
 
-   d) STEP 4 OF 4 (5 OF 5): READY TO PATCH.  A summary of everything
-      that is about to happen - the resolution and the battlefield
+   d) STEP 4 OF 4 (5 OF 5, 6 OF 6): READY TO PATCH.  A summary of everything
+      that is about to happen - the disc install if chosen (both discs,
+      the folder, the file count), the resolution and the battlefield
       interface, every executable (original ->
       output, how many fixes, which ones were left out and why, whether
       the interface set is written, whether an existing file is
@@ -267,13 +329,23 @@ What makes it trustworthy:
 
    e) PATCH.  If some of the files already exist the script asks once
       before replacing them.  A small "Patching in progress" box names
-      each step: executable by executable, fix by fix, then - for an HD
-      resolution - the interface set into its folder (a few seconds).  Then a
+      each step: with the discs first the game folder by folder from
+      the two discs (half a minute from an image), the eight music
+      tracks ripped and encoded (a few seconds each), then for every
+      executable the patcher's own files copied into its folder
+      (patcher\game -> the game folder, patcher\editor -> the editor's),
+      fix by fix, then - for an HD resolution - the interface set into
+      its folder (a few seconds).  Then a
       message box and the FINISHED page list every executable: written
       (file, size, SHA-256, "byte-identical to the exe published in the
       repository" with all fixes at 1024x768, dark interface) or failed (what went
       wrong, and that nothing was written), its desktop shortcut, and
-      the skipped ones.  Press "Close".
+      the skipped ones, and the soundtrack lines ("Dark Colony
+      soundtrack: 4 of 4 tracks ripped ...").  Without the music (an
+      .iso image, or a Windows "N" edition without the Media Feature
+      Pack, which has no MP3 encoder) Dark Colony Ultimate gets 20 of
+      its 21 fixes and its line says so instead of "byte-identical".
+      Press "Close".
 
    f) Start the games with the desktop shortcuts, or with the files
       just written.
@@ -301,8 +373,14 @@ What makes it trustworthy:
    INSTALL.CMD -Original "DC - Council wars\dc16.exe" -All -Resolution 1024x768 -Theme dark
                        (the deprecated Classic build, explicitly)
    INSTALL.CMD -Verify "DC - Council wars\Dark Colony Ultimate.exe"
+   INSTALL.CMD -InstallDir "%USERPROFILE%\Documents\Dark Colony" -CouncilWarsDisc D:\ -DarkColonyDisc "E:\Dark Colony.iso" -All -Resolution 1920x1080 -Theme dark -DesktopShortcut
+                       the game from the two discs (images or drives)
+                       into that folder, then Dark Colony Ultimate and
+                       the map editor built there (like the window with
+                       its checkbox ticked; -InstallDir, -CouncilWarsDisc
+                       and -DarkColonyDisc belong together, with -All)
 
-   From a PowerShell prompt write  .\Apply-DarkColonyPatches.ps1  instead
+   From a PowerShell prompt write  .\patcher\Apply-DarkColonyPatches.ps1  instead
    (after  Set-ExecutionPolicy -Scope Process Bypass  if scripts are
    blocked).  Relative paths are taken from the current folder.
 
@@ -388,7 +466,14 @@ What makes it trustworthy:
      folder (Shift + right-click on empty space in the folder ->
      "Open PowerShell window here" / "Open in Terminal") and run
 
-        powershell -ExecutionPolicy Bypass -File .\Apply-DarkColonyPatches.ps1
+        powershell -ExecutionPolicy Bypass -File .\patcher\Apply-DarkColonyPatches.ps1
+
+   * "the disc reader could not be compiled" / "the GIF reader/writer
+     could not be compiled": the script compiles two small C# helpers
+     with the .NET compiler that ships with Windows (Add-Type) - a
+     managed PC may block that.  Mount the disc images (double-click an
+     .iso) and point the installer at the drive letters; the interface
+     set then still needs the compiler, so use the repository's files.
 
    * "... cannot be loaded because running scripts is disabled" even
      then: your PC is managed (school or company rules).  Play the
@@ -409,3 +494,6 @@ What makes it trustworthy:
    folder docs\ (DC16_DISPLAY_AND_RESOLUTION.md in particular) and the
    Python patch tools in tools\.  The .ps1 script is generated from
    those tools, so it always matches the committed executables.
+   Which file of the game comes from which disc is the list
+   tools\disc_manifest.json there (tools\discs.py builds it from the
+   two CD images); the installer carries the same list.

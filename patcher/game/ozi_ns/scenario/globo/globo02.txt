@@ -1,0 +1,16 @@
+~1...INCOMING MESSAGE...
+
+~4Good day, Soldier...
+
+We have some bad news - ~1Ternox ~4commander is delayed so you have to take control over the base we have found last time.
+
+That is not all - ~0our scouts have reported us about the ancient ruins localized somewhere in the area. You must localize these ruins.
+
+~4Good luck, Commander.
+
+~1Orders:
+~2-Don't let the base to be destroyed before Ternox commander's arrival
+-Localize the ancient ruins
+-Commander must not be critically wounded
+
+~1...MESSAGE OUT...

@@ -1,0 +1,25 @@
+/*
+ * DEFAULT_SERVER.TXT - the relay server behind ONLINE WAR and REPLAY ONLINE GAME.
+ *
+ * Dark Colony Ultimate reads this file when you press one of those two buttons in the main
+ * menu. It connects to the address below with TLS encryption on port 8889 (the Dark Colony
+ * Server relay), shows the rooms or the recorded battles the relay offers and joins the one
+ * you pick. Both screens show the name and the address from this file above the connection
+ * state.
+ *
+ * Fields, one per line:
+ *   name=<how the screens call this server>          any text; here the relay's project page
+ *   address=<host or IP address>[:port]              the port defaults to 8889 (TLS)
+ *   plain                                            optional: no encryption, for a relay on
+ *                                                    your own network without a certificate
+ *                                                    (the plain relay port is 8888)
+ * Comments in the C++ style are ignored: "//" at the start of a line or after a space runs to
+ * the end of the line (so an address like https://... is kept), or a block like this one.
+ * A file holding only an address (the form before 3 Oct 2026) is still understood.
+ *
+ * Keep one server in the file. CUSTOM NET WAR (the in-game host / CONNECT TO SERVER
+ * screens) does not read this file.
+ */
+
+name=https://github.com/endotermic/Dark-Colony-Server
+address=dark-colony-server.fly.dev

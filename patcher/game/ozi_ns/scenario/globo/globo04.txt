@@ -1,0 +1,15 @@
+~1...INCOMING MESSAGE...
+
+~1Message Received
+
+~4Good day, Soldier...
+
+This time you won't stand alone on the battlefield! ~1Ternox ~4has a base in the area but they will be in need of your help for sure. We also have an interesting piece of news for you - ~0an ancient artifact of a huge firepower was localized in the ruins. Its name is ~3Solaris~1, and we suppose that it can be found near the other ruins as well.
+
+~4Good luck, Commander.
+
+~1Orders:
+~2-Destroy all enemy bases
+-Don't let the Ternox base to be destroyed
+
+~1...MESSAGE OUT...

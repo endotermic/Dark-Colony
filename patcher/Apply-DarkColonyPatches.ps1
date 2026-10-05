@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 1.6, build 20261003.1822 - generated 2026-10-03 18:22 UTC from Dark-Colony-Server aeaeae5+ and Dark-Colony c77d671+.
+    Dark Colony patcher 2.1, build 20261005.1132 - generated 2026-10-05 11:32 UTC from Dark-Colony-Server 4eee778+ and Dark-Colony ef41557+.
 
 
 .SYNOPSIS
@@ -56,6 +56,29 @@
         the DC*.AVI movies, the ozi_ns overlay) are not in the target folder is marked
         "RESOURCES NOT FOUND", its checkbox cannot be ticked and -All skips it; a fix that depends
         on such a fix is marked the same way
+      * since 5 Oct 2026 this script lives in the folder patcher\ of the repository together with a
+        copy of the project's own data files: patcher\game\ (the painted backdrops and HUD frames per
+        size, the console banks, the re-baked logo banks, the tracer bullets, the icon, the ozi_ns
+        mission pack, the DARK COLONY mode's tables, DEFAULT_SERVER.TXT) is copied into the game folder
+        and patcher\editor\ (the map editor's Borland runtime DLLs, the Atlantis block set) into the
+        editor's folder before a build is patched - the repository's game folders hold the same files
+        already, so there the copy changes nothing; a fix's data file counts as present when the
+        resource folder holds it.  INSTALL.CMD + PATCH_HOWTO.TXT + patcher\ is the installer package
+        published on ModDB: it holds nothing of the game itself
+      * a player without a game folder installs the game from the two ORIGINAL DISCS first (the
+        welcome page's checkbox, ticked by itself when no game folder is found beside the package;
+        -InstallDir with -CouncilWarsDisc and -DarkColonyDisc on the command line): the Council Wars
+        disc (ENGEXP16.EXE, the expansion, the shared Classic data) and the Dark Colony disc (the
+        missions, encyclopedia, cursors, briefings, the Classic movies, the map editor) are read as
+        disc images (.iso, .bin, .cue) or from a drive, the game is copied into the install folder
+        ("Dark Colony" in Documents by default, the map editor in its "Map editor" sub-folder), the
+        resources are added and the executables are built there.  Which disc holds which file is the
+        list $DiscFiles below (tools/discs.py); the disc reader is C# text in this file like the GIF
+        codec.  The soundtrack - audio tracks 2-5 of both mixed-mode CDs - is ripped from a .bin / .cue
+        image or a real drive and encoded to MP3 (192 kbit/s) with Windows' own encoder (WinRT
+        MediaTranscoder; the "N" editions need the Media Feature Pack) into MUSIC\ and exp\music\, so
+        fix music has its files; an .iso holds the data track only.  Not on the discs: the January 1998
+        dc16.exe of the deprecated Dark Colony build
 
     The originals, both in the "DC - Council wars" folder (since 15 Sep 2026 the one folder both games
     run from): "ENGEXP16.EXE" (ENGEXP16.EXE from the Council Wars CD; patched build "Dark Colony
@@ -129,6 +152,19 @@
     as well.  Without it that build is skipped with a note; -Original "DC - Council wars\dc16.exe"
     always patches it.
 
+.PARAMETER InstallDir
+    Install the game from the two original discs into this folder first (created if missing; the map
+    editor goes into its "Map editor" sub-folder), then patch Dark Colony Ultimate and the map editor
+    there.  Needs -CouncilWarsDisc, -DarkColonyDisc and -All (with -Resolution and -Theme).  Files
+    already in the folder with the right size are kept, so an interrupted install can be resumed.
+
+.PARAMETER CouncilWarsDisc
+    The Council Wars disc: a disc image (.iso, .bin, .cue) or the drive / folder holding it.  Must
+    carry EXPENG\ENGEXP16.EXE (the English expansion; the exe is verified by SHA-256).
+
+.PARAMETER DarkColonyDisc
+    The Dark Colony disc: a disc image or drive with DC\GAMESTAT, DC\SCENARIO and DC\MAPED.EXE.
+
 .PARAMETER DesktopShortcut
     After a successful write, put a shortcut to the patched exe on the desktop ("Dark Colony",
     "Dark Colony - Council Wars" or "Dark Colony Map Editor"; start folder = the game folder, which
@@ -151,9 +187,11 @@
     .\Apply-DarkColonyPatches.ps1 -Original "DC - Council wars\dc16.exe" -All -Resolution 1024x768 -Theme dark     (the deprecated Classic build)
     .\Apply-DarkColonyPatches.ps1 -Original "Dark Colony - Map editor\maped.exe" -All     (-> "Dark Colony Map Editor.exe")
     .\Apply-DarkColonyPatches.ps1 -Verify "DC - Council wars\Dark Colony Ultimate.exe"
+    .\Apply-DarkColonyPatches.ps1 -InstallDir "$env:USERPROFILE\Documents\Dark Colony" -CouncilWarsDisc D:\ -DarkColonyDisc "E:\Dark Colony.iso" -All -Resolution 1920x1080 -Theme dark -DesktopShortcut
+        (the game from the two discs into a new folder, then Dark Colony Ultimate and the map editor built there)
 
 .NOTES
-    Double-click INSTALL.CMD beside this file: it starts this script with Windows
+    Double-click INSTALL.CMD in the folder above this one (the package / repository root): it starts this script with Windows
     PowerShell 5.1 and -ExecutionPolicy Bypass for that one run (Windows' own "Run with PowerShell"
     obeys the execution policy, which refuses a script from a downloaded ZIP), and passes any
     command-line options on.  Without it, if Windows refuses to run the script ("running scripts is
@@ -178,6 +216,9 @@ param(
     [Parameter(ParameterSetName = 'Apply')] [switch] $IgnoreMissingData,
     [Parameter(ParameterSetName = 'Apply')] [switch] $DesktopShortcut,
     [Parameter(ParameterSetName = 'Apply')] [switch] $IncludeDeprecated,
+    [Parameter(ParameterSetName = 'Apply')] [string] $InstallDir,
+    [Parameter(ParameterSetName = 'Apply')] [string] $CouncilWarsDisc,
+    [Parameter(ParameterSetName = 'Apply')] [string] $DarkColonyDisc,
     [Parameter(ParameterSetName = 'List')] [switch] $List,
     [Parameter(ParameterSetName = 'List')] [switch] $Detail,
     [Parameter(ParameterSetName = 'Verify')] [string] $Verify
@@ -207,9 +248,9 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '1.6'
-$PatcherBuild = '20261003.1822'
-$PatcherGenerated = '2026-10-03 18:22 UTC from Dark-Colony-Server aeaeae5+ and Dark-Colony c77d671+'
+$PatcherVersion = '2.1'
+$PatcherBuild = '20261005.1132'
+$PatcherGenerated = '2026-10-05 11:32 UTC from Dark-Colony-Server 4eee778+ and Dark-Colony ef41557+'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -16398,6 +16439,9 @@ function New-GameShortcut([string] $ExePath, $Build) {
 # shows it in its "patching in progress" box; the command line passes nothing.
 function Invoke-PatchRun([string] $OriginalPath, $Build, [object[]] $Chosen, [string] $OutputPath, [string] $Mode, [string] $Theme, [scriptblock] $Progress) {
     $data = [System.IO.File]::ReadAllBytes($OriginalPath)
+    # the patcher's resources (patcher\game | patcher\editor beside this script) into the folder the exe is written to,
+    # before anything else: the interface set is built from them, and the exe reads them (5 Oct 2026)
+    $generated = @(Copy-Resources $Build (Split-Path -Parent ([System.IO.Path]::GetFullPath($OutputPath))) $Progress)
     $effective = @(Get-BuildPatches $Build $Mode $Theme)
     $ordered = @($effective | Where-Object { $p = $_; ($Chosen | Where-Object { $_.Id -eq $p.Id -and $_.Mode -eq $p.Mode }) })
     $result = $data
@@ -16413,15 +16457,14 @@ function Invoke-PatchRun([string] $OriginalPath, $Build, [object[]] $Chosen, [st
     $ref = if ($Mode) { $Build.ReferenceSha256[$Mode + $(if ($Theme -eq 'light') { '/light' } else { '' })] } else { $Build.PatchedSha256 }
     # an HD display fix was applied: build the INTRF_HD interface set for the chosen size (scripts,
     # briefing lists, letterboxed backgrounds, loading screens; the Council Wars and OZI copies too)
-    $generated = @()
     if ($Mode -and $Mode -ne '640x480' -and ($ordered | Where-Object { $_.ContainsKey('SetSources') })) {
         $movies = [bool] ($ordered | Where-Object { $_.Id -eq 'movies' })
         $console = [bool] ($ordered | Where-Object { $_.Id -eq 'console' })
         if ($Progress) { & $Progress ("Writing the {0} interface set ({1} battlefield interface) into {2} (scripts, backgrounds, loading screens; other resolutions' folders are deleted) - this takes a few seconds..." -f $Mode, $(if ($console) { 'dark' } else { 'light' }), (Get-HdFolder $Mode)) }
         try {
-            $generated = @(Write-InterfaceSet (Split-Path -Parent ([System.IO.Path]::GetFullPath($OutputPath))) $Mode $movies $console)
+            $generated += @(Write-InterfaceSet (Split-Path -Parent ([System.IO.Path]::GetFullPath($OutputPath))) $Mode $movies $console)
         } catch {
-            $generated = @('INTERFACE SET NOT WRITTEN: ' + $_.Exception.Message)
+            $generated += @('INTERFACE SET NOT WRITTEN: ' + $_.Exception.Message)
         }
     }
     if ($Mode -eq '640x480') {
@@ -16471,12 +16514,13 @@ function Get-DataProblems($Build, [object[]] $Chosen, [string] $GameDir, [string
             }
         }
         $missing = @()
-        foreach ($rel in @($p.Data)) { if (-not (Test-Path -LiteralPath (Join-Path $GameDir $rel))) { $missing += $rel } }
+        foreach ($rel in @($p.Data)) { if (-not (Test-DataFile $Build $GameDir $rel)) { $missing += $rel } }
         if ($missing.Count -gt 0) {
             $total = 0; foreach ($d in @($p.Data)) { $total++ }
             $shown = @($missing | Select-Object -First 8) -join ', '
             if ($missing.Count -gt 8) { $shown += (', ... ({0} more)' -f ($missing.Count - 8)) }
-            $problems += ("fix '{0}' ({1}) needs {2} data files under '{3}', {4} are missing: {5}. Copy the game folder from the repository " +
+            $problems += ("fix '{0}' ({1}) needs {2} data files under '{3}' (or in the patcher's resource folder beside this script), {4} are missing: {5}. " +
+                          "Install the game from your discs (the welcome page's checkbox), copy the game folder from the repository " +
                           "(https://github.com/endotermic/Dark-Colony) or write the exe into the game folder there.") -f $p.Id, $p.Name, $total, $GameDir, $missing.Count, $shown
         }
     }
@@ -16492,7 +16536,7 @@ function Get-UnavailableFixes($Build, [string] $GameDir, [string] $Mode, [string
     $effective = @(Get-BuildPatches $Build $Mode $Theme)
     foreach ($p in $effective) {
         $missing = @(); $total = 0
-        foreach ($rel in @($p.Data)) { $total++; if (-not (Test-Path -LiteralPath (Join-Path $GameDir $rel))) { $missing += $rel } }
+        foreach ($rel in @($p.Data)) { $total++; if (-not (Test-DataFile $Build $GameDir $rel)) { $missing += $rel } }
         if ($missing.Count -gt 0) {
             $tops = @{}
             foreach ($m in $missing) { $top = ($m -split '\\')[0]; if ($tops.ContainsKey($top)) { $tops[$top]++ } else { $tops[$top] = 1 } }
@@ -16562,6 +16606,2914 @@ function Write-PatchList([switch] $WithEdits) {
     Write-Host ''
 }
 
+
+
+# =================================================================================================
+#  DISCS - the game files from the player's own Dark Colony and Council Wars discs (5 Oct 2026)
+#
+#  The installer package for ModDB carries nothing of the game itself (that would be Strategic Simulations'
+#  copyright); the patcher's resources (patcher\game, patcher\editor) are the project's own files and the
+#  ozi_ns mission pack.  A player without a game folder points the installer at the two original discs - a
+#  disc image (.iso, .bin, .cue) or a mounted / real drive - and it copies the game into the install folder,
+#  then patches it like any other game folder.  Which disc holds which file is the manifest $DiscFiles below
+#  (tools/discs.py of the Dark-Colony-Server repository, built from the two CD images against the repository):
+#  the Council Wars CD holds ENGEXP16.EXE, the expansion (EXPENG\EXP = exp\) and the Classic data the
+#  expansion shares (DC\ANIMATE, AVI, INTRFACE, SOUND, SPRITES, WALLPAPR), the Dark Colony CD the rest of the
+#  Classic game (DC\SCENARIO, GAMESTAT, CURSOR, MISSION, ENCYCLO, MAPED.EXE and the Classic movies, written
+#  as AVI\DCINTRO.AVI etc. because the expansion's own have the same names).  Both are needed.  Not on the
+#  discs: the January 1998 dc16.exe (the deprecated Dark Colony build needs it - from the repository), the
+#  map editor's Borland runtime DLLs (they ship as resources).  The CD soundtrack IS on the discs - tracks 2-5
+#  of both mixed-mode CDs - and is ripped from a .bin / .cue image or a real drive and encoded to MP3 with
+#  Windows' own encoder (Install-DiscMusic below); an .iso has no audio tracks.  ISO 9660 level 1 (8.3 upper-case names with ";1" versions, no Joliet); the .bin images are
+#  mixed-mode (audio tracks after the data track) - only the data track is read.
+# =================================================================================================
+$DiscReaderSource = @'
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
+
+// DcDisc: the files of one disc, from an ISO 9660 image or a folder.  Paths are "/DC/ANIM.DAT" (upper case,
+// no version suffix), matched case-insensitively.  Extract() copies one file to disk.
+public class DcDiscEntry { public string Path; public long Lba; public long Size; public string FilePath; }
+public class DcDisc : IDisposable
+{
+    public string Volume = "";
+    public string Source;
+    public bool IsFolder;
+    public int SectorSize;
+    public Dictionary<string, DcDiscEntry> Files = new Dictionary<string, DcDiscEntry>(StringComparer.OrdinalIgnoreCase);
+    FileStream f;
+    int ss, off;
+    static readonly byte[] SYNC = new byte[] { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0 };
+
+    public static DcDisc Open(string path)
+    {
+        DcDisc d = new DcDisc();
+        d.Source = path;
+        if (Directory.Exists(path)) { d.OpenFolder(path); return d; }
+        if (!File.Exists(path)) throw new FileNotFoundException("not found: " + path);
+        if (path.EndsWith(".cue", StringComparison.OrdinalIgnoreCase))
+        {
+            string bin = null;
+            foreach (string line in File.ReadAllLines(path, Encoding.Default))
+            {
+                string t = line.Trim();
+                if (!t.StartsWith("FILE ", StringComparison.OrdinalIgnoreCase)) continue;
+                string rest = t.Substring(5).Trim();
+                if (rest.StartsWith("\"")) { int q = rest.IndexOf('"', 1); rest = q > 0 ? rest.Substring(1, q - 1) : rest.Substring(1); }
+                else { int sp = rest.IndexOf(' '); if (sp > 0) rest = rest.Substring(0, sp); }
+                bin = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(path)), rest);
+                break;
+            }
+            if (bin == null) throw new InvalidDataException(path + ": no FILE line in the cue sheet");
+            if (!File.Exists(bin)) throw new FileNotFoundException("the cue sheet names " + bin + ", which is not there");
+            path = bin;
+        }
+        d.f = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 16);
+        byte[] head = new byte[16];
+        if (d.f.Read(head, 0, 16) < 16) throw new InvalidDataException(path + ": too small for a disc image");
+        bool sync = true;
+        for (int i = 0; i < 12; i++) if (head[i] != SYNC[i]) sync = false;
+        if (sync) { d.ss = 2352; d.off = (head[15] == 2) ? 24 : 16; }
+        else { d.ss = 2048; d.off = 0; }
+        d.SectorSize = d.ss;
+        byte[] pvd = d.Sector(16);
+        if (pvd[1] != 'C' || pvd[2] != 'D' || pvd[3] != '0' || pvd[4] != '0' || pvd[5] != '1')
+            throw new InvalidDataException(path + ": no ISO 9660 volume descriptor at sector 16 (not a data CD image, or an image format this installer does not read)");
+        d.Volume = Encoding.ASCII.GetString(pvd, 40, 32).Trim();
+        long rootLba = BitConverter.ToUInt32(pvd, 158);
+        long rootLen = BitConverter.ToUInt32(pvd, 166);
+        d.Walk(rootLba, rootLen, "");
+        return d;
+    }
+
+    void OpenFolder(string root)
+    {
+        IsFolder = true;
+        root = Path.GetFullPath(root).TrimEnd('\\', '/');
+        foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
+        {
+            string rel = file.Substring(root.Length).Replace('\\', '/');
+            if (!rel.StartsWith("/")) rel = "/" + rel;
+            DcDiscEntry e = new DcDiscEntry();
+            e.Path = rel.ToUpperInvariant(); e.FilePath = file; e.Size = new FileInfo(file).Length;
+            Files[e.Path] = e;
+        }
+        // a drive letter: the volume label, for the messages
+        try { string r = Path.GetPathRoot(root); if (!string.IsNullOrEmpty(r) && r.Length <= 3) Volume = new DriveInfo(r).VolumeLabel; } catch { }
+    }
+
+    byte[] Sector(long lba)
+    {
+        byte[] b = new byte[2048];
+        f.Seek(lba * ss + off, SeekOrigin.Begin);
+        int n = f.Read(b, 0, 2048);
+        return b;
+    }
+
+    byte[] ReadExtent(long lba, long size)
+    {
+        byte[] outb = new byte[size];
+        long done = 0;
+        while (done < size)
+        {
+            byte[] s = Sector(lba++);
+            int take = (int)Math.Min(2048, size - done);
+            Array.Copy(s, 0, outb, done, take);
+            done += take;
+        }
+        return outb;
+    }
+
+    void Walk(long lba, long length, string prefix)
+    {
+        byte[] data = ReadExtent(lba, length);
+        int pos = 0;
+        while (pos < data.Length)
+        {
+            int ln = data[pos];
+            if (ln == 0) { pos = (pos / 2048 + 1) * 2048; continue; }
+            long ext = BitConverter.ToUInt32(data, pos + 2);
+            long size = BitConverter.ToUInt32(data, pos + 10);
+            int flags = data[pos + 25];
+            int nl = data[pos + 32];
+            if (nl == 1 && (data[pos + 33] == 0 || data[pos + 33] == 1)) { pos += ln; continue; }
+            string name = Encoding.ASCII.GetString(data, pos + 33, nl);
+            pos += ln;
+            int semi = name.IndexOf(';'); if (semi >= 0) name = name.Substring(0, semi);
+            name = name.TrimEnd('.');
+            string full = prefix + "/" + name;
+            if ((flags & 2) != 0) Walk(ext, size, full);
+            else { DcDiscEntry e = new DcDiscEntry(); e.Path = full.ToUpperInvariant(); e.Lba = ext; e.Size = size; Files[e.Path] = e; }
+        }
+    }
+
+    public bool Has(string path) { return Files.ContainsKey(path); }
+    public long SizeOf(string path) { return Files[path].Size; }
+
+    // ---- the audio tracks (the soundtrack: tracks 2-5 of both mixed-mode CDs).  [start, count] in 2352-byte sectors:
+    // file sectors of a raw .bin image (found by scanning: the data track is a prefix carrying the sync pattern, the
+    // tracks are separated by >= 150 sectors = 2 s of digital silence, pieces under 20 s are gap noise), or LBAs of a
+    // real disc in a drive (from its table of contents, read raw with IOCTL_CDROM_RAW_READ).  An .iso and a folder
+    // have none.  AudioNote says why when the list is empty.
+    public List<long[]> AudioTracks = new List<long[]>();
+    public string AudioNote = "";
+    IntPtr hDrive = IntPtr.Zero;
+    bool isDrive;
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    static extern IntPtr CreateFileW(string name, uint access, uint share, IntPtr sec, uint disp, uint flags, IntPtr tmpl);
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern bool DeviceIoControl(IntPtr h, uint code, byte[] inBuf, int inSize, byte[] outBuf, int outSize, out int returned, IntPtr overlapped);
+    [DllImport("kernel32.dll")]
+    static extern bool CloseHandle(IntPtr h);
+
+    static bool SilentSector(byte[] buf, int off)
+    {
+        for (int i = 0; i < 2352; i += 2) { short v = (short)(buf[off + i] | (buf[off + i + 1] << 8)); if (v > 2 || v < -2) return false; }
+        return true;
+    }
+    public void ScanAudio()
+    {
+        if (IsFolder) { OpenDriveAudio(); return; }
+        if (ss != 2352) { AudioNote = "an .iso image holds the data track only - the soundtrack is on the .bin / .cue image or on the disc itself"; return; }
+        long total = f.Length / ss;
+        long lo = 0, hi = total; byte[] h = new byte[12];
+        while (lo < hi)
+        {
+            long mid = (lo + hi) / 2; f.Seek(mid * ss, SeekOrigin.Begin); f.Read(h, 0, 12);
+            bool sync = true; for (int i = 0; i < 12; i++) if (h[i] != SYNC[i]) sync = false;
+            if (sync) lo = mid + 1; else hi = mid;
+        }
+        if (lo >= total) { AudioNote = "no audio tracks after the data track (the image holds the data track only)"; return; }
+        const int chunk = 256; byte[] buf = new byte[ss * chunk];
+        long pos = lo, runStart = -1, pieceStart = -1;
+        List<long[]> pieces = new List<long[]>();
+        while (pos < total)
+        {
+            int n = (int)Math.Min(chunk, total - pos);
+            f.Seek(pos * ss, SeekOrigin.Begin); int got = f.Read(buf, 0, n * ss); n = got / ss; if (n <= 0) break;
+            for (int i = 0; i < n; i++)
+            {
+                long sct = pos + i;
+                if (SilentSector(buf, i * ss)) { if (runStart < 0) runStart = sct; continue; }
+                if (runStart >= 0 && sct - runStart >= 150) { if (pieceStart >= 0) pieces.Add(new long[] { pieceStart, runStart - pieceStart }); pieceStart = sct; }
+                else if (pieceStart < 0) pieceStart = sct;
+                runStart = -1;
+            }
+            pos += n;
+        }
+        if (pieceStart >= 0) { long end = runStart >= 0 ? runStart : total; pieces.Add(new long[] { pieceStart, end - pieceStart }); }
+        foreach (long[] pc in pieces) if (pc[1] >= 1500) AudioTracks.Add(pc);
+        if (AudioTracks.Count == 0) AudioNote = "no audio tracks found after the data track";
+    }
+    void OpenDriveAudio()
+    {
+        string letter = null;
+        try { letter = Path.GetPathRoot(Path.GetFullPath(Source)); } catch { }
+        if (string.IsNullOrEmpty(letter) || letter.Length > 3) { AudioNote = "a folder has no audio tracks - the soundtrack comes from the disc itself (a drive letter) or its .bin / .cue image"; return; }
+        try { if (new DriveInfo(letter).DriveType != DriveType.CDRom) { AudioNote = "not a CD drive (a mounted .iso has the data track only) - the soundtrack comes from the disc itself or its .bin / .cue image"; return; } }
+        catch { AudioNote = "the drive type could not be read"; return; }
+        hDrive = CreateFileW(@"\\.\" + letter.Substring(0, 2), 0x80000000, 3, IntPtr.Zero, 3, 0, IntPtr.Zero);
+        if (hDrive == new IntPtr(-1)) { hDrive = IntPtr.Zero; AudioNote = "the drive cannot be opened for raw reading (Windows error " + Marshal.GetLastWin32Error() + ")"; return; }
+        byte[] toc = new byte[804]; int ret;
+        if (!DeviceIoControl(hDrive, 0x24000, null, 0, toc, toc.Length, out ret, IntPtr.Zero)) { AudioNote = "the disc's table of contents cannot be read (Windows error " + Marshal.GetLastWin32Error() + ")"; return; }
+        int first = toc[2], last = toc[3];
+        if (last < first || last - first > 98) { AudioNote = "unreadable table of contents"; return; }
+        List<long> starts = new List<long>(); List<bool> audio = new List<bool>();
+        for (int t = 0; t <= last - first + 1; t++)        // the tracks and the lead-out entry after them
+        {
+            int o = 4 + t * 8;
+            int control = toc[o + 1] & 0x0F;
+            long lba = ((long)toc[o + 5] * 60 + toc[o + 6]) * 75 + toc[o + 7] - 150;
+            starts.Add(lba); audio.Add((control & 4) == 0);
+        }
+        for (int t = 0; t < last - first + 1; t++) if (audio[t] && starts[t + 1] > starts[t]) AudioTracks.Add(new long[] { starts[t], starts[t + 1] - starts[t] });
+        isDrive = true;
+        if (AudioTracks.Count == 0) AudioNote = "the disc in the drive has no audio tracks";
+    }
+    byte[] ReadAudioSectors(long start, int count)
+    {
+        byte[] outb = new byte[count * 2352];
+        if (isDrive)
+        {
+            int done = 0;
+            while (done < count)
+            {
+                int n = Math.Min(16, count - done);
+                byte[] req = new byte[16];
+                BitConverter.GetBytes((long)((start + done) * 2048)).CopyTo(req, 0);
+                BitConverter.GetBytes(n).CopyTo(req, 8); BitConverter.GetBytes(2).CopyTo(req, 12);   // TrackMode CDDA
+                byte[] tmp = new byte[n * 2352]; int ret;
+                if (!DeviceIoControl(hDrive, 0x2403E, req, 16, tmp, tmp.Length, out ret, IntPtr.Zero)) throw new IOException("raw audio read failed at sector " + (start + done) + " (Windows error " + Marshal.GetLastWin32Error() + ")");
+                Array.Copy(tmp, 0, outb, done * 2352, Math.Min(ret, n * 2352)); done += n;
+            }
+            return outb;
+        }
+        f.Seek(start * ss, SeekOrigin.Begin); f.Read(outb, 0, outb.Length); return outb;
+    }
+    static bool SilentFrame(byte[] b, int i)
+    {
+        short l = (short)(b[i * 4] | (b[i * 4 + 1] << 8)), r = (short)(b[i * 4 + 2] | (b[i * 4 + 3] << 8));
+        return l > -3 && l < 3 && r > -3 && r < 3;
+    }
+    // Writes audio track `index` as a WAV (44.1 kHz, 16-bit stereo - CD audio as it is): the pregap junk at the start is
+    // cut at the end of the last >= 20 ms run of digital silence within the first second, trailing silence is dropped.
+    // Returns the length in seconds.
+    public double WriteTrackWav(int index, string dest)
+    {
+        long[] t = AudioTracks[index];
+        byte[] pcm = ReadAudioSectors(t[0], (int)t[1]);
+        int frames = pcm.Length / 4, start = 0, run = 0;
+        int firstSecond = Math.Min(44100, frames);
+        for (int i = 0; i < firstSecond; i++)
+        {
+            if (SilentFrame(pcm, i)) { run++; if (run >= 882) start = i + 1; }
+            else run = 0;
+        }
+        int end = frames;
+        while (end > start && SilentFrame(pcm, end - 1)) end--;
+        int bytes = (end - start) * 4;
+        using (FileStream o = new FileStream(dest, FileMode.Create, FileAccess.Write))
+        {
+            BinaryWriter w = new BinaryWriter(o);
+            w.Write(Encoding.ASCII.GetBytes("RIFF")); w.Write(36 + bytes); w.Write(Encoding.ASCII.GetBytes("WAVEfmt "));
+            w.Write(16); w.Write((short)1); w.Write((short)2); w.Write(44100); w.Write(44100 * 4); w.Write((short)4); w.Write((short)16);
+            w.Write(Encoding.ASCII.GetBytes("data")); w.Write(bytes);
+            o.Write(pcm, start * 4, bytes);
+        }
+        return (end - start) / 44100.0;
+    }
+
+    public byte[] Read(string path)
+    {
+        DcDiscEntry e = Files[path];
+        if (IsFolder) return File.ReadAllBytes(e.FilePath);
+        return ReadExtent(e.Lba, e.Size);
+    }
+
+    // copies one file; returns its size
+    public long Extract(string path, string dest)
+    {
+        DcDiscEntry e = Files[path];
+        string dir = Path.GetDirectoryName(dest);
+        if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+        if (IsFolder) { File.Copy(e.FilePath, dest, true); return e.Size; }
+        using (FileStream o = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 16))
+        {
+            if (ss == 2048)
+            {
+                f.Seek(e.Lba * 2048, SeekOrigin.Begin);
+                byte[] buf = new byte[1 << 16];
+                long left = e.Size;
+                while (left > 0) { int n = f.Read(buf, 0, (int)Math.Min(buf.Length, left)); if (n <= 0) break; o.Write(buf, 0, n); left -= n; }
+            }
+            else
+            {
+                const int chunk = 64;
+                byte[] buf = new byte[ss * chunk];
+                long sectors = (e.Size + 2047) / 2048, done = 0, lba = e.Lba;
+                while (done < e.Size)
+                {
+                    int n = (int)Math.Min(chunk, sectors - (lba - e.Lba));
+                    f.Seek(lba * ss, SeekOrigin.Begin);
+                    int got = f.Read(buf, 0, n * ss);
+                    for (int i = 0; i < n && done < e.Size; i++)
+                    {
+                        int take = (int)Math.Min(2048, e.Size - done);
+                        o.Write(buf, i * ss + off, take);
+                        done += take;
+                    }
+                    lba += n;
+                }
+            }
+        }
+        return e.Size;
+    }
+
+    public void Dispose() { if (f != null) { f.Dispose(); f = null; } if (hDrive != IntPtr.Zero) { CloseHandle(hDrive); hDrive = IntPtr.Zero; } }
+}
+'@
+$script:discReaderReady = $false
+function Initialize-DiscReader {
+    if ($script:discReaderReady) { return }
+    try {
+        if (-not ('DcDisc' -as [type])) { Add-Type -TypeDefinition $DiscReaderSource -ErrorAction Stop }
+        $script:discReaderReady = $true
+    } catch {
+        throw ("the disc reader could not be compiled (Add-Type): {0}`r`nIt is C# text in this file, compiled with the .NET compiler that ships with Windows. " +
+               "If Add-Type is blocked on your PC, mount the disc images (double-click an .iso) and point the installer at the drive letters instead." -f $_.Exception.Message)
+    }
+}
+
+
+# One line per file the installer takes from the discs: root (g = the game folder, e = the map editor's folder) |
+# path in the install folder | disc (c = Council Wars, d = Dark Colony) [| path on the disc when it is not the
+# natural one: /DC/<path> for the game folder, /EXPENG/EXP/<path> for exp\, /DC/SCENARIO/<path> for the editor's
+# scenario\].  2263 files: 305 from the Council Wars disc (volume COUNCILWARS), 1958 from the Dark Colony disc (volume DCUK).
+$DiscFiles = @(
+    'g|ANIM.DAT|d'
+    'g|ANIMATE\ABUILDNG.FIN|d'
+    'g|ANIMATE\ACAR.FIN|d'
+    'g|ANIMATE\ACOM.FIN|d'
+    'g|ANIMATE\AIRD.FIN|d'
+    'g|ANIMATE\ALBU.FIN|d'
+    'g|ANIMATE\ALIEN1.FIN|d'
+    'g|ANIMATE\ANIM.FIN|d'
+    'g|ANIMATE\ART.FIN|d'
+    'g|ANIMATE\ARTF.FIN|d'
+    'g|ANIMATE\ARTILER2.FIN|d'
+    'g|ANIMATE\ATRIL.FIN|d'
+    'g|ANIMATE\ATTACK1.FIN|d'
+    'g|ANIMATE\ATTACK2.FIN|d'
+    'g|ANIMATE\AVII.FIN|d'
+    'g|ANIMATE\BARR.FIN|d'
+    'g|ANIMATE\BEAC.FIN|d'
+    'g|ANIMATE\BEES.FIN|d'
+    'g|ANIMATE\BEEZ.FIN|d'
+    'g|ANIMATE\BEON.FIN|d'
+    'g|ANIMATE\BLEED.FIN|d'
+    'g|ANIMATE\BLEED2.FIN|d'
+    'g|ANIMATE\BLEED3.FIN|d'
+    'g|ANIMATE\BLOO.FIN|d'
+    'g|ANIMATE\BLUSPARK.FIN|d'
+    'g|ANIMATE\BRIT.FIN|d'
+    'g|ANIMATE\BUILDING.FIN|d'
+    'g|ANIMATE\BUILDNG.FIN|d'
+    'g|ANIMATE\BUILTILE.FIN|d'
+    'g|ANIMATE\BURN.FIN|d'
+    'g|ANIMATE\BURN2.FIN|d'
+    'g|ANIMATE\BURN3.FIN|d'
+    'g|ANIMATE\CAMM.FIN|d'
+    'g|ANIMATE\CENT.FIN|d'
+    'g|ANIMATE\CHAA.FIN|d'
+    'g|ANIMATE\CHOA.FIN|d'
+    'g|ANIMATE\CRYO.FIN|d'
+    'g|ANIMATE\CURS.FIN|d'
+    'g|ANIMATE\CYBORG.FIN|d'
+    'g|ANIMATE\DCSS.FIN|d'
+    'g|ANIMATE\DCUK.FIN|d'
+    'g|ANIMATE\DCUT.FIN|d'
+    'g|ANIMATE\DISH.FIN|d'
+    'g|ANIMATE\DOTT.FIN|d'
+    'g|ANIMATE\DROA.FIN|d'
+    'g|ANIMATE\DROP.FIN|d'
+    'g|ANIMATE\DROP2.FIN|d'
+    'g|ANIMATE\DROP3.FIN|d'
+    'g|ANIMATE\DROP4.FIN|d'
+    'g|ANIMATE\EFFECTS.FIN|d'
+    'g|ANIMATE\ENCA.FIN|d'
+    'g|ANIMATE\ENGI.FIN|d'
+    'g|ANIMATE\EXPL.FIN|d'
+    'g|ANIMATE\FACT.FIN|d'
+    'g|ANIMATE\FETU.FIN|d'
+    'g|ANIMATE\FILL.FIN|d'
+    'g|ANIMATE\FIRE.FIN|d'
+    'g|ANIMATE\FLUCTION.FIN|d'
+    'g|ANIMATE\FUEL.FIN|d'
+    'g|ANIMATE\GASY.FIN|d'
+    'g|ANIMATE\GLOG.FIN|d'
+    'g|ANIMATE\GLOT.FIN|d'
+    'g|ANIMATE\GRAY.FIN|d'
+    'g|ANIMATE\GRND.FIN|d'
+    'g|ANIMATE\GRUB.FIN|d'
+    'g|ANIMATE\HAZE.FIN|d'
+    'g|ANIMATE\HCAR.FIN|d'
+    'g|ANIMATE\HEAT.FIN|d'
+    'g|ANIMATE\HUBU.FIN|d'
+    'g|ANIMATE\HYYK.FIN|d'
+    'g|ANIMATE\KNOBE.FIN|d'
+    'g|ANIMATE\LEFT.FIN|d'
+    'g|ANIMATE\LENS.FIN|d'
+    'g|ANIMATE\LIGHT1B.FIN|d'
+    'g|ANIMATE\LIGHT1F.FIN|d'
+    'g|ANIMATE\LIGHT1M.FIN|d'
+    'g|ANIMATE\LIGHT2B.FIN|d'
+    'g|ANIMATE\LIGHT2F.FIN|d'
+    'g|ANIMATE\LIGHT2M.FIN|d'
+    'g|ANIMATE\LIGHT3B.FIN|d'
+    'g|ANIMATE\LIGHT3F.FIN|d'
+    'g|ANIMATE\LIGHT3M.FIN|d'
+    'g|ANIMATE\LIGHT4B.FIN|d'
+    'g|ANIMATE\LIGHT4F.FIN|d'
+    'g|ANIMATE\LIGHT4M.FIN|d'
+    'g|ANIMATE\LITE.FIN|d'
+    'g|ANIMATE\LUNA.FIN|d'
+    'g|ANIMATE\MACTOR.FIN|d'
+    'g|ANIMATE\MAKT.FIN|d'
+    'g|ANIMATE\MISA.FIN|d'
+    'g|ANIMATE\MISE.FIN|d'
+    'g|ANIMATE\MISH.FIN|d'
+    'g|ANIMATE\MWIN.FIN|d'
+    'g|ANIMATE\N1.FIN|d'
+    'g|ANIMATE\NAPALM.FIN|d'
+    'g|ANIMATE\NET.FIN|d'
+    'g|ANIMATE\NETD.FIN|d'
+    'g|ANIMATE\NUKE.FIN|d'
+    'g|ANIMATE\ORTU.FIN|d'
+    'g|ANIMATE\PART2.FIN|d'
+    'g|ANIMATE\PART3.FIN|d'
+    'g|ANIMATE\PART4.FIN|d'
+    'g|ANIMATE\PCFO.FIN|d'
+    'g|ANIMATE\PHT.FIN|d'
+    'g|ANIMATE\PORT.FIN|d'
+    'g|ANIMATE\PSYC.FIN|d'
+    'g|ANIMATE\PSY_R.FIN|d'
+    'g|ANIMATE\PUFF.FIN|d'
+    'g|ANIMATE\PUSB.FIN|d'
+    'g|ANIMATE\PUST.FIN|d'
+    'g|ANIMATE\RACK.FIN|d'
+    'g|ANIMATE\REAP.FIN|d'
+    'g|ANIMATE\RESA.FIN|d'
+    'g|ANIMATE\RESN.FIN|d'
+    'g|ANIMATE\RNAT.FIN|d'
+    'g|ANIMATE\ROBO.FIN|d'
+    'g|ANIMATE\SALA.FIN|d'
+    'g|ANIMATE\SALY.FIN|d'
+    'g|ANIMATE\SARG.FIN|d'
+    'g|ANIMATE\SAUC.FIN|d'
+    'g|ANIMATE\SAUC2.FIN|d'
+    'g|ANIMATE\SAUC3.FIN|d'
+    'g|ANIMATE\SAUC4.FIN|d'
+    'g|ANIMATE\SAWS.FIN|d'
+    'g|ANIMATE\SCFG.FIN|d'
+    'g|ANIMATE\SCGM.FIN|d'
+    'g|ANIMATE\SCOU.FIN|d'
+    'g|ANIMATE\SCOUT1.FIN|d'
+    'g|ANIMATE\SCOUT2.FIN|d'
+    'g|ANIMATE\SCUT.FIN|d'
+    'g|ANIMATE\SCYT.FIN|d'
+    'g|ANIMATE\SCYTH.FIN|d'
+    'g|ANIMATE\SERA.FIN|d'
+    'g|ANIMATE\SERA2.FIN|d'
+    'g|ANIMATE\SERG.FIN|d'
+    'g|ANIMATE\SHLITZ.FIN|d'
+    'g|ANIMATE\SHOK.FIN|d'
+    'g|ANIMATE\SHRI.FIN|d'
+    'g|ANIMATE\SLOM.FIN|d'
+    'g|ANIMATE\SLUG.FIN|d'
+    'g|ANIMATE\SMAE.FIN|d'
+    'g|ANIMATE\SMAY.FIN|d'
+    'g|ANIMATE\SMOA.FIN|d'
+    'g|ANIMATE\SMSP.FIN|d'
+    'g|ANIMATE\SMSP2.FIN|d'
+    'g|ANIMATE\SMSP3.FIN|d'
+    'g|ANIMATE\SMSP4.FIN|d'
+    'g|ANIMATE\SOLAR.FIN|d'
+    'g|ANIMATE\SPAC.FIN|d'
+    'g|ANIMATE\SPAK.FIN|d'
+    'g|ANIMATE\SPAR.FIN|d'
+    'g|ANIMATE\SPARE.FIN|d'
+    'g|ANIMATE\SPED.FIN|d'
+    'g|ANIMATE\SPID.FIN|d'
+    'g|ANIMATE\SPON.FIN|d'
+    'g|ANIMATE\SPUC.FIN|d'
+    'g|ANIMATE\TEKT.FIN|d'
+    'g|ANIMATE\TEKTARA.FIN|d'
+    'g|ANIMATE\TMP.FIN|d'
+    'g|ANIMATE\TONG.FIN|d'
+    'g|ANIMATE\TOP.FIN|d'
+    'g|ANIMATE\TORT.FIN|d'
+    'g|ANIMATE\TOWR.FIN|d'
+    'g|ANIMATE\TOXX.FIN|d'
+    'g|ANIMATE\TRANS.FIN|d'
+    'g|ANIMATE\TROOPER1.FIN|d'
+    'g|ANIMATE\TROOPER2.FIN|d'
+    'g|ANIMATE\TRSC.FIN|d'
+    'g|ANIMATE\TRUK.FIN|d'
+    'g|ANIMATE\TSDF.FIN|d'
+    'g|ANIMATE\TURR.FIN|d'
+    'g|ANIMATE\VCAL.FIN|d'
+    'g|ANIMATE\VCEA.FIN|d'
+    'g|ANIMATE\VENT.FIN|d'
+    'g|ANIMATE\WATC.FIN|d'
+    'g|ANIMATE\WIN.FIN|d'
+    'g|ANIMATE\XENO.FIN|d'
+    'g|ANIMATE\ZISP.FIN|d'
+    'g|ATLANTIS.GIF|d'
+    'g|ATLANTIS.NCY|d'
+    'g|ATLANTIS.RGB|d'
+    'g|ATLANTIS.RMP|d'
+    'g|AVI\ADTEMP.AVI|d'
+    'g|AVI\AENDING.AVI|c|/DC/AVI/AENDING.AVI'
+    'g|AVI\AFIELD.AVI|d'
+    'g|AVI\ASCRUBB.AVI|c|/DC/AVI/ASCRUBB.AVI'
+    'g|AVI\ATAVHD.AVI|d'
+    'g|AVI\ATRAIN.AVI|d'
+    'g|AVI\ATRAN1.AVI|d'
+    'g|AVI\ATRAN2.AVI|d'
+    'g|AVI\ATRAN3.AVI|d'
+    'g|AVI\ATRAN4.AVI|d'
+    'g|AVI\ATRAN5.AVI|d'
+    'g|AVI\ATRAN6.AVI|d'
+    'g|AVI\ATRAN7.AVI|d'
+    'g|AVI\AVHD.AVI|d'
+    'g|AVI\AVHD4.AVI|d'
+    'g|AVI\AVHD5.AVI|d'
+    'g|AVI\BARBQ.AVI|d'
+    'g|AVI\BODYS.AVI|d'
+    'g|AVI\CAPTURE.AVI|d'
+    'g|AVI\COUNCIL.AVI|d'
+    'g|AVI\COUNCIL1.AVI|c|/DC/AVI/COUNCIL1.AVI'
+    'g|AVI\COUNCIL2.AVI|c|/DC/AVI/COUNCIL2.AVI'
+    'g|AVI\CRAWL.AVI|d'
+    'g|AVI\DCAENDING.AVI|d|/DC/AVI/AENDING.AVI'
+    'g|AVI\DCHENDING.AVI|d|/DC/AVI/HENDING.AVI'
+    'g|AVI\DCINTRO.AVI|d|/DC/AVI/INTRO.AVI'
+    'g|AVI\DESNIGHT.AVI|d'
+    'g|AVI\DTALK1.AVI|d'
+    'g|AVI\DTALK2.AVI|d'
+    'g|AVI\ELECTRIC.AVI|c|/DC/AVI/ELECTRIC.AVI'
+    'g|AVI\ESCAPE.AVI|d'
+    'g|AVI\HDTEMP.AVI|d'
+    'g|AVI\HENDING.AVI|c|/DC/AVI/HENDING.AVI'
+    'g|AVI\HFIELD.AVI|d'
+    'g|AVI\HJTEMP.AVI|d'
+    'g|AVI\HTRAIN.AVI|d'
+    'g|AVI\HTRAN1.AVI|d'
+    'g|AVI\HTRAN10.AVI|d'
+    'g|AVI\HTRAN2.AVI|d'
+    'g|AVI\HTRAN3.AVI|d'
+    'g|AVI\HTRAN4.AVI|d'
+    'g|AVI\HTRAN5.AVI|d'
+    'g|AVI\HTRAN6.AVI|d'
+    'g|AVI\HTRAN7.AVI|d'
+    'g|AVI\HTRAN8.AVI|d'
+    'g|AVI\HTRAN9.AVI|d'
+    'g|AVI\HVAD.AVI|d'
+    'g|AVI\HVAD2.AVI|d'
+    'g|AVI\HVAD5.AVI|d'
+    'g|AVI\HVAD6.AVI|d'
+    'g|AVI\INTRO.AVI|c|/DC/AVI/INTRO.AVI'
+    'g|AVI\JCRAWL.AVI|d'
+    'g|AVI\JTALK1.AVI|d'
+    'g|AVI\JTALK2.AVI|d'
+    'g|AVI\JTALK3.AVI|d'
+    'g|AVI\KAOXMAKT.AVI|d'
+    'g|AVI\LENZ.AVI|d'
+    'g|AVI\LIZARDS.AVI|d'
+    'g|AVI\PORTALIS.AVI|d'
+    'g|AVI\SCRUB.AVI|d'
+    'g|AVI\STRATUS.AVI|d'
+    'g|AVI\SYLUNGE.AVI|d'
+    'g|AVI\TEKTAARA.AVI|d'
+    'g|AVI\TICK.AVI|d'
+    'g|AVI\ULTIMATE.AVI|d'
+    'g|AVI\WASTE.AVI|d'
+    'g|COLOUR.SET|d'
+    'g|CURSOR\CSCRIPT|d'
+    'g|CURSOR\CURS.SPR|d'
+    'g|CURSOR\CURSOR0.BMP|d'
+    'g|CURSOR\CURSOR1.BMP|d'
+    'g|CURSOR\CURSOR10.BMP|d'
+    'g|CURSOR\CURSOR11.BMP|d'
+    'g|CURSOR\CURSOR12.BMP|d'
+    'g|CURSOR\CURSOR13.BMP|d'
+    'g|CURSOR\CURSOR14.BMP|d'
+    'g|CURSOR\CURSOR15.BMP|d'
+    'g|CURSOR\CURSOR16.BMP|d'
+    'g|CURSOR\CURSOR17.BMP|d'
+    'g|CURSOR\CURSOR18.BMP|d'
+    'g|CURSOR\CURSOR19.BMP|d'
+    'g|CURSOR\CURSOR2.BMP|d'
+    'g|CURSOR\CURSOR20.BMP|d'
+    'g|CURSOR\CURSOR21.BMP|d'
+    'g|CURSOR\CURSOR22.BMP|d'
+    'g|CURSOR\CURSOR23.BMP|d'
+    'g|CURSOR\CURSOR24.BMP|d'
+    'g|CURSOR\CURSOR25.BMP|d'
+    'g|CURSOR\CURSOR26.BMP|d'
+    'g|CURSOR\CURSOR27.BMP|d'
+    'g|CURSOR\CURSOR28.BMP|d'
+    'g|CURSOR\CURSOR29.BMP|d'
+    'g|CURSOR\CURSOR3.BMP|d'
+    'g|CURSOR\CURSOR30.BMP|d'
+    'g|CURSOR\CURSOR31.BMP|d'
+    'g|CURSOR\CURSOR4.BMP|d'
+    'g|CURSOR\CURSOR5.BMP|d'
+    'g|CURSOR\CURSOR6.BMP|d'
+    'g|CURSOR\CURSOR7.BMP|d'
+    'g|CURSOR\CURSOR8.BMP|d'
+    'g|CURSOR\CURSOR9.BMP|d'
+    'g|CURSOR\PALETTE.BMP|d'
+    'g|DC.ICO|d'
+    'g|DC16.ICO|d'
+    'g|DESERT.GIF|d'
+    'g|DESERT.RGB|d'
+    'g|DESERT.RMP|d'
+    'g|ENCYCLO\ATRIL.SPR|d'
+    'g|ENCYCLO\ATRIL.TXT|d'
+    'g|ENCYCLO\ATRIL.WAV|d'
+    'g|ENCYCLO\BARR.SPR|d'
+    'g|ENCYCLO\BARR.TXT|d'
+    'g|ENCYCLO\BARR.WAV|d'
+    'g|ENCYCLO\BEON.SPR|d'
+    'g|ENCYCLO\BEON.TXT|d'
+    'g|ENCYCLO\BEON.WAV|d'
+    'g|ENCYCLO\CYBO.SPR|d'
+    'g|ENCYCLO\CYBO.TXT|d'
+    'g|ENCYCLO\CYBO.WAV|d'
+    'g|ENCYCLO\DROP.SPR|d'
+    'g|ENCYCLO\DROP.TXT|d'
+    'g|ENCYCLO\DROP.WAV|d'
+    'g|ENCYCLO\ENGI.SPR|d'
+    'g|ENCYCLO\ENGI.TXT|d'
+    'g|ENCYCLO\ENGI.WAV|d'
+    'g|ENCYCLO\EXPL.SPR|d'
+    'g|ENCYCLO\EXPL.TXT|d'
+    'g|ENCYCLO\EXPL.WAV|d'
+    'g|ENCYCLO\GRAY.SPR|d'
+    'g|ENCYCLO\GRAY.TXT|d'
+    'g|ENCYCLO\GRAY.WAV|d'
+    'g|ENCYCLO\HYK.SPR|d'
+    'g|ENCYCLO\HYK.TXT|d'
+    'g|ENCYCLO\HYK.WAV|d'
+    'g|ENCYCLO\LNA.SPR|d'
+    'g|ENCYCLO\LNA.TXT|d'
+    'g|ENCYCLO\LNA.WAV|d'
+    'g|ENCYCLO\LNS.SPR|d'
+    'g|ENCYCLO\LNS.TXT|d'
+    'g|ENCYCLO\LNS.WAV|d'
+    'g|ENCYCLO\MKT.SPR|d'
+    'g|ENCYCLO\MKT.TXT|d'
+    'g|ENCYCLO\MKT.WAV|d'
+    'g|ENCYCLO\ORTU.SPR|d'
+    'g|ENCYCLO\ORTU.TXT|d'
+    'g|ENCYCLO\ORTU.WAV|d'
+    'g|ENCYCLO\PSYCH.SPR|d'
+    'g|ENCYCLO\PSYCH.TXT|d'
+    'g|ENCYCLO\PSYCH.WAV|d'
+    'g|ENCYCLO\REAP.SPR|d'
+    'g|ENCYCLO\REAP.TXT|d'
+    'g|ENCYCLO\REAP.WAV|d'
+    'g|ENCYCLO\SAUC.SPR|d'
+    'g|ENCYCLO\SAUC.TXT|d'
+    'g|ENCYCLO\SAUC.WAV|d'
+    'g|ENCYCLO\SCGM.SPR|d'
+    'g|ENCYCLO\SCGM.TXT|d'
+    'g|ENCYCLO\SCGM.WAV|d'
+    'g|ENCYCLO\SLOM.SPR|d'
+    'g|ENCYCLO\SLOM.TXT|d'
+    'g|ENCYCLO\SLOM.WAV|d'
+    'g|ENCYCLO\SLUG.SPR|d'
+    'g|ENCYCLO\SLUG.TXT|d'
+    'g|ENCYCLO\SLUG.WAV|d'
+    'g|ENCYCLO\SYTH.SPR|d'
+    'g|ENCYCLO\SYTH.TXT|d'
+    'g|ENCYCLO\SYTH.WAV|d'
+    'g|ENCYCLO\TKT.SPR|d'
+    'g|ENCYCLO\TKT.TXT|d'
+    'g|ENCYCLO\TKT.WAV|d'
+    'g|ENCYCLO\TROOP.SPR|d'
+    'g|ENCYCLO\TROOP.TXT|d'
+    'g|ENCYCLO\TROOP.WAV|d'
+    'g|ENCYCLO\TURR.SPR|d'
+    'g|ENCYCLO\TURR.TXT|d'
+    'g|ENCYCLO\TURR.WAV|d'
+    'g|ENCYCLO\XENO.SPR|d'
+    'g|ENCYCLO\XENO.TXT|d'
+    'g|ENCYCLO\XENO.WAV|d'
+    'g|ENCYCLO\ZISP.SPR|d'
+    'g|ENCYCLO\ZISP.TXT|d'
+    'g|ENCYCLO\ZISP.WAV|d'
+    'g|ENGEXP16.EXE|c|/EXPENG/ENGEXP16.EXE'
+    'g|ESAVE\SAVE.TXT|c|/EXPENG/ESAVE/SAVE.TXT'
+    'g|FADE.DAT|d'
+    'g|FULL|d'
+    'g|GAMESTAT\BOOMSTAT.TXT|d'
+    'g|GAMESTAT\DEPEND.TXT|d'
+    'g|GAMESTAT\GAMESTAT.TXT|d'
+    'g|GAMESTAT\GSCENE.TXT|d'
+    'g|GAMESTAT\GTSCENE.TXT|d'
+    'g|GAMESTAT\HSCENE.TXT|d'
+    'g|GAMESTAT\HTSCENE.TXT|d'
+    'g|GAMESTAT\MBULLET.TXT|d'
+    'g|GAMESTAT\UNITID.TXT|d'
+    'g|GAMESTAT\WEAPSTAT.TXT|d'
+    'g|HTRAIN.GIF|d'
+    'g|HTRAIN.RGB|d'
+    'g|HTRAIN.RMP|d'
+    'g|ICON.RC|d'
+    'g|ICON.RES|d'
+    'g|ICON16.RC|d'
+    'g|ICON16.RES|d'
+    'g|INTRFACE\ACAR.SPR|d'
+    'g|INTRFACE\ACOM.SPR|d'
+    'g|INTRFACE\ASTORY.TXT|d'
+    'g|INTRFACE\BDF.TXT|d'
+    'g|INTRFACE\BINTROE|d'
+    'g|INTRFACE\BLEW.SPR|d'
+    'g|INTRFACE\BLOGO.SPR|d'
+    'g|INTRFACE\BUTTON.SPR|d'
+    'g|INTRFACE\BUTTONSE|d'
+    'g|INTRFACE\CHOO.DAT|d'
+    'g|INTRFACE\CHOO.GIF|d'
+    'g|INTRFACE\CHOO.RGB|d'
+    'g|INTRFACE\CHOO.RMP|d'
+    'g|INTRFACE\CLIENT.SPR|d'
+    'g|INTRFACE\CODE.SPR|d'
+    'g|INTRFACE\CREDITS.TXT|d'
+    'g|INTRFACE\DCSS.SPR|d'
+    'g|INTRFACE\DCUK.SPR|d'
+    'g|INTRFACE\DCUT.SPR|d'
+    'g|INTRFACE\DEMOWINE|d'
+    'g|INTRFACE\DIAG.SPR|d'
+    'g|INTRFACE\DINTROE|d'
+    'g|INTRFACE\DOT.SPR|d'
+    'g|INTRFACE\DPBLANKE|d'
+    'g|INTRFACE\DPLAYSE|d'
+    'g|INTRFACE\EARTHG.SPR|d'
+    'g|INTRFACE\EARTHS.SPR|d'
+    'g|INTRFACE\ENCY.DAT|d'
+    'g|INTRFACE\ENCY.GIF|d'
+    'g|INTRFACE\ENCY.RGB|d'
+    'g|INTRFACE\ENCY.RMP|d'
+    'g|INTRFACE\ENCYCLO.TXT|d'
+    'g|INTRFACE\ENCYCLOE|d'
+    'g|INTRFACE\EPIC.SPR|d'
+    'g|INTRFACE\FLASH.SPR|d'
+    'g|INTRFACE\FONT.SPR|d'
+    'g|INTRFACE\FOO|d'
+    'g|INTRFACE\GENERALE|d'
+    'g|INTRFACE\GETSVRE|d'
+    'g|INTRFACE\GETSVRE.SPR|d'
+    'g|INTRFACE\GLIGHT.SPR|d'
+    'g|INTRFACE\GLOBEG.SPR|d'
+    'g|INTRFACE\GLOBES.SPR|d'
+    'g|INTRFACE\GLOI.SPR|d'
+    'g|INTRFACE\GRAYDEMO.TXT|d'
+    'g|INTRFACE\GRDO.SPR|d'
+    'g|INTRFACE\GTSUX.GIF|d'
+    'g|INTRFACE\GTSUX.RGB|d'
+    'g|INTRFACE\GTSUX.RMP|d'
+    'g|INTRFACE\HCAR.SPR|d'
+    'g|INTRFACE\HCOM.SPR|d'
+    'g|INTRFACE\HSTORY.TXT|d'
+    'g|INTRFACE\INSEE.SPR|d'
+    'g|INTRFACE\INTRFACE.GIF|d'
+    'g|INTRFACE\INTRG.DAT|d'
+    'g|INTRFACE\INTRG.GIF|d'
+    'g|INTRFACE\INTRG.RGB|d'
+    'g|INTRFACE\INTRG.RMP|d'
+    'g|INTRFACE\INTRO.DAT|d'
+    'g|INTRFACE\INTRO.GIF|d'
+    'g|INTRFACE\INTRO.RGB|d'
+    'g|INTRFACE\INTRO.RMP|d'
+    'g|INTRFACE\INTRO.SPR|d'
+    'g|INTRFACE\INTROE|d'
+    'g|INTRFACE\INTROE.SPR|d'
+    'g|INTRFACE\IPXNAMEE|d'
+    'g|INTRFACE\KNOBE.SPR|d'
+    'g|INTRFACE\LEVEL.SPR|d'
+    'g|INTRFACE\LOAD.BMP|d'
+    'g|INTRFACE\LOAD2.BMP|d'
+    'g|INTRFACE\LOADER.GIF|d'
+    'g|INTRFACE\LOADER.RGB|d'
+    'g|INTRFACE\LOADER.RMP|d'
+    'g|INTRFACE\LOADG.DAT|d'
+    'g|INTRFACE\LOADGE|d'
+    'g|INTRFACE\LOBJE|d'
+    'g|INTRFACE\LOGOE|d'
+    'g|INTRFACE\LOPTE|d'
+    'g|INTRFACE\LOST.GIF|d'
+    'g|INTRFACE\LOST.RGB|d'
+    'g|INTRFACE\LOST.RMP|d'
+    'g|INTRFACE\LOSTE|d'
+    'g|INTRFACE\LQCE|d'
+    'g|INTRFACE\LSG.SPR|d'
+    'g|INTRFACE\LSGE|d'
+    'g|INTRFACE\MAINBUT.SPR|d'
+    'g|INTRFACE\MAINE|d'
+    'g|INTRFACE\MAKEFILE|d'
+    'g|INTRFACE\MAKEFILE.TPL|d'
+    'g|INTRFACE\MAKESPR.BAT|d'
+    'g|INTRFACE\MDLA.SPR|d'
+    'g|INTRFACE\MDLB.SPR|d'
+    'g|INTRFACE\MDLC.SPR|d'
+    'g|INTRFACE\MDLD.SPR|d'
+    'g|INTRFACE\MDLE.SPR|d'
+    'g|INTRFACE\MDLF.SPR|d'
+    'g|INTRFACE\MDLG.SPR|d'
+    'g|INTRFACE\MDLH.SPR|d'
+    'g|INTRFACE\MDLI.SPR|d'
+    'g|INTRFACE\MDLJ.SPR|d'
+    'g|INTRFACE\MDLK.SPR|d'
+    'g|INTRFACE\MDLL.SPR|d'
+    'g|INTRFACE\METAE|d'
+    'g|INTRFACE\METR.SPR|d'
+    'g|INTRFACE\MFONT.SPR|d'
+    'g|INTRFACE\MFONTO1.SPR|d'
+    'g|INTRFACE\MFONTO2.SPR|d'
+    'g|INTRFACE\MFONTO5.SPR|d'
+    'g|INTRFACE\MFONTO7.SPR|d'
+    'g|INTRFACE\MFONTO8.SPR|d'
+    'g|INTRFACE\MULTIE|d'
+    'g|INTRFACE\MULTIE.SPR|d'
+    'g|INTRFACE\MULTIE~1.TXT|d'
+    'g|INTRFACE\MULTIWIN.DAT|d'
+    'g|INTRFACE\MULTIWIN.GIF|d'
+    'g|INTRFACE\MULTIWIN.RGB|d'
+    'g|INTRFACE\MULTIWIN.RMP|d'
+    'g|INTRFACE\MULTIWNE|d'
+    'g|INTRFACE\NAME.GIF|d'
+    'g|INTRFACE\NAME.RGB|d'
+    'g|INTRFACE\NAME.RMP|d'
+    'g|INTRFACE\NET.DAT|d'
+    'g|INTRFACE\NET.GIF|d'
+    'g|INTRFACE\NET.RGB|d'
+    'g|INTRFACE\NET.RMP|d'
+    'g|INTRFACE\NETBUTE.SPR|d'
+    'g|INTRFACE\NETOPTE|d'
+    'g|INTRFACE\NEWGAME.SPR|d'
+    'g|INTRFACE\NEWGAMEE|d'
+    'g|INTRFACE\NUM.TXT|d'
+    'g|INTRFACE\PALETTE.GIF|d'
+    'g|INTRFACE\PLASMA.SPR|d'
+    'g|INTRFACE\POLO.SPR|d'
+    'g|INTRFACE\POPP.SPR|d'
+    'g|INTRFACE\ROUND.SPR|d'
+    'g|INTRFACE\SCNE.SPR|d'
+    'g|INTRFACE\SERVER.DAT|d'
+    'g|INTRFACE\SERVER.GIF|d'
+    'g|INTRFACE\SERVER.RGB|d'
+    'g|INTRFACE\SERVER.RMP|d'
+    'g|INTRFACE\SGREYE.SPR|d'
+    'g|INTRFACE\SHUMAN.DAT|d'
+    'g|INTRFACE\SHUMAN.GIF|d'
+    'g|INTRFACE\SHUMAN.RGB|d'
+    'g|INTRFACE\SHUMAN.RMP|d'
+    'g|INTRFACE\SHUMANE|d'
+    'g|INTRFACE\SHUMANE.SPR|d'
+    'g|INTRFACE\SOKAYE.SPR|d'
+    'g|INTRFACE\STORY.GIF|d'
+    'g|INTRFACE\STORY.RGB|d'
+    'g|INTRFACE\STORY.RMP|d'
+    'g|INTRFACE\STORYE|d'
+    'g|INTRFACE\TCPWAIT.DAT|d'
+    'g|INTRFACE\TCPWAIT.GIF|d'
+    'g|INTRFACE\TCPWAIT.RGB|d'
+    'g|INTRFACE\TCPWAIT.RMP|d'
+    'g|INTRFACE\VCAL.SPR|d'
+    'g|INTRFACE\VCEA.SPR|d'
+    'g|INTRFACE\VICTORG.GIF|d'
+    'g|INTRFACE\VICTORY.DAT|d'
+    'g|INTRFACE\VICTORY.GIF|d'
+    'g|INTRFACE\WEATH.SPR|d'
+    'g|INTRFACE\WHOO.SPR|d'
+    'g|INTRFACE\WIND.SPR|d'
+    'g|INTRFACE\WINE|d'
+    'g|INTRFACE\WINGAME.DAT|d'
+    'g|INTRFACE\WINGAME.GIF|d'
+    'g|INTRFACE\WINGAME.RGB|d'
+    'g|INTRFACE\WINGAME.RMP|d'
+    'g|INTRFACE\WINGAMEE|d'
+    'g|INTRFACE\WINUKE|d'
+    'g|INTRFACE\WLNT.SPR|d'
+    'g|JUNGLE.GIF|d'
+    'g|JUNGLE.RGB|d'
+    'g|JUNGLE.RMP|d'
+    'g|MISSION\G1.WAV|d'
+    'g|MISSION\G10.WAV|d'
+    'g|MISSION\G11.WAV|d'
+    'g|MISSION\G12.WAV|d'
+    'g|MISSION\G13.WAV|d'
+    'g|MISSION\G14.WAV|d'
+    'g|MISSION\G15.WAV|d'
+    'g|MISSION\G2.WAV|d'
+    'g|MISSION\G3.WAV|d'
+    'g|MISSION\G4.WAV|d'
+    'g|MISSION\G5.WAV|d'
+    'g|MISSION\G6.WAV|d'
+    'g|MISSION\G7.WAV|d'
+    'g|MISSION\G8.WAV|d'
+    'g|MISSION\G9.WAV|d'
+    'g|MISSION\H1.WAV|d'
+    'g|MISSION\H10.WAV|d'
+    'g|MISSION\H11.WAV|d'
+    'g|MISSION\H12.WAV|d'
+    'g|MISSION\H13.WAV|d'
+    'g|MISSION\H14.WAV|d'
+    'g|MISSION\H15.WAV|d'
+    'g|MISSION\H2.WAV|d'
+    'g|MISSION\H3.WAV|d'
+    'g|MISSION\H4.WAV|d'
+    'g|MISSION\H5.WAV|d'
+    'g|MISSION\H6.WAV|d'
+    'g|MISSION\H7.WAV|d'
+    'g|MISSION\H8.WAV|d'
+    'g|MISSION\H9.WAV|d'
+    'g|PALETTE.GIF|d'
+    'g|PALETTE.PPM|d'
+    'g|PALETTE.RGB|d'
+    'g|PALETTE.RMP|d'
+    'g|PRIMES.DAT|d'
+    'g|README.TXT|d'
+    'g|SAVE\SAVE.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN01.001|d'
+    'g|SCENARIO\ALIEN\ALIEN01.002|d'
+    'g|SCENARIO\ALIEN\ALIEN01.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN01.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN01.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN01.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN01.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN01.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN01.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN01.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN02.001|d'
+    'g|SCENARIO\ALIEN\ALIEN02.002|d'
+    'g|SCENARIO\ALIEN\ALIEN02.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN02.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN02.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN02.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN02.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN02.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN02.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN02.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN03.001|d'
+    'g|SCENARIO\ALIEN\ALIEN03.002|d'
+    'g|SCENARIO\ALIEN\ALIEN03.003|d'
+    'g|SCENARIO\ALIEN\ALIEN03.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN03.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN03.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN03.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN03.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN03.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN03.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN03.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN04.001|d'
+    'g|SCENARIO\ALIEN\ALIEN04.002|d'
+    'g|SCENARIO\ALIEN\ALIEN04.003|d'
+    'g|SCENARIO\ALIEN\ALIEN04.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN04.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN04.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN04.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN04.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN04.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN04.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN04.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN05.001|d'
+    'g|SCENARIO\ALIEN\ALIEN05.002|d'
+    'g|SCENARIO\ALIEN\ALIEN05.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN05.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN05.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN05.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN05.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN05.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN05.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN05.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN06.001|d'
+    'g|SCENARIO\ALIEN\ALIEN06.002|d'
+    'g|SCENARIO\ALIEN\ALIEN06.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN06.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN06.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN06.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN06.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN06.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN06.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN06.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN07.001|d'
+    'g|SCENARIO\ALIEN\ALIEN07.002|d'
+    'g|SCENARIO\ALIEN\ALIEN07.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN07.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN07.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN07.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN07.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN07.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN07.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN07.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN08.001|d'
+    'g|SCENARIO\ALIEN\ALIEN08.002|d'
+    'g|SCENARIO\ALIEN\ALIEN08.003|d'
+    'g|SCENARIO\ALIEN\ALIEN08.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN08.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN08.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN08.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN08.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN08.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN08.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN08.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN09.001|d'
+    'g|SCENARIO\ALIEN\ALIEN09.002|d'
+    'g|SCENARIO\ALIEN\ALIEN09.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN09.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN09.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN09.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN09.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN09.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN09.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN09.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN10.001|d'
+    'g|SCENARIO\ALIEN\ALIEN10.002|d'
+    'g|SCENARIO\ALIEN\ALIEN10.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN10.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN10.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN10.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN10.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN10.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN10.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN10.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN11.001|d'
+    'g|SCENARIO\ALIEN\ALIEN11.002|d'
+    'g|SCENARIO\ALIEN\ALIEN11.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN11.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN11.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN11.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN11.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN11.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN11.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN11.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN12.001|d'
+    'g|SCENARIO\ALIEN\ALIEN12.002|d'
+    'g|SCENARIO\ALIEN\ALIEN12.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN12.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN12.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN12.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN12.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN12.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN12.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN12.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN13.001|d'
+    'g|SCENARIO\ALIEN\ALIEN13.002|d'
+    'g|SCENARIO\ALIEN\ALIEN13.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN13.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN13.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN13.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN13.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN13.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN13.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN13.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN14.001|d'
+    'g|SCENARIO\ALIEN\ALIEN14.002|d'
+    'g|SCENARIO\ALIEN\ALIEN14.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN14.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN14.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN14.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN14.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN14.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN14.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN14.TXT|d'
+    'g|SCENARIO\ALIEN\ALIEN15.001|d'
+    'g|SCENARIO\ALIEN\ALIEN15.002|d'
+    'g|SCENARIO\ALIEN\ALIEN15.MAP|d'
+    'g|SCENARIO\ALIEN\ALIEN15.MSG|d'
+    'g|SCENARIO\ALIEN\ALIEN15.MTG|d'
+    'g|SCENARIO\ALIEN\ALIEN15.OVH|d'
+    'g|SCENARIO\ALIEN\ALIEN15.PTH|d'
+    'g|SCENARIO\ALIEN\ALIEN15.SCN|d'
+    'g|SCENARIO\ALIEN\ALIEN15.TRO|d'
+    'g|SCENARIO\ALIEN\ALIEN15.TXT|d'
+    'g|SCENARIO\ALIEN\DEMO.TXT|d'
+    'g|SCENARIO\ALL.JUS|d'
+    'g|SCENARIO\ATLANTIS.BTS|d'
+    'g|SCENARIO\DESERT.BTS|d'
+    'g|SCENARIO\DESERT.SET|d'
+    'g|SCENARIO\HTRAIN.BTS|d'
+    'g|SCENARIO\HUMAN\DEMO.MAP|d'
+    'g|SCENARIO\HUMAN\DEMO.MTG|d'
+    'g|SCENARIO\HUMAN\DEMO.PTH|d'
+    'g|SCENARIO\HUMAN\DEMO.SCN|d'
+    'g|SCENARIO\HUMAN\DEMO.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN01.001|d'
+    'g|SCENARIO\HUMAN\HUMAN01.002|d'
+    'g|SCENARIO\HUMAN\HUMAN01.003|d'
+    'g|SCENARIO\HUMAN\HUMAN01.004|d'
+    'g|SCENARIO\HUMAN\HUMAN01.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN01.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN01.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN01.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN01.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN01.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN01.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN01.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN02.001|d'
+    'g|SCENARIO\HUMAN\HUMAN02.002|d'
+    'g|SCENARIO\HUMAN\HUMAN02.003|d'
+    'g|SCENARIO\HUMAN\HUMAN02.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN02.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN02.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN02.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN02.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN02.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN02.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN02.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN03.001|d'
+    'g|SCENARIO\HUMAN\HUMAN03.002|d'
+    'g|SCENARIO\HUMAN\HUMAN03.003|d'
+    'g|SCENARIO\HUMAN\HUMAN03.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN03.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN03.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN03.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN03.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN03.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN03.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN03.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN04.001|d'
+    'g|SCENARIO\HUMAN\HUMAN04.002|d'
+    'g|SCENARIO\HUMAN\HUMAN04.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN04.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN04.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN04.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN04.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN04.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN04.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN04.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN05.001|d'
+    'g|SCENARIO\HUMAN\HUMAN05.002|d'
+    'g|SCENARIO\HUMAN\HUMAN05.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN05.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN05.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN05.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN05.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN05.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN05.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN05.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN06.001|d'
+    'g|SCENARIO\HUMAN\HUMAN06.002|d'
+    'g|SCENARIO\HUMAN\HUMAN06.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN06.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN06.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN06.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN06.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN06.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN06.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN06.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN07.001|d'
+    'g|SCENARIO\HUMAN\HUMAN07.002|d'
+    'g|SCENARIO\HUMAN\HUMAN07.003|d'
+    'g|SCENARIO\HUMAN\HUMAN07.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN07.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN07.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN07.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN07.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN07.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN07.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN07.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN08.001|d'
+    'g|SCENARIO\HUMAN\HUMAN08.002|d'
+    'g|SCENARIO\HUMAN\HUMAN08.003|d'
+    'g|SCENARIO\HUMAN\HUMAN08.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN08.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN08.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN08.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN08.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN08.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN08.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN08.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN09.001|d'
+    'g|SCENARIO\HUMAN\HUMAN09.002|d'
+    'g|SCENARIO\HUMAN\HUMAN09.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN09.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN09.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN09.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN09.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN09.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN09.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN10.001|d'
+    'g|SCENARIO\HUMAN\HUMAN10.002|d'
+    'g|SCENARIO\HUMAN\HUMAN10.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN10.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN10.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN10.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN10.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN10.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN10.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN10.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN11.001|d'
+    'g|SCENARIO\HUMAN\HUMAN11.002|d'
+    'g|SCENARIO\HUMAN\HUMAN11.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN11.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN11.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN11.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN11.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN11.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN11.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN11.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN12.001|d'
+    'g|SCENARIO\HUMAN\HUMAN12.002|d'
+    'g|SCENARIO\HUMAN\HUMAN12.003|d'
+    'g|SCENARIO\HUMAN\HUMAN12.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN12.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN12.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN12.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN12.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN12.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN12.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN12.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN13.001|d'
+    'g|SCENARIO\HUMAN\HUMAN13.002|d'
+    'g|SCENARIO\HUMAN\HUMAN13.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN13.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN13.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN13.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN13.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN13.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN13.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN13.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN14.001|d'
+    'g|SCENARIO\HUMAN\HUMAN14.002|d'
+    'g|SCENARIO\HUMAN\HUMAN14.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN14.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN14.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN14.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN14.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN14.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN14.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN14.TXT|d'
+    'g|SCENARIO\HUMAN\HUMAN15.001|d'
+    'g|SCENARIO\HUMAN\HUMAN15.002|d'
+    'g|SCENARIO\HUMAN\HUMAN15.MAP|d'
+    'g|SCENARIO\HUMAN\HUMAN15.MSG|d'
+    'g|SCENARIO\HUMAN\HUMAN15.MTG|d'
+    'g|SCENARIO\HUMAN\HUMAN15.OVH|d'
+    'g|SCENARIO\HUMAN\HUMAN15.PTH|d'
+    'g|SCENARIO\HUMAN\HUMAN15.SCN|d'
+    'g|SCENARIO\HUMAN\HUMAN15.TRO|d'
+    'g|SCENARIO\HUMAN\HUMAN15.TXT|d'
+    'g|SCENARIO\JUNGLE.BTS|d'
+    'g|SCENARIO\JUNGLE.SET|d'
+    'g|SCENARIO\MPLAYER\A2PLAY01.MAP|d'
+    'g|SCENARIO\MPLAYER\A2PLAY01.MTG|d'
+    'g|SCENARIO\MPLAYER\A2PLAY01.OVH|d'
+    'g|SCENARIO\MPLAYER\A2PLAY01.POP|d'
+    'g|SCENARIO\MPLAYER\A2PLAY01.PTH|d'
+    'g|SCENARIO\MPLAYER\A2PLAY01.SCN|d'
+    'g|SCENARIO\MPLAYER\A2PLAY01.TRO|d'
+    'g|SCENARIO\MPLAYER\D2PLAY01.MAP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY01.MTG|d'
+    'g|SCENARIO\MPLAYER\D2PLAY01.OVH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY01.POP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY01.PTH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY01.SCN|d'
+    'g|SCENARIO\MPLAYER\D2PLAY01.TRO|d'
+    'g|SCENARIO\MPLAYER\D2PLAY02.MAP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY02.MTG|d'
+    'g|SCENARIO\MPLAYER\D2PLAY02.OVH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY02.POP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY02.PTH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY02.SCN|d'
+    'g|SCENARIO\MPLAYER\D2PLAY02.TRO|d'
+    'g|SCENARIO\MPLAYER\D2PLAY03.MAP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY03.MTG|d'
+    'g|SCENARIO\MPLAYER\D2PLAY03.OVH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY03.POP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY03.PTH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY03.SCN|d'
+    'g|SCENARIO\MPLAYER\D2PLAY03.TRO|d'
+    'g|SCENARIO\MPLAYER\D2PLAY04.MAP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY04.MTG|d'
+    'g|SCENARIO\MPLAYER\D2PLAY04.OVH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY04.POP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY04.PTH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY04.SCN|d'
+    'g|SCENARIO\MPLAYER\D2PLAY04.TRO|d'
+    'g|SCENARIO\MPLAYER\D2PLAY05.MAP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY05.MTG|d'
+    'g|SCENARIO\MPLAYER\D2PLAY05.OVH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY05.POP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY05.PTH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY05.SCN|d'
+    'g|SCENARIO\MPLAYER\D2PLAY05.TRO|d'
+    'g|SCENARIO\MPLAYER\D2PLAY06.MAP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY06.MTG|d'
+    'g|SCENARIO\MPLAYER\D2PLAY06.OVH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY06.POP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY06.PTH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY06.SCN|d'
+    'g|SCENARIO\MPLAYER\D2PLAY06.TRO|d'
+    'g|SCENARIO\MPLAYER\D2PLAY07.MAP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY07.MTG|d'
+    'g|SCENARIO\MPLAYER\D2PLAY07.OVH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY07.POP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY07.PTH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY07.SCN|d'
+    'g|SCENARIO\MPLAYER\D2PLAY07.TRO|d'
+    'g|SCENARIO\MPLAYER\D2PLAY08.MAP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY08.MTG|d'
+    'g|SCENARIO\MPLAYER\D2PLAY08.OVH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY08.POP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY08.PTH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY08.SCN|d'
+    'g|SCENARIO\MPLAYER\D2PLAY08.TRO|d'
+    'g|SCENARIO\MPLAYER\D2PLAY09.MAP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY09.MTG|d'
+    'g|SCENARIO\MPLAYER\D2PLAY09.OVH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY09.POP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY09.PTH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY09.SCN|d'
+    'g|SCENARIO\MPLAYER\D2PLAY09.TRO|d'
+    'g|SCENARIO\MPLAYER\D2PLAY10.MAP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY10.MTG|d'
+    'g|SCENARIO\MPLAYER\D2PLAY10.OVH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY10.POP|d'
+    'g|SCENARIO\MPLAYER\D2PLAY10.PTH|d'
+    'g|SCENARIO\MPLAYER\D2PLAY10.SCN|d'
+    'g|SCENARIO\MPLAYER\D2PLAY10.TRO|d'
+    'g|SCENARIO\MPLAYER\D4PLAY01.MAP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY01.MTG|d'
+    'g|SCENARIO\MPLAYER\D4PLAY01.OVH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY01.POP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY01.PTH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY01.SCN|d'
+    'g|SCENARIO\MPLAYER\D4PLAY01.TRO|d'
+    'g|SCENARIO\MPLAYER\D4PLAY02.MAP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY02.MTG|d'
+    'g|SCENARIO\MPLAYER\D4PLAY02.OVH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY02.POP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY02.PTH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY02.SCN|d'
+    'g|SCENARIO\MPLAYER\D4PLAY02.TRO|d'
+    'g|SCENARIO\MPLAYER\D4PLAY03.MAP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY03.MTG|d'
+    'g|SCENARIO\MPLAYER\D4PLAY03.OVH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY03.POP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY03.PTH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY03.SCN|d'
+    'g|SCENARIO\MPLAYER\D4PLAY03.TRO|d'
+    'g|SCENARIO\MPLAYER\D4PLAY04.MAP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY04.MTG|d'
+    'g|SCENARIO\MPLAYER\D4PLAY04.OVH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY04.POP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY04.PTH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY04.SCN|d'
+    'g|SCENARIO\MPLAYER\D4PLAY04.TRO|d'
+    'g|SCENARIO\MPLAYER\D4PLAY05.MAP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY05.MTG|d'
+    'g|SCENARIO\MPLAYER\D4PLAY05.OVH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY05.POP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY05.PTH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY05.SCN|d'
+    'g|SCENARIO\MPLAYER\D4PLAY05.TRO|d'
+    'g|SCENARIO\MPLAYER\D4PLAY06.MAP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY06.MTG|d'
+    'g|SCENARIO\MPLAYER\D4PLAY06.OVH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY06.POP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY06.PTH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY06.SCN|d'
+    'g|SCENARIO\MPLAYER\D4PLAY06.TRO|d'
+    'g|SCENARIO\MPLAYER\D4PLAY07.MAP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY07.MTG|d'
+    'g|SCENARIO\MPLAYER\D4PLAY07.OVH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY07.POP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY07.PTH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY07.SCN|d'
+    'g|SCENARIO\MPLAYER\D4PLAY07.TRO|d'
+    'g|SCENARIO\MPLAYER\D4PLAY08.MAP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY08.MTG|d'
+    'g|SCENARIO\MPLAYER\D4PLAY08.OVH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY08.POP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY08.PTH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY08.SCN|d'
+    'g|SCENARIO\MPLAYER\D4PLAY08.TRO|d'
+    'g|SCENARIO\MPLAYER\D4PLAY09.MAP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY09.MTG|d'
+    'g|SCENARIO\MPLAYER\D4PLAY09.OVH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY09.POP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY09.PTH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY09.SCN|d'
+    'g|SCENARIO\MPLAYER\D4PLAY09.TRO|d'
+    'g|SCENARIO\MPLAYER\D4PLAY10.MAP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY10.MTG|d'
+    'g|SCENARIO\MPLAYER\D4PLAY10.OVH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY10.POP|d'
+    'g|SCENARIO\MPLAYER\D4PLAY10.PTH|d'
+    'g|SCENARIO\MPLAYER\D4PLAY10.SCN|d'
+    'g|SCENARIO\MPLAYER\D4PLAY10.TRO|d'
+    'g|SCENARIO\MPLAYER\D8PLAY01.MAP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY01.MTG|d'
+    'g|SCENARIO\MPLAYER\D8PLAY01.OVH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY01.POP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY01.PTH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY01.SCN|d'
+    'g|SCENARIO\MPLAYER\D8PLAY01.TRO|d'
+    'g|SCENARIO\MPLAYER\D8PLAY02.MAP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY02.MTG|d'
+    'g|SCENARIO\MPLAYER\D8PLAY02.OVH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY02.POP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY02.PTH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY02.SCN|d'
+    'g|SCENARIO\MPLAYER\D8PLAY02.TRO|d'
+    'g|SCENARIO\MPLAYER\D8PLAY03.MAP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY03.MTG|d'
+    'g|SCENARIO\MPLAYER\D8PLAY03.OVH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY03.POP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY03.PTH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY03.SCN|d'
+    'g|SCENARIO\MPLAYER\D8PLAY03.TRO|d'
+    'g|SCENARIO\MPLAYER\D8PLAY04.MAP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY04.MTG|d'
+    'g|SCENARIO\MPLAYER\D8PLAY04.OVH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY04.POP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY04.PTH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY04.SCN|d'
+    'g|SCENARIO\MPLAYER\D8PLAY04.TRO|d'
+    'g|SCENARIO\MPLAYER\D8PLAY05.MAP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY05.MTG|d'
+    'g|SCENARIO\MPLAYER\D8PLAY05.OVH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY05.POP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY05.PTH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY05.SCN|d'
+    'g|SCENARIO\MPLAYER\D8PLAY05.TRO|d'
+    'g|SCENARIO\MPLAYER\D8PLAY06.MAP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY06.MTG|d'
+    'g|SCENARIO\MPLAYER\D8PLAY06.OVH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY06.POP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY06.PTH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY06.SCN|d'
+    'g|SCENARIO\MPLAYER\D8PLAY06.TRO|d'
+    'g|SCENARIO\MPLAYER\D8PLAY07.MAP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY07.MTG|d'
+    'g|SCENARIO\MPLAYER\D8PLAY07.OVH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY07.POP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY07.PTH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY07.SCN|d'
+    'g|SCENARIO\MPLAYER\D8PLAY07.TRO|d'
+    'g|SCENARIO\MPLAYER\D8PLAY08.MAP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY08.MTG|d'
+    'g|SCENARIO\MPLAYER\D8PLAY08.OVH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY08.POP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY08.PTH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY08.SCN|d'
+    'g|SCENARIO\MPLAYER\D8PLAY08.TRO|d'
+    'g|SCENARIO\MPLAYER\D8PLAY09.MAP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY09.MTG|d'
+    'g|SCENARIO\MPLAYER\D8PLAY09.OVH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY09.POP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY09.PTH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY09.SCN|d'
+    'g|SCENARIO\MPLAYER\D8PLAY09.TRO|d'
+    'g|SCENARIO\MPLAYER\D8PLAY10.MAP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY10.MTG|d'
+    'g|SCENARIO\MPLAYER\D8PLAY10.OVH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY10.POP|d'
+    'g|SCENARIO\MPLAYER\D8PLAY10.PTH|d'
+    'g|SCENARIO\MPLAYER\D8PLAY10.SCN|d'
+    'g|SCENARIO\MPLAYER\D8PLAY10.TRO|d'
+    'g|SCENARIO\MPLAYER\J2PLAY01.MAP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY01.MTG|d'
+    'g|SCENARIO\MPLAYER\J2PLAY01.OVH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY01.POP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY01.PTH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY01.SCN|d'
+    'g|SCENARIO\MPLAYER\J2PLAY01.TRO|d'
+    'g|SCENARIO\MPLAYER\J2PLAY02.MAP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY02.MTG|d'
+    'g|SCENARIO\MPLAYER\J2PLAY02.OVH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY02.POP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY02.PTH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY02.SCN|d'
+    'g|SCENARIO\MPLAYER\J2PLAY02.TRO|d'
+    'g|SCENARIO\MPLAYER\J2PLAY03.MAP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY03.MTG|d'
+    'g|SCENARIO\MPLAYER\J2PLAY03.OVH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY03.POP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY03.PTH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY03.SCN|d'
+    'g|SCENARIO\MPLAYER\J2PLAY03.TRO|d'
+    'g|SCENARIO\MPLAYER\J2PLAY04.MAP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY04.MTG|d'
+    'g|SCENARIO\MPLAYER\J2PLAY04.OVH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY04.POP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY04.PTH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY04.SCN|d'
+    'g|SCENARIO\MPLAYER\J2PLAY04.TRO|d'
+    'g|SCENARIO\MPLAYER\J2PLAY05.MAP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY05.MTG|d'
+    'g|SCENARIO\MPLAYER\J2PLAY05.OVH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY05.POP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY05.PTH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY05.SCN|d'
+    'g|SCENARIO\MPLAYER\J2PLAY05.TRO|d'
+    'g|SCENARIO\MPLAYER\J2PLAY06.MAP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY06.MTG|d'
+    'g|SCENARIO\MPLAYER\J2PLAY06.OVH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY06.POP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY06.PTH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY06.SCN|d'
+    'g|SCENARIO\MPLAYER\J2PLAY06.TRO|d'
+    'g|SCENARIO\MPLAYER\J2PLAY07.MAP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY07.MTG|d'
+    'g|SCENARIO\MPLAYER\J2PLAY07.OVH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY07.POP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY07.PTH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY07.SCN|d'
+    'g|SCENARIO\MPLAYER\J2PLAY07.TRO|d'
+    'g|SCENARIO\MPLAYER\J2PLAY08.MAP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY08.MTG|d'
+    'g|SCENARIO\MPLAYER\J2PLAY08.OVH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY08.POP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY08.PTH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY08.SCN|d'
+    'g|SCENARIO\MPLAYER\J2PLAY08.TRO|d'
+    'g|SCENARIO\MPLAYER\J2PLAY09.MAP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY09.MTG|d'
+    'g|SCENARIO\MPLAYER\J2PLAY09.OVH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY09.POP|d'
+    'g|SCENARIO\MPLAYER\J2PLAY09.PTH|d'
+    'g|SCENARIO\MPLAYER\J2PLAY09.SCN|d'
+    'g|SCENARIO\MPLAYER\J2PLAY09.TRO|d'
+    'g|SCENARIO\MPLAYER\J4PLAY01.MAP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY01.MTG|d'
+    'g|SCENARIO\MPLAYER\J4PLAY01.OVH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY01.POP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY01.PTH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY01.SCN|d'
+    'g|SCENARIO\MPLAYER\J4PLAY01.TRO|d'
+    'g|SCENARIO\MPLAYER\J4PLAY02.MAP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY02.MTG|d'
+    'g|SCENARIO\MPLAYER\J4PLAY02.OVH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY02.POP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY02.PTH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY02.SCN|d'
+    'g|SCENARIO\MPLAYER\J4PLAY02.TRO|d'
+    'g|SCENARIO\MPLAYER\J4PLAY03.MAP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY03.MTG|d'
+    'g|SCENARIO\MPLAYER\J4PLAY03.OVH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY03.POP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY03.PTH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY03.SCN|d'
+    'g|SCENARIO\MPLAYER\J4PLAY03.TRO|d'
+    'g|SCENARIO\MPLAYER\J4PLAY04.MAP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY04.MTG|d'
+    'g|SCENARIO\MPLAYER\J4PLAY04.OVH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY04.POP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY04.PTH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY04.SCN|d'
+    'g|SCENARIO\MPLAYER\J4PLAY04.TRO|d'
+    'g|SCENARIO\MPLAYER\J4PLAY05.MAP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY05.MTG|d'
+    'g|SCENARIO\MPLAYER\J4PLAY05.OVH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY05.POP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY05.PTH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY05.SCN|d'
+    'g|SCENARIO\MPLAYER\J4PLAY05.TRO|d'
+    'g|SCENARIO\MPLAYER\J4PLAY06.MAP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY06.MTG|d'
+    'g|SCENARIO\MPLAYER\J4PLAY06.OVH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY06.POP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY06.PTH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY06.SCN|d'
+    'g|SCENARIO\MPLAYER\J4PLAY06.TRO|d'
+    'g|SCENARIO\MPLAYER\J4PLAY07.MAP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY07.MTG|d'
+    'g|SCENARIO\MPLAYER\J4PLAY07.OVH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY07.POP|d'
+    'g|SCENARIO\MPLAYER\J4PLAY07.PTH|d'
+    'g|SCENARIO\MPLAYER\J4PLAY07.SCN|d'
+    'g|SCENARIO\MPLAYER\J4PLAY07.TRO|d'
+    'g|SCENARIO\MPLAYER\J6PLAY01.MAP|d'
+    'g|SCENARIO\MPLAYER\J6PLAY01.MTG|d'
+    'g|SCENARIO\MPLAYER\J6PLAY01.OVH|d'
+    'g|SCENARIO\MPLAYER\J6PLAY01.POP|d'
+    'g|SCENARIO\MPLAYER\J6PLAY01.PTH|d'
+    'g|SCENARIO\MPLAYER\J6PLAY01.SCN|d'
+    'g|SCENARIO\MPLAYER\J6PLAY01.TRO|d'
+    'g|SCENARIO\MPLAYER\J6PLAY02.MAP|d'
+    'g|SCENARIO\MPLAYER\J6PLAY02.MTG|d'
+    'g|SCENARIO\MPLAYER\J6PLAY02.OVH|d'
+    'g|SCENARIO\MPLAYER\J6PLAY02.POP|d'
+    'g|SCENARIO\MPLAYER\J6PLAY02.PTH|d'
+    'g|SCENARIO\MPLAYER\J6PLAY02.SCN|d'
+    'g|SCENARIO\MPLAYER\J6PLAY02.TRO|d'
+    'g|SCENARIO\MPLAYER\J8PLAY01.MAP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY01.MTG|d'
+    'g|SCENARIO\MPLAYER\J8PLAY01.OVH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY01.POP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY01.PTH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY01.SCN|d'
+    'g|SCENARIO\MPLAYER\J8PLAY01.TRO|d'
+    'g|SCENARIO\MPLAYER\J8PLAY02.MAP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY02.MTG|d'
+    'g|SCENARIO\MPLAYER\J8PLAY02.OVH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY02.POP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY02.PTH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY02.SCN|d'
+    'g|SCENARIO\MPLAYER\J8PLAY02.TRO|d'
+    'g|SCENARIO\MPLAYER\J8PLAY03.MAP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY03.MTG|d'
+    'g|SCENARIO\MPLAYER\J8PLAY03.OVH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY03.POP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY03.PTH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY03.SCN|d'
+    'g|SCENARIO\MPLAYER\J8PLAY03.TRO|d'
+    'g|SCENARIO\MPLAYER\J8PLAY04.MAP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY04.MTG|d'
+    'g|SCENARIO\MPLAYER\J8PLAY04.OVH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY04.POP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY04.PTH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY04.SCN|d'
+    'g|SCENARIO\MPLAYER\J8PLAY04.TRO|d'
+    'g|SCENARIO\MPLAYER\J8PLAY05.MAP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY05.MTG|d'
+    'g|SCENARIO\MPLAYER\J8PLAY05.OVH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY05.POP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY05.PTH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY05.SCN|d'
+    'g|SCENARIO\MPLAYER\J8PLAY05.TRO|d'
+    'g|SCENARIO\MPLAYER\J8PLAY06.MAP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY06.MTG|d'
+    'g|SCENARIO\MPLAYER\J8PLAY06.OVH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY06.POP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY06.PTH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY06.SCN|d'
+    'g|SCENARIO\MPLAYER\J8PLAY06.TRO|d'
+    'g|SCENARIO\MPLAYER\J8PLAY07.MAP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY07.MED|d'
+    'g|SCENARIO\MPLAYER\J8PLAY07.MTG|d'
+    'g|SCENARIO\MPLAYER\J8PLAY07.OVH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY07.POP|d'
+    'g|SCENARIO\MPLAYER\J8PLAY07.PTH|d'
+    'g|SCENARIO\MPLAYER\J8PLAY07.SCN|d'
+    'g|SCENARIO\MPLAYER\J8PLAY07.TRO|d'
+    'g|SCENARIO\MPLAYER\PALETTE.GIF|d'
+    'g|SCENARIO\MPLAYER\PALETTE.RGB|d'
+    'g|SCENARIO\MPLAYER\PALETTE.RMP|d'
+    'g|SCENARIO\MPLAYER\PMAP.EXE|d'
+    'g|SCENARIO\MPLAYER\PRIMES.DAT|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY01.MAP|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY01.MTG|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY01.PTH|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY01.SCN|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY02.MAP|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY02.MTG|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY02.PTH|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY02.SCN|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY03.MAP|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY03.MTG|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY03.PTH|d'
+    'g|SCENARIO\MULTI-~1\J2PLAY03.SCN|d'
+    'g|SCENARIO\MULTI-~1\J4PLAY01.MAP|d'
+    'g|SCENARIO\MULTI-~1\J4PLAY01.MTG|d'
+    'g|SCENARIO\MULTI-~1\J4PLAY01.PTH|d'
+    'g|SCENARIO\MULTI-~1\J4PLAY01.SCN|d'
+    'g|SCENARIO\MULTI-~1\J4PLAY01.TRM|d'
+    'g|SCENARIO\MULTI-~1\J4PLAY01.TRO|d'
+    'g|SCENARIO\MULTI-~1\J4PLAY02.MAP|d'
+    'g|SCENARIO\MULTI-~1\J4PLAY02.MTG|d'
+    'g|SCENARIO\MULTI-~1\J4PLAY02.PTH|d'
+    'g|SCENARIO\MULTI-~1\J4PLAY02.SCN|d'
+    'g|SCENARIO\MULTI-~1\J6PLAY01.MAP|d'
+    'g|SCENARIO\MULTI-~1\J6PLAY01.MTG|d'
+    'g|SCENARIO\MULTI-~1\J6PLAY01.PTH|d'
+    'g|SCENARIO\MULTI-~1\J6PLAY01.SCN|d'
+    'g|SCENARIO\MULTI-~1\J8PLAY01.MAP|d'
+    'g|SCENARIO\MULTI-~1\J8PLAY01.MTG|d'
+    'g|SCENARIO\MULTI-~1\J8PLAY01.PTH|d'
+    'g|SCENARIO\MULTI-~1\J8PLAY01.SCN|d'
+    'g|SCENARIO\TEST\7BACK.TXT|d'
+    'g|SCENARIO\TEST\ATRAIN1.001|d'
+    'g|SCENARIO\TEST\ATRAIN1.002|d'
+    'g|SCENARIO\TEST\ATRAIN1.MAP|d'
+    'g|SCENARIO\TEST\ATRAIN1.MSG|d'
+    'g|SCENARIO\TEST\ATRAIN1.MTG|d'
+    'g|SCENARIO\TEST\ATRAIN1.OVH|d'
+    'g|SCENARIO\TEST\ATRAIN1.PTH|d'
+    'g|SCENARIO\TEST\ATRAIN1.SCN|d'
+    'g|SCENARIO\TEST\ATRAIN1.TRO|d'
+    'g|SCENARIO\TEST\ATRAIN1.TXT|d'
+    'g|SCENARIO\TEST\ATRAIN2.001|d'
+    'g|SCENARIO\TEST\ATRAIN2.002|d'
+    'g|SCENARIO\TEST\ATRAIN2.003|d'
+    'g|SCENARIO\TEST\ATRAIN2.004|d'
+    'g|SCENARIO\TEST\ATRAIN2.MAP|d'
+    'g|SCENARIO\TEST\ATRAIN2.MSG|d'
+    'g|SCENARIO\TEST\ATRAIN2.MTG|d'
+    'g|SCENARIO\TEST\ATRAIN2.OVH|d'
+    'g|SCENARIO\TEST\ATRAIN2.PTH|d'
+    'g|SCENARIO\TEST\ATRAIN2.SCN|d'
+    'g|SCENARIO\TEST\ATRAIN2.TRO|d'
+    'g|SCENARIO\TEST\ATRAIN2.TXT|d'
+    'g|SCENARIO\TEST\ATRAIN3.001|d'
+    'g|SCENARIO\TEST\ATRAIN3.002|d'
+    'g|SCENARIO\TEST\ATRAIN3.003|d'
+    'g|SCENARIO\TEST\ATRAIN3.MAP|d'
+    'g|SCENARIO\TEST\ATRAIN3.MSG|d'
+    'g|SCENARIO\TEST\ATRAIN3.MTG|d'
+    'g|SCENARIO\TEST\ATRAIN3.OVH|d'
+    'g|SCENARIO\TEST\ATRAIN3.PTH|d'
+    'g|SCENARIO\TEST\ATRAIN3.SCN|d'
+    'g|SCENARIO\TEST\ATRAIN3.TRO|d'
+    'g|SCENARIO\TEST\ATRAIN3.TXT|d'
+    'g|SCENARIO\TEST\ATRAIN4.001|d'
+    'g|SCENARIO\TEST\ATRAIN4.002|d'
+    'g|SCENARIO\TEST\ATRAIN4.003|d'
+    'g|SCENARIO\TEST\ATRAIN4.MAP|d'
+    'g|SCENARIO\TEST\ATRAIN4.MSG|d'
+    'g|SCENARIO\TEST\ATRAIN4.MTG|d'
+    'g|SCENARIO\TEST\ATRAIN4.OVH|d'
+    'g|SCENARIO\TEST\ATRAIN4.PTH|d'
+    'g|SCENARIO\TEST\ATRAIN4.SCN|d'
+    'g|SCENARIO\TEST\ATRAIN4.TRO|d'
+    'g|SCENARIO\TEST\ATRAIN4.TXT|d'
+    'g|SCENARIO\TEST\ATRAIN5.001|d'
+    'g|SCENARIO\TEST\ATRAIN5.002|d'
+    'g|SCENARIO\TEST\ATRAIN5.003|d'
+    'g|SCENARIO\TEST\ATRAIN5.004|d'
+    'g|SCENARIO\TEST\ATRAIN5.005|d'
+    'g|SCENARIO\TEST\ATRAIN5.MAP|d'
+    'g|SCENARIO\TEST\ATRAIN5.MSG|d'
+    'g|SCENARIO\TEST\ATRAIN5.MTG|d'
+    'g|SCENARIO\TEST\ATRAIN5.OVH|d'
+    'g|SCENARIO\TEST\ATRAIN5.PTH|d'
+    'g|SCENARIO\TEST\ATRAIN5.SCN|d'
+    'g|SCENARIO\TEST\ATRAIN5.TRO|d'
+    'g|SCENARIO\TEST\ATRAIN5.TXT|d'
+    'g|SCENARIO\TEST\ATRAIN6.001|d'
+    'g|SCENARIO\TEST\ATRAIN6.002|d'
+    'g|SCENARIO\TEST\ATRAIN6.003|d'
+    'g|SCENARIO\TEST\ATRAIN6.004|d'
+    'g|SCENARIO\TEST\ATRAIN6.MAP|d'
+    'g|SCENARIO\TEST\ATRAIN6.MSG|d'
+    'g|SCENARIO\TEST\ATRAIN6.MTG|d'
+    'g|SCENARIO\TEST\ATRAIN6.OVH|d'
+    'g|SCENARIO\TEST\ATRAIN6.PTH|d'
+    'g|SCENARIO\TEST\ATRAIN6.SCN|d'
+    'g|SCENARIO\TEST\ATRAIN6.TRO|d'
+    'g|SCENARIO\TEST\ATRAIN6.TXT|d'
+    'g|SCENARIO\TEST\ATRAIN7.001|d'
+    'g|SCENARIO\TEST\ATRAIN7.002|d'
+    'g|SCENARIO\TEST\ATRAIN7.003|d'
+    'g|SCENARIO\TEST\ATRAIN7.MAP|d'
+    'g|SCENARIO\TEST\ATRAIN7.MSG|d'
+    'g|SCENARIO\TEST\ATRAIN7.MTG|d'
+    'g|SCENARIO\TEST\ATRAIN7.OVH|d'
+    'g|SCENARIO\TEST\ATRAIN7.PTH|d'
+    'g|SCENARIO\TEST\ATRAIN7.SCN|d'
+    'g|SCENARIO\TEST\ATRAIN7.TRO|d'
+    'g|SCENARIO\TEST\ATRAIN7.TXT|d'
+    'g|SCENARIO\TEST\HTRAIN1.001|d'
+    'g|SCENARIO\TEST\HTRAIN1.002|d'
+    'g|SCENARIO\TEST\HTRAIN1.MAP|d'
+    'g|SCENARIO\TEST\HTRAIN1.MSG|d'
+    'g|SCENARIO\TEST\HTRAIN1.MTG|d'
+    'g|SCENARIO\TEST\HTRAIN1.OVH|d'
+    'g|SCENARIO\TEST\HTRAIN1.PTH|d'
+    'g|SCENARIO\TEST\HTRAIN1.SCN|d'
+    'g|SCENARIO\TEST\HTRAIN1.TRO|d'
+    'g|SCENARIO\TEST\HTRAIN1.TXT|d'
+    'g|SCENARIO\TEST\HTRAIN2.001|d'
+    'g|SCENARIO\TEST\HTRAIN2.002|d'
+    'g|SCENARIO\TEST\HTRAIN2.003|d'
+    'g|SCENARIO\TEST\HTRAIN2.004|d'
+    'g|SCENARIO\TEST\HTRAIN2.MAP|d'
+    'g|SCENARIO\TEST\HTRAIN2.MSG|d'
+    'g|SCENARIO\TEST\HTRAIN2.MTG|d'
+    'g|SCENARIO\TEST\HTRAIN2.OVH|d'
+    'g|SCENARIO\TEST\HTRAIN2.PTH|d'
+    'g|SCENARIO\TEST\HTRAIN2.SCN|d'
+    'g|SCENARIO\TEST\HTRAIN2.TRO|d'
+    'g|SCENARIO\TEST\HTRAIN2.TXT|d'
+    'g|SCENARIO\TEST\HTRAIN3.001|d'
+    'g|SCENARIO\TEST\HTRAIN3.002|d'
+    'g|SCENARIO\TEST\HTRAIN3.003|d'
+    'g|SCENARIO\TEST\HTRAIN3.MAP|d'
+    'g|SCENARIO\TEST\HTRAIN3.MSG|d'
+    'g|SCENARIO\TEST\HTRAIN3.MTG|d'
+    'g|SCENARIO\TEST\HTRAIN3.OVH|d'
+    'g|SCENARIO\TEST\HTRAIN3.PTH|d'
+    'g|SCENARIO\TEST\HTRAIN3.SCN|d'
+    'g|SCENARIO\TEST\HTRAIN3.TRO|d'
+    'g|SCENARIO\TEST\HTRAIN3.TXT|d'
+    'g|SCENARIO\TEST\HTRAIN4.001|d'
+    'g|SCENARIO\TEST\HTRAIN4.002|d'
+    'g|SCENARIO\TEST\HTRAIN4.003|d'
+    'g|SCENARIO\TEST\HTRAIN4.MAP|d'
+    'g|SCENARIO\TEST\HTRAIN4.MSG|d'
+    'g|SCENARIO\TEST\HTRAIN4.MTG|d'
+    'g|SCENARIO\TEST\HTRAIN4.OVH|d'
+    'g|SCENARIO\TEST\HTRAIN4.PTH|d'
+    'g|SCENARIO\TEST\HTRAIN4.SCN|d'
+    'g|SCENARIO\TEST\HTRAIN4.TRO|d'
+    'g|SCENARIO\TEST\HTRAIN4.TXT|d'
+    'g|SCENARIO\TEST\HTRAIN5.001|d'
+    'g|SCENARIO\TEST\HTRAIN5.002|d'
+    'g|SCENARIO\TEST\HTRAIN5.003|d'
+    'g|SCENARIO\TEST\HTRAIN5.004|d'
+    'g|SCENARIO\TEST\HTRAIN5.005|d'
+    'g|SCENARIO\TEST\HTRAIN5.MAP|d'
+    'g|SCENARIO\TEST\HTRAIN5.MSG|d'
+    'g|SCENARIO\TEST\HTRAIN5.MTG|d'
+    'g|SCENARIO\TEST\HTRAIN5.OVH|d'
+    'g|SCENARIO\TEST\HTRAIN5.PTH|d'
+    'g|SCENARIO\TEST\HTRAIN5.SCN|d'
+    'g|SCENARIO\TEST\HTRAIN5.TRO|d'
+    'g|SCENARIO\TEST\HTRAIN5.TXT|d'
+    'g|SCENARIO\TEST\HTRAIN6.001|d'
+    'g|SCENARIO\TEST\HTRAIN6.002|d'
+    'g|SCENARIO\TEST\HTRAIN6.003|d'
+    'g|SCENARIO\TEST\HTRAIN6.MAP|d'
+    'g|SCENARIO\TEST\HTRAIN6.MSG|d'
+    'g|SCENARIO\TEST\HTRAIN6.MTG|d'
+    'g|SCENARIO\TEST\HTRAIN6.OVH|d'
+    'g|SCENARIO\TEST\HTRAIN6.PTH|d'
+    'g|SCENARIO\TEST\HTRAIN6.SCN|d'
+    'g|SCENARIO\TEST\HTRAIN6.TRO|d'
+    'g|SCENARIO\TEST\HTRAIN6.TXT|d'
+    'g|SCENARIO\TEST\HTRAIN7.001|d'
+    'g|SCENARIO\TEST\HTRAIN7.002|d'
+    'g|SCENARIO\TEST\HTRAIN7.003|d'
+    'g|SCENARIO\TEST\HTRAIN7.MAP|d'
+    'g|SCENARIO\TEST\HTRAIN7.MSG|d'
+    'g|SCENARIO\TEST\HTRAIN7.MTG|d'
+    'g|SCENARIO\TEST\HTRAIN7.OVH|d'
+    'g|SCENARIO\TEST\HTRAIN7.PTH|d'
+    'g|SCENARIO\TEST\HTRAIN7.SCN|d'
+    'g|SCENARIO\TEST\HTRAIN7.TRO|d'
+    'g|SCENARIO\TEST\HTRAIN7.TXT|d'
+    'g|SCENARIO\VENT.JUS|d'
+    'g|SOUND\A51.WAV|d'
+    'g|SOUND\ABOVE.WAV|d'
+    'g|SOUND\ACTIVE.WAV|d'
+    'g|SOUND\ALIST.DAT|d'
+    'g|SOUND\ARTACK.WAV|d'
+    'g|SOUND\ARTDIG.WAV|d'
+    'g|SOUND\ARTSEL.WAV|d'
+    'g|SOUND\ATLANTIS.AMB|d'
+    'g|SOUND\ATLANTIS.DAT|d'
+    'g|SOUND\ATRAIN.DAT|d'
+    'g|SOUND\ATRILDEA.WAV|d'
+    'g|SOUND\ATRILSEL.WAV|d'
+    'g|SOUND\ATRILWEA.WAV|d'
+    'g|SOUND\ATRL1ACK.WAV|d'
+    'g|SOUND\ATRL1DEA.WAV|d'
+    'g|SOUND\BALLDPLY.WAV|d'
+    'g|SOUND\BARR1SEL.WAV|d'
+    'g|SOUND\BARRACK.WAV|d'
+    'g|SOUND\BARRWEA.WAV|d'
+    'g|SOUND\BASE.WAV|d'
+    'g|SOUND\BATWEA.WAV|d'
+    'g|SOUND\BATWEA1.WAV|d'
+    'g|SOUND\BEAT.WAV|d'
+    'g|SOUND\BEAT2.WAV|d'
+    'g|SOUND\BEEP.WAV|d'
+    'g|SOUND\BELOW.WAV|d'
+    'g|SOUND\BEOP.WAV|d'
+    'g|SOUND\BIRDCALL.WAV|d'
+    'g|SOUND\BRTHWTR.WAV|d'
+    'g|SOUND\BUG.WAV|d'
+    'g|SOUND\BUTTON.WAV|d'
+    'g|SOUND\CAPTURE.WAV|d'
+    'g|SOUND\CHIGGERS.WAV|d'
+    'g|SOUND\CLICK.WAV|d'
+    'g|SOUND\CMND2NDF.WAV|d'
+    'g|SOUND\CMNDACK.WAV|d'
+    'g|SOUND\CMNDACK1.WAV|d'
+    'g|SOUND\CMNDACK2.WAV|d'
+    'g|SOUND\CMNDACK3.WAV|d'
+    'g|SOUND\CMNDDPLY.WAV|d'
+    'g|SOUND\CMNDSEL.WAV|d'
+    'g|SOUND\CMNDSEL1.WAV|d'
+    'g|SOUND\CREEP.WAV|d'
+    'g|SOUND\CY2NDFI.WAV|d'
+    'g|SOUND\CYACK1.WAV|d'
+    'g|SOUND\CYACK2.WAV|d'
+    'g|SOUND\CYACK3.WAV|d'
+    'g|SOUND\CYACK4.WAV|d'
+    'g|SOUND\CYDEA.WAV|d'
+    'g|SOUND\CYDPLY1.WAV|d'
+    'g|SOUND\CYDPLY2.WAV|d'
+    'g|SOUND\CYSEL1.WAV|d'
+    'g|SOUND\CYSEL2.WAV|d'
+    'g|SOUND\CYSEL3.WAV|d'
+    'g|SOUND\CYWEA.WAV|d'
+    'g|SOUND\DAYCHIRP.WAV|d'
+    'g|SOUND\DCHIRP2.WAV|d'
+    'g|SOUND\DCHIRP3.WAV|d'
+    'g|SOUND\DESERT.AMB|d'
+    'g|SOUND\DESERT.DAT|d'
+    'g|SOUND\DRAIN.WAV|d'
+    'g|SOUND\DROPLP.WAV|d'
+    'g|SOUND\DROPLPG.WAV|d'
+    'g|SOUND\ENGACK.WAV|d'
+    'g|SOUND\ENGDPLY.WAV|d'
+    'g|SOUND\ENGSEL.WAV|d'
+    'g|SOUND\ERUPT.WAV|d'
+    'g|SOUND\EXP1SEL.WAV|d'
+    'g|SOUND\EXPACK.WAV|d'
+    'g|SOUND\EXPLDPLY.WAV|d'
+    'g|SOUND\EXPLO.WAV|d'
+    'g|SOUND\EXPLO1.WAV|d'
+    'g|SOUND\EXPLO2.WAV|d'
+    'g|SOUND\EXPLO3.WAV|d'
+    'g|SOUND\EXPLODEA.WAV|d'
+    'g|SOUND\GC2NDFI.WAV|d'
+    'g|SOUND\GCACK.WAV|d'
+    'g|SOUND\GCACK1.WAV|d'
+    'g|SOUND\GCACK2.WAV|d'
+    'g|SOUND\GCACK3.WAV|d'
+    'g|SOUND\GCDPLY.WAV|d'
+    'g|SOUND\GCLAZER.WAV|d'
+    'g|SOUND\GCSEL.WAV|d'
+    'g|SOUND\GCSEL1.WAV|d'
+    'g|SOUND\GHELACK.WAV|d'
+    'g|SOUND\GHELDEA.WAV|d'
+    'g|SOUND\GHELSEL.WAV|d'
+    'g|SOUND\GHELSEL1.WAV|d'
+    'g|SOUND\GHELSEL2.WAV|d'
+    'g|SOUND\GMINEDEA.WAV|d'
+    'g|SOUND\GRAY1ACK.WAV|d'
+    'g|SOUND\GRAY1DEA.WAV|d'
+    'g|SOUND\GRAY1SEL.WAV|d'
+    'g|SOUND\GRAY1WEA.WAV|d'
+    'g|SOUND\GRAY2ACK.WAV|d'
+    'g|SOUND\GRAY2DEA.WAV|d'
+    'g|SOUND\GRAY2SEL.WAV|d'
+    'g|SOUND\GRAY2WEA.WAV|d'
+    'g|SOUND\GRAY3ACK.WAV|d'
+    'g|SOUND\GRAY3DEA.WAV|d'
+    'g|SOUND\GRAY3SEL.WAV|d'
+    'g|SOUND\GRAY3WEA.WAV|d'
+    'g|SOUND\GRAY4ACK.WAV|d'
+    'g|SOUND\GRAY4DEA.WAV|d'
+    'g|SOUND\GRUBWEA.WAV|d'
+    'g|SOUND\GRUBWEA1.WAV|d'
+    'g|SOUND\HBUILD.WAV|d'
+    'g|SOUND\HEAL.WAV|d'
+    'g|SOUND\HHELACK.WAV|d'
+    'g|SOUND\HHELDEA.WAV|d'
+    'g|SOUND\HHELSEL.WAV|d'
+    'g|SOUND\HHELSEL1.WAV|d'
+    'g|SOUND\HHELSEL2.WAV|d'
+    'g|SOUND\HLIGHT.WAV|d'
+    'g|SOUND\HMINEDEA.WAV|d'
+    'g|SOUND\HTRAIN.AMB|d'
+    'g|SOUND\HTRAIN.DAT|d'
+    'g|SOUND\HUM.WAV|d'
+    'g|SOUND\INDGDIE.WAV|d'
+    'g|SOUND\JUNGLE.AMB|d'
+    'g|SOUND\JUNGLE.DAT|d'
+    'g|SOUND\LENSDPLY.WAV|d'
+    'g|SOUND\LUNADPLY.WAV|d'
+    'g|SOUND\MECH1SEL.WAV|d'
+    'g|SOUND\MECH2SEL.WAV|d'
+    'g|SOUND\MECH3SEL.WAV|d'
+    'g|SOUND\MECHACK.WAV|d'
+    'g|SOUND\MECHDEA.WAV|d'
+    'g|SOUND\MECHDEA1.WAV|d'
+    'g|SOUND\MECHWEA.WAV|d'
+    'g|SOUND\MECHWEA2.WAV|d'
+    'g|SOUND\MECHWEA3.WAV|d'
+    'g|SOUND\MKTDPLY.WAV|d'
+    'g|SOUND\MONK.WAV|d'
+    'g|SOUND\MORTDEA.WAV|d'
+    'g|SOUND\MSG.WAV|d'
+    'g|SOUND\NAPALM.WAV|d'
+    'g|SOUND\NEWSND.DAT|d'
+    'g|SOUND\NIGHTBUG.WAV|d'
+    'g|SOUND\ORTU1ACK.WAV|d'
+    'g|SOUND\ORTU2ACK.WAV|d'
+    'g|SOUND\ORTUDEA.WAV|d'
+    'g|SOUND\ORTUSEL.WAV|d'
+    'g|SOUND\OWL.WAV|d'
+    'g|SOUND\PIPSTEAM.WAV|d'
+    'g|SOUND\PSY1SEL.WAV|d'
+    'g|SOUND\PSY2NDFI.WAV|d'
+    'g|SOUND\PSY2SEL.WAV|d'
+    'g|SOUND\PSYACK.WAV|d'
+    'g|SOUND\PSYDEA.WAV|d'
+    'g|SOUND\PSYDPLY.WAV|d'
+    'g|SOUND\PSYSEL.WAV|d'
+    'g|SOUND\REZIN.WAV|d'
+    'g|SOUND\RNATWEA.WAV|d'
+    'g|SOUND\RNATWEA1.WAV|d'
+    'g|SOUND\ROCK.WAV|d'
+    'g|SOUND\SALWEA.WAV|d'
+    'g|SOUND\SALWEA1.WAV|d'
+    'g|SOUND\SCENESND.DAT|d'
+    'g|SOUND\SCYT1SEL.WAV|d'
+    'g|SOUND\SILENCE.WAV|d'
+    'g|SOUND\SLIST.DAT|d'
+    'g|SOUND\SLOMACK.WAV|d'
+    'g|SOUND\SLOMDPLY.WAV|d'
+    'g|SOUND\SLOMSEL.WAV|d'
+    'g|SOUND\SLUGAKN.WAV|d'
+    'g|SOUND\SLUGDEA.WAV|d'
+    'g|SOUND\SLUGDPY.WAV|d'
+    'g|SOUND\SLUGSEL.WAV|d'
+    'g|SOUND\SNIPER.WAV|d'
+    'g|SOUND\SNIPER2.WAV|d'
+    'g|SOUND\SOUND2.DAT|d'
+    'g|SOUND\SPECIAL.AMB|d'
+    'g|SOUND\SPIDWEA.WAV|d'
+    'g|SOUND\SPIDWEA1.WAV|d'
+    'g|SOUND\SYCWEA.WAV|d'
+    'g|SOUND\SYTH1ACK.WAV|d'
+    'g|SOUND\SYTH1WEA.WAV|d'
+    'g|SOUND\SYTH2ACK.WAV|d'
+    'g|SOUND\SYTH2WEA.WAV|d'
+    'g|SOUND\SYTH3ACK.WAV|d'
+    'g|SOUND\SYTHDEA.WAV|d'
+    'g|SOUND\SYTHDEA1.WAV|d'
+    'g|SOUND\SYTHDEA2.WAV|d'
+    'g|SOUND\SYTHSEL.WAV|d'
+    'g|SOUND\TEKDPLY.WAV|d'
+    'g|SOUND\TINGLE.WAV|d'
+    'g|SOUND\TOWERDEA.WAV|d'
+    'g|SOUND\TOWERWEA.WAV|d'
+    'g|SOUND\TROPDEA.WAV|d'
+    'g|SOUND\TROPDEA1.WAV|d'
+    'g|SOUND\TROPDEA2.WAV|d'
+    'g|SOUND\TROPDEA3.WAV|d'
+    'g|SOUND\TRP1ACK.WAV|d'
+    'g|SOUND\TRP1SEL.WAV|d'
+    'g|SOUND\TRP1WEA.WAV|d'
+    'g|SOUND\TRP1WEAU.WAV|d'
+    'g|SOUND\TRP2ACK.WAV|d'
+    'g|SOUND\TRP2WEA.WAV|d'
+    'g|SOUND\TRP2WEAU.WAV|d'
+    'g|SOUND\TRP3ACK.WAV|d'
+    'g|SOUND\TRP3SEL.WAV|d'
+    'g|SOUND\TRPWEA.WAV|d'
+    'g|SOUND\TRPWEAU.WAV|d'
+    'g|SOUND\TURRACK.WAV|d'
+    'g|SOUND\TURRDPLY.WAV|d'
+    'g|SOUND\TURRSEL.WAV|d'
+    'g|SOUND\UNIT.WAV|d'
+    'g|SOUND\VENTPOO.WAV|d'
+    'g|SOUND\VTOL1SEL.WAV|d'
+    'g|SOUND\VTOLACK.WAV|d'
+    'g|SOUND\VTOLACK2.WAV|d'
+    'g|SOUND\VTOLDEA.WAV|d'
+    'g|SOUND\VTOLWEA.WAV|d'
+    'g|SOUND\WATER.WAV|d'
+    'g|SOUND\WHALE.WAV|d'
+    'g|SOUND\XENODEA.WAV|d'
+    'g|SOUND\XENODPLY.WAV|d'
+    'g|SOUND\XENOSEL.WAV|d'
+    'g|SPECIAL.GIF|d'
+    'g|SPRITES\ACAR.SPR|d'
+    'g|SPRITES\ACOM.SPR|d'
+    'g|SPRITES\AIRD.SPR|d'
+    'g|SPRITES\ALBU.SPR|d'
+    'g|SPRITES\ALIEN1.SPR|d'
+    'g|SPRITES\ARTILER2.SPR|d'
+    'g|SPRITES\ARTY.SPR|d'
+    'g|SPRITES\ATRIL.SPR|d'
+    'g|SPRITES\ATTACK2.SPR|d'
+    'g|SPRITES\AVII.SPR|d'
+    'g|SPRITES\BARR.SPR|d'
+    'g|SPRITES\BBIT.SPR|d'
+    'g|SPRITES\BEAC.SPR|d'
+    'g|SPRITES\BEES.SPR|d'
+    'g|SPRITES\BEON.SPR|d'
+    'g|SPRITES\BIGC.SPR|d'
+    'g|SPRITES\BITS.SPR|d'
+    'g|SPRITES\BLAH.SPR|d'
+    'g|SPRITES\BLAM.SPR|d'
+    'g|SPRITES\BLAZ.SPR|d'
+    'g|SPRITES\BLOO.SPR|d'
+    'g|SPRITES\BOIG.SPR|d'
+    'g|SPRITES\BRIT.SPR|d'
+    'g|SPRITES\BUILDNG.SPR|d'
+    'g|SPRITES\CAMM.SPR|d'
+    'g|SPRITES\CENT.SPR|d'
+    'g|SPRITES\CHAA.SPR|d'
+    'g|SPRITES\CHAB.SPR|d'
+    'g|SPRITES\CHOA.SPR|d'
+    'g|SPRITES\CHOB.SPR|d'
+    'g|SPRITES\CHOC.SPR|d'
+    'g|SPRITES\CHOD.SPR|d'
+    'g|SPRITES\CLOC.SPR|d'
+    'g|SPRITES\CLOD.SPR|d'
+    'g|SPRITES\CRYO.SPR|d'
+    'g|SPRITES\CURS.SPR|d'
+    'g|SPRITES\CYBORG.SPR|d'
+    'g|SPRITES\DCSS.SPR|d'
+    'g|SPRITES\DCUK.SPR|d'
+    'g|SPRITES\DCUT.SPR|d'
+    'g|SPRITES\DISH.SPR|d'
+    'g|SPRITES\DOTT.SPR|d'
+    'g|SPRITES\DROA.SPR|d'
+    'g|SPRITES\DROP.SPR|d'
+    'g|SPRITES\DSTY.SPR|d'
+    'g|SPRITES\DUTS.SPR|d'
+    'g|SPRITES\EGG.SPR|d'
+    'g|SPRITES\ENCA.SPR|d'
+    'g|SPRITES\ENCB.SPR|d'
+    'g|SPRITES\ENCC.SPR|d'
+    'g|SPRITES\ENCD.SPR|d'
+    'g|SPRITES\ENCE.SPR|d'
+    'g|SPRITES\ENCF.SPR|d'
+    'g|SPRITES\ENGI.SPR|d'
+    'g|SPRITES\EXPL.SPR|d'
+    'g|SPRITES\FACT.SPR|d'
+    'g|SPRITES\FETU.SPR|d'
+    'g|SPRITES\FILL.SPR|d'
+    'g|SPRITES\FIRA.SPR|d'
+    'g|SPRITES\FIRB.SPR|d'
+    'g|SPRITES\FIRE.SPR|d'
+    'g|SPRITES\FLUCTION.SPR|d'
+    'g|SPRITES\FRIEGHT.SPR|d'
+    'g|SPRITES\FUEL.SPR|d'
+    'g|SPRITES\GASY.SPR|d'
+    'g|SPRITES\GLAT.SPR|d'
+    'g|SPRITES\GLIT.SPR|d'
+    'g|SPRITES\GLOT.SPR|d'
+    'g|SPRITES\GRAY.SPR|d'
+    'g|SPRITES\GRND.SPR|d'
+    'g|SPRITES\GRUB.SPR|d'
+    'g|SPRITES\HCAR.SPR|d'
+    'g|SPRITES\HCOM.SPR|d'
+    'g|SPRITES\HITA.SPR|d'
+    'g|SPRITES\HITB.SPR|d'
+    'g|SPRITES\HITC.SPR|d'
+    'g|SPRITES\HITD.SPR|d'
+    'g|SPRITES\HITE.SPR|d'
+    'g|SPRITES\HITF.SPR|d'
+    'g|SPRITES\HITG.SPR|d'
+    'g|SPRITES\HITH.SPR|d'
+    'g|SPRITES\HITT.SPR|d'
+    'g|SPRITES\HUBU.SPR|d'
+    'g|SPRITES\HYYK.SPR|d'
+    'g|SPRITES\IT.SPR|d'
+    'g|SPRITES\KNOBE.SPR|d'
+    'g|SPRITES\LEFT.SPR|d'
+    'g|SPRITES\LENS.SPR|d'
+    'g|SPRITES\LEVEL.SPR|d'
+    'g|SPRITES\LLLL.SPR|d'
+    'g|SPRITES\LUNA.SPR|d'
+    'g|SPRITES\LUNY.SPR|d'
+    'g|SPRITES\MAKT.SPR|d'
+    'g|SPRITES\MATATRAC.SPR|d'
+    'g|SPRITES\MISA.INF|d'
+    'g|SPRITES\MISA.SPR|d'
+    'g|SPRITES\MISB.SPR|d'
+    'g|SPRITES\MISC.SPR|d'
+    'g|SPRITES\MISD.SPR|d'
+    'g|SPRITES\MISE.SPR|d'
+    'g|SPRITES\MISF.SPR|d'
+    'g|SPRITES\MISG.SPR|d'
+    'g|SPRITES\MISH.SPR|d'
+    'g|SPRITES\MORE.SPR|d'
+    'g|SPRITES\MSLS.SPR|d'
+    'g|SPRITES\MUZA.SPR|d'
+    'g|SPRITES\MWIA.SPR|d'
+    'g|SPRITES\MWIB.SPR|d'
+    'g|SPRITES\MWIC.SPR|d'
+    'g|SPRITES\MWID.SPR|d'
+    'g|SPRITES\NETA.SPR|d'
+    'g|SPRITES\NETB.SPR|d'
+    'g|SPRITES\NETC.SPR|d'
+    'g|SPRITES\NETD.SPR|d'
+    'g|SPRITES\NETE.SPR|d'
+    'g|SPRITES\NUKE.SPR|d'
+    'g|SPRITES\ORTU.SPR|d'
+    'g|SPRITES\PCFO.JUS|d'
+    'g|SPRITES\PCFO.SPR|d'
+    'g|SPRITES\PLASMA.SPR|d'
+    'g|SPRITES\POPP.SPR|d'
+    'g|SPRITES\POPPPAEN.SPR|d'
+    'g|SPRITES\PORT.SPR|d'
+    'g|SPRITES\PSYC.SPR|d'
+    'g|SPRITES\PUFF.SPR|d'
+    'g|SPRITES\PUSB.SPR|d'
+    'g|SPRITES\REAP.SPR|d'
+    'g|SPRITES\RNAT.SPR|d'
+    'g|SPRITES\SALA.SPR|d'
+    'g|SPRITES\SALY.SPR|d'
+    'g|SPRITES\SARG.SPR|d'
+    'g|SPRITES\SAUC.SPR|d'
+    'g|SPRITES\SCGM.JUS|d'
+    'g|SPRITES\SCGM.SPR|d'
+    'g|SPRITES\SCOU.SPR|d'
+    'g|SPRITES\SCOUT1.SPR|d'
+    'g|SPRITES\SCUT.SPR|d'
+    'g|SPRITES\SCYT.SPR|d'
+    'g|SPRITES\SERA.SPR|d'
+    'g|SPRITES\SERB.SPR|d'
+    'g|SPRITES\SERC.SPR|d'
+    'g|SPRITES\SERD.SPR|d'
+    'g|SPRITES\SERE.SPR|d'
+    'g|SPRITES\SHOK.SPR|d'
+    'g|SPRITES\SHORTCIT.SPR|d'
+    'g|SPRITES\SHRI.SPR|d'
+    'g|SPRITES\SIDE.SPR|d'
+    'g|SPRITES\SLOM.SPR|d'
+    'g|SPRITES\SLUG.B00|d'
+    'g|SPRITES\SLUG.SPR|d'
+    'g|SPRITES\SMAE.SPR|d'
+    'g|SPRITES\SMAY.SPR|d'
+    'g|SPRITES\SMOA.SPR|d'
+    'g|SPRITES\SMOK.SPR|d'
+    'g|SPRITES\SMSP.SPR|d'
+    'g|SPRITES\SONIC.SPR|d'
+    'g|SPRITES\SPAC.SPR|d'
+    'g|SPRITES\SPAK.SPR|d'
+    'g|SPRITES\SPAR.SPR|d'
+    'g|SPRITES\SPED.SPR|d'
+    'g|SPRITES\SPID.SPR|d'
+    'g|SPRITES\SPIKE.SPR|d'
+    'g|SPRITES\SPON.SPR|d'
+    'g|SPRITES\SPOT.SPR|d'
+    'g|SPRITES\SPUC.SPR|d'
+    'g|SPRITES\SRCH.SPR|d'
+    'g|SPRITES\SSSS.SPR|d'
+    'g|SPRITES\TEKT.SPR|d'
+    'g|SPRITES\TEKTARA.SPR|d'
+    'g|SPRITES\TIMEMIS.SPR|d'
+    'g|SPRITES\TONG.SPR|d'
+    'g|SPRITES\TORT.SPR|d'
+    'g|SPRITES\TOWR.SPR|d'
+    'g|SPRITES\TOXX.SPR|d'
+    'g|SPRITES\TROOPER1.SPR|d'
+    'g|SPRITES\TROOPER2.SPR|d'
+    'g|SPRITES\TRSC.SPR|d'
+    'g|SPRITES\TRUK.SPR|d'
+    'g|SPRITES\TURR.SPR|d'
+    'g|SPRITES\VCAL.SPR|d'
+    'g|SPRITES\VCEA.SPR|d'
+    'g|SPRITES\VENT.SPR|d'
+    'g|SPRITES\VENT2.SPR|d'
+    'g|SPRITES\WATC.SPR|d'
+    'g|SPRITES\WEATH.SPR|d'
+    'g|SPRITES\WINA.SPR|d'
+    'g|SPRITES\WINB.SPR|d'
+    'g|SPRITES\WINC.SPR|d'
+    'g|SPRITES\WIND.SPR|d'
+    'g|SPRITES\WINE.SPR|d'
+    'g|SPRITES\WINF.SPR|d'
+    'g|SPRITES\XENO.SPR|d'
+    'g|SPRITES\YABA.SPR|d'
+    'g|SPRITES\ZISP.SPR|d'
+    'g|WALLPAPR\ATRFU4.BMP|d'
+    'g|WALLPAPR\EXPLOIT.BMP|d'
+    'g|WALLPAPR\FIRESTRM.BMP|d'
+    'g|WALLPAPR\GORREM.BMP|d'
+    'g|WALLPAPR\GRAY.BMP|d'
+    'g|WALLPAPR\ORTU3.BMP|d'
+    'g|WALLPAPR\OSPREYIV.BMP|d'
+    'g|WALLPAPR\REAPER.BMP|d'
+    'g|WALLPAPR\SARGE.BMP|d'
+    'g|WALLPAPR\SENTINEL.BMP|d'
+    'g|WALLPAPR\SLUG.BMP|d'
+    'g|WALLPAPR\SYTHE.BMP|d'
+    'g|WALLPAPR\TROOPER.BMP|d'
+    'g|dc\intrface\credits.txt|c|/EXPENG/EXP/INTRFACE/CREDITS.TXT'
+    'g|exp\alta.gif|c'
+    'g|exp\alta.rgb|c'
+    'g|exp\alta.rmp|c'
+    'g|exp\anim.dat|c'
+    'g|exp\animate\carb.fin|c'
+    'g|exp\animate\carr.fin|c'
+    'g|exp\animate\grrr.fin|c'
+    'g|exp\animate\horn.fin|c'
+    'g|exp\animate\pimp.fin|c'
+    'g|exp\animate\pimptowr.fin|c'
+    'g|exp\animate\scid.fin|c'
+    'g|exp\animate\snak.fin|c'
+    'g|exp\animate\tran.fin|c'
+    'g|exp\animate\troo.fin|c'
+    'g|exp\animate\urur.fin|c'
+    'g|exp\animate\vato.fin|c'
+    'g|exp\area52.gif|c'
+    'g|exp\area52.rgb|c'
+    'g|exp\area52.rmp|c'
+    'g|exp\earth.gif|c'
+    'g|exp\gamestat\gamestat.txt|c'
+    'g|exp\gamestat\gxmestat.txt|c'
+    'g|exp\gamestat\gxscene.txt|c'
+    'g|exp\gamestat\hxscene.txt|c'
+    'g|exp\intrface\astory.txt|c'
+    'g|exp\intrface\credits.txt|c'
+    'g|exp\intrface\hstory.txt|c'
+    'g|exp\intrface\intrg.gif|c'
+    'g|exp\intrface\intro.gif|c'
+    'g|exp\intrface\introe|c'
+    'g|exp\intrface\shumane|c'
+    'g|exp\jubjub.gif|c'
+    'g|exp\jubjub.rgb|c'
+    'g|exp\jubjub.rmp|c'
+    'g|exp\mission\g1.wav|c'
+    'g|exp\mission\g2.wav|c'
+    'g|exp\mission\g3.wav|c'
+    'g|exp\mission\g4.wav|c'
+    'g|exp\mission\g5.wav|c'
+    'g|exp\mission\g6.wav|c'
+    'g|exp\mission\g7.wav|c'
+    'g|exp\mission\g8.wav|c'
+    'g|exp\mission\h1.wav|c'
+    'g|exp\mission\h2.wav|c'
+    'g|exp\mission\h3.wav|c'
+    'g|exp\mission\h4.wav|c'
+    'g|exp\mission\h5.wav|c'
+    'g|exp\mission\h6.wav|c'
+    'g|exp\mission\h7.wav|c'
+    'g|exp\mission\h8.wav|c'
+    'g|exp\scenario\aerogen\aero01.001|c'
+    'g|exp\scenario\aerogen\aero01.002|c'
+    'g|exp\scenario\aerogen\aero01.map|c'
+    'g|exp\scenario\aerogen\aero01.msg|c'
+    'g|exp\scenario\aerogen\aero01.mtg|c'
+    'g|exp\scenario\aerogen\aero01.ovh|c'
+    'g|exp\scenario\aerogen\aero01.pth|c'
+    'g|exp\scenario\aerogen\aero01.scn|c'
+    'g|exp\scenario\aerogen\aero01.tro|c'
+    'g|exp\scenario\aerogen\aero01.txt|c'
+    'g|exp\scenario\aerogen\aero02.001|c'
+    'g|exp\scenario\aerogen\aero02.002|c'
+    'g|exp\scenario\aerogen\aero02.map|c'
+    'g|exp\scenario\aerogen\aero02.msg|c'
+    'g|exp\scenario\aerogen\aero02.mtg|c'
+    'g|exp\scenario\aerogen\aero02.ovh|c'
+    'g|exp\scenario\aerogen\aero02.pth|c'
+    'g|exp\scenario\aerogen\aero02.scn|c'
+    'g|exp\scenario\aerogen\aero02.tro|c'
+    'g|exp\scenario\aerogen\aero02.txt|c'
+    'g|exp\scenario\aerogen\aero03.001|c'
+    'g|exp\scenario\aerogen\aero03.002|c'
+    'g|exp\scenario\aerogen\aero03.map|c'
+    'g|exp\scenario\aerogen\aero03.msg|c'
+    'g|exp\scenario\aerogen\aero03.mtg|c'
+    'g|exp\scenario\aerogen\aero03.ovh|c'
+    'g|exp\scenario\aerogen\aero03.pth|c'
+    'g|exp\scenario\aerogen\aero03.scn|c'
+    'g|exp\scenario\aerogen\aero03.tro|c'
+    'g|exp\scenario\aerogen\aero03.txt|c'
+    'g|exp\scenario\aerogen\aero04.001|c'
+    'g|exp\scenario\aerogen\aero04.002|c'
+    'g|exp\scenario\aerogen\aero04.map|c'
+    'g|exp\scenario\aerogen\aero04.msg|c'
+    'g|exp\scenario\aerogen\aero04.mtg|c'
+    'g|exp\scenario\aerogen\aero04.ovh|c'
+    'g|exp\scenario\aerogen\aero04.pth|c'
+    'g|exp\scenario\aerogen\aero04.scn|c'
+    'g|exp\scenario\aerogen\aero04.tro|c'
+    'g|exp\scenario\aerogen\aero04.txt|c'
+    'g|exp\scenario\aerogen\aero05.001|c'
+    'g|exp\scenario\aerogen\aero05.002|c'
+    'g|exp\scenario\aerogen\aero05.map|c'
+    'g|exp\scenario\aerogen\aero05.msg|c'
+    'g|exp\scenario\aerogen\aero05.mtg|c'
+    'g|exp\scenario\aerogen\aero05.ovh|c'
+    'g|exp\scenario\aerogen\aero05.pth|c'
+    'g|exp\scenario\aerogen\aero05.scn|c'
+    'g|exp\scenario\aerogen\aero05.tro|c'
+    'g|exp\scenario\aerogen\aero05.txt|c'
+    'g|exp\scenario\aerogen\aero06.001|c'
+    'g|exp\scenario\aerogen\aero06.002|c'
+    'g|exp\scenario\aerogen\aero06.map|c'
+    'g|exp\scenario\aerogen\aero06.msg|c'
+    'g|exp\scenario\aerogen\aero06.mtg|c'
+    'g|exp\scenario\aerogen\aero06.ovh|c'
+    'g|exp\scenario\aerogen\aero06.pth|c'
+    'g|exp\scenario\aerogen\aero06.scn|c'
+    'g|exp\scenario\aerogen\aero06.tro|c'
+    'g|exp\scenario\aerogen\aero06.txt|c'
+    'g|exp\scenario\aerogen\aero07.001|c'
+    'g|exp\scenario\aerogen\aero07.002|c'
+    'g|exp\scenario\aerogen\aero07.map|c'
+    'g|exp\scenario\aerogen\aero07.msg|c'
+    'g|exp\scenario\aerogen\aero07.mtg|c'
+    'g|exp\scenario\aerogen\aero07.ovh|c'
+    'g|exp\scenario\aerogen\aero07.pth|c'
+    'g|exp\scenario\aerogen\aero07.scn|c'
+    'g|exp\scenario\aerogen\aero07.tro|c'
+    'g|exp\scenario\aerogen\aero07.txt|c'
+    'g|exp\scenario\aerogen\aero08.001|c'
+    'g|exp\scenario\aerogen\aero08.002|c'
+    'g|exp\scenario\aerogen\aero08.map|c'
+    'g|exp\scenario\aerogen\aero08.msg|c'
+    'g|exp\scenario\aerogen\aero08.mtg|c'
+    'g|exp\scenario\aerogen\aero08.ovh|c'
+    'g|exp\scenario\aerogen\aero08.pth|c'
+    'g|exp\scenario\aerogen\aero08.scn|c'
+    'g|exp\scenario\aerogen\aero08.tro|c'
+    'g|exp\scenario\aerogen\aero08.txt|c'
+    'g|exp\scenario\alta.bts|c'
+    'g|exp\scenario\area52.bts|c'
+    'g|exp\scenario\council\coun01.001|c'
+    'g|exp\scenario\council\coun01.002|c'
+    'g|exp\scenario\council\coun01.map|c'
+    'g|exp\scenario\council\coun01.msg|c'
+    'g|exp\scenario\council\coun01.mtg|c'
+    'g|exp\scenario\council\coun01.ovh|c'
+    'g|exp\scenario\council\coun01.pth|c'
+    'g|exp\scenario\council\coun01.scn|c'
+    'g|exp\scenario\council\coun01.tro|c'
+    'g|exp\scenario\council\coun01.txt|c'
+    'g|exp\scenario\council\coun02.001|c'
+    'g|exp\scenario\council\coun02.002|c'
+    'g|exp\scenario\council\coun02.map|c'
+    'g|exp\scenario\council\coun02.msg|c'
+    'g|exp\scenario\council\coun02.mtg|c'
+    'g|exp\scenario\council\coun02.ovh|c'
+    'g|exp\scenario\council\coun02.pth|c'
+    'g|exp\scenario\council\coun02.scn|c'
+    'g|exp\scenario\council\coun02.tro|c'
+    'g|exp\scenario\council\coun02.txt|c'
+    'g|exp\scenario\council\coun03.001|c'
+    'g|exp\scenario\council\coun03.002|c'
+    'g|exp\scenario\council\coun03.map|c'
+    'g|exp\scenario\council\coun03.msg|c'
+    'g|exp\scenario\council\coun03.mtg|c'
+    'g|exp\scenario\council\coun03.ovh|c'
+    'g|exp\scenario\council\coun03.pth|c'
+    'g|exp\scenario\council\coun03.scn|c'
+    'g|exp\scenario\council\coun03.tro|c'
+    'g|exp\scenario\council\coun03.txt|c'
+    'g|exp\scenario\council\coun04.001|c'
+    'g|exp\scenario\council\coun04.002|c'
+    'g|exp\scenario\council\coun04.map|c'
+    'g|exp\scenario\council\coun04.msg|c'
+    'g|exp\scenario\council\coun04.mtg|c'
+    'g|exp\scenario\council\coun04.ovh|c'
+    'g|exp\scenario\council\coun04.pth|c'
+    'g|exp\scenario\council\coun04.scn|c'
+    'g|exp\scenario\council\coun04.tro|c'
+    'g|exp\scenario\council\coun04.txt|c'
+    'g|exp\scenario\council\coun05.001|c'
+    'g|exp\scenario\council\coun05.002|c'
+    'g|exp\scenario\council\coun05.003|c'
+    'g|exp\scenario\council\coun05.map|c'
+    'g|exp\scenario\council\coun05.msg|c'
+    'g|exp\scenario\council\coun05.mtg|c'
+    'g|exp\scenario\council\coun05.ovh|c'
+    'g|exp\scenario\council\coun05.pth|c'
+    'g|exp\scenario\council\coun05.scn|c'
+    'g|exp\scenario\council\coun05.tro|c'
+    'g|exp\scenario\council\coun05.txt|c'
+    'g|exp\scenario\council\coun06.001|c'
+    'g|exp\scenario\council\coun06.002|c'
+    'g|exp\scenario\council\coun06.003|c'
+    'g|exp\scenario\council\coun06.map|c'
+    'g|exp\scenario\council\coun06.msg|c'
+    'g|exp\scenario\council\coun06.mtg|c'
+    'g|exp\scenario\council\coun06.ovh|c'
+    'g|exp\scenario\council\coun06.pth|c'
+    'g|exp\scenario\council\coun06.scn|c'
+    'g|exp\scenario\council\coun06.tro|c'
+    'g|exp\scenario\council\coun06.txt|c'
+    'g|exp\scenario\council\coun07.001|c'
+    'g|exp\scenario\council\coun07.002|c'
+    'g|exp\scenario\council\coun07.003|c'
+    'g|exp\scenario\council\coun07.map|c'
+    'g|exp\scenario\council\coun07.msg|c'
+    'g|exp\scenario\council\coun07.mtg|c'
+    'g|exp\scenario\council\coun07.ovh|c'
+    'g|exp\scenario\council\coun07.pth|c'
+    'g|exp\scenario\council\coun07.scn|c'
+    'g|exp\scenario\council\coun07.tro|c'
+    'g|exp\scenario\council\coun07.txt|c'
+    'g|exp\scenario\council\coun08.001|c'
+    'g|exp\scenario\council\coun08.002|c'
+    'g|exp\scenario\council\coun08.map|c'
+    'g|exp\scenario\council\coun08.msg|c'
+    'g|exp\scenario\council\coun08.mtg|c'
+    'g|exp\scenario\council\coun08.ovh|c'
+    'g|exp\scenario\council\coun08.pth|c'
+    'g|exp\scenario\council\coun08.scn|c'
+    'g|exp\scenario\council\coun08.tro|c'
+    'g|exp\scenario\council\coun08.txt|c'
+    'g|exp\scenario\earth.bts|c'
+    'g|exp\scenario\jubjub.bts|c'
+    'g|exp\sound\alta.amb|c'
+    'g|exp\sound\area52.amb|c'
+    'g|exp\sound\birds.wav|c'
+    'g|exp\sound\cobra.wav|c'
+    'g|exp\sound\cow.wav|c'
+    'g|exp\sound\cricket.wav|c'
+    'g|exp\sound\dog.wav|c'
+    'g|exp\sound\dog2.wav|c'
+    'g|exp\sound\earth.amb|c'
+    'g|exp\sound\frog.wav|c'
+    'g|exp\sound\frogs.wav|c'
+    'g|exp\sound\gease.wav|c'
+    'g|exp\sound\jubjub.amb|c'
+    'g|exp\sound\mosq.wav|c'
+    'g|exp\sound\r2bird.wav|c'
+    'g|exp\sound\seagull.wav|c'
+    'g|exp\sound\slist.dat|c'
+    'g|exp\sound\sound2.dat|c'
+    'g|exp\sound\turkey.wav|c'
+    'g|exp\sound\water.wav|c'
+    'g|exp\sound\wolf.wav|c'
+    'g|exp\sprites\carr.spr|c'
+    'g|exp\sprites\horn.spr|c'
+    'g|exp\sprites\pimp.spr|c'
+    'g|exp\sprites\pimptowr.spr|c'
+    'g|exp\sprites\scid.spr|c'
+    'g|exp\sprites\snak.spr|c'
+    'g|exp\sprites\tran.spr|c'
+    'g|exp\sprites\urur.spr|c'
+    'g|exp\sprites\vato.spr|c'
+    'g|ozi_ns\alta.gif|c|/EXPENG/EXP/ALTA.GIF'
+    'g|ozi_ns\alta.rgb|c|/EXPENG/EXP/ALTA.RGB'
+    'g|ozi_ns\alta.rmp|c|/EXPENG/EXP/ALTA.RMP'
+    'g|ozi_ns\area52.gif|c|/EXPENG/EXP/AREA52.GIF'
+    'g|ozi_ns\area52.rgb|c|/EXPENG/EXP/AREA52.RGB'
+    'g|ozi_ns\area52.rmp|c|/EXPENG/EXP/AREA52.RMP'
+    'g|ozi_ns\earth.gif|c|/EXPENG/EXP/EARTH.GIF'
+    'g|ozi_ns\gJUNGLE.RMP|d|/DC/JUNGLE.RMP'
+    'g|ozi_ns\gatlan.GIF|d|/DC/ATLANTIS.GIF'
+    'g|ozi_ns\gatlan.NCY|d|/DC/ATLANTIS.NCY'
+    'g|ozi_ns\gatlan.RGB|d|/DC/ATLANTIS.RGB'
+    'g|ozi_ns\gatlan.RMP|d|/DC/ATLANTIS.RMP'
+    'g|ozi_ns\gjungle.gif|d|/DC/JUNGLE.GIF'
+    'g|ozi_ns\gjungle.rgb|d|/DC/JUNGLE.RGB'
+    'g|ozi_ns\intrface\credits.txt|c|/EXPENG/EXP/INTRFACE/CREDITS.TXT'
+    'g|ozi_ns\jubjub.gif|c|/EXPENG/EXP/JUBJUB.GIF'
+    'g|ozi_ns\jubjub.rgb|c|/EXPENG/EXP/JUBJUB.RGB'
+    'g|ozi_ns\jubjub.rmp|c|/EXPENG/EXP/JUBJUB.RMP'
+    'g|ozi_ns\scenario\DESERT.BTS|d|/DC/SCENARIO/DESERT.BTS'
+    'g|ozi_ns\scenario\GJUNGLE.BTS|d|/DC/SCENARIO/JUNGLE.BTS'
+    'g|ozi_ns\scenario\HTRAIN.BTS|d|/DC/SCENARIO/HTRAIN.BTS'
+    'g|ozi_ns\scenario\JUNGLE.BTS|d|/DC/SCENARIO/JUNGLE.BTS'
+    'g|ozi_ns\scenario\all.jus|d|/DC/SCENARIO/ALL.JUS'
+    'g|ozi_ns\scenario\alta.bts|c|/EXPENG/EXP/SCENARIO/ALTA.BTS'
+    'g|ozi_ns\scenario\area52.bts|c|/EXPENG/EXP/SCENARIO/AREA52.BTS'
+    'g|ozi_ns\scenario\atlantis.bts|d|/DC/SCENARIO/ATLANTIS.BTS'
+    'g|ozi_ns\scenario\council\tarr02.pop|d|/DC/SCENARIO/MPLAYER/A2PLAY01.POP'
+    'g|ozi_ns\scenario\council\tarr04.mtg|d|/DC/SCENARIO/ALIEN/ALIEN02.MTG'
+    'g|ozi_ns\scenario\council\tarr10.mtg|d|/DC/SCENARIO/ALIEN/ALIEN07.MTG'
+    'g|ozi_ns\scenario\council\tarr11.mtg|c|/EXPENG/EXP/SCENARIO/AEROGEN/AERO03.MTG'
+    'g|ozi_ns\scenario\earth.bts|c|/EXPENG/EXP/SCENARIO/EARTH.BTS'
+    'g|ozi_ns\scenario\gatlan.bts|d|/DC/SCENARIO/ATLANTIS.BTS'
+    'g|ozi_ns\scenario\globo\globo05.mtg|c|/EXPENG/EXP/SCENARIO/AEROGEN/AERO02.MTG'
+    'g|ozi_ns\scenario\globo\globo06.mtg|c|/EXPENG/EXP/SCENARIO/AEROGEN/AERO03.MTG'
+    'g|ozi_ns\scenario\globo\globo11.mtg|c|/EXPENG/EXP/SCENARIO/AEROGEN/AERO03.MTG'
+    'g|ozi_ns\scenario\trainh.bts|d|/DC/SCENARIO/HTRAIN.BTS'
+    'g|ozi_ns\scenario\vent.jus|d|/DC/SCENARIO/VENT.JUS'
+    'g|ozi_ns\sound\ALIST.DAT|c|/DC/FSOUND/ALIST.DAT'
+    'g|ozi_ns\sound\ATLANTIS.AMB|c|/DC/FSOUND/ATLANTIS.AMB'
+    'g|ozi_ns\sound\ATLANTIS.DAT|c|/DC/FSOUND/ATLANTIS.DAT'
+    'g|ozi_ns\sound\ATRAIN.DAT|c|/DC/FSOUND/ATLANTIS.DAT'
+    'g|ozi_ns\sound\GJUNGLE.AMB|c|/DC/FSOUND/JUNGLE.AMB'
+    'g|ozi_ns\sound\GJUNGLE.DAT|c|/DC/FSOUND/ATLANTIS.DAT'
+    'g|ozi_ns\sound\SCENESND.DAT|c|/DC/FSOUND/SCENESND.DAT'
+    'g|ozi_ns\sound\alta.amb|c|/DC/FSOUND/DESERT.AMB'
+    'g|ozi_ns\sound\area52.amb|c|/DC/FSOUND/DESERT.AMB'
+    'g|ozi_ns\sound\birds.wav|c|/EXPENG/EXP/SOUND/BIRDS.WAV'
+    'g|ozi_ns\sound\cobra.wav|c|/EXPENG/EXP/SOUND/COBRA.WAV'
+    'g|ozi_ns\sound\cow.wav|c|/EXPENG/EXP/SOUND/COW.WAV'
+    'g|ozi_ns\sound\cricket.wav|c|/EXPENG/EXP/SOUND/CRICKET.WAV'
+    'g|ozi_ns\sound\dog.wav|c|/EXPENG/EXP/SOUND/DOG.WAV'
+    'g|ozi_ns\sound\dog2.wav|c|/EXPENG/EXP/SOUND/DOG2.WAV'
+    'g|ozi_ns\sound\earth.amb|c|/DC/FSOUND/HTRAIN.AMB'
+    'g|ozi_ns\sound\frog.wav|c|/EXPENG/EXP/SOUND/CRICKET.WAV'
+    'g|ozi_ns\sound\frogs.wav|c|/EXPENG/EXP/SOUND/FROGS.WAV'
+    'g|ozi_ns\sound\gatlan.AMB|c|/DC/FSOUND/ATLANTIS.AMB'
+    'g|ozi_ns\sound\gease.wav|c|/EXPENG/EXP/SOUND/GEASE.WAV'
+    'g|ozi_ns\sound\jubjub.amb|c|/DC/FSOUND/DESERT.AMB'
+    'g|ozi_ns\sound\mosq.wav|c|/EXPENG/EXP/SOUND/MOSQ.WAV'
+    'g|ozi_ns\sound\r2bird.wav|c|/EXPENG/EXP/SOUND/R2BIRD.WAV'
+    'g|ozi_ns\sound\seagull.wav|c|/EXPENG/EXP/SOUND/SEAGULL.WAV'
+    'g|ozi_ns\sound\turkey.wav|c|/EXPENG/EXP/SOUND/TURKEY.WAV'
+    'g|ozi_ns\sound\water.wav|c|/EXPENG/EXP/SOUND/WATER.WAV'
+    'g|ozi_ns\sound\wolf.wav|c|/EXPENG/EXP/SOUND/WOLF.WAV'
+    'g|ozi_ns\special.gif|c|/EXPENG/EXP/JUBJUB.GIF'
+    'g|ozi_ns\special.rgb|c|/EXPENG/EXP/JUBJUB.RGB'
+    'g|ozi_ns\special.rmp|c|/EXPENG/EXP/JUBJUB.RMP'
+    'e|maped.exe|d'
+    'e|scenario\all.jus|d'
+    'e|scenario\atlantis.bts|d'
+    'e|scenario\desert.bts|d'
+    'e|scenario\desert.set|d'
+    'e|scenario\jungle.bts|d'
+    'e|scenario\jungle.set|d'
+    'e|scenario\mplayer\palette.gif|d'
+    'e|scenario\mplayer\palette.rgb|d'
+    'e|scenario\mplayer\palette.rmp|d'
+    'e|scenario\mplayer\pmap.exe|d'
+    'e|scenario\mplayer\primes.dat|d'
+    'e|scenario\vent.jus|d'
+)
+# the installer derives these (not on a disc as they are): the January 1998 update's repair of mission 9's trigger
+# file (the disc's text has a typo, `&&==`), the two drive-letter files the original installers wrote (the patched
+# exes never read them, the untouched originals look for the disc on that drive), the editor's own copy
+$DiscDerived = @(
+    @{ Root = 'g'; To = 'SCENARIO\HUMAN\human09.tro'; Disc = 'd'; From = '/DC/SCENARIO/HUMAN/HUMAN09.TRO'; Rule = 'tro_typo' }
+    @{ Root = 'g'; To = 'HBNFUFL.A01'; Text = ("D:`r`n" + [char] 0x1A) }
+    @{ Root = 'g'; To = 'HBNFUFL.A02'; Text = ("D:`r`n" + [char] 0x1A) }
+    @{ Root = 'e'; To = 'hbnfufl.a01'; Text = ("C:`r`n" + [char] 0x1A) }
+)
+# the two originals the discs provide, verified against the builds' SHA-256 after extraction
+$DiscOriginals = @(
+    @{ Build = 'CouncilWars'; Disc = 'c'; From = '/EXPENG/ENGEXP16.EXE'; Root = 'g'; To = 'ENGEXP16.EXE' }
+    @{ Build = 'MapEditor';   Disc = 'd'; From = '/DC/MAPED.EXE';        Root = 'e'; To = 'maped.exe' }
+)
+# the layout of a fresh install: the game in the chosen folder, the map editor in a sub-folder
+$InstallSubfolder = @{ g = ''; e = 'Map editor' }
+
+
+function Get-InstallRoot([string] $Dir, [string] $Root) {
+    $sub = $InstallSubfolder[$Root]
+    if ($sub) { return (Join-Path $Dir $sub) } else { return $Dir }
+}
+# the disc path of a manifest line (its 4th field, or the natural place)
+function Get-DiscSourcePath([string] $Root, [string] $To, [string] $From) {
+    if ($From) { return $From }
+    $fwd = $To.Replace('\', '/')
+    if ($Root -eq 'e') { if ($fwd.StartsWith('scenario/', [StringComparison]::OrdinalIgnoreCase)) { return '/DC/SCENARIO/' + $fwd.Substring(9) } else { return '/DC/' + $fwd } }
+    if ($fwd.StartsWith('exp/', [StringComparison]::OrdinalIgnoreCase)) { return '/EXPENG/EXP/' + $fwd.Substring(4) }
+    return '/DC/' + $fwd
+}
+function Open-Disc([string] $Path, [string] $What) {
+    Initialize-DiscReader
+    if (-not $Path) { throw "no $What given" }
+    $p = $Path.Trim()
+    if ($p -match '^[A-Za-z]:$') { $p += '\' }
+    if (-not (Test-Path -LiteralPath $p)) { throw "$What not found: $Path" }
+    try { $d = [DcDisc]::Open((Get-AbsolutePath $p)) } catch { throw ("{0} cannot be read as a disc: {1}" -f $What, $_.Exception.Message) }
+    try { $d.ScanAudio() } catch { $d.AudioNote = 'the audio tracks could not be read: ' + $_.Exception.Message }
+    return $d
+}
+
+# --- the soundtrack (5 Oct 2026, maintainer: "music is on the original discs as real music disc tracks. installer must
+# rip them, and if possible convert to mp3").  Both CDs are mixed-mode: tracks 2-5 are the music the game played from
+# the CD; the `music` fix plays MUSIC\TRACK02-05.MP3 (the Dark Colony disc's) and exp\music\track02-05.mp3 (the Council
+# Wars disc's) instead.  The installer writes each track as WAV (DcDisc.WriteTrackWav: the raw 2352-byte audio sectors
+# ARE 44.1 kHz 16-bit stereo PCM) and encodes it to MP3 at 192 kbit/s with Windows' own encoder through the WinRT
+# MediaTranscoder (Windows 8 and later; the "N" editions lack it without the Media Feature Pack).  WinRT is reachable
+# from Windows PowerShell 5.1 only, so PowerShell 7 runs the encoder in a powershell.exe child.  The game's MCI player
+# (mpegvideo) refuses a WAV under the .mp3 name, so without an encoder the music is left out.
+$Mp3TranscoderScript = @'
+param([string] $In, [string] $Out)
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Runtime.WindowsRuntime
+$null = [Windows.Media.Transcoding.MediaTranscoder, Windows.Media, ContentType = WindowsRuntime]
+$null = [Windows.Storage.StorageFile, Windows.Storage, ContentType = WindowsRuntime]
+$null = [Windows.Media.MediaProperties.MediaEncodingProfile, Windows.Media, ContentType = WindowsRuntime]
+$methods = [System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 }
+$asTaskOp = $methods | Where-Object { $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1' } | Select-Object -First 1
+$asTaskActP = $methods | Where-Object { $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncActionWithProgress`1' } | Select-Object -First 1
+function AwaitOp($op, $type) { $t = $asTaskOp.MakeGenericMethod($type).Invoke($null, @($op)); $t.Wait(); return $t.Result }
+function AwaitAct($op, $type) { $t = $asTaskActP.MakeGenericMethod($type).Invoke($null, @($op)); $t.Wait() }
+if (-not (Test-Path -LiteralPath $Out)) { [System.IO.File]::WriteAllBytes($Out, [byte[]] @()) }
+$src = AwaitOp ([Windows.Storage.StorageFile]::GetFileFromPathAsync([System.IO.Path]::GetFullPath($In))) ([Windows.Storage.StorageFile])
+$dst = AwaitOp ([Windows.Storage.StorageFile]::GetFileFromPathAsync([System.IO.Path]::GetFullPath($Out))) ([Windows.Storage.StorageFile])
+$profile = [Windows.Media.MediaProperties.MediaEncodingProfile]::CreateMp3([Windows.Media.MediaProperties.AudioEncodingQuality]::High)
+$profile.Audio.Bitrate = 192000
+$profile.Audio.SampleRate = 44100
+$profile.Audio.ChannelCount = 2
+$tc = New-Object Windows.Media.Transcoding.MediaTranscoder
+$prep = AwaitOp ($tc.PrepareFileTranscodeAsync($src, $dst, $profile)) ([Windows.Media.Transcoding.PrepareTranscodeResult])
+if (-not $prep.CanTranscode) { throw ('Windows cannot encode MP3 here (' + $prep.FailureReason + ') - an "N" edition without the Media Feature Pack?') }
+AwaitAct ($prep.TranscodeAsync()) ([double])
+if ((Get-Item -LiteralPath $Out).Length -lt 1000) { throw 'the encoder wrote an empty file' }
+'@
+function ConvertTo-Mp3([string] $Wav, [string] $Mp3) {
+    if ($PSVersionTable.PSEdition -eq 'Desktop') {
+        & ([scriptblock]::Create($Mp3TranscoderScript)) $Wav $Mp3
+        return
+    }
+    # PowerShell 7 has no WinRT projection: the same script in a Windows PowerShell child
+    $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ('dc_mp3_' + [System.Diagnostics.Process]::GetCurrentProcess().Id + '.ps1')
+    $err = $tmp + '.err'
+    [System.IO.File]::WriteAllText($tmp, $Mp3TranscoderScript)
+    try {
+        $exe = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+        $pr = Start-Process -FilePath $exe -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ('"' + $tmp + '"'), ('"' + $Wav + '"'), ('"' + $Mp3 + '"')) -Wait -PassThru -WindowStyle Hidden -RedirectStandardError $err
+        if ($pr.ExitCode -ne 0) {
+            $msg = ''; if (Test-Path -LiteralPath $err) { $msg = ((Get-Content -LiteralPath $err -Raw) -replace '\s+', ' ').Trim() }
+            if ($msg.Length -gt 300) { $msg = $msg.Substring(0, 300) }
+            throw ('the MP3 encoder (Windows PowerShell child) failed: ' + $msg)
+        }
+    } finally { foreach ($x in $tmp, $err) { if (Test-Path -LiteralPath $x) { Remove-Item -LiteralPath $x -Force -ErrorAction SilentlyContinue } } }
+}
+$script:mp3Encoder = $null     # @{ Ok; Note } once tested
+function Test-Mp3Encoder {
+    if ($script:mp3Encoder) { return $script:mp3Encoder }
+    $dir = Join-Path ([System.IO.Path]::GetTempPath()) ('dc_mp3test_' + [System.Diagnostics.Process]::GetCurrentProcess().Id)
+    [void] [System.IO.Directory]::CreateDirectory($dir)
+    $wav = Join-Path $dir 'probe.wav'; $mp3 = Join-Path $dir 'probe.mp3'
+    try {
+        # a fifth of a second of silence, 44.1 kHz 16-bit stereo
+        $n = 8820 * 4
+        $ms = New-Object System.IO.MemoryStream
+        $w = New-Object System.IO.BinaryWriter($ms)
+        $w.Write([System.Text.Encoding]::ASCII.GetBytes('RIFF')); $w.Write([int](36 + $n)); $w.Write([System.Text.Encoding]::ASCII.GetBytes('WAVEfmt '))
+        $w.Write([int]16); $w.Write([int16]1); $w.Write([int16]2); $w.Write([int]44100); $w.Write([int](44100 * 4)); $w.Write([int16]4); $w.Write([int16]16)
+        $w.Write([System.Text.Encoding]::ASCII.GetBytes('data')); $w.Write([int]$n); $w.Write((New-Object byte[] $n))
+        [System.IO.File]::WriteAllBytes($wav, $ms.ToArray())
+        ConvertTo-Mp3 $wav $mp3
+        $script:mp3Encoder = @{ Ok = $true; Note = '' }
+    } catch {
+        $script:mp3Encoder = @{ Ok = $false; Note = $_.Exception.Message }
+    } finally { try { [System.IO.Directory]::Delete($dir, $true) } catch { } }
+    return $script:mp3Encoder
+}
+# Rips the four music tracks of each disc into the install folder as MP3.  Returns text lines.
+function Install-DiscMusic($Cw, $Dc, [string] $Dir, [scriptblock] $Progress) {
+    $lines = @()
+    $jobs = @(@{ Disc = $Dc; Name = 'Dark Colony'; Folder = 'MUSIC'; Pattern = 'TRACK{0:D2}.MP3' },
+              @{ Disc = $Cw; Name = 'Council Wars'; Folder = 'exp\music'; Pattern = 'track{0:D2}.mp3' })
+    foreach ($j in $jobs) {
+        $folder = Join-Path (Get-InstallRoot $Dir 'g') $j.Folder
+        $have = 0
+        foreach ($n in 2..5) { $q = Join-Path $folder ($j.Pattern -f $n); if ((Test-Path -LiteralPath $q) -and (Get-Item -LiteralPath $q).Length -gt 100000) { $have++ } }
+        if ($have -eq 4) { $lines += ('{0} soundtrack: the four MP3 files are already in {1}\' -f $j.Name, $j.Folder); continue }
+        $d = $j.Disc
+        if ($d.AudioTracks.Count -lt 4) {
+            $why = if ($d.AudioNote) { $d.AudioNote } else { 'only ' + $d.AudioTracks.Count + ' audio track(s) on this disc' }
+            $lines += ('{0} soundtrack NOT written ({1}) - fix music is left out; use the .bin / .cue image or the disc itself' -f $j.Name, $why); continue
+        }
+        $enc = Test-Mp3Encoder
+        if (-not $enc.Ok) { $lines += ('{0} soundtrack NOT written: {1}' -f $j.Name, $enc.Note); continue }
+        [void] [System.IO.Directory]::CreateDirectory($folder)
+        $done = 0; $secs = 0.0
+        for ($i = 0; $i -lt 4; $i++) {
+            $mp3 = Join-Path $folder ($j.Pattern -f ($i + 2)); $wav = $mp3 + '.wav'
+            if ($Progress) { & $Progress ("Ripping the {0} soundtrack from the disc: track {1} of 4, encoding to MP3 (192 kbit/s)..." -f $j.Name, ($i + 1)) }
+            try {
+                $secs += $d.WriteTrackWav($i, $wav)
+                ConvertTo-Mp3 $wav $mp3
+                $done++
+            } catch {
+                $lines += ('{0} soundtrack: track {1} NOT written: {2}' -f $j.Name, ($i + 2), $_.Exception.Message)
+                if (Test-Path -LiteralPath $mp3) { Remove-Item -LiteralPath $mp3 -Force -ErrorAction SilentlyContinue }
+                break
+            } finally {
+                if (Test-Path -LiteralPath $wav) { Remove-Item -LiteralPath $wav -Force -ErrorAction SilentlyContinue }
+            }
+        }
+        if ($done -gt 0) { $lines += ('{0} soundtrack: {1} of 4 tracks ripped from the disc into {2}\ ({3} min of music, MP3 192 kbit/s)' -f $j.Name, $done, $j.Folder, [int][Math]::Round($secs / 60)) }
+    }
+    return $lines
+}
+# Is this the Council Wars disc / the Dark Colony disc?  Returns '' when yes, else what is wrong with it.
+function Test-CouncilWarsDisc($Disc) {
+    if (-not $Disc.Has('/EXPENG/ENGEXP16.EXE')) { return ('no EXPENG\ENGEXP16.EXE on it (volume "{0}", {1} files) - this is not the Council Wars CD' -f $Disc.Volume, $Disc.Files.Count) }
+    if (-not $Disc.Has('/EXPENG/EXP/ANIM.DAT')) { return ('EXPENG\EXP\ANIM.DAT missing (volume "{0}") - the expansion data is not on this disc' -f $Disc.Volume) }
+    return ''
+}
+function Test-DarkColonyDisc($Disc) {
+    if (-not $Disc.Has('/DC/GAMESTAT/GAMESTAT.TXT') -or -not $Disc.Has('/DC/SCENARIO/HUMAN/HUMAN01.SCN')) { return ('no DC\GAMESTAT and DC\SCENARIO on it (volume "{0}", {1} files) - this is not the Dark Colony CD' -f $Disc.Volume, $Disc.Files.Count) }
+    if (-not $Disc.Has('/DC/MAPED.EXE')) { return ('DC\MAPED.EXE missing (volume "{0}") - the map editor is not on this disc' -f $Disc.Volume) }
+    return ''
+}
+# Extracts the two originals (ENGEXP16.EXE, maped.exe) into the install folder and checks their SHA-256 against
+# the builds.  Returns @{ CouncilWars = <path>; MapEditor = <path> }; throws when a disc is wrong or an exe is
+# another build.  Cheap (1.3 MB), so the window does it when the discs page is left.
+function Install-DiscOriginals([string] $CwPath, [string] $DcPath, [string] $Dir) {
+    $cw = Open-Disc $CwPath 'the Council Wars disc'; $dc = Open-Disc $DcPath 'the Dark Colony disc'
+    try {
+        $bad = Test-CouncilWarsDisc $cw; if ($bad) { throw "Council Wars disc: $bad" }
+        $bad = Test-DarkColonyDisc $dc;  if ($bad) { throw "Dark Colony disc: $bad" }
+        $out = @{}
+        # the soundtrack: both discs with four audio tracks and an MP3 encoder on this PC = the music fix will have its files
+        $audio = ($cw.AudioTracks.Count -ge 4 -and $dc.AudioTracks.Count -ge 4)
+        $note = if ($cw.AudioTracks.Count -lt 4) { 'Council Wars disc: ' + $(if ($cw.AudioNote) { $cw.AudioNote } else { 'only ' + $cw.AudioTracks.Count + ' audio track(s)' }) }
+                elseif ($dc.AudioTracks.Count -lt 4) { 'Dark Colony disc: ' + $(if ($dc.AudioNote) { $dc.AudioNote } else { 'only ' + $dc.AudioTracks.Count + ' audio track(s)' }) } else { '' }
+        if ($audio) { $enc = Test-Mp3Encoder; if (-not $enc.Ok) { $audio = $false; $note = $enc.Note } }
+        $out['Audio'] = $audio; $out['AudioNote'] = $note
+        foreach ($o in $DiscOriginals) {
+            $disc = if ($o.Disc -eq 'c') { $cw } else { $dc }
+            $dest = Join-Path (Get-InstallRoot $Dir $o.Root) $o.To
+            [void] $disc.Extract($o.From, $dest)
+            $b = $null; foreach ($x in $Builds) { if ($x.Id -eq $o.Build) { $b = $x } }
+            $sha = Get-Sha256Hex ([System.IO.File]::ReadAllBytes($dest))
+            if ($sha -ne $b.OriginalSha256) {
+                throw ("{0} on the disc is not the build these fixes are written for ({1} bytes, SHA-256 {2}; expected {3}). Another pressing or language? The English Council Wars and the UK Dark Colony discs are the known ones." -f $o.From, (Get-Item -LiteralPath $dest).Length, $sha, $b.OriginalSha256)
+            }
+            $out[$o.Build] = $dest
+        }
+        return $out
+    } finally { $cw.Dispose(); $dc.Dispose() }
+}
+# Copies the whole game from the two discs into $Dir (every $DiscFiles line, then the derived files).  A file already
+# there with the right size is kept (a second run after an interruption only fills the gaps).  Returns
+# @{ Files; Bytes; Skipped; Missing = @(disc paths this disc does not have) }.  $Progress gets a line per folder.
+function Install-GameFromDiscs([string] $CwPath, [string] $DcPath, [string] $Dir, [scriptblock] $Progress) {
+    $cw = Open-Disc $CwPath 'the Council Wars disc'; $dc = Open-Disc $DcPath 'the Dark Colony disc'
+    try {
+        $bad = Test-CouncilWarsDisc $cw; if ($bad) { throw "Council Wars disc: $bad" }
+        $bad = Test-DarkColonyDisc $dc;  if ($bad) { throw "Dark Colony disc: $bad" }
+        foreach ($r in 'g', 'e') { [void] [System.IO.Directory]::CreateDirectory((Get-InstallRoot $Dir $r)) }
+        $files = 0; $bytes = [long] 0; $skipped = 0; $missing = @(); $lastTop = ''
+        $total = $DiscFiles.Count; $i = 0
+        foreach ($line in $DiscFiles) {
+            $i++
+            $f = $line.Split('|')
+            $root = $f[0]; $to = $f[1]; $disc = if ($f[2] -eq 'c') { $cw } else { $dc }
+            $src = Get-DiscSourcePath $root $to $(if ($f.Count -gt 3) { $f[3] } else { '' })
+            $dest = Join-Path (Get-InstallRoot $Dir $root) $to
+            $top = ($to -split '\\')[0]
+            if ($top -ne $lastTop -and $Progress) { & $Progress ("Copying the game from the discs: {0}\{1} ({2} of {3} files)..." -f $(if ($root -eq 'e') { 'Map editor\' } else { '' }), $top, $i, $total); $lastTop = $top }
+            if (-not $disc.Has($src)) { $missing += $src; continue }
+            if ((Test-Path -LiteralPath $dest) -and (Get-Item -LiteralPath $dest).Length -eq $disc.SizeOf($src) -and -not $to.EndsWith('.EXE', [StringComparison]::OrdinalIgnoreCase)) { $skipped++; continue }
+            $bytes += $disc.Extract($src, $dest); $files++
+        }
+        foreach ($d in $DiscDerived) {
+            $dest = Join-Path (Get-InstallRoot $Dir $d.Root) $d.To
+            # ($parent, not $dir: PowerShell variable names are case-insensitive and $Dir is the parameter)
+            $parent = Split-Path -Parent $dest; if (-not (Test-Path -LiteralPath $parent)) { [void] [System.IO.Directory]::CreateDirectory($parent) }
+            if ($d.ContainsKey('Text')) { [System.IO.File]::WriteAllBytes($dest, $script:latin1.GetBytes($d.Text)); continue }
+            $disc = if ($d.Disc -eq 'c') { $cw } else { $dc }
+            if (-not $disc.Has($d.From)) { $missing += $d.From; continue }
+            $data = $disc.Read($d.From)
+            if ($d.Rule -eq 'tro_typo') { $data = $script:latin1.GetBytes($script:latin1.GetString($data).Replace('&&==', '==')) }
+            [System.IO.File]::WriteAllBytes($dest, $data); $files++
+        }
+        foreach ($sub in 'SAVE', 'ESAVE', 'ozisave') { [void] [System.IO.Directory]::CreateDirectory((Join-Path (Get-InstallRoot $Dir 'g') $sub)) }
+        $music = @(Install-DiscMusic $cw $dc $Dir $Progress)
+        return @{ Files = $files; Bytes = $bytes; Skipped = $skipped; Missing = $missing; Music = $music }
+    } finally { $cw.Dispose(); $dc.Dispose() }
+}
+
+# =================================================================================================
+#  RESOURCES - the project's own files, copied from patcher\game | patcher\editor into the game folders
+#
+#  Since 5 Oct 2026 the patcher's resources live beside this script (patcher\game: the painted backdrops and HUD
+#  frames per size in HD_SRC, the console banks, the re-baked logo banks, the tracer bullets, the icon, the
+#  ozi_ns mission pack, the DARK COLONY mode's tables, DEFAULT_SERVER.TXT; patcher\editor: the Borland runtime
+#  DLLs of the map editor and the Atlantis block set), not in the game folders.  Before a build is patched they
+#  are copied into its folder (Copy-Resources; an identical file is left alone), and a fix's Data file counts as
+#  present when the resource folder holds it (Test-DataFile).  The game folder of the repository therefore
+#  gets these copies on the maintainer's own runs; they are listed in its .gitignore.
+# =================================================================================================
+$ResourceRoots = @{ CouncilWars = 'game'; Classic = 'game'; MapEditor = 'editor' }
+function Get-ResourceRoot($Build) { return (Join-Path $PSScriptRoot $ResourceRoots[$Build.Id]) }
+# A planned disc install (@{ Dir; Cw; Dc }, set by the window's discs page and by the command line): the game files
+# are not in the install folder yet when the fixes are checked, but the discs will provide every manifest file at
+# Patch - so for that folder a data file counts as present when the manifest lists it.
+$script:DiscInstall = $null
+$script:discTargets = $null
+function Get-DiscTargets {
+    if (-not $script:discTargets) {
+        $h = New-Object 'System.Collections.Generic.HashSet[string]'
+        foreach ($line in $DiscFiles) { $f = $line.Split('|'); [void] $h.Add(($f[0] + '|' + $f[1]).ToUpperInvariant()) }
+        foreach ($d in $DiscDerived) { [void] $h.Add(($d.Root + '|' + $d.To).ToUpperInvariant()) }
+        $script:discTargets = $h
+    }
+    return $script:discTargets
+}
+function Test-DataFile($Build, [string] $GameDir, [string] $Rel) {
+    if (Test-Path -LiteralPath (Join-Path $GameDir $Rel)) { return $true }
+    if (Test-Path -LiteralPath (Join-Path (Get-ResourceRoot $Build) $Rel)) { return $true }
+    if ($script:DiscInstall) {
+        $root = if ($ResourceRoots[$Build.Id] -eq 'editor') { 'e' } else { 'g' }
+        $expect = [System.IO.Path]::GetFullPath((Get-InstallRoot $script:DiscInstall.Dir $root)).TrimEnd('\')
+        if ([System.IO.Path]::GetFullPath($GameDir).TrimEnd('\') -ieq $expect) {
+            if ($Rel -match '^(?i)(MUSIC|exp\\music)\\track0[2-5]\.mp3$') { return [bool] $script:DiscInstall.Audio }   # the soundtrack ripped from the discs
+            return (Get-DiscTargets).Contains(($root + '|' + $Rel).ToUpperInvariant())
+        }
+    }
+    return $false
+}
+$script:resourcesCopied = @{}
+function Copy-Resources($Build, [string] $GameDir, [scriptblock] $Progress) {
+    $src = Get-ResourceRoot $Build
+    $key = $src.ToLowerInvariant() + '>' + ([System.IO.Path]::GetFullPath($GameDir)).ToLowerInvariant()
+    if ($script:resourcesCopied.ContainsKey($key)) { return @() }
+    if (-not (Test-Path -LiteralPath $src)) { return @(('resources NOT copied: the folder {0} beside this script is missing - the fixes that need them are skipped' -f $src)) }
+    $n = 0; $same = 0; $total = 0
+    foreach ($f in [System.IO.Directory]::GetFiles($src, '*', 'AllDirectories')) {
+        $total++
+        $rel = $f.Substring($src.TrimEnd('\').Length + 1)
+        $dest = Join-Path $GameDir $rel
+        if ((Test-Path -LiteralPath $dest) -and (Get-Item -LiteralPath $dest).Length -eq (Get-Item -LiteralPath $f).Length) {
+            $a = [System.IO.File]::ReadAllBytes($f); $b = [System.IO.File]::ReadAllBytes($dest)
+            if ([System.Linq.Enumerable]::SequenceEqual($a, $b)) { $same++; continue }
+        }
+        if ($Progress -and ($n % 40) -eq 0) { & $Progress ("Copying the patcher's resources into {0} ({1} of {2} files)..." -f (Split-Path -Leaf $GameDir), $total, @([System.IO.Directory]::GetFiles($src, '*', 'AllDirectories')).Count) }
+        $parent = Split-Path -Parent $dest; if (-not (Test-Path -LiteralPath $parent)) { [void] [System.IO.Directory]::CreateDirectory($parent) }
+        [System.IO.File]::Copy($f, $dest, $true); $n++
+    }
+    $script:resourcesCopied[$key] = $true
+    return @(('resources: {0} file(s) copied from {1} into the game folder ({2} already there)' -f $n, (Split-Path -Leaf $src), $same))
+}
+
+
 # =================================================================================================
 #  WINDOW - the installer front end (Windows Forms, part of every Windows PowerShell)
 # =================================================================================================
@@ -16619,7 +19571,8 @@ function Show-PatcherWindow([string] $PreloadPath) {
     }
     $script:gui = @{ Items = $items; Sel = -1; Step = 0; Syncing = $false; Mode = ''; Theme = ''; IncludeDeprecated = $false
                      ModeList = @(); Patches = @(); Monitor = (Get-MonitorSize); Visible = @(); Last = 0
-                     Here = $PSScriptRoot; Results = $null }     # Here = the folder this script sits in = the repository root
+                     Here = (Split-Path -Parent $PSScriptRoot); Results = $null      # Here = the parent of patcher\ = the repository root (or the unpacked installer package)
+                     Disc = $false; DiscCw = ''; DiscDc = ''; DiscDir = (Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'Dark Colony'); Base = 1 }
     foreach ($b in $Builds) { if (@($b.Modes).Count -gt 0) { $script:gui.ModeList = @($b.Modes); break } }
     $n = $items.Count
     $mono = New-Object System.Drawing.Font('Consolas', 9)
@@ -16673,14 +19626,70 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $lblLnk = New-Object System.Windows.Forms.Label
     $lblLnk.Location = '44,334'; $lblLnk.Size = '900,36'
     $lblLnk.Text = 'Named "Dark Colony Ultimate", "Dark Colony Map Editor" (and "Dark Colony" if you patch it); each starts in its game folder, where the game finds its files.  An older shortcut of the same name is replaced.'
+    # the disc install (5 Oct 2026, maintainer: "add a checkbox that adds a form to select both discs and installation
+    # directory"): ticked, the wizard gets a "Game discs" page and copies the game from the player's own discs first
+    $chkDisc = New-Object System.Windows.Forms.CheckBox
+    $chkDisc.Text = 'Install the game first, from my original Dark Colony and Council Wars discs  (no game folder yet)'; $chkDisc.Location = '24,372'; $chkDisc.AutoSize = $true
+    $chkDisc.Font = $bold
+    $lblDisc = New-Object System.Windows.Forms.Label
+    $lblDisc.Location = '44,396'; $lblDisc.Size = '900,40'
+    $lblDisc.Text = ('Adds a page where you pick the two discs (a disc image .iso / .bin / .cue, or the drive of a mounted image or a real CD) and the ' +
+                     'install folder (a "Dark Colony" folder in your Documents by default).  The game is copied from the discs, this patcher''s own files ' +
+                     'are added and the executables are built there.  Ticked by itself when no game folder was found beside this installer.')
     $lblNext = New-Object System.Windows.Forms.Label
-    $lblNext.Location = '24,540'; $lblNext.Size = '936,20'; $lblNext.Text = "Press Next to continue.          Dark Colony patcher $PatcherVersion, build $PatcherBuild (generated $PatcherGenerated)"
+    $lblNext.Location = '24,556'; $lblNext.Size = '936,20'; $lblNext.Text = "Press Next to continue.          Dark Colony patcher $PatcherVersion, build $PatcherBuild (generated $PatcherGenerated)"
     # a missing or wrong original: a big red banner here, the details and the remedies on its page
     $lblProblem = New-Object System.Windows.Forms.Label
-    $lblProblem.Location = '24,378'; $lblProblem.Size = '936,156'; $lblProblem.Visible = $false
+    $lblProblem.Location = '24,440'; $lblProblem.Size = '936,112'; $lblProblem.Visible = $false
     $lblProblem.BackColor = [System.Drawing.Color]::FromArgb(192, 0, 0); $lblProblem.ForeColor = [System.Drawing.Color]::White
     $lblProblem.Font = New-Object System.Drawing.Font('Segoe UI', 10.5, [System.Drawing.FontStyle]::Bold); $lblProblem.Padding = '12,8,12,8'
-    $pWelcome.Controls.AddRange(@($lblHello, $lblFound, $chkLnk, $lblLnk, $lblNext, $lblProblem))
+    $pWelcome.Controls.AddRange(@($lblHello, $lblFound, $chkLnk, $lblLnk, $chkDisc, $lblDisc, $lblNext, $lblProblem))
+
+    # --- page "Game discs" (5 Oct 2026): shown as step 1 while the welcome checkbox is ticked - the two original discs
+    # and the install folder.  Next checks the discs and takes the two originals (ENGEXP16.EXE, maped.exe) from them;
+    # the whole game is copied at the Patch step.
+    $pDisc = New-Object System.Windows.Forms.Panel
+    $pDisc.Location = '0,66'; $pDisc.Size = '984,580'; $pDisc.Visible = $false
+    $lblDiscIntro = New-Object System.Windows.Forms.Label
+    $lblDiscIntro.Location = '24,14'; $lblDiscIntro.Size = '936,56'
+    $lblDiscIntro.Text = ('The game is copied from your two original discs into the install folder (about 480 MB), this patcher''s own files are added and ' +
+                          'the executables are built there.  A disc is a disc image file (.iso, .bin or .cue) or the drive letter of a mounted image or a real CD.  ' +
+                          'Both discs are needed: the Council Wars disc holds the expansion and ENGEXP16.EXE, the Dark Colony disc the missions, the ' +
+                          'encyclopedia, the Classic movies and the map editor.  Nothing is downloaded; the discs are read on this PC only.')
+    $discRows = @()
+    $y = 84
+    foreach ($row in @(@('cw', 'Council Wars disc  (the "Dark Colony: The Council Wars" CD, volume COUNCILWARS):'),
+                       @('dc', 'Dark Colony disc  (the original "Dark Colony" CD, volume DCUK):'),
+                       @('dir', 'Install into  (a new or empty folder; an interrupted install can be resumed into the same folder):'))) {
+        $l = New-Object System.Windows.Forms.Label
+        $l.Text = $row[1]; $l.Location = "40,$y"; $l.AutoSize = $true; $l.Font = $bold
+        $t = New-Object System.Windows.Forms.TextBox
+        $t.Location = "40,$($y + 22)"; $t.Size = '660,23'; $t.Tag = $row[0]
+        $b1 = New-Object System.Windows.Forms.Button
+        $b2 = New-Object System.Windows.Forms.Button
+        if ($row[0] -eq 'dir') {
+            $b1.Text = 'Browse...'; $b1.Location = "836,$($y + 20)"; $b1.Size = '128,27'; $b1.Tag = 'dir'
+            $b2.Visible = $false
+        } else {
+            $b1.Text = 'Image file...'; $b1.Location = "712,$($y + 20)"; $b1.Size = '116,27'; $b1.Tag = $row[0] + ':file'
+            $b2.Text = 'Drive / folder...'; $b2.Location = "836,$($y + 20)"; $b2.Size = '128,27'; $b2.Tag = $row[0] + ':folder'
+        }
+        $pDisc.Controls.AddRange(@($l, $t, $b1, $b2))
+        $discRows += @{ Key = $row[0]; Text = $t; File = $b1; Folder = $b2 }
+        $y += 66
+    }
+    $lblDiscNote = New-Object System.Windows.Forms.Label
+    $lblDiscNote.Location = '40,290'; $lblDiscNote.Size = '920,110'; $lblDiscNote.ForeColor = [System.Drawing.Color]::DimGray
+    $lblDiscNote.Text = (@('The soundtrack: both CDs carry the music as audio tracks 2-5.  From a .bin / .cue image or a real CD in a drive they are ripped',
+                          'and encoded to MP3 (192 kbit/s) with Windows'' own encoder into MUSIC\ and exp\music\ - the "music" fix plays them.  An .iso image and a',
+                          'mounted .iso hold the data track only, so there the music is left out (copy the eight MP3 files from the repository instead).',
+                          'Not on the discs at all: the January 1998 dc16.exe of the deprecated Dark Colony build (the Dark Colony CD carries the 1997 build).',
+                          'Files already in the install folder with the right size are kept, so a second run after an interruption only fills the gaps.',
+                          'Press Next: the discs are checked and ENGEXP16.EXE and maped.exe are taken from them; the rest is copied when you press Patch.') -join "`r`n")
+    $lblDiscStatus = New-Object System.Windows.Forms.Label
+    $lblDiscStatus.Location = '24,520'; $lblDiscStatus.Size = '936,52'; $lblDiscStatus.Font = $bold
+    $lblDiscStatus.Text = 'Pick both discs and the install folder, then press Next.'
+    $pDisc.Controls.AddRange(@($lblDiscIntro, $lblDiscNote, $lblDiscStatus))
 
     # --- page 1: options - the resolution drop-down, the battlefield interface theme, the deprecated build.
     # NOTHING is preselected (maintainer, 1 Oct 2026): Next stays disabled until the resolution and - at an
@@ -16840,12 +19849,14 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $btnCancel.Text = 'Cancel'; $btnCancel.Location = '864,658'; $btnCancel.Size = '104,30'
     $form.AcceptButton = $btnNext; $form.CancelButton = $btnCancel
 
-    $form.Controls.AddRange(@($header, $sepTop, $pWelcome, $pRes) + $pages + @($pReady, $pDone, $sepBot, $btnVerify, $lblLog, $btnBack, $btnNext, $btnCancel))
+    $form.Controls.AddRange(@($header, $sepTop, $pWelcome, $pDisc, $pRes) + $pages + @($pReady, $pDone, $sepBot, $btnVerify, $lblLog, $btnBack, $btnNext, $btnCancel))
     # All / List / Info / Out are re-pointed to the current page's controls by Select
     $script:gui.Controls = @{ Form = $form; Title = $lblTitle; Sub = $lblSub; Welcome = $pWelcome; Found = $lblFound; Problem = $lblProblem
                               Options = $pRes; ModeBox = $cmbRes; ThemeLight = $rbLight; ThemeDark = $rbDark; DepBox = $chkDep; ModePick = $lblResPick
                               Ready = $pReady; ReadyText = $txtReady
                               Done = $pDone; DoneText = $txtDone; DoneNote = $lblDone; Shortcut = $chkLnk
+                              DiscBox = $chkDisc; Discs = $pDisc; DiscStatus = $lblDiscStatus; DiscRows = $discRows
+                              DiscCw = ($discRows | Where-Object { $_.Key -eq 'cw' }).Text; DiscDc = ($discRows | Where-Object { $_.Key -eq 'dc' }).Text; DiscDir = ($discRows | Where-Object { $_.Key -eq 'dir' }).Text
                               Back = $btnBack; Next = $btnNext; Cancel = $btnCancel; Apply = $btnNext
                               Verify = $btnVerify; Log = $lblLog; All = $items[0].UI.All; List = $items[0].UI.List; Info = $items[0].UI.Info
                               Out = $items[0].UI.Out; Status = $items[0].UI.Status; Res = $items[0].UI.Res }
@@ -16859,14 +19870,15 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $vis = @()
         for ($i = 0; $i -lt $g.Items.Count; $i++) { if (-not $g.Items[$i].Build.Deprecated -or $g.IncludeDeprecated) { $vis += $i } }
         $g.Visible = $vis
-        $g.Last = $vis.Count + 2
+        $g.Base = if ($g.Disc) { 2 } else { 1 }        # the options page's step: the "Game discs" page is step 1 while the disc install is on
+        $g.Last = $vis.Count + $g.Base + 1
     }
     # the wizard step of executable $index, or -1 when its page is not shown
     $script:gui.StepOf = {
         param([int] $index)
         $k = [Array]::IndexOf(@($script:gui.Visible), $index)
         if ($k -lt 0) { return -1 }
-        return $k + 2
+        return $k + $script:gui.Base + 1
     }
     & $script:gui.Layout
 
@@ -16895,7 +19907,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $u.Dep.Visible = (-not $it.Error) -and [bool] $it.Build.Deprecated
         if ($it.Error) { $u.ErrorTitle.Text = $it.Error.Title; $u.ErrorBody.Text = $it.Error.Body; $u.Error.BringToFront() }
         $g.Syncing = $false
-        $bad = @($g.Items | Where-Object { $_.Error -and (-not $_.Build.Deprecated -or $g.IncludeDeprecated) })
+        $bad = @($g.Items | Where-Object { $_.Error -and (-not $_.Build.Deprecated -or $g.IncludeDeprecated) -and -not ($g.Disc -and $_.Error.Kind -eq 'missing') })
         $g.Controls.Problem.Visible = ($bad.Count -gt 0)
         if ($bad.Count -gt 0) {
             $g.Controls.Problem.Text = (@('PROBLEM - these originals cannot be used as they are:', '') +
@@ -16912,7 +19924,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
             if ($shown -and $root -and $shown.StartsWith($root, [StringComparison]::OrdinalIgnoreCase)) { $shown = $shown.Substring($root.Length) }
             elseif ($shown -and $shown.Length -gt 48) { $parts = $shown.Split($sep); if ($parts.Count -gt 2) { $shown = '...' + $sep + $parts[-2] + $sep + $parts[-1] } }
             $tail = if ($x.Build.Deprecated) { '  DEPRECATED - only if ticked on the options page' } else { '' }
-            $lines += ('  {0} {1,-28} {2}{3}' -f $mark, $x.Build.ProductName, $(if ($shown) { "$shown  ($($x.Status))" } else { "not found ($($x.Build.OriginalPath)) - you can pick it on its page" }), $tail)
+            $lines += ('  {0} {1,-28} {2}{3}' -f $mark, $x.Build.ProductName, $(if ($shown) { "$shown  ($($x.Status))" } elseif ($g.Disc -and -not $x.Build.Deprecated) { 'taken from the discs (next page)' } else { "not found ($($x.Build.OriginalPath)) - you can pick it on its page" }), $tail)
         }
         $g.Controls.Found.Text = $lines -join "`r`n"
     }
@@ -16948,6 +19960,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $it.Status = $status
         $it.Detail = "$title - see the red box below."
         $it.Error = @{
+            Kind  = $kind
             Title = $title
             Body  = (@(
                 "Found:      $found",
@@ -17189,6 +20202,83 @@ function Show-PatcherWindow([string] $PreloadPath) {
         & $g.ShowFix $g.Items[[int] $sender.Tag]
     }
 
+    # The disc install (5 Oct 2026).  SetDiscMode: the welcome checkbox = a "Game discs" page as step 1 and the originals
+    # from the discs.  PrepareDiscs (Next on that page): opens both discs, checks them, extracts the two originals into
+    # the install folder and loads them like browsed originals - the executable pages then work as always; the rest of
+    # the game is copied at Patch (Apply).  SetDiscPaths is the test hook for the three text boxes.
+    $script:gui.SetDiscMode = {
+        param([bool] $on)
+        $g = $script:gui
+        $c = $g.Controls
+        $g.Disc = $on
+        if (-not $on) { $script:DiscInstall = $null }
+        $g.Syncing = $true; $c.DiscBox.Checked = $on; $g.Syncing = $false
+        & $g.Layout
+        foreach ($x in $g.Items) { & $g.ShowRow $x }
+        if ($g.Step -gt 0) { & $g.GoTo $g.Step }
+    }
+    $script:gui.SetDiscPaths = {
+        param([string] $cw, [string] $dc, [string] $dir)
+        $g = $script:gui
+        $c = $g.Controls
+        $g.DiscCw = $cw; $g.DiscDc = $dc; $g.DiscDir = $dir
+        $c.DiscCw.Text = $cw; $c.DiscDc.Text = $dc; $c.DiscDir.Text = $dir
+    }
+    $script:gui.PrepareDiscs = {
+        $g = $script:gui
+        $c = $g.Controls
+        $g.DiscCw = $c.DiscCw.Text.Trim(); $g.DiscDc = $c.DiscDc.Text.Trim(); $g.DiscDir = $c.DiscDir.Text.Trim()
+        $c.DiscStatus.ForeColor = [System.Drawing.Color]::Firebrick
+        if (-not $g.DiscCw -or -not $g.DiscDc -or -not $g.DiscDir) { $c.DiscStatus.Text = 'Pick both discs and the install folder first.'; return $false }
+        if ($g.DiscCw -eq $g.DiscDc) { $c.DiscStatus.Text = 'The two discs are the same file or drive - the Council Wars and the Dark Colony disc are two different CDs.'; return $false }
+        $c.DiscStatus.ForeColor = [System.Drawing.Color]::Black; $c.DiscStatus.Text = 'Reading the discs...'; $c.DiscStatus.Refresh()
+        try {
+            $g.DiscDir = Get-AbsolutePath $g.DiscDir
+            [void] [System.IO.Directory]::CreateDirectory($g.DiscDir)
+            $orig = Install-DiscOriginals $g.DiscCw $g.DiscDc $g.DiscDir
+        } catch {
+            $c.DiscStatus.ForeColor = [System.Drawing.Color]::Firebrick
+            $c.DiscStatus.Text = 'Cannot install from these discs: ' + $_.Exception.Message
+            return $false
+        }
+        $script:DiscInstall = @{ Dir = $g.DiscDir; Cw = $g.DiscCw; Dc = $g.DiscDc; Audio = [bool] $orig['Audio'] }    # the fixes' data files will be there at Patch
+        foreach ($id in @($orig.Keys | Where-Object { $_ -ne 'Audio' -and $_ -ne 'AudioNote' })) { & $g.Load $orig[$id] $false }
+        $c.DiscStatus.ForeColor = [System.Drawing.Color]::DarkGreen
+        $c.DiscStatus.Text = ('Both discs are fine.  ENGEXP16.EXE and maped.exe were taken from them into {0}; the game itself ({1} files) is copied when you press Patch.  {2}' -f $g.DiscDir, $DiscFiles.Count,
+            $(if ($orig['Audio']) { 'The soundtrack (4 + 4 audio tracks) will be ripped and encoded to MP3.' } else { 'No soundtrack from these discs: ' + $orig['AudioNote'] + ' - fix music is left out.' }))
+        & $g.Refresh
+        return $true
+    }
+    $c.DiscBox.Add_CheckedChanged({
+        param($sender, $e)
+        $g = $script:gui
+        if ($g.Syncing) { return }
+        & $g.SetDiscMode ([bool] $sender.Checked)
+    })
+    $discBrowse = {
+        param($sender, $e)
+        $c = $script:gui.Controls
+        $parts = ([string] $sender.Tag).Split(':')
+        $row = $c.DiscRows | Where-Object { $_.Key -eq $parts[0] }
+        if ($parts[0] -eq 'dir') {
+            $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
+            $dlg.Description = 'The folder to install the game into (a new or empty folder)'
+            if ($row.Text.Text -and (Test-Path -LiteralPath $row.Text.Text)) { $dlg.SelectedPath = $row.Text.Text }
+            if ($dlg.ShowDialog($c.Form) -eq 'OK') { $row.Text.Text = $dlg.SelectedPath }
+        } elseif ($parts[1] -eq 'file') {
+            $dlg = New-Object System.Windows.Forms.OpenFileDialog
+            $dlg.Title = $(if ($parts[0] -eq 'cw') { 'The Council Wars disc image' } else { 'The Dark Colony disc image' })
+            $dlg.Filter = 'Disc images (*.iso;*.bin;*.cue;*.img)|*.iso;*.bin;*.cue;*.img|All files (*.*)|*.*'
+            if ($dlg.ShowDialog($c.Form) -eq 'OK') { $row.Text.Text = $dlg.FileName }
+        } else {
+            $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
+            $dlg.Description = $(if ($parts[0] -eq 'cw') { 'The drive (or folder) holding the Council Wars disc' } else { 'The drive (or folder) holding the Dark Colony disc' })
+            $dlg.RootFolder = 'MyComputer'
+            if ($dlg.ShowDialog($c.Form) -eq 'OK') { $row.Text.Text = $dlg.SelectedPath }
+        }
+    }
+    foreach ($row in $c.DiscRows) { $row.File.Add_Click($discBrowse); $row.Folder.Add_Click($discBrowse) }
+
     # The options page.  Refresh: every executable page is refilled for the choices (its unticked fixes
     # survive), the theme radios are live only at an HD size, Next follows the state, the status line says
     # what is still missing.  SetMode / SetTheme / SetDeprecated are the handlers' work and the test hooks.
@@ -17205,7 +20295,7 @@ function Show-PatcherWindow([string] $PreloadPath) {
                            elseif (-not $ready) { 'Screen resolution: ' + (Format-ModeLabel $g.Mode $g.Monitor) + '.  Now choose the battlefield interface (light or dark) to continue.' }
                            elseif (-not $hd) { 'Screen resolution: 640x480 (original) - the game keeps its own interface.  Press Next to continue.' }
                            else { 'Screen resolution: ' + (Format-ModeLabel $g.Mode $g.Monitor) + ', ' + $g.Theme + ' battlefield interface.  Press Next to continue.' }
-        if ($g.Step -eq 1) { $c.Next.Enabled = $ready }
+        if ($g.Step -eq $g.Base) { $c.Next.Enabled = $ready }
     }
     $script:gui.SetMode = {
         param([string] $mode)
@@ -17315,6 +20405,11 @@ function Show-PatcherWindow([string] $PreloadPath) {
         $g = $script:gui
         $c = $g.Controls
         $lines = @()
+        if ($g.Disc) {
+            $lines += 'Game install:            from the discs ' + $g.DiscCw + '  and  ' + $g.DiscDc
+            $lines += ('{0,-24} into {1}  ({2} files, about 480 MB; files already there with the right size are kept)' -f '', $g.DiscDir, $DiscFiles.Count)
+            $lines += ''
+        }
         $lines += 'Screen resolution:       ' + $(if ($g.Mode) { Format-ModeLabel $g.Mode $g.Monitor } else { 'NOT CHOSEN - go back to the options page' })
         $lines += 'Battlefield interface:   ' + $(if ($g.Mode -eq '640x480') { 'the original (640x480 keeps the stock interface)' } elseif ($g.Theme -eq 'light') { 'light (classic) - the original metal interface' } elseif ($g.Theme -eq 'dark') { 'dark - the console style of the menus' } else { 'NOT CHOSEN - go back to the options page' })
         $lines += ''
@@ -17434,6 +20529,20 @@ function Show-PatcherWindow([string] $PreloadPath) {
         }
         $results = @()
         try {
+            if ($g.Disc) {
+                $g.StepPrefix = 'Discs: '
+                try {
+                    $dr = Install-GameFromDiscs $g.DiscCw $g.DiscDc $g.DiscDir $g.Progress
+                    $line = 'Game installed from the discs into {0}: {1} files copied ({2} MB){3}' -f $g.DiscDir, $dr.Files, [int][Math]::Round($dr.Bytes / 1MB), $(if ($dr.Skipped) { ", $($dr.Skipped) already there" } else { '' })
+                    $kind = 'ok'
+                    foreach ($ml in @($dr.Music)) { $line += "`r`n    " + $ml; if ($ml -match 'NOT written') { $kind = 'warning' } }
+                    if (@($dr.Missing).Count -gt 0) { $kind = 'warning'; $line += "`r`n    NOT on your discs ({0} files - another pressing?): {1}" -f @($dr.Missing).Count, (@($dr.Missing | Select-Object -First 6) -join ', ') }
+                    $results += @{ Item = $null; R = $null; Error = $null; Shortcut = $null; Kind = $kind; Line = $line }
+                } catch {
+                    $results += @{ Item = $null; R = $null; Error = $_.Exception.Message; Shortcut = $null; Kind = 'error'; Line = 'Installing the game from the discs FAILED - nothing patched:' + "`r`n    " + $_.Exception.Message }
+                    $todo = @()
+                }
+            }
             $k = 0
             foreach ($it in $todo) {
                 $k++
@@ -17494,8 +20603,9 @@ function Show-PatcherWindow([string] $PreloadPath) {
         elseif ($errors -gt 0) { $title = 'Patching finished with errors'; $icon = 'Error'; $c.Log.ForeColor = 'Firebrick' }
         elseif ($warnings -gt 0) { $title = 'Patched, with warnings'; $icon = 'Warning'; $c.Log.ForeColor = 'DarkOrange' }
         else { $title = 'Patching succeeded'; $icon = 'Information'; $c.Log.ForeColor = 'DarkGreen' }
-        $ok = $results.Count - $errors
-        $c.Log.Text = "$ok of $($results.Count) executable(s) patched" + $(if ($errors) { ", $errors failed" } else { '' }) + ' - see the message for details.'
+        $exeResults = @($results | Where-Object { $_.Item })
+        $ok = @($exeResults | Where-Object { $_.Kind -ne 'error' }).Count
+        $c.Log.Text = "$ok of $($exeResults.Count) executable(s) patched" + $(if ($errors) { ", $errors failed" } else { '' }) + ' - see the message for details.'
         $text = ($results | ForEach-Object { $_.Line }) -join "`r`n`r`n"
         $skipped = @(& $g.SkippedLines)
         if ($skipped.Count -gt 0) { $text += "`r`n`r`nNot patched: " + ($skipped -join ', ') }
@@ -17536,25 +20646,34 @@ function Show-PatcherWindow([string] $PreloadPath) {
         & $g.Layout
         $vis = @($g.Visible)
         $last = $g.Last
+        $base = $g.Base
         if ($step -gt $last + 1) { $step = $last + 1 }
         $g.Step = $step
         $c.Welcome.Visible = ($step -eq 0)
-        $c.Options.Visible = ($step -eq 1)
+        $c.Discs.Visible = ($g.Disc -and $step -eq 1)
+        $c.Options.Visible = ($step -eq $base)
         for ($i = 0; $i -lt $g.Items.Count; $i++) { $g.Items[$i].UI.Page.Visible = ($step -eq (& $g.StepOf $i)) }
         $c.Ready.Visible = ($step -eq $last)
         $c.Done.Visible = ($step -eq $last + 1)
         $c.Next.Enabled = $true
         if ($step -eq 0) {
             $c.Title.Text = 'Welcome to the Dark Colony patcher'
-            $c.Sub.Text = 'Builds Dark Colony Ultimate, the Map Editor (and, if you ask for it, the deprecated Dark Colony) from the untouched originals in this folder.'
-        } elseif ($step -eq 1) {
-            $c.Title.Text = "Step 1 of ${last}: Options"
+            $c.Sub.Text = 'Builds Dark Colony Ultimate, the Map Editor (and, if you ask for it, the deprecated Dark Colony) from the untouched originals - of this folder, or from your discs.'
+        } elseif ($g.Disc -and $step -eq 1) {
+            $c.Title.Text = "Step 1 of ${last}: Game discs"
+            $c.Sub.Text = 'Your original Dark Colony and Council Wars discs (disc images or drives) and the folder to install the game into.'
+            if ($g.DiscCw -and -not $c.DiscCw.Text) { $c.DiscCw.Text = $g.DiscCw }
+            if ($g.DiscDc -and -not $c.DiscDc.Text) { $c.DiscDc.Text = $g.DiscDc }
+            if ($g.DiscDir -and -not $c.DiscDir.Text) { $c.DiscDir.Text = $g.DiscDir }
+            $c.Log.Text = ''
+        } elseif ($step -eq $base) {
+            $c.Title.Text = "Step $base of ${last}: Options"
             $c.Sub.Text = 'The screen resolution, the battlefield interface (light = classic, dark = console style) and the deprecated executable.  Nothing is preselected.'
             $hd = [bool] $g.Mode -and $g.Mode -ne '640x480'
             $c.Next.Enabled = [bool] $g.Mode -and (-not $hd -or [bool] $g.Theme)
             $c.Log.Text = ''
         } elseif ($step -lt $last) {
-            $index = $vis[$step - 2]
+            $index = $vis[$step - $base - 1]
             $it = $g.Items[$index]
             $b = $it.Build
             $c.Title.Text = "Step $step of ${last}: $($b.ProductName)" + $(if ($b.Deprecated) { '  (deprecated)' } else { '' })
@@ -17570,8 +20689,9 @@ function Show-PatcherWindow([string] $PreloadPath) {
         } else {
             $r = @($g.Results)
             $errors = @($r | Where-Object { $_.Kind -eq 'error' }).Count
+            $exes = @($r | Where-Object { $_.Item })
             $c.Title.Text = if ($errors -eq 0) { 'Finished' } elseif ($errors -lt $r.Count) { 'Finished, with errors' } else { 'Patching failed' }
-            $c.Sub.Text = '{0} of {1} executable(s) patched.' -f ($r.Count - $errors), $r.Count
+            $c.Sub.Text = '{0} of {1} executable(s) patched.' -f @($exes | Where-Object { $_.Kind -ne 'error' }).Count, $exes.Count
             $skipped = @(& $g.SkippedLines)
             $c.DoneText.Text = (($r | ForEach-Object { $_.Line }) -join "`r`n`r`n") + $(if ($skipped.Count -gt 0) { "`r`n`r`nNot patched: " + ($skipped -join ', ') } else { '' })
             $c.DoneNote.Text = if ($errors -lt $r.Count) { 'Start the games with the desktop shortcuts or the files above.  Press Close to leave.' } else { 'Nothing usable was written - see above.  Press Close to leave.' }
@@ -17584,7 +20704,10 @@ function Show-PatcherWindow([string] $PreloadPath) {
     $c.Next.Add_Click({
         $g = $script:gui
         $last = $g.Last
-        if ($g.Step -eq 1) {
+        if ($g.Disc -and $g.Step -eq 1) {
+            if (-not (& $g.PrepareDiscs)) { $g.Controls.Log.ForeColor = 'Firebrick'; $g.Controls.Log.Text = 'The discs are not ready - see the message on the page.'; return }
+        }
+        if ($g.Step -eq $g.Base) {
             $hd = [bool] $g.Mode -and $g.Mode -ne '640x480'
             if (-not $g.Mode -or ($hd -and -not $g.Theme)) { $g.Controls.Log.ForeColor = 'Firebrick'; $g.Controls.Log.Text = 'Choose a screen resolution and a battlefield interface first.'; return }
         }
@@ -17619,6 +20742,8 @@ function Show-PatcherWindow([string] $PreloadPath) {
         else { & $script:gui.SetError $it $p $null 'missing'; & $script:gui.ShowRow $it; & $script:gui.FillItem $it }
     }
     if ($PreloadPath) { & $loadOriginal ((Resolve-Path $PreloadPath).Path) $false }
+    # the installer package unpacked on its own (no game folder beside it): the disc install is the way, ticked by itself
+    if (-not $PreloadPath -and @($script:gui.Items | Where-Object { $_.Data }).Count -eq 0) { & $script:gui.SetDiscMode $true }
     & $script:gui.Refresh
     & $script:gui.GoTo 0
     return $form
@@ -17732,6 +20857,39 @@ function Invoke-CliBuild([string] $OriginalFile, [string] $OutputFile) {
 }
 
 if ($Original) { Invoke-CliBuild $Original $Output; return }
+# --- the disc install from the command line (5 Oct 2026): copy the game from the two discs into -InstallDir, then
+# patch Dark Colony Ultimate and the map editor there (like the window with its checkbox ticked)
+if ($InstallDir -or $CouncilWarsDisc -or $DarkColonyDisc) {
+    if (-not ($InstallDir -and $CouncilWarsDisc -and $DarkColonyDisc)) { throw '-InstallDir, -CouncilWarsDisc and -DarkColonyDisc belong together: the folder to install into and the two disc images (or drives)' }
+    if (-not $All) { throw 'the disc install takes -All (every fix whose resources are there), together with -Resolution and -Theme' }
+    $games = @($Builds | Where-Object { @($_.Modes).Count -gt 0 -and -not $_.Deprecated })
+    $m0 = Resolve-Mode $games[0] $Resolution; [void] (Resolve-Theme $games[0] $m0 $Theme)
+    Write-Host ("Dark Colony patcher {0}, build {1} (generated {2})" -f $PatcherVersion, $PatcherBuild, $PatcherGenerated) -ForegroundColor Cyan; $script:BannerShown = $true
+    Write-Host ''
+    Write-Host ('=== Installing the game from the discs into {0}' -f $InstallDir) -ForegroundColor Cyan
+    Write-Host ("Council Wars disc: {0}`r`nDark Colony disc:  {1}" -f $CouncilWarsDisc, $DarkColonyDisc)
+    $InstallDir = Get-AbsolutePath $InstallDir
+    [void] [System.IO.Directory]::CreateDirectory($InstallDir)
+    $pre = Install-DiscOriginals $CouncilWarsDisc $DarkColonyDisc $InstallDir       # checks both discs, the two exes, the soundtrack + encoder
+    $script:DiscInstall = @{ Dir = $InstallDir; Cw = $CouncilWarsDisc; Dc = $DarkColonyDisc; Audio = [bool] $pre['Audio'] }
+    if (-not $pre['Audio']) { Write-Warning ('no soundtrack from these discs: ' + $pre['AudioNote'] + ' - fix music is left out') }
+    $dr = Install-GameFromDiscs $CouncilWarsDisc $DarkColonyDisc $InstallDir { param([string] $s) Write-Host ('  ' + $s) -ForegroundColor DarkGray }
+    Write-Host ('{0} files copied ({1} MB), {2} already there' -f $dr.Files, [int][Math]::Round($dr.Bytes / 1MB), $dr.Skipped)
+    foreach ($ml in @($dr.Music)) { if ($ml -match 'NOT written') { Write-Warning $ml } else { Write-Host ('music: ' + $ml) } }
+    if (@($dr.Missing).Count -gt 0) { Write-Warning ('{0} file(s) are not on your discs (another pressing?): {1}' -f @($dr.Missing).Count, (@($dr.Missing | Select-Object -First 10) -join ', ')) }
+    $failed = 0; $done = 0
+    foreach ($o in $DiscOriginals) {
+        $b = $Builds | Where-Object { $_.Id -eq $o.Build }
+        $p = Join-Path (Get-InstallRoot $InstallDir $o.Root) $o.To
+        Write-Host ''
+        Write-Host ('=== {0}  ({1} -> {2})' -f $b.ProductName, $o.To, $b.OutputName) -ForegroundColor Cyan
+        try { Invoke-CliBuild $p $null; $done++ } catch { Write-Warning ('{0}: {1}' -f $b.ProductName, $_.Exception.Message); $failed++ }
+    }
+    Write-Host ''
+    Write-Host ('{0} executable(s) patched, {1} failed.' -f $done, $failed)
+    if ($failed -gt 0 -or $done -eq 0) { exit 1 }
+    return
+}
 if ($Patches) { throw 'give -Original <exe> together with -Patches (the fix ids differ per executable)' }
 if ($Output) { throw '-Output needs -Original (with -All alone each executable is written under its own name beside its original)' }
 # the screen resolution and the battlefield interface are chosen explicitly (1 Oct 2026): checked once here,
@@ -17740,7 +20898,7 @@ $games = @($Builds | Where-Object { @($_.Modes).Count -gt 0 -and (-not $_.Deprec
 if ($games.Count -gt 0) { $m0 = Resolve-Mode $games[0] $Resolution; [void] (Resolve-Theme $games[0] $m0 $Theme) }
 $failed = 0; $done = 0
 foreach ($b in (Sort-ForPatching $Builds { param($i) $i })) {   # Ultimate last: its step adds files to the interface set that a later game build's rebuild would drop
-    $p = Join-Path $PSScriptRoot $b.OriginalPath
+    $p = Join-Path (Split-Path -Parent $PSScriptRoot) $b.OriginalPath      # the repository root = the parent of patcher\
     Write-Host ''
     Write-Host ('=== {0}  ({1} -> {2})' -f $b.ProductName, $b.OriginalPath, $b.OutputName) -ForegroundColor Cyan
     if ($b.Deprecated -and -not $IncludeDeprecated) {

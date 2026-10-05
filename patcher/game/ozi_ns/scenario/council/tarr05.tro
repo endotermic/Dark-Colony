@@ -1,0 +1,106 @@
+0 norm 1 (c>0)
+reinforce 0 9 71 75 1 8 6 10 5 14 1
+reinforce 0 4 57 8 6 10 5
+exomoney 2 4
+exomoney 3 4
+exomoney 2 7
+msg 2 0 2 4 6
+msg 2 0 1 4 7
+end
+
+1 norm 0 ((b(2,0)==0)&&(b(2,1)==0)&&(b(2,2)==0)&&(b(2,3)==0)&&(b(2,4)==0)&&(b(3,0)==0)&&(b(3,1)==0)&&(b(3,2)==0)&&(b(3,3)==0)&&(b(3,4)==0)&&(b(1,0)==0)&&(b(1,1)==0)&&(b(1,2)==0)&&(b(1,3)==0)&&(b(1,4)==0))
+reinforce 7 15 55 0 5 2 3 3 2 4 1 0 0
+reinforce 7 15 61 2 3 0 5 3 2 4 1 0 0
+reinforce 7 14 68 2 5 0 5 3 2 4 1 0 0
+reinforce 7 5 67 0 5 2 3 3 2 4 1 0 0
+reinforce 7 3 57 0 5 2 3 3 2 4 1 0 0
+abduct 0 0
+setarray 0 (c+6)
+setlifes 6 1
+msg 2 0 10 3 6
+msg 2 0 11 3 6
+end
+
+2 norm 1 ((b(0,0)==0)&&(b(0,1)==0)&&(b(0,2)==0)&&(b(0,3)==0)&&(b(0,4)==0))
+bail 1 2
+msg 0 0 4 3 6
+msg 0 0 14 3 6
+end
+
+3 trip 1 (S==0)
+ai 1 3
+reinforce 3 29 73 0 3
+newrate 29 76 107
+setlifes 7 0
+setlifes 13 0
+setarray 0 (c+15)
+setlifes 1 1
+msg 4 0 9 4 6
+end
+
+4 norm 1 (c>460)
+newrate 19 118 78
+newrate 16 26 101
+reinforce 0 9 71 8 4 10 5 14 1
+msg 2 0 9 4 6
+end
+
+14 norm 1 (c>210)
+reinforce 0 9 71 8 6 10 5
+msg 2 0 12 4 6
+end
+
+5 norm 1 (c>600)
+newrate 15 106 107
+newrate 13 29 11
+end
+
+6 norm 0 (c>s(0,2,0))
+msg 2 0 10 3 6
+bail 0 1
+end
+
+7 norm 1 ((b(2,0)==0)&&(b(2,1)==0)&&(b(2,2)==0)&&(b(2,3)==0)&&(b(2,4)==0))
+reinforce 3 29 73 0 3
+ai 1 3
+newrate 29 76 107
+setlifes 13 0
+setarray 0 (c+15)
+setlifes 1 1
+msg 4 0 9 4 6
+end
+
+13 norm 1 ((b(3,0)==0)&&(b(3,1)==0)&&(b(3,2)==0)&&(b(3,3)==0)&&(b(3,4)==0))
+reinforce 3 29 73 0 3
+ai 1 3
+newrate 29 76 107
+setlifes 7 0
+setarray 0 (c+15)
+setlifes 1 1
+msg 4 0 9 4 6
+end
+
+8 norm 1 (c>200)
+newrate 14 32 43
+end
+
+9 norm 1 (c>850)
+reinforce 4 107 11 8 3 10 3 0 0 0 0 0 0
+reinforce 4 16 61 8 4 10 2 0 0 0 0 0 0
+end
+
+10 norm 1 (c>1350)
+reinforce 2 107 11 8 6 10 5 0 0 0 0 0 0
+reinforce 3 100 5 8 5 10 4 0 0 0 0 0 0
+end
+
+11 norm 1 ((s(0,0,73)==1)||(s(0,0,74)==1)||(s(0,0,75)==1)||(s(0,0,76)==1))
+msg 2 0 3 3 6
+setarray 0 (c+60)
+setlifes 12 1
+end
+
+12 norm 0 (c>s(0,2,0))
+reinforce 0 9 71 73 1
+msg 2 0 8 3 6
+end

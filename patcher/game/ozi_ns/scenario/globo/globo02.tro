@@ -1,0 +1,116 @@
+0 norm 1 (c>0)
+reinforce 0 10 74 70 1 6 1 0 3 0 0 0 0
+waypoint 90 56 2 92 35 75 46
+waypoint 92 56 2 91 36 75 45
+waypoint 89 3 2 46 8 89 3
+waypoint 89 2 2 45 7 89 2
+waypoint 89 1 2 44 7 89 1
+waypoint 89 0 2 43 6 89 0
+waypoint 86 9 2 46 8 86 9
+waypoint 87 9 2 43 6 87 9
+msg 7 0 2 3 6
+msg 2 0 1 3 5
+end
+
+1 norm 1 ((b(0,0)==0)&&(b(0,1)==0)&&(b(0,2)==0)&&(b(0,3)==0)&&(b(0,4)==0))
+bail 1 3
+msg 0 0 7 3 6
+msg 0 0 8 3 6
+end
+
+3 norm 1 (c>200)
+reinforce 3 67 78 8 5 10 1 0 0 0 0 0 0
+end
+
+4 norm 1 (c>300)
+reinforce 3 63 59 8 5 10 2 0 0 0 0 0 0
+end
+
+5 norm 1 (c>400)
+reinforce 3 63 59 8 3 0 0 0 0 0 0 0 0
+end
+
+6 norm 1 (c>415)
+newrate 15 40 55
+newrate 15 91 58
+end
+
+7 norm 1 (c>500)
+reinforce 3 3 81 8 4 0 0 0 0 0 0 0 0
+end
+
+8 trip 1 (S==0)
+msg 7 0 4 3 10
+setlifes 20 0
+setlifes 17 1
+end
+
+9 trip 0 (S==0)
+msg 2 0 5 3 6
+msg 7 0 4 3 4
+bail 0 1
+end
+
+10 norm 1 (c>10)
+reinforce 3 63 59 8 2 0 0 0 0 0 0 0 0
+reinforce 3 63 74 8 2 0 0 0 0 0 0 0 0
+end
+
+11 norm 1 (c>910)
+reinforce 3 60 10 8 4 10 2 0 0 0 0 0 0
+end
+
+12 norm 1 (c>700)
+reinforce 3 63 59 8 5 0 0 0 0 0 0 0 0
+end
+
+13 norm 1 (c>1050)
+reinforce 3 63 63 8 6 10 3 0 0 0 0 50 1
+reinforce 3 63 59 8 5 10 3 0 0 0 0 50 1
+ai 2 3
+end
+
+14 norm 1 (c>800)
+reinforce 3 63 59 8 5 10 1 0 0 0 0 0 0
+end
+
+15 norm 1 (c>1060)
+reinforce 3 63 74 8 5 10 3 0 0 0 0 50 1
+reinforce 3 63 59 8 5 10 3 0 0 0 0 50 1
+end
+
+16 norm 1 (c>600)
+reinforce 3 63 59 8 3 10 1 0 0 0 0 0 0
+end
+
+17 norm 0 (c>1295)
+reinforce 1 23 63 69 1 0 2 0 0 0 0 0 0
+msg 2 0 10 3 6
+msg 1 0 11 3 6
+bail 0 1
+end
+
+18 norm 1 ((s(0,0,69)==1)||(s(0,0,70)==1)||(s(0,0,71)==1)||(s(0,0,72)==1))
+bail 1 2
+msg 0 0 7 3 5
+msg 0 0 6 3 4
+end
+
+20 norm 1 (c>1295)
+reinforce 1 23 63 69 1 0 3 0 0 0 0 0 0
+setlifes 9 1
+setlifes 8 0
+msg 7 0 9 3 6
+msg 1 0 11 3 6
+end
+
+21 norm 1 (c>750)
+reinforce 3 3 77 8 2 10 1 0 0 0 0 0 0
+reinforce 3 63 59 8 5 0 0 0 0 0 0 0 0
+end
+
+22 norm 1 (c>1200)
+reinforce 3 63 74 8 3 10 1 0 0 0 0 0 0
+reinforce 3 63 59 8 3 10 1 0 0 0 0 50 1
+end
+

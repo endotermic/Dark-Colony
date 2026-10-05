@@ -1,0 +1,133 @@
+0 norm 1 ((s(0,0,73)==1)||(s(0,0,74)==1)||(s(0,0,75)==1))
+bail 1 2
+msg 0 0 7 3 6
+msg 0 0 6 3 6
+end
+
+2 norm 1 ((b(2,0)==0)&&(b(2,1)==0)&&(b(2,2)==0)&&(b(2,3)==0)&&(b(2,4)==0))
+reinforce2 0 13 26 106 1
+bail 0 1
+msg 0 0 9 3 6
+end
+
+4 norm 1 (c>1900)
+bail 1 3
+msg 0 0 3 3 6
+end
+
+6 norm 1 (c>0)
+reinforce 0 4 107 74 1
+ai 2 3
+msg 2 0 1 4 6
+setarray 0 (c+15)
+setlifes 3 1
+end
+
+8 norm 1 (c>15)
+waypoint 12 59 2 2 94 17 109
+waypoint 13 59 2 2 94 17 109
+waypoint 12 58 2 2 94 17 109
+waypoint 13 58 2 2 94 17 109
+waypoint 10 57 2 2 94 17 109
+waypoint 15 57 2 2 94 17 109
+waypoint 12 55 2 2 94 17 109
+waypoint 13 55 2 2 94 17 109
+waypoint 14 46 2 2 94 17 109
+waypoint 15 46 2 2 94 17 109
+waypoint 16 46 2 2 94 17 109
+waypoint 17 46 2 2 94 17 109
+waypoint 11 58 2 2 94 17 109
+waypoint 14 58 2 2 94 17 109
+waypoint 45 104 2 1 110 9 95
+waypoint 45 105 2 1 110 9 95
+waypoint 45 102 2 1 110 9 95
+waypoint 47 106 2 1 110 9 95
+waypoint 47 103 2 1 110 9 95
+waypoint 47 101 2 1 110 9 95
+waypoint 49 106 2 1 110 9 95
+waypoint 49 104 2 1 110 9 95
+waypoint 49 102 2 1 110 9 95
+waypoint 50 103 2 1 110 9 95
+waypoint 59 107 2 1 110 9 95
+waypoint 59 106 2 1 110 9 95
+waypoint 59 105 2 1 110 9 95
+waypoint 59 104 2 1 110 9 95
+waypoint 50 73 2 51 73 59 96
+waypoint 99 16 2 96 2 84 10
+waypoint 101 17 2 81 9 65 7
+waypoint 51 18 2 52 16 51 4
+waypoint 29 5 2 29 7 38 16
+waypoint 59 61 2 63 61 71 71
+end
+
+3 norm 0 (c>s(0,2,0))
+setlifes 7 0
+setlifes 21 1
+setlifes 23 0
+setlifes 9 1
+setarray 0 (c+3)
+setlifes 5 1
+end
+
+5 norm 0 (c>s(0,2,0))
+setlifes 21 0
+setlifes 23 1
+setlifes 9 0
+setlifes 7 1
+setarray 0 (c+3)
+setlifes 3 1
+end
+
+21 trip 0 (S==0)
+reinforce2 0 33 53 14 1
+newrate 12 115 107
+msg 0 0 2 3 6
+msg 0 0 5 3 6
+setlifes 14 1
+setlifes 9 0
+setlifes 18 1
+setlifes 3 0
+setlifes 5 0
+end
+
+23 trip 0 (S==0)
+reinforce2 0 119 98 14 1
+newrate 12 105 24
+msg 0 0 2 3 6
+msg 0 0 5 3 6
+setlifes 16 1
+setlifes 7 0
+setlifes 18 1
+setlifes 3 0
+setlifes 5 0
+end
+
+7 trip 0 (S==0)
+msg 0 0 11 3 6
+setlifes 3 0
+setlifes 5 0
+end
+
+9 trip 0 (S==0)
+msg 0 0 11 3 6
+setlifes 3 0
+setlifes 5 0
+end
+
+14 norm 0 (s(0,1,48)>0)
+reinforce 0 108 88 8 8 10 9 11 3 12 2
+setlifes 18 0
+msg 0 0 12 3 6
+end
+
+16 norm 0 (s(0,1,48)>0)
+reinforce 0 101 33 8 8 10 9 11 3 12 2
+setlifes 18 0
+msg 0 0 12 3 6
+end
+
+18 norm 0 (s(0,0,14)==1)
+bail 1 4
+msg 0 0 13 3 6
+end
+

@@ -1,0 +1,103 @@
+1 trip 1 (S==0)
+waypoint 93 32 1 104 31 94 32
+waypoint 93 30 1 107 31 107 31
+waypoint 93 28 1 104 29 94 28
+waypoint 93 31 1 107 31 107 31
+msg 7 0 10 3 8
+msg 4 0 9 3 4
+end
+
+20 trip 1 (S==0)
+waypoint 11 42 1 18 10 11 42
+waypoint 12 42 1 18 10 12 42
+waypoint 13 42 1 18 10 13 42
+waypoint 12 44 1 18 10 12 44
+ai 2 3
+exomoney 3 8
+end
+
+3 trip 1 (S==0)
+reinforce2 2 120 56 8 5 10 8 0 0 0 0 0 0
+end
+
+15 trip 1 (S==0)
+exomoney 0 3
+exomoney 3 6
+msg 7 0 5 4 8
+msg 2 0 11 3 8
+msg 2 0 4 3 8
+msg 2 0 3 3 8
+end
+
+18 trip 1 (S==0)
+reinforce2 3 120 56 8 5 10 8 0 0 0 0 0 0
+end
+
+19 trip 1 (S==0)
+waypoint 26 98 1 18 10 26 98
+waypoint 27 98 1 18 10 27 98
+waypoint 28 98 1 18 10 28 98
+waypoint 29 98 1 18 10 29 98
+waypoint 26 97 1 18 10 26 97
+waypoint 27 97 1 18 10 27 97
+waypoint 28 97 1 18 10 28 97
+waypoint 29 97 1 18 10 29 97
+end
+
+0 norm 1 (c>0)
+exomoney 0 0
+msg 7 0 8 3 8
+msg 4 0 2 3 8
+msg 2 0 1 3 8
+end
+
+2 norm 1 ((b(0,0)==0)&&(b(0,1)==0)&&(b(0,2)==0)&&(b(0,3)==0)&&(b(0,4)==0))
+bail 1 3
+msg 0 0 14 3 8
+end
+
+4 norm 1 (c>1250)
+reinforce2 3 120 56 8 6 10 8 0 0 0 0 0 0
+end
+
+5 norm 1 (c>600)
+reinforce2 3 120 56 8 5 10 2 0 0 0 0 0 0
+end
+
+6 norm 1 (c>700)
+reinforce2 3 120 56 8 6 0 0 0 0 0 0 0 0
+reinforce2 3 39 81 8 6 0 0 0 0 0 0 0 0
+end
+
+8 norm 1 ((b(2,0)==0)&&(b(2,1)==0)&&(b(2,2)==0)&&(b(2,3)==0)&&(b(2,4)==0))
+msg 2 0 13 3 7
+msg 7 0 12 3 5
+bail 0 1
+end
+
+7 norm 1 (c>550)
+newrate 15 54 76
+end
+
+9 norm 1 (c>750)
+newrate 15 25 69
+end
+
+10 norm 1 (c>800)
+reinforce2 3 39 81 8 7 0 0 0 0 0 0 0 0
+end
+
+11 norm 1 (c>1000)
+reinforce2 3 120 56 8 7 10 8 0 0 0 0 0 0
+end
+
+12 norm 1 ((s(0,0,69)==1)||(s(0,0,70)==1)||(s(0,0,71)==1))
+bail 1 2
+msg 0 0 7 3 6
+msg 0 0 6 3 6
+end
+
+13 norm 1 (c>1600)
+reinforce2 3 120 56 8 9 10 10 0 0 0 0 0 0
+end
+
