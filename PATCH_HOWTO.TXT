@@ -518,7 +518,8 @@ What makes it trustworthy:
                      intro (5 Oct 2026: no intro movie at start-up;
                        DARK COLONY plays avi\dcintro.avi and COUNCIL
                        WARS avi\intro.avi right before its campaign;
-                       needs ozi),
+                       7 Oct 2026: the menu's hum is stopped for the
+                       movie and starts again after it; needs ozi),
                      icon (the high-resolution icon and the per-monitor
                        DPI-aware manifest, so Windows never scales the
                        full-screen picture),
