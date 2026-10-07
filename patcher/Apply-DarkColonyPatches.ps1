@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 2.6, build 20261005.1520 - generated 2026-10-05 15:20 UTC from Dark-Colony-Server 9271a09+ and Dark-Colony da0a414+.
+    Dark Colony patcher 2.7, build 20261007.0755 - generated 2026-10-07 07:55 UTC from Dark-Colony-Server 00ddd0d and Dark-Colony e65ba66+.
 
 
 .SYNOPSIS
@@ -234,9 +234,9 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '2.6'
-$PatcherBuild = '20261005.1520'
-$PatcherGenerated = '2026-10-05 15:20 UTC from Dark-Colony-Server 9271a09+ and Dark-Colony da0a414+'
+$PatcherVersion = '2.7'
+$PatcherBuild = '20261007.0755'
+$PatcherGenerated = '2026-10-07 07:55 UTC from Dark-Colony-Server 00ddd0d and Dark-Colony e65ba66+'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -256,7 +256,7 @@ $Builds = @(
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '165b609a379a1fac721305ee91837741a09ae8d998fb0f1d24a1fc57fe7ed7c4'   # every patch applied at the reference resolution (1024x768, dark interface) = the generator's reference build (the repository ships no patched file since 5 Oct 2026)
+        PatchedSha256  = 'ac3a24633347d68b2668c39b59bdbc9fb9f5519f642bb3662646d6a563ef5208'   # every patch applied at the reference resolution (1024x768, dark interface) = the generator's reference build (the repository ships no patched file since 5 Oct 2026)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -264,7 +264,7 @@ $Builds = @(
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the generator's reference builds); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = '01fc077c1a88dd2c014f0c4a419b72547d13d49e706a530a5ef42b45ba3820bb'; '1024x768' = '165b609a379a1fac721305ee91837741a09ae8d998fb0f1d24a1fc57fe7ed7c4'; '1024x768/light' = 'b5986b072244207b70c7b34f191488c8f14194043521e318f67544f81fbd48d8'; '1280x1024' = 'eb643a9908423429bd3ceac7b9c14131314d1297b5df72c31b2a5c1377165cb3'; '1280x1024/light' = '8e4d7d0ca3891db7bf406756ab538e3d7cc824b2efafa7476986d18d2a0bf7dd'; '1280x720' = 'e407c7f391580537b89eaf7ce7b4e62e726fa9168bd09917716fbc2811694ca1'; '1280x720/light' = '467cdc75bc2d65eff5f676cb01d8009d40954c3a65f2a5f25ef0abf1ea30c754'; '1280x800' = 'dff78ff5382db9f08811643cd1a95f9811d039dfa721b98686811480dd87f003'; '1280x800/light' = '8a33c8625681eb81338c703a84c0afc145abc85acbac91f29adef8dcb2027e33'; '1920x1080' = '176dcc6825f53b377eed8c31d01b321a5258705d6601c15b36240c1b636950d4'; '1920x1080/light' = 'd16eacb3bb62374dd978ffc4143fa545b18e36ded1ee505f16f02519895dd058'; '1920x1200' = '8bb20919e8d53af157e171ce3c5296755d7505f38eb2207a6a89be9f0e71132d'; '1920x1200/light' = '8329c0acb9a9cb231cd134f638aa607ea7cfb4984c6a8917ade27b63b5f9a929'; '3840x1080' = 'baf48bcd56b50cfc68aa7a38755002d988cb7ff9875a9d0884b2fcefaeb1c748'; '3840x1080/light' = '26cdd03254b765e477780084688e1a6fc3fa359b1a257743d3f6a38d68d27a08' }
+        ReferenceSha256 = @{ '640x480' = '7335ea8c94eeb98b0902c29e7abbc40911a974a5ea5655a6896559ee2ccc7bb5'; '1024x768' = 'ac3a24633347d68b2668c39b59bdbc9fb9f5519f642bb3662646d6a563ef5208'; '1024x768/light' = '720ca97b2d70f0ef4d4809d7cad703194364f812f9616abb22cf27f1a9ebd7a8'; '1280x1024' = '5cbbbba1426ad8e6abbf13ce415c80d4ba01646b89b32ba6dd0095c03b82d780'; '1280x1024/light' = 'aa3adeab8331cec2a4ef7d966f7da1429096baf4af63a87b3a3f725831da04f3'; '1280x720' = '7b93363e6f2ce8c327718eba32078ab534aa2bcb7ee94e5cfcbf45e2b4a2a871'; '1280x720/light' = '4148e7d3785e4b24973d9dcd7aaf4e26576fff04ac6ba0928b7ea28a868152e0'; '1280x800' = 'c3f6e34b90c20dd09b3b5a08fc83f875fc7300f699870cc815563c83002ffb30'; '1280x800/light' = 'ceae00d2687ace4ff938962cd58b0231176116350b4920308a92a16670ce669c'; '1920x1080' = 'd150de5991c45ee1c83c3660025c3be697e069144af5eb92c287a777375ad18a'; '1920x1080/light' = 'ba10a65c6c0f21dc57fbe398aae3caf33426481bb89b2695ea51760848316239'; '1920x1200' = '907e4c8b270c11987eb12e612b007d7774ce5c24a6ebaa917af492c7ed3ed946'; '1920x1200/light' = '9d4a4152d4655d4c2555a2261b0f7149403e96e23f336e5d5872773a26b6f078'; '3840x1080' = '85b258b38a3992631dd55a520d80027d22419c204c7154853b958371b0924e09'; '3840x1080/light' = '7071980ce076fc9a74672f9f5d19dabe1a6ac03575e187a5f13c53f6b63b77cd' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -7462,46 +7462,52 @@ later relocation entry, this patch is always applied last.
             }
 
             # ---- intro: No intro movie at start-up; DARK COLONY and COUNCIL WARS play their own intro (Dark Colony Ultimate only) ---------------------------------------------------------
-            #  Added      : 5 Oct 2026
+            #  Added      : 5 Oct 2026 / 7 Oct 2026
             #  Made with  : tools/patch_intro.py
-            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.74
-            #  Changes    : 100 bytes in 5 edits
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.74 and 10.77
+            #  Changes    : 102 bytes in 5 edits
             #  The game started with the Council Wars intro (avi/intro.avi) before the main menu, whatever the player
             #  was going to do, and the Dark Colony intro - on the Dark Colony disc, kept beside the Council Wars one as
             #  AVI/DCINTRO.AVI since both games share the folder - was never played by this build.  Now the main menu
             #  comes up at once, DARK COLONY plays avi/dcintro.avi and COUNCIL WARS plays avi/intro.avi, each right
             #  before its campaign's race and name screen.  ACADEMY, OZI MISSIONS and LOAD GAME play nothing.  SPACE
-            #  skips a movie as before; a missing movie file is skipped silently.
+            #  skips a movie as before; a missing movie file is skipped silently.  Since 7 Oct 2026 the movie plays
+            #  without the main menu's background hum (SOUND/HUM.WAV, a looping sound the menu starts and nothing
+            #  stopped, so it went on under the movie); the hum comes back for the race and name screen, as after
+            #  ACADEMY.
             #  How: the 95 bytes of main() that built "avi/" + "intro.avi" and called the movie player become a jump
             #  to the menu loop and hold the new code: two small trampolines (one per button: push edx; call the
             #  button's mode stub of fix ozi; call common with the movie path inline) and a common tail (pop the path
-            #  into edx, save eax, call the movie player with eax = the menu object, restore, jump to the campaign
-            #  runner).  The COUNCIL WARS and DARK COLONY handlers call these trampolines instead of fix ozi's
-            #  plain ones (which set the mode and enter the campaign); ACADEMY keeps the plain one.  The two absolute
-            #  operands the old bytes held lose their .reloc entries (type 0); the new code has none.  Requires fix ozi
-            #  (its mode stubs and trampolines).
+            #  into edx, save eax and ecx, stop every sound, call the movie player with eax = the menu object, start
+            #  the hum again, restore, jump to the campaign runner).  The COUNCIL WARS and DARK COLONY handlers call
+            #  these trampolines instead of fix ozi's plain ones (which set the mode and enter the campaign); ACADEMY
+            #  keeps the plain one.  The two absolute operands the old bytes held lose their .reloc entries (type 0);
+            #  the new code has none.  Requires fix ozi (its mode stubs and trampolines).
             @{
-                Id = 'intro'; Name = 'No intro movie at start-up; DARK COLONY and COUNCIL WARS play their own intro (Dark Colony Ultimate only)'; Date = '5 Oct 2026'
+                Id = 'intro'; Name = 'No intro movie at start-up; DARK COLONY and COUNCIL WARS play their own intro (Dark Colony Ultimate only)'; Date = '5 Oct 2026 / 7 Oct 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = $null
                 # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
                 Theme = $null
-                Tool = 'tools/patch_intro.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.74'
+                Tool = 'tools/patch_intro.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md sections 10.74 and 10.77'
                 Description = @'
 The game started with the Council Wars intro (avi/intro.avi) before the main menu, whatever the player
 was going to do, and the Dark Colony intro - on the Dark Colony disc, kept beside the Council Wars one as
 AVI/DCINTRO.AVI since both games share the folder - was never played by this build.  Now the main menu
 comes up at once, DARK COLONY plays avi/dcintro.avi and COUNCIL WARS plays avi/intro.avi, each right
 before its campaign's race and name screen.  ACADEMY, OZI MISSIONS and LOAD GAME play nothing.  SPACE
-skips a movie as before; a missing movie file is skipped silently.
+skips a movie as before; a missing movie file is skipped silently.  Since 7 Oct 2026 the movie plays
+without the main menu's background hum (SOUND/HUM.WAV, a looping sound the menu starts and nothing
+stopped, so it went on under the movie); the hum comes back for the race and name screen, as after
+ACADEMY.
 How: the 95 bytes of main() that built "avi/" + "intro.avi" and called the movie player become a jump
 to the menu loop and hold the new code: two small trampolines (one per button: push edx; call the
 button's mode stub of fix ozi; call common with the movie path inline) and a common tail (pop the path
-into edx, save eax, call the movie player with eax = the menu object, restore, jump to the campaign
-runner).  The COUNCIL WARS and DARK COLONY handlers call these trampolines instead of fix ozi's
-plain ones (which set the mode and enter the campaign); ACADEMY keeps the plain one.  The two absolute
-operands the old bytes held lose their .reloc entries (type 0); the new code has none.  Requires fix ozi
-(its mode stubs and trampolines).
+into edx, save eax and ecx, stop every sound, call the movie player with eax = the menu object, start
+the hum again, restore, jump to the campaign runner).  The COUNCIL WARS and DARK COLONY handlers call
+these trampolines instead of fix ozi's plain ones (which set the mode and enter the campaign); ACADEMY
+keeps the plain one.  The two absolute operands the old bytes held lose their .reloc entries (type 0);
+the new code has none.  Requires fix ozi (its mode stubs and trampolines).
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @('ozi')
@@ -7514,8 +7520,8 @@ operands the old bytes held lose their .reloc entries (type 0); the new code has
                     @{ Offset = 0x4465; Old = 'E8 76 A2 07 00'; New = 'E8 FF 02 00 00' }
                     # DARK COLONY handler: call tramp_dc_campaign 0x0047f390 -> call tramp_dc_intro 0x00405382 (mode dc/, the Dark Colony intro, then the campaign)
                     @{ Offset = 0x4516; Old = 'E8 75 A2 07 00'; New = 'E8 67 02 00 00' }
-                    # main: the start-up intro ("avi/" + "intro.avi" built in a local buffer, play_movie 0x00401028) -> jmp to the menu loop 0x004053c6; the freed 93 bytes hold tramp_cw_intro (0x00405369: push edx; call stub_cw_set 0x0047f290; call common; "avi/intro.avi"), tramp_dc_intro (0x00405382: push edx; call stub_dc_set 0x0047f340; call common; "avi/dcintro.avi") and common (0x0040539d: pop edx = the path; push eax; call play_movie; pop eax; pop edx; jmp campaign runner 0x00401c08)
-                    @{ Offset = 0x4767; Old = 'BE F2 46 4A 00 8D BD 00 FF FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD 00 FF FF FF 8D 95 00 FF FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 89 D8 E8 62 BC FF FF'; New = 'EB 5D 52 E8 21 9F 07 00 E8 29 00 00 00 61 76 69 2F 69 6E 74 72 6F 2E 61 76 69 00 52 E8 B8 9F 07 00 E8 10 00 00 00 61 76 69 2F 64 63 69 6E 74 72 6F 2E 61 76 69 00 5A 50 E8 84 BC FF FF 58 5A E9 5D C8 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
+                    # main: the start-up intro ("avi/" + "intro.avi" built in a local buffer, play_movie 0x00401028) -> jmp to the menu loop 0x004053c6; the freed 93 bytes hold tramp_cw_intro (0x00405369: push edx; call stub_cw_set 0x0047f290; call common; "avi/intro.avi"), tramp_dc_intro (0x00405382: push edx; call stub_dc_set 0x0047f340; call common; "avi/dcintro.avi") and common (0x0040539d: pop edx = the path; save eax, ecx; stop every sample (ui+0B4h: the menu hum HUM.WAV loops otherwise under the movie); call play_movie; HUM.WAV again (ui+7Ch, 86h, 1) for the race screen; restore; pop edx; jmp campaign runner 0x00401c08)
+                    @{ Offset = 0x4767; Old = 'BE F2 46 4A 00 8D BD 00 FF FF FF 57 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F BE A8 24 48 00 8D BD 00 FF FF FF 8D 95 00 FF FF FF 57 2B C9 49 B0 00 F2 AE 4F 8A 06 88 07 3C 00 74 10 8A 46 01 83 C6 02 88 47 01 83 C7 02 3C 00 75 E8 5F 89 D8 E8 62 BC FF FF'; New = 'EB 5D 52 E8 21 9F 07 00 E8 29 00 00 00 61 76 69 2F 69 6E 74 72 6F 2E 61 76 69 00 52 E8 B8 9F 07 00 E8 10 00 00 00 61 76 69 2F 64 63 69 6E 74 72 6F 2E 61 76 69 00 5A 50 51 89 C1 52 FF 91 B4 00 00 00 5A 89 C8 E8 77 BC FF FF 6A 01 5A B8 86 00 00 00 FF 51 7C 59 58 5A E9 44 C8 FF FF 00 00' }
                     # .reloc table: entry 3368 (type 3 HIGHLOW, page offset 0x368) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
                     @{ Offset = 0x97C1C; Old = '68 33'; New = '68 03' }
                     # .reloc table: entry 338D (type 3 HIGHLOW, page offset 0x38D) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
