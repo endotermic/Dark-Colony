@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 2.7, build 20261007.0755 - generated 2026-10-07 07:55 UTC from Dark-Colony-Server 00ddd0d and Dark-Colony e65ba66+.
+    Dark Colony patcher 2.8, build 20261007.1009 - generated 2026-10-07 10:09 UTC from Dark-Colony-Server 8d9ffe0 and Dark-Colony 0dd637e+.
 
 
 .SYNOPSIS
@@ -234,9 +234,9 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '2.7'
-$PatcherBuild = '20261007.0755'
-$PatcherGenerated = '2026-10-07 07:55 UTC from Dark-Colony-Server 00ddd0d and Dark-Colony e65ba66+'
+$PatcherVersion = '2.8'
+$PatcherBuild = '20261007.1009'
+$PatcherGenerated = '2026-10-07 10:09 UTC from Dark-Colony-Server 8d9ffe0 and Dark-Colony 0dd637e+'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -256,7 +256,7 @@ $Builds = @(
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = 'ac3a24633347d68b2668c39b59bdbc9fb9f5519f642bb3662646d6a563ef5208'   # every patch applied at the reference resolution (1024x768, dark interface) = the generator's reference build (the repository ships no patched file since 5 Oct 2026)
+        PatchedSha256  = 'd37b674ee4b16b7282338b5652d4c296ca79a5cdfa9a1afa64ea1faa50ebb166'   # every patch applied at the reference resolution (1024x768, dark interface) = the generator's reference build (the repository ships no patched file since 5 Oct 2026)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -264,7 +264,7 @@ $Builds = @(
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the generator's reference builds); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = '7335ea8c94eeb98b0902c29e7abbc40911a974a5ea5655a6896559ee2ccc7bb5'; '1024x768' = 'ac3a24633347d68b2668c39b59bdbc9fb9f5519f642bb3662646d6a563ef5208'; '1024x768/light' = '720ca97b2d70f0ef4d4809d7cad703194364f812f9616abb22cf27f1a9ebd7a8'; '1280x1024' = '5cbbbba1426ad8e6abbf13ce415c80d4ba01646b89b32ba6dd0095c03b82d780'; '1280x1024/light' = 'aa3adeab8331cec2a4ef7d966f7da1429096baf4af63a87b3a3f725831da04f3'; '1280x720' = '7b93363e6f2ce8c327718eba32078ab534aa2bcb7ee94e5cfcbf45e2b4a2a871'; '1280x720/light' = '4148e7d3785e4b24973d9dcd7aaf4e26576fff04ac6ba0928b7ea28a868152e0'; '1280x800' = 'c3f6e34b90c20dd09b3b5a08fc83f875fc7300f699870cc815563c83002ffb30'; '1280x800/light' = 'ceae00d2687ace4ff938962cd58b0231176116350b4920308a92a16670ce669c'; '1920x1080' = 'd150de5991c45ee1c83c3660025c3be697e069144af5eb92c287a777375ad18a'; '1920x1080/light' = 'ba10a65c6c0f21dc57fbe398aae3caf33426481bb89b2695ea51760848316239'; '1920x1200' = '907e4c8b270c11987eb12e612b007d7774ce5c24a6ebaa917af492c7ed3ed946'; '1920x1200/light' = '9d4a4152d4655d4c2555a2261b0f7149403e96e23f336e5d5872773a26b6f078'; '3840x1080' = '85b258b38a3992631dd55a520d80027d22419c204c7154853b958371b0924e09'; '3840x1080/light' = '7071980ce076fc9a74672f9f5d19dabe1a6ac03575e187a5f13c53f6b63b77cd' }
+        ReferenceSha256 = @{ '640x480' = '8f76732ade03a59deb65a4879997366fc6dda87b35dffb07febf30bd8c837865'; '1024x768' = 'd37b674ee4b16b7282338b5652d4c296ca79a5cdfa9a1afa64ea1faa50ebb166'; '1024x768/light' = '89b3fa45d3904fb31295962a772b33309121a32bda22ffdca500c16327b0efa7'; '1280x1024' = 'b753d3d335c2a3a4610285bcd7f20e8feb50944b6fa01abc968c92458c427bc4'; '1280x1024/light' = '6846a9bef3fb8599afd6b4adbaa6eefe9893faeea2fbc27659d76f665a9684c3'; '1280x720' = '9cc2954c165f431962407b6a264a7d3675c40e93e5fa1a9b2f89e6c61689c381'; '1280x720/light' = '5fba1edf02a0037e30169ccf04951874ed3d8071ad633393899f9b34a40fd382'; '1280x800' = '2392609b61403140ea71527ff815676cdac5f1a9ff954e83004aa3b95a72f56f'; '1280x800/light' = 'e09fd95611afea56facdfdb8bd22a92d7354ac4aff2395f20ec7cdb1694d3f1d'; '1920x1080' = '772a285df0263f474bf8194881ffb9addc1d93475841f85da6e838966429179f'; '1920x1080/light' = '1c3b491e9c53e03e93fd69bda9cd8746d3017bccb64b2c7ba1fb50d352652836'; '1920x1200' = 'f9862fcecc44532bdca696da851769a965b3fecc732307919320ca57ff8eade0'; '1920x1200/light' = 'dce442327ed94151808a9b9441173837fc2cb5a937ddb1f9d6cb994b53b35059'; '3840x1080' = 'b69ddf22ca8884a3bff167be170b7291f90a1a3451aed6a5eb32067e91bf2a99'; '3840x1080/light' = 'ddd6e7c4cef10e84b40dec6670af4aa8fded51942d4ff381df24393d7cbcf69c' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -7526,6 +7526,186 @@ the new code has none.  Requires fix ozi (its mode stubs and trampolines).
                     @{ Offset = 0x97C1C; Old = '68 33'; New = '68 03' }
                     # .reloc table: entry 338D (type 3 HIGHLOW, page offset 0x38D) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
                     @{ Offset = 0x97C1E; Old = '8D 33'; New = '8D 03' }
+                )
+            }
+
+            # ---- volume: The SOUND slider changes the sound effects only, not the music (Dark Colony Ultimate only) ---------------------------------------------------------
+            #  Added      : 7 Oct 2026
+            #  Made with  : tools/patch_volume.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.78
+            #  Changes    : 717 bytes in 62 edits
+            #  The options screen's SOUND -/+ buttons set the "WaveOut" line of the legacy Windows mixer.  Since
+            #  Windows Vista that line is the game's own slider in the Windows Volume Mixer (its per-application volume),
+            #  so it scaled everything the game plays - the effects and, since fix music plays the soundtrack inside the
+            #  game, the music too: the music could never be louder than the SOUND level allowed, and Windows kept the
+            #  reduced level between runs.  Now the SOUND level is an attenuation applied to the effects themselves:
+            #  every sound is started at its sound2.dat volume plus 36*log10(level/10) dB (the taper of the Windows
+            #  slider it replaces; 10 = unchanged, 5 = -10.8 dB, 0 = silent), a press re-applies it to every playing
+            #  voice (the menu hum, a running battle), and the music keeps its own slider (CDROM VOLUME / MUSIC).  A press
+            #  also sets the game's Windows per-application volume back to 100 %, so a game an older build left quiet in
+            #  the Volume Mixer recovers with one press.
+            #  How: the 632 bytes of the mixer walk that set_volume's sound branch called (nothing else did) become a
+            #  position-independent module: sfx_set (the cache, the re-apply loop over the 200-sample table, the Windows
+            #  mixer walk at maximum, returns 0 so set_volume does nothing more) and setvol (volume + the attenuation of
+            #  the cached or saved level, clamped at DirectSound's minimum, IDirectSoundBuffer::SetVolume); the sample
+            #  engine's three SetVolume calls go through setvol.  The 58 .reloc entries of the old walk become type 0;
+            #  the new code has no absolute operand.  Independent of every other fix.
+            @{
+                Id = 'volume'; Name = 'The SOUND slider changes the sound effects only, not the music (Dark Colony Ultimate only)'; Date = '7 Oct 2026'
+                # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
+                Mode = $null
+                # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
+                Theme = $null
+                Tool = 'tools/patch_volume.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.78'
+                Description = @'
+The options screen's SOUND -/+ buttons set the "WaveOut" line of the legacy Windows mixer.  Since
+Windows Vista that line is the game's own slider in the Windows Volume Mixer (its per-application volume),
+so it scaled everything the game plays - the effects and, since fix music plays the soundtrack inside the
+game, the music too: the music could never be louder than the SOUND level allowed, and Windows kept the
+reduced level between runs.  Now the SOUND level is an attenuation applied to the effects themselves:
+every sound is started at its sound2.dat volume plus 36*log10(level/10) dB (the taper of the Windows
+slider it replaces; 10 = unchanged, 5 = -10.8 dB, 0 = silent), a press re-applies it to every playing
+voice (the menu hum, a running battle), and the music keeps its own slider (CDROM VOLUME / MUSIC).  A press
+also sets the game's Windows per-application volume back to 100 %, so a game an older build left quiet in
+the Volume Mixer recovers with one press.
+How: the 632 bytes of the mixer walk that set_volume's sound branch called (nothing else did) become a
+position-independent module: sfx_set (the cache, the re-apply loop over the 200-sample table, the Windows
+mixer walk at maximum, returns 0 so set_volume does nothing more) and setvol (volume + the attenuation of
+the cached or saved level, clamped at DirectSound's minimum, IDirectSoundBuffer::SetVolume); the sample
+engine's three SetVolume calls go through setvol.  The 58 .reloc entries of the old walk become type 0;
+the new code has no absolute operand.  Independent of every other fix.
+'@
+                # fixes that must be applied together with this one (the exe would not work otherwise)
+                Requires = @()
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
+                Data = @(
+                )
+                Edits = @(
+                    # play: SetVolume of the voice, VA 0x00431006: edx = the resolved volume, push it, call IDirectSoundBuffer::SetVolume -> edx = the volume, call setvol 0x00452723 (adds the SOUND level's attenuation, clamps at -10000, SetVolume), 2 nops
+                    @{ Offset = 0x30406; Old = '8B 55 FC 52 8B 03 53 FF 50 3C'; New = '8B 55 FC E8 15 17 02 00 90 90' }
+                    # play with pan: SetVolume of the voice, VA 0x00431257: push the volume, call IDirectSoundBuffer::SetVolume -> edx = the volume, call setvol 0x00452723 (adds the SOUND level's attenuation, clamps at -10000, SetVolume)
+                    @{ Offset = 0x30657; Old = '57 8B 03 53 FF 50 3C'; New = '89 FA E8 C5 14 02 00' }
+                    # voice adjust: SetVolume of the voice, VA 0x00431374: push the volume, call IDirectSoundBuffer::SetVolume -> edx = the volume, call setvol 0x00452723 (adds the SOUND level's attenuation, clamps at -10000, SetVolume)
+                    @{ Offset = 0x30774; Old = '57 8B 03 53 FF 50 3C'; New = '89 FA E8 A8 13 02 00' }
+                    # set_volume method 1: VA 0x004525E0, the legacy-mixer walk + mixerSetControlDetails/mixerClose wrappers (632 bytes; set the WaveOut line = the game's Windows per-application volume, which scales the music too) -> the fix's module (411 bytes, position-independent): sfx_set (cache = level+1 at 0x005337CC; SetVolume(sound2.dat volume + attenuation) on every voice of every loaded sample; the Windows per-application volume back to its maximum; eax = 0 so set_volume returns), setvol at +0x143 (volume + attenuation of the cached or saved level 0x00488E0C, clamp -10000, SetVolume), the 11-word attenuation table at +0x185 (36*log10(level/10) in hundredths of a dB, level 0 = silence)
+                    @{ Offset = 0x519E0; Old = '53 51 52 56 57 55 89 E5 83 EC 04 89 C7 2E FF 15 84 05 48 00 89 45 FC 85 C0 0F 86 E7 01 00 00 31 F6 3B 75 FC 0F 83 DC 01 00 00 6A 00 6A 00 6A 00 56 68 C8 37 53 00 2E FF 15 88 05 48 00 85 C0 0F 85 BB 01 00 00 BB A8 00 00 00 B8 F0 36 53 00 31 D2 B9 A8 00 00 00 E8 71 9A 02 00 89 0D F0 36 53 00 85 FF 75 0C C7 05 08 37 53 00 05 10 00 00 EB 56 83 FF 01 75 0C C7 05 08 37 53 00 08 10 00 00 EB 45 68 90 7D 48 00 6A 35 68 94 7D 48 00 68 A0 7D 48 00 8B 15 B4 49 4A 00 52 B9 35 00 00 00 BB 94 7D 48 00 E8 1D 98 02 00 83 C4 14 A1 B4 49 4A 00 BA 90 7D 48 00 E8 2C 98 02 00 E8 37 98 02 00 31 C0 E8 E7 99 02 00 6A 03 68 F0 36 53 00 8B 0D C8 37 53 00 51 2E FF 15 80 05 48 00 85 C0 0F 85 07 01 00 00 BB 18 00 00 00 B8 98 37 53 00 31 D2 E8 D7 99 02 00 BB 94 00 00 00 B8 D4 37 53 00 31 D2 B9 94 00 00 00 E8 C1 99 02 00 BB 18 00 00 00 B8 01 00 03 50 6A 02 BA 01 00 00 00 89 0D A8 37 53 00 68 98 37 53 00 89 1D 98 37 53 00 A3 A0 37 53 00 A1 C8 37 53 00 BB D4 37 53 00 50 89 15 A4 37 53 00 89 1D AC 37 53 00 2E FF 15 7C 05 48 00 85 C0 0F 85 93 00 00 00 A1 38 38 53 00 BB 18 00 00 00 A3 CC 37 53 00 A1 3C 38 53 00 31 D2 A3 68 38 53 00 B8 B0 37 53 00 E8 4F 99 02 00 BB 04 00 00 00 B8 D0 37 53 00 31 D2 B9 01 00 00 00 E8 39 99 02 00 BA 18 00 00 00 BB 04 00 00 00 6A 00 A1 D8 37 53 00 89 0D B8 37 53 00 68 B0 37 53 00 89 15 B0 37 53 00 A3 B4 37 53 00 8B 15 C8 37 53 00 B8 D0 37 53 00 52 89 1D C0 37 53 00 A3 C4 37 53 00 2E FF 15 78 05 48 00 85 C0 75 0F B9 01 00 00 00 89 C8 89 0D A8 C1 48 00 EB 1D 8B 1D C8 37 53 00 53 2E FF 15 74 05 48 00 31 C0 A3 C8 37 53 00 46 E9 1B FE FF FF 31 C0 89 EC 5D 5F 5E 5A 59 5B C3 8D 40 00 51 52 55 89 E5 83 3D A8 C1 48 00 00 74 1A 6A 00 68 B0 37 53 00 8B 0D C8 37 53 00 51 A3 D0 37 53 00 2E FF 15 8C 05 48 00 5D 5A 59 C3 51 52 56 57 55 89 E5 83 3D A8 C1 48 00 00 74 22 8B 0D C8 37 53 00 85 C9 74 10 51 31 F6 2E FF 15 74 05 48 00 89 35 C8 37 53 00 31 FF 89 3D A8 C1 48 00 5D 5F 5E 5A 59 C3'; New = '60 E8 00 00 00 00 5D 83 ED 06 8D 41 01 89 85 EC 11 0E 00 83 BD 70 71 03 00 00 75 2D 31 F6 8D BD 50 D9 08 00 80 7F 48 01 75 13 0F B6 0F E3 0E 8B 5C 8F 48 8B 57 44 E8 08 01 00 00 E2 F2 83 C7 74 46 81 FE C8 00 00 00 72 DB FF 95 A4 DF 02 00 89 C6 4E 0F 88 E7 00 00 00 6A 00 6A 00 6A 00 56 8D 85 E8 11 0E 00 50 FF 95 A8 DF 02 00 85 C0 75 E1 8D BD 10 11 0E 00 C7 07 A8 00 00 00 C7 47 18 08 10 00 00 6A 03 57 FF B5 E8 11 0E 00 FF 95 A0 DF 02 00 85 C0 0F 85 94 00 00 00 8D BD B8 11 0E 00 C7 07 18 00 00 00 8B 85 1C 11 0E 00 89 47 04 C7 47 08 01 00 03 50 C7 47 0C 01 00 00 00 C7 47 10 94 00 00 00 8D 85 F4 11 0E 00 89 47 14 6A 02 57 FF B5 E8 11 0E 00 FF 95 9C DF 02 00 85 C0 75 4E 8D BD D0 11 0E 00 C7 07 18 00 00 00 8B 85 F8 11 0E 00 89 47 04 C7 47 08 01 00 00 00 C7 47 0C 00 00 00 00 C7 47 10 04 00 00 00 8D 85 F0 11 0E 00 89 47 14 8B 85 5C 12 0E 00 89 85 F0 11 0E 00 6A 00 57 FF B5 E8 11 0E 00 FF 95 AC DF 02 00 FF B5 E8 11 0E 00 FF 95 94 DF 02 00 E9 12 FF FF FF 61 31 C0 C3 51 52 E8 00 00 00 00 59 8B 81 A2 10 0E 00 85 C0 75 07 8B 81 E2 66 03 00 40 48 83 F8 0A 76 05 B8 0A 00 00 00 0F BF 44 41 3B 01 C2 81 FA F0 D8 FF FF 7D 05 BA F0 D8 FF FF 52 8B 03 53 FF 50 3C 5A 59 C3 F0 D8 F0 F1 2B F6 A5 F8 67 FA C4 FB E1 FC D2 FD A3 FE 5B FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00' }
+                    # .reloc table: entry 35F0 (type 3 HIGHLOW, page offset 0x5F0) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C274; Old = 'F0 35'; New = '00 00' }
+                    # .reloc table: entry 3612 (type 3 HIGHLOW, page offset 0x612) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C276; Old = '12 36'; New = '00 00' }
+                    # .reloc table: entry 3619 (type 3 HIGHLOW, page offset 0x619) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C278; Old = '19 36'; New = '00 00' }
+                    # .reloc table: entry 362B (type 3 HIGHLOW, page offset 0x62B) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C27A; Old = '2B 36'; New = '00 00' }
+                    # .reloc table: entry 363D (type 3 HIGHLOW, page offset 0x63D) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C27C; Old = '3D 36'; New = '00 00' }
+                    # .reloc table: entry 3647 (type 3 HIGHLOW, page offset 0x647) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C27E; Old = '47 36'; New = '00 00' }
+                    # .reloc table: entry 3658 (type 3 HIGHLOW, page offset 0x658) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C280; Old = '58 36'; New = '00 00' }
+                    # .reloc table: entry 3663 (type 3 HIGHLOW, page offset 0x663) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C282; Old = '63 36'; New = '00 00' }
+                    # .reloc table: entry 366A (type 3 HIGHLOW, page offset 0x66A) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C284; Old = '6A 36'; New = '00 00' }
+                    # .reloc table: entry 366F (type 3 HIGHLOW, page offset 0x66F) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C286; Old = '6F 36'; New = '00 00' }
+                    # .reloc table: entry 3675 (type 3 HIGHLOW, page offset 0x675) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C288; Old = '75 36'; New = '00 00' }
+                    # .reloc table: entry 3680 (type 3 HIGHLOW, page offset 0x680) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C28A; Old = '80 36'; New = '00 00' }
+                    # .reloc table: entry 368D (type 3 HIGHLOW, page offset 0x68D) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C28C; Old = '8D 36'; New = '00 00' }
+                    # .reloc table: entry 3692 (type 3 HIGHLOW, page offset 0x692) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C28E; Old = '92 36'; New = '00 00' }
+                    # .reloc table: entry 36AA (type 3 HIGHLOW, page offset 0x6AA) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C290; Old = 'AA 36'; New = '00 00' }
+                    # .reloc table: entry 36B0 (type 3 HIGHLOW, page offset 0x6B0) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C292; Old = 'B0 36'; New = '00 00' }
+                    # .reloc table: entry 36B8 (type 3 HIGHLOW, page offset 0x6B8) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C294; Old = 'B8 36'; New = '00 00' }
+                    # .reloc table: entry 36CA (type 3 HIGHLOW, page offset 0x6CA) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C296; Old = 'CA 36'; New = '00 00' }
+                    # .reloc table: entry 36DB (type 3 HIGHLOW, page offset 0x6DB) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C298; Old = 'DB 36'; New = '00 00' }
+                    # .reloc table: entry 36FE (type 3 HIGHLOW, page offset 0x6FE) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C29A; Old = 'FE 36'; New = '00 00' }
+                    # .reloc table: entry 3703 (type 3 HIGHLOW, page offset 0x703) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C29C; Old = '03 37'; New = '00 00' }
+                    # .reloc table: entry 3709 (type 3 HIGHLOW, page offset 0x709) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C29E; Old = '09 37'; New = '00 00' }
+                    # .reloc table: entry 370E (type 3 HIGHLOW, page offset 0x70E) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2A0; Old = '0E 37'; New = '00 00' }
+                    # .reloc table: entry 3713 (type 3 HIGHLOW, page offset 0x713) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2A2; Old = '13 37'; New = '00 00' }
+                    # .reloc table: entry 3718 (type 3 HIGHLOW, page offset 0x718) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2A4; Old = '18 37'; New = '00 00' }
+                    # .reloc table: entry 371F (type 3 HIGHLOW, page offset 0x71F) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2A6; Old = '1F 37'; New = '00 00' }
+                    # .reloc table: entry 3725 (type 3 HIGHLOW, page offset 0x725) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2A8; Old = '25 37'; New = '00 00' }
+                    # .reloc table: entry 372C (type 3 HIGHLOW, page offset 0x72C) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2AA; Old = '2C 37'; New = '00 00' }
+                    # .reloc table: entry 3739 (type 3 HIGHLOW, page offset 0x739) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2AC; Old = '39 37'; New = '00 00' }
+                    # .reloc table: entry 3743 (type 3 HIGHLOW, page offset 0x743) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2AE; Old = '43 37'; New = '00 00' }
+                    # .reloc table: entry 3748 (type 3 HIGHLOW, page offset 0x748) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2B0; Old = '48 37'; New = '00 00' }
+                    # .reloc table: entry 374F (type 3 HIGHLOW, page offset 0x74F) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2B2; Old = '4F 37'; New = '00 00' }
+                    # .reloc table: entry 3754 (type 3 HIGHLOW, page offset 0x754) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2B4; Old = '54 37'; New = '00 00' }
+                    # .reloc table: entry 3763 (type 3 HIGHLOW, page offset 0x763) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2B6; Old = '63 37'; New = '00 00' }
+                    # .reloc table: entry 3780 (type 3 HIGHLOW, page offset 0x780) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2B8; Old = '80 37'; New = '00 00' }
+                    # .reloc table: entry 3786 (type 3 HIGHLOW, page offset 0x786) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2BA; Old = '86 37'; New = '00 00' }
+                    # .reloc table: entry 378B (type 3 HIGHLOW, page offset 0x78B) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2BC; Old = '8B 37'; New = '00 00' }
+                    # .reloc table: entry 3791 (type 3 HIGHLOW, page offset 0x791) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2BE; Old = '91 37'; New = '00 00' }
+                    # .reloc table: entry 3796 (type 3 HIGHLOW, page offset 0x796) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2C0; Old = '96 37'; New = '00 00' }
+                    # .reloc table: entry 379C (type 3 HIGHLOW, page offset 0x79C) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2C2; Old = '9C 37'; New = '00 00' }
+                    # .reloc table: entry 37A1 (type 3 HIGHLOW, page offset 0x7A1) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2C4; Old = 'A1 37'; New = '00 00' }
+                    # .reloc table: entry 37A8 (type 3 HIGHLOW, page offset 0x7A8) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2C6; Old = 'A8 37'; New = '00 00' }
+                    # .reloc table: entry 37AD (type 3 HIGHLOW, page offset 0x7AD) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2C8; Old = 'AD 37'; New = '00 00' }
+                    # .reloc table: entry 37B4 (type 3 HIGHLOW, page offset 0x7B4) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2CA; Old = 'B4 37'; New = '00 00' }
+                    # .reloc table: entry 37C5 (type 3 HIGHLOW, page offset 0x7C5) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2CC; Old = 'C5 37'; New = '00 00' }
+                    # .reloc table: entry 37CD (type 3 HIGHLOW, page offset 0x7CD) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2CE; Old = 'CD 37'; New = '00 00' }
+                    # .reloc table: entry 37D5 (type 3 HIGHLOW, page offset 0x7D5) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2D0; Old = 'D5 37'; New = '00 00' }
+                    # .reloc table: entry 37DC (type 3 HIGHLOW, page offset 0x7DC) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2D2; Old = 'DC 37'; New = '00 00' }
+                    # .reloc table: entry 37FB (type 3 HIGHLOW, page offset 0x7FB) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2D4; Old = 'FB 37'; New = '00 00' }
+                    # .reloc table: entry 3805 (type 3 HIGHLOW, page offset 0x805) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2D6; Old = '05 38'; New = '00 00' }
+                    # .reloc table: entry 380B (type 3 HIGHLOW, page offset 0x80B) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2D8; Old = '0B 38'; New = '00 00' }
+                    # .reloc table: entry 3811 (type 3 HIGHLOW, page offset 0x811) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2DA; Old = '11 38'; New = '00 00' }
+                    # .reloc table: entry 3818 (type 3 HIGHLOW, page offset 0x818) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2DC; Old = '18 38'; New = '00 00' }
+                    # .reloc table: entry 3829 (type 3 HIGHLOW, page offset 0x829) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2DE; Old = '29 38'; New = '00 00' }
+                    # .reloc table: entry 3832 (type 3 HIGHLOW, page offset 0x832) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2E0; Old = '32 38'; New = '00 00' }
+                    # .reloc table: entry 3840 (type 3 HIGHLOW, page offset 0x840) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2E2; Old = '40 38'; New = '00 00' }
+                    # .reloc table: entry 3846 (type 3 HIGHLOW, page offset 0x846) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2E4; Old = '46 38'; New = '00 00' }
+                    # .reloc table: entry 384E (type 3 HIGHLOW, page offset 0x84E) -> 0000: the absolute operand it described no longer exists, entry becomes type 0 ABSOLUTE padding
+                    @{ Offset = 0x9C2E6; Old = '4E 38'; New = '00 00' }
                 )
             }
 
