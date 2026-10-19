@@ -523,7 +523,7 @@ What makes it trustworthy:
                      icon (the high-resolution icon and the per-monitor
                        DPI-aware manifest, so Windows never scales the
                        full-screen picture),
-                     online, last (the ONLINE WAR button: a room
+                     online (the ONLINE WAR button: a room
                        browser for the relay server, TLS to port 8889,
                        the REPLAY ONLINE GAME button: the relay's
                        recorded battles, watched from a participant's
@@ -537,7 +537,18 @@ What makes it trustworthy:
                        the Name: and Server: lines of both screens - a
                        file of the earlier form that still holds only
                        the shipped address is upgraded, an existing file
-                       with your own relay address is never overwritten)
+                       with your own relay address is never overwritten),
+                     wow64, last (19 Oct 2026: the four Watcom callback
+                       wrappers no longer push and pop the GS segment
+                       register - seven two-byte NOPs - because under
+                       Wine's 64-bit-only "wow64" mode, Wine 10.0 to
+                       10.13 as Ubuntu 26.10 installs it without wine32,
+                       a GS write cleared the base Wine's 64-bit side
+                       keeps its thread block at and the game died
+                       before its first screen with a
+                       "virtual_setup_exception stack overflow"; Wine
+                       bug 58141, fixed in Wine 10.14; Windows and the
+                       classic 32-bit Wine run the game either way)
                      = 22 fixes with the dark interface, 21 with the
                        light one (no console), 20 at 640x480 (no
                        resolution, no console)
@@ -612,12 +623,18 @@ What makes it trustworthy:
    it writes are byte-identical to the Windows build, and the script
    says so.  Start them with Wine as usual.
 
+   -DesktopShortcut works here too: instead of a Windows .lnk it puts
+   a "Dark Colony Ultimate.desktop" and "Dark Colony Map Editor.desktop"
+   launcher on your desktop that starts the exe with Wine from the game
+   folder, already marked as trusted - a double click runs it.  The
+   game's icon goes to ~/.local/share/icons/hicolor/256x256/apps/
+   dark-colony.png (the 256x256 image of DC_HD.ICO), which every
+   desktop shows.
+
    Windows-only, so not on Linux: the installer window (the script
-   started without arguments) - use the command line instead; the
-   -DesktopShortcut option - leave it out and make your own launcher;
-   and the MP3 encoder of the disc install - the full Dark-Colony
-   repository already carries the MP3 tracks, so nothing is missing
-   there.
+   started without arguments) - use the command line instead; and the
+   MP3 encoder of the disc install - the full Dark-Colony repository
+   already carries the MP3 tracks, so nothing is missing there.
 
    * "No usable version of libssl was found": pwsh needs OpenSSL 1.1
      or 3 for its SHA-256 checks.  A distribution that ships only
