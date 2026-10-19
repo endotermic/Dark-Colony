@@ -595,6 +595,44 @@ What makes it trustworthy:
 
 
 ---------------------------------------------------------------------
+  ON LINUX, WITHOUT WINDOWS
+---------------------------------------------------------------------
+
+   The patcher runs under PowerShell 7 on Linux as well, from the
+   command line.  Install PowerShell 7 ("pwsh") from Microsoft - your
+   distribution's package, the snap, or the linux-x64 tarball from
+   github.com/PowerShell/PowerShell/releases unpacked anywhere - and
+   run, from the repository folder,
+
+        pwsh -NoProfile -File patcher/Apply-DarkColonyPatches.ps1 -All -Resolution 1024x768 -Theme dark
+
+   with your screen size and -Theme light or dark, exactly as under
+   COMMAND LINE above; -List, -Verify and the other options work the
+   same way (write the paths with forward slashes).  The executables
+   it writes are byte-identical to the Windows build, and the script
+   says so.  Start them with Wine as usual.
+
+   Windows-only, so not on Linux: the installer window (the script
+   started without arguments) - use the command line instead; the
+   -DesktopShortcut option - leave it out and make your own launcher;
+   and the MP3 encoder of the disc install - the full Dark-Colony
+   repository already carries the MP3 tracks, so nothing is missing
+   there.
+
+   * "No usable version of libssl was found": pwsh needs OpenSSL 1.1
+     or 3 for its SHA-256 checks.  A distribution that ships only
+     OpenSSL 4 (Ubuntu 26.10) has to lend it an OpenSSL 3: install
+     the distribution's libssl3 package if it still has one, or
+     unpack an OpenSSL 3 libssl.so.3 and libcrypto.so.3 into a folder
+     of your own and start pwsh with
+
+        LD_LIBRARY_PATH=/path/to/that/folder pwsh -NoProfile -File patcher/Apply-DarkColonyPatches.ps1 ...
+
+   * Wine's own powershell.exe is an empty stub and cannot run the
+     script - use the Linux pwsh.
+
+
+---------------------------------------------------------------------
   WHERE THE PATCHES COME FROM
 ---------------------------------------------------------------------
 
