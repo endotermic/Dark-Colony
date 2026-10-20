@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 2.9, build 20261020.1017 - generated 2026-10-07 10:09 UTC from Dark-Colony-Server 8d9ffe0 and Dark-Colony 0dd637e+, edited by hand on 19-20 Oct 2026 (fix wow64, Linux desktop launchers).
+    Dark Colony patcher 2.9, build 20261020.1032 - generated 2026-10-20 10:32 UTC from Dark-Colony-Server f84ae65+ and Dark-Colony 1f54f92.
 
 
 .SYNOPSIS
@@ -238,8 +238,8 @@ $ErrorActionPreference = 'Stop'
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
 $PatcherVersion = '2.9'
-$PatcherBuild = '20261020.1017'
-$PatcherGenerated = '2026-10-07 10:09 UTC from Dark-Colony-Server 8d9ffe0 and Dark-Colony 0dd637e+'
+$PatcherBuild = '20261020.1032'
+$PatcherGenerated = '2026-10-20 10:32 UTC from Dark-Colony-Server f84ae65+ and Dark-Colony 1f54f92'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -7963,31 +7963,34 @@ repository.
                 )
             }
 
-            # ---- wow64: Wine's 64-bit-only mode: the four segment-register-saving routines no longer write GS ---------------------------------------------------------
-            #  Added      : 19 Oct 2026 (by hand in this script; port to Dark-Colony-Server tools/patch_wow64.py so the generator keeps it)
-            #  Made with  : objdump byte scan of the AUTO section (push gs 0F A8 / pop gs 0F A9), verified in game under Wine 10.0 wow64
-            #  Documented : Wine bug 58141 (https://bugs.winehq.org/show_bug.cgi?id=58141), fixed in Wine 10.14 by commit 94447cee
+            # ---- wow64: Wine 64-bit-only (wow64) mode: the game starts (no GS segment register writes) ---------------------------------------------------------
+            #  Added      : 19 Oct 2026
+            #  Made with  : tools/patch_wow64.py
+            #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.79 (Wine bug 58141, fixed in Wine 10.14)
             #  Changes    : 14 bytes in 7 edits
-            #  Under Wine's new "wow64" mode - a 64-bit-only Wine running the 32-bit game, the default on
-            #  Ubuntu 26.10 (Wine 10.0, no wine32 package) and the only mode of Wine 11 - the game dies
-            #  before its first screen with "err:virtual:virtual_setup_exception stack overflow" in Wine's
-            #  log.  Four routines of the Watcom runtime save and restore the segment registers around
-            #  their body (push es / push fs / push gs ... pop gs / pop fs / pop es, the compiler's
-            #  convention for callbacks); the pop gs is the problem.  On x86-64 Linux a write to GS, even of
-            #  the value it already holds, clears the 64-bit GS base that Wine's 64-bit side uses to reach
-            #  its thread block; the next access faults, the fault handler needs the same thread block,
-            #  faults again, and the recursion exhausts the 64-bit stack.  Wine 10.14 (Aug 2025) repairs
-            #  the GS base in its fault handler; Wine 10.0 - 10.13 do not.  The 32-bit game never uses GS
-            #  (flat Win32 model), so every push gs and pop gs becomes two NOPs: the stacks stay balanced
-            #  (the routine at 0x440BBF leaves through the shared epilogue at 0x440B8C), nothing moves.
-            #  The classic 32-bit Wine (wine32) and Windows are not affected either way.
+            #  Under Wine's new "wow64" mode - a 64-bit-only Wine running this 32-bit game, which is what Ubuntu
+            #  26.10 installs (Wine 10.0 with no wine32 package) and the only mode Wine 11 has - the game died
+            #  before its first screen, with "err:virtual:virtual_setup_exception stack overflow" in Wine's
+            #  output (the untouched ENGEXP16.EXE too).  Four routines of the Watcom runtime save and restore the
+            #  segment registers around their body: push es / push fs / push gs on entry, pop gs / pop fs /
+            #  pop es on exit, the compiler's convention for callbacks.  On x86-64 Linux a write to the GS
+            #  register - even of the value it already holds - clears the 64-bit GS base that Wine's 64-bit side
+            #  uses to find its thread block; the next access faults, the fault handler needs the same thread
+            #  block and faults again, and that recursion runs the 64-bit stack out (Wine bug 58141, the same
+            #  crash in MDK and Blood Omen, two other Watcom-built games; fixed in Wine 10.14 of Aug 2025, which
+            #  repairs the GS base in its fault handler - Wine 10.0 to 10.13 do not).  The game is flat 32-bit code
+            #  and never reads GS, so each of the four push gs and the three pop gs becomes two NOPs; every push
+            #  keeps its pop (the routine entered at 0x440BBF leaves through the shared epilogue at 0x440B8C),
+            #  nothing moves.  Verified 19 Oct 2026: under Wine 10.0 in wow64 mode the game reaches the main
+            #  menu with this fix and dies without it.  Windows and the classic 32-bit Wine run the game either
+            #  way.
             @{
                 Id = 'wow64'; Name = 'Wine 64-bit-only (wow64) mode: the game starts (no GS segment register writes)'; Date = '19 Oct 2026'
                 # $null = part of every resolution, 'hd' = every resolution but 640x480, 'WxH' = that one only
                 Mode = $null
                 # $null = part of both battlefield interface themes, 'dark' = only with the dark one (chosen with the resolution)
                 Theme = $null
-                Tool = 'added by hand 19 Oct 2026 (port to tools/patch_wow64.py)'; Doc = 'Wine bug 58141, Wine commit 94447cee (fixed in Wine 10.14)'
+                Tool = 'tools/patch_wow64.py'; Doc = 'docs/DC16_DISPLAY_AND_RESOLUTION.md section 10.79 (Wine bug 58141, fixed in Wine 10.14)'
                 Description = @'
 Under Wine's new "wow64" mode - a 64-bit-only Wine running this 32-bit game, which is what Ubuntu
 26.10 installs (Wine 10.0 with no wine32 package) and the only mode Wine 11 has - the game died
@@ -8008,7 +8011,8 @@ way.
 '@
                 # fixes that must be applied together with this one (the exe would not work otherwise)
                 Requires = @()
-                # data files this fix needs next to the exe (0)
+                # data files this fix needs next to the exe (0; listed from the repository when this
+                # script was generated) - the patcher refuses to write when any of them is missing
                 Data = @(
                 )
                 Edits = @(
