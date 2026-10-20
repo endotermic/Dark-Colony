@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 2.8, build 20261007.1009 - generated 2026-10-07 10:09 UTC from Dark-Colony-Server 8d9ffe0 and Dark-Colony 0dd637e+.
+    Dark Colony patcher 2.9, build 20261020.1017 - generated 2026-10-07 10:09 UTC from Dark-Colony-Server 8d9ffe0 and Dark-Colony 0dd637e+, edited by hand on 19-20 Oct 2026 (fix wow64, Linux desktop launchers).
 
 
 .SYNOPSIS
@@ -237,8 +237,8 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '2.8'
-$PatcherBuild = '20261007.1009'
+$PatcherVersion = '2.9'
+$PatcherBuild = '20261020.1017'
 $PatcherGenerated = '2026-10-07 10:09 UTC from Dark-Colony-Server 8d9ffe0 and Dark-Colony 0dd637e+'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
