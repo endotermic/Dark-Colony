@@ -629,7 +629,11 @@ What makes it trustworthy:
    folder, already marked as trusted - a double click runs it.  The
    game's icon goes to ~/.local/share/icons/hicolor/256x256/apps/
    dark-colony.png (the 256x256 image of DC_HD.ICO), which every
-   desktop shows.
+   desktop shows.  The game's launcher runs a small start script,
+   "Dark Colony Ultimate.sh" beside the exe, which on a GNOME Wayland
+   desktop sets the display scale to 100 % while the game runs and
+   puts it back when the game quits (see the last point below); the
+   exe itself is not touched, -Verify says the same as before.
 
    Windows-only, so not on Linux: the installer window (the script
    started without arguments) - use the command line instead; and the
@@ -647,6 +651,40 @@ What makes it trustworthy:
 
    * Wine's own powershell.exe is an empty stub and cannot run the
      script - use the Linux pwsh.
+
+   * The game sits small in the top-left corner of a black screen:
+     Wine's X11 driver could not switch the display mode (under a
+     Wayland desktop it never really can).  Two steps: tell Wine to
+     use its Wayland driver, which draws the full-screen game at the
+     size of the screen itself,
+
+        wine reg add "HKCU\Software\Wine\Drivers" /v Graphics /d "wayland,x11" /f
+
+     and patch for a size with your screen's proportions (1920x1080
+     or 1280x720 on a 16:9 screen, 1920x1200 or 1280x800 on 16:10),
+     which then fills the screen exactly.  A size of another shape is
+     scaled with its proportions kept, but pinned to the top-left
+     corner instead of centred, so the black bar sits on one side
+     only.
+     "wine reg delete "HKCU\Software\Wine\Drivers" /v Graphics /f"
+     goes back to the X11 driver.
+
+   * The picture is too large, the right and bottom edges are cut off
+     (with the Wayland driver): the desktop's display scale is above
+     100 %.  Wine 10.0's Wayland driver counts in the desktop's scaled
+     pixels, so at 125 % it draws the game a quarter too large from
+     the top-left corner (at 1920x1080 only 1536x864 of the picture
+     is visible); at 100 % every game pixel is one screen pixel.  The
+     desktop launcher takes care of this itself: its start script
+     "Dark Colony Ultimate.sh" (beside the exe, written together with
+     the launcher) asks GNOME to switch to 100 % for the time the game
+     runs and switches back when the game quits - a temporary change,
+     nothing is saved, and a logout brings your own setting back
+     anyway.  Only when you start the exe by hand with "wine" do you
+     set the scale to 100 % yourself (Settings > Displays > Scale) or
+     start the game through that script instead.  Outside a GNOME
+     Wayland session the script changes nothing and simply starts the
+     game.
 
 
 ---------------------------------------------------------------------

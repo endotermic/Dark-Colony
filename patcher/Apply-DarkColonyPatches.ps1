@@ -158,7 +158,9 @@
     "Dark Colony - Council Wars" or "Dark Colony Map Editor"; start folder = the game folder, which
     the game needs to find its data).  An existing shortcut of that name is replaced.  The window
     does the same with its "Desktop shortcut" checkbox (ticked by default).  Under PowerShell 7 on
-    Linux a ".desktop" launcher that starts the exe with Wine is written instead (19 Oct 2026).
+    Linux a ".desktop" launcher that starts the exe with Wine is written instead (19 Oct 2026); for
+    the game it runs a small "<name>.sh" script beside the exe that, on a GNOME Wayland desktop, sets
+    the display scale to 100 % while the game runs and puts it back afterwards (20 Oct 2026).
 
 .PARAMETER Verify
     Instead of patching, inspect an existing exe: which build it is and which patches it carries.
@@ -10665,7 +10667,7 @@ function New-GameShortcut([string] $ExePath, $Build) {
                else { [Environment]::GetFolderPath('Desktop') }
     if (-not $desktop -or -not (Test-Path -LiteralPath $desktop)) { throw 'this user has no desktop folder' }
     $exe = Get-AbsolutePath $ExePath
-    if (-not $onWindows) { return New-LinuxLauncher $desktop $name $exe }
+    if (-not $onWindows) { return New-LinuxLauncher $desktop $name $exe ($Build.Modes.Count -gt 0) }   # a build with screen sizes = the full-screen game
     $lnkPath = Join-Path $desktop ($name + '.lnk')
     $shell = New-Object -ComObject WScript.Shell
     try {
@@ -10683,7 +10685,11 @@ function New-GameShortcut([string] $ExePath, $Build) {
 
 # The Linux form of the desktop shortcut (19 Oct 2026): a freedesktop.org desktop entry
 # "<name>.desktop" on the desktop that runs  wine "<exe>"  with the game folder as the working
-# directory.  Icon: the 256x256 PNG image inside DC_HD.ICO (beside the exe, or the patcher's own copy
+# directory.  For the full-screen game ($FullScreen, 20 Oct 2026) it runs the small shell script
+# "<name>.sh" that New-LinuxWrapper writes beside the exe instead, which starts the exe with Wine and,
+# on a GNOME Wayland desktop with a display scale above 100 %, sets the scale to 100 % for the time the
+# game runs - the exe itself is untouched, -Verify and the reference SHA-256 values do not change.
+# Icon: the 256x256 PNG image inside DC_HD.ICO (beside the exe, or the patcher's own copy
 # patcher\game\DC_HD.ICO) is written to the user's icon theme folder,
 # ~/.local/share/icons/hicolor/256x256/apps/dark-colony.png, and the launcher names it "dark-colony" -
 # a desktop without an .ico image loader (GNOME on Ubuntu) shows nothing for an .ico path, every
@@ -10691,7 +10697,7 @@ function New-GameShortcut([string] $ExePath, $Build) {
 # value is quoted and escaped as the specification asks (\ " ` $ with a backslash, % doubled).  chmod +x
 # and the GNOME "trusted" mark let a double-click start it at once.  Wine itself is not checked for
 # beyond a warning: the launcher is for the desktop, the patcher runs without Wine.
-function New-LinuxLauncher([string] $Desktop, [string] $Name, [string] $Exe) {
+function New-LinuxLauncher([string] $Desktop, [string] $Name, [string] $Exe, [bool] $FullScreen = $false) {
     $folder = Split-Path -Parent $Exe
     $icon = $null
     foreach ($c in @((Join-Path $folder 'DC_HD.ICO'), (Join-Path (Join-Path $PSScriptRoot 'game') 'DC_HD.ICO'))) {
@@ -10707,14 +10713,15 @@ function New-LinuxLauncher([string] $Desktop, [string] $Name, [string] $Exe) {
         }
     }
     if (-not (Get-Command wine -ErrorAction SilentlyContinue)) { Write-Warning 'wine was not found in PATH - the desktop launcher starts the exe with "wine" and needs it installed.' }
-    $q = $Exe.Replace('\', '\\').Replace('"', '\"').Replace('`', '\`').Replace('$', '\$').Replace('%', '%%')
+    $target = if ($FullScreen) { New-LinuxWrapper $folder $Name (Split-Path -Leaf $Exe) } else { $Exe }
+    $q = $target.Replace('\', '\\').Replace('"', '\"').Replace('`', '\`').Replace('$', '\$').Replace('%', '%%')
     $lines = @(
         '[Desktop Entry]'
         'Type=Application'
         'Version=1.0'
         "Name=$Name"
         "Comment=$Name - patched exe written by Apply-DarkColonyPatches.ps1"
-        ('Exec=wine "{0}"' -f $q)
+        $(if ($FullScreen) { 'Exec="{0}"' -f $q } else { 'Exec=wine "{0}"' -f $q })
         "Path=$folder"
     )
     if ($icon) { $lines += "Icon=$icon" }
@@ -10723,6 +10730,113 @@ function New-LinuxLauncher([string] $Desktop, [string] $Name, [string] $Exe) {
     [System.IO.File]::WriteAllText($path, (($lines -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding $false))
     if (Get-Command chmod -ErrorAction SilentlyContinue) { & chmod +x $path }
     if (Get-Command gio -ErrorAction SilentlyContinue) { & gio set $path 'metadata::trusted' 'true' 2>$null }
+    return $path
+}
+
+# The game's start script "<name>.sh" beside the exe (20 Oct 2026), the target of the Linux desktop
+# launcher: cd to its own folder, wine "<exe>", and around that the GNOME display scale.  Wine 10.0's
+# Wayland driver sizes the full-screen game in the desktop's scaled (logical) pixels and ignores the
+# compositor's answer, so at a scale of 125 % the 1920x1080 picture is drawn 1.25x from the top-left
+# corner and cropped (only 1536x864 of it visible); at 100 % every game pixel is one screen pixel
+# (verified with screenshots, Ubuntu 26.10 / GNOME 51 / Wine 10.0, 20 Oct 2026).  The script therefore
+# asks mutter (org.gnome.Mutter.DisplayConfig on the session bus, via python3 + GObject introspection,
+# which every GNOME desktop has) for the current monitor layout and, if any logical monitor's scale is
+# not 1.0, applies the same layout at scale 1.0 with ApplyMonitorsConfig method 1 - temporary: nothing
+# is persisted, a logout restores the desktop's own setting - and applies the saved layout again in an
+# EXIT/INT/TERM/HUP trap when the game is over.  Positions are re-laid out for the new scale (one scale
+# everywhere: multiplied by it; mixed scales: a row from left to right; physical layout mode: kept).
+# Without a Wayland session, without mutter on the bus, without python3/gi, or if mutter rejects the
+# layout, the script just starts the game - exactly what the launcher did before.  Written with LF
+# line endings and chmod +x; an existing script of the name is replaced.
+function New-LinuxWrapper([string] $Folder, [string] $Name, [string] $ExeName) {
+    $text = @'
+#!/bin/sh
+# __NAME__.sh - written by Apply-DarkColonyPatches.ps1 (-DesktopShortcut), 20 Oct 2026.
+# Starts "__EXE__" with Wine from this folder - the desktop launcher runs this file.
+#
+# On a GNOME Wayland desktop whose display scale is above 100 % the game would not fit the screen:
+# Wine 10.0's Wayland driver draws the full-screen game in the desktop's scaled pixels, so at 125 % it
+# comes out a quarter too large from the top-left corner with the right and bottom edges off the
+# screen.  So this script first sets the scale of every monitor to 100 % for the time the game runs
+# (mutter's ApplyMonitorsConfig in its temporary form: nothing is saved, a logout brings the desktop's
+# own setting back) and puts the previous scale back when the game exits.  Anywhere else - an X11
+# session, another desktop, no python3 with GObject introspection - the game is simply started.
+exe='__EXE__'
+cd "$(dirname -- "$0")" || exit 1
+
+helper='
+import sys, json
+try:
+    import gi
+    gi.require_version("Gio", "2.0"); gi.require_version("GLib", "2.0")
+    from gi.repository import Gio, GLib
+except Exception:
+    sys.exit(1)
+TYPE = "(uua(iiduba(ssa{sv}))a{sv})"
+def state():
+    bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    p = Gio.DBusProxy.new_sync(bus, Gio.DBusProxyFlags.DO_NOT_AUTO_START, None, "org.gnome.Mutter.DisplayConfig",
+                               "/org/gnome/Mutter/DisplayConfig", "org.gnome.Mutter.DisplayConfig", None)
+    serial, monitors, logical, props = p.call_sync("GetCurrentState", None, 0, 5000, None).unpack()
+    return p, serial, monitors, logical, props
+def apply(p, serial, layout):
+    lm = [(x, y, float(s), t, bool(prim), [(c, m, {}) for c, m in mons]) for x, y, s, t, prim, mons in layout]
+    p.call_sync("ApplyMonitorsConfig", GLib.Variant(TYPE, (serial, 1, lm, {})), 0, 5000, None)   # 1 = temporary
+if sys.argv[1] == "scale100":
+    p, serial, monitors, logical, props = state()
+    if all(abs(l[2] - 1.0) < 0.001 for l in logical): sys.exit(1)
+    size = {}                               # connector -> (current mode id, physical w, h)
+    for mon in monitors:
+        for m in mon[1]:
+            if m[6].get("is-current"): size[mon[0][0]] = (m[0], m[1], m[2])
+    orig = [[l[0], l[1], l[2], l[3], l[4], [[m[0], size[m[0]][0]] for m in l[5] if m[0] in size]] for l in logical]
+    orig = [l for l in orig if l[5]]
+    if not orig: sys.exit(1)
+    logicalmode = props.get("layout-mode", 1) == 1    # positions in scaled pixels; 2 = physical pixels
+    def extent(l):
+        c, mode = l[5][0]; w, h = size[c][1], size[c][2]
+        return (h, w) if l[3] % 2 else (w, h)
+    tries = []
+    if not logicalmode:
+        tries.append([[x, y, 1.0, t, prim, mons] for x, y, s, t, prim, mons in orig])
+    else:
+        if len({l[2] for l in orig}) == 1:    # one scale everywhere: positions grow by the same factor
+            f = orig[0][2]
+            tries.append([[int(round(x * f)), int(round(y * f)), 1.0, t, prim, mons] for x, y, s, t, prim, mons in orig])
+        row = []; nx = 0                      # otherwise (or if that fails): a row from left to right
+        for l in sorted(orig, key=lambda l: (l[0], l[1])):
+            row.append([nx, int(round(l[1] * l[2])), 1.0, l[3], l[4], l[5]]); nx += extent(l)[0]
+        tries.append(row)
+    for layout in tries:
+        try:
+            apply(p, serial, layout)
+            print(json.dumps(orig)); sys.exit(0)
+        except Exception:
+            serial = state()[1]
+    sys.exit(1)
+elif sys.argv[1] == "restore":
+    orig = json.load(sys.stdin)
+    p, serial = state()[:2]
+    apply(p, serial, orig)
+'
+orig=''
+if { [ "${XDG_SESSION_TYPE:-}" = wayland ] || [ -n "${WAYLAND_DISPLAY:-}" ]; } && command -v python3 >/dev/null 2>&1; then
+    orig=$(python3 -I -c "$helper" scale100 2>/dev/null) || orig=''
+fi
+restore() {
+    if [ -n "$orig" ]; then printf '%s' "$orig" | python3 -I -c "$helper" restore >/dev/null 2>&1; fi
+    orig=''
+}
+if [ -n "$orig" ]; then
+    trap restore EXIT
+    trap 'restore; exit 130' INT TERM HUP
+fi
+wine "$exe"
+'@
+    $text = $text.Replace("`r`n", "`n").Replace('__NAME__', $Name).Replace('__EXE__', $ExeName.Replace("'", "'\''"))
+    $path = Join-Path $Folder ($Name + '.sh')
+    [System.IO.File]::WriteAllText($path, $text + "`n", (New-Object System.Text.UTF8Encoding $false))
+    if (Get-Command chmod -ErrorAction SilentlyContinue) { & chmod +x $path }
     return $path
 }
 

@@ -44,6 +44,7 @@ DC - Council wars/Dark Colony.exe
 # (the 1024x768 set HD_0768P was committed 2-5 Oct 2026), the OZI save-folder marker and the pre-October INTRF_HD layout
 # are written by the installer - INSTALL.CMD builds them from the untouched originals and the resources in patcher/
 /DC - Council wars/Dark Colony Ultimate.exe
+/DC - Council wars/Dark Colony Ultimate.sh
 /Dark Colony - Map editor/Dark Colony Map Editor.exe
 /DC - Council wars/ozisave/ozisave.txt
 /DC - Council wars/HD_[0-9][0-9][0-9][0-9]P/
