@@ -1,5 +1,5 @@
 <#
-    Dark Colony patcher 2.9, build 20261020.1032 - generated 2026-10-20 10:32 UTC from Dark-Colony-Server f84ae65+ and Dark-Colony 1f54f92.
+    Dark Colony patcher 2.10, build 20261020.1253 - generated 2026-10-20 12:53 UTC from Dark-Colony-Server 7bd34a0+ and Dark-Colony 5f6e468.
 
 
 .SYNOPSIS
@@ -237,9 +237,9 @@ $ErrorActionPreference = 'Stop'
 # Version and build of this patcher (maintainer, 2 Oct 2026): the version is set by hand in the generator when the
 # patcher's behaviour changes, the build is the UTC time of the generation (YYYYMMDD.HHMM) - the commits it was
 # generated from are in the header above.
-$PatcherVersion = '2.9'
-$PatcherBuild = '20261020.1032'
-$PatcherGenerated = '2026-10-20 10:32 UTC from Dark-Colony-Server f84ae65+ and Dark-Colony 1f54f92'
+$PatcherVersion = '2.10'
+$PatcherBuild = '20261020.1253'
+$PatcherGenerated = '2026-10-20 12:53 UTC from Dark-Colony-Server 7bd34a0+ and Dark-Colony 5f6e468'
 $script:BannerShown = $false   # the command-line banner is printed once (Set-StrictMode: declare before reading)
 
 $Builds = @(
@@ -259,7 +259,7 @@ $Builds = @(
         SourceNote     = 'the Council Wars CD holds exactly this file as EXPENG\ENGEXP16.EXE - copy it into the "DC - Council wars" folder.'
         Size           = 659968
         OriginalSha256 = '3b930ba92cfd07ab4403c499d5251d604e660f4e8b092303691315e13a1737f4'   # untouched original
-        PatchedSha256  = '998669f9ca3b49ab65b08998d506fb543cca1fea316642a3e26f0e847f3326df'   # every patch applied at the reference resolution (1024x768, dark interface) = the generator's reference build (the repository ships no patched file since 5 Oct 2026)
+        PatchedSha256  = '832ba88330f5fa4cda43ade1183f82ea5cff9112eb25779cd079f9f83e4019e4'   # every patch applied at the reference resolution (1024x768, dark interface) = the generator's reference build (the repository ships no patched file since 5 Oct 2026)
         # screen resolutions this build can be patched for: '640x480' = the original size (no display fix),
         # the others select that size's variant of the 'resolution' fix below.  One of them must be chosen
         # explicitly (window page 1 / -Resolution): there is no default (1 Oct 2026)
@@ -267,7 +267,7 @@ $Builds = @(
         PublishedMode  = '1024x768'
         # SHA-256 with every fix of that resolution applied (the generator's reference builds); 'WxH' = the
         # dark battlefield interface (every fix), 'WxH/light' = the light one (without fix console)
-        ReferenceSha256 = @{ '640x480' = 'a7d708c1c65ff8ab0279c17bebdc88ef54c7c79991aba611cae765354495fc58'; '1024x768' = '998669f9ca3b49ab65b08998d506fb543cca1fea316642a3e26f0e847f3326df'; '1024x768/light' = '880ba6d9bb1b2d956d928350308cfeb225bf1b01dbdf5ecb5a3ffbe2b41acad7'; '1280x1024' = 'a7ee76fe87285fbb2a8346f1fdc525b23ba0792ed64a8d551f75659bdb49106e'; '1280x1024/light' = '154efe8759660a777d03cd259c9731dcb07de32e46d1b9252a0ea3fc223eb3bd'; '1280x720' = '85d0d1842cda72d07482ece58b0293e598649572af2640a328a344906ec5483e'; '1280x720/light' = '9e919f84b36fe816892f5efba1dd6039c87e265013008cae6dc7e63a45ed9cbd'; '1280x800' = '521ab560ea7827832c65699a7b75ccf50711034c43c4d05f46428a4380d7ba00'; '1280x800/light' = '0a9229ba0ebf91c6bf1cad09bf4f00eaeb1f3ddd3952f8baa01852464ffc8b9b'; '1920x1080' = '54e35f5680da9dbd1dd667149fe8bf22b12003fd7a8b57c4365464f16b3d4a9a'; '1920x1080/light' = '9abacec6b6cc166c8503c2bf3c6cf40c0627bf14a6a66ee5488b110dbe205ff3'; '1920x1200' = 'b381e4d9af0364e758e67ae469cf0c614a73a05671fef18311f765f958ba8126'; '1920x1200/light' = 'ad8809212c0c63421b7af1790ffd6be2de3e169df14ce7cd57fb384e66ad9e08'; '3840x1080' = '2db8988fc4713fb9affdec35733f49d326f16af0cbbd7af15e773a6f12aae781'; '3840x1080/light' = '004864ef750a700fb51a6fb7afe0ba7468de506cb52de5995b2ea6ef63e8f91d' }
+        ReferenceSha256 = @{ '640x480' = 'a7d708c1c65ff8ab0279c17bebdc88ef54c7c79991aba611cae765354495fc58'; '1024x768' = '832ba88330f5fa4cda43ade1183f82ea5cff9112eb25779cd079f9f83e4019e4'; '1024x768/light' = '097b917897010d72d1a78c218052831989abb5151992410044d60f1480ebdb27'; '1280x1024' = 'e6ed9fd0949e034bf983c38c0c379c1ef1869e29b46d056cf9e351357a7ca042'; '1280x1024/light' = 'dc6b3b4ce710cd20f9aae5ce5c44cd2bb6f1166b870da32a7a5322c001444049'; '1280x720' = '50fcdc7f511e9377c0df97cc3b31a978b4fc6c171206bebab9b1a401b43c38e4'; '1280x720/light' = 'bd8327bd8251ef5ab7c973f8903a2965d424164a7e05d021428aa66f225298cd'; '1280x800' = '8e0c055023ff22d02e5b064931a8bf02ef20daab84de01425593836f8b10a430'; '1280x800/light' = '99586978e4edc612d3ff44a0d5f89d9bbed97d2b7cf660af0dca66f2644fb06c'; '1920x1080' = '059ca5a26aa7911786e693c7f8bfa9ae7211a4bb9698416861fe324f6c9b1b93'; '1920x1080/light' = 'd4782726573d69963182578f1ea48685eabf0b68be08af95cbb183bf6a9f4ae5'; '1920x1200' = 'abac1d61d49cc09d849913c3482b578becee6df93bf22c4530ae5a454cf67d95'; '1920x1200/light' = 'f51e801d85ac2a76eb09cb34356e1cdcebf65377ceba91014f640950596cc6a5'; '3840x1080' = 'c7f10bd902385eb2a280ac79e51ee92f5fc5a4d46f489ccd8cc4a96f670670d8'; '3840x1080/light' = 'b7ca4b0be93dfe90608cbe2c68795e78d80c1c386fea4d932dcb7abcc083d6c4' }
         Patches        = @(
 
             # ---- nocd: No CD: the game neither needs the disc nor touches the CD path ---------------------------------------------------------
@@ -416,7 +416,7 @@ longer needs HBNFUFL.A01 / .A02 (the untouched originals still read the drive le
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 609 bytes in 198 edits
+            #  Changes    : 622 bytes in 198 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -735,8 +735,8 @@ WAR screen is read from.
                     @{ Offset = 0x68D9; Old = 'E9 D4 00 00 00'; New = '90 90 90 90 90' }
                     # draw_offscreen: draw all H rows, not H-1 (jae -> ja)
                     @{ Offset = 0x6D7B; Old = '0F 83'; New = '0F 87' }
-                    # draw_offscreen: BltFast -> stretching Blt(primary, dest rect, movie surface)
-                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C'; New = '31 FF 89 7D 62 C7 45 66 60 00 00 00 C7 45 6A 00 04 00 00 C7 45 6E A0 02 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 40 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90' }
+                    # draw_offscreen: BltFast -> stretching Blt(back buffer, dest rect, movie surface) + Flip
+                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C 8D A5 82 00 00 00 5D 5F 5E 5A 59 5B C3'; New = '31 FF 89 7D 62 C7 45 66 60 00 00 00 C7 45 6A 00 04 00 00 C7 45 6E A0 02 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 44 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90 E9 9F F9 FF FF 90 90 90 90 90 90 90 90' }
                     # display thread: always draw through the 320x180 movie surface
                     @{ Offset = 0x7F9E; Old = '75 07'; New = 'EB 07' }
                     # minimap click: mouse x - minimap x
@@ -1026,7 +1026,7 @@ WAR screen is read from.
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 686 bytes in 211 edits
+            #  Changes    : 699 bytes in 211 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -1345,8 +1345,8 @@ WAR screen is read from.
                     @{ Offset = 0x68D9; Old = 'E9 D4 00 00 00'; New = '90 90 90 90 90' }
                     # draw_offscreen: draw all H rows, not H-1 (jae -> ja)
                     @{ Offset = 0x6D7B; Old = '0F 83'; New = '0F 87' }
-                    # draw_offscreen: BltFast -> stretching Blt(primary, dest rect, movie surface)
-                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C'; New = '31 FF 89 7D 62 C7 45 66 98 00 00 00 C7 45 6A 00 05 00 00 C7 45 6E 68 03 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 40 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90' }
+                    # draw_offscreen: BltFast -> stretching Blt(back buffer, dest rect, movie surface) + Flip
+                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C 8D A5 82 00 00 00 5D 5F 5E 5A 59 5B C3'; New = '31 FF 89 7D 62 C7 45 66 98 00 00 00 C7 45 6A 00 05 00 00 C7 45 6E 68 03 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 44 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90 E9 9F F9 FF FF 90 90 90 90 90 90 90 90' }
                     # display thread: always draw through the 320x180 movie surface
                     @{ Offset = 0x7F9E; Old = '75 07'; New = 'EB 07' }
                     # minimap click: mouse x - minimap x
@@ -1662,7 +1662,7 @@ WAR screen is read from.
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 668 bytes in 211 edits
+            #  Changes    : 681 bytes in 211 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -1981,8 +1981,8 @@ WAR screen is read from.
                     @{ Offset = 0x68D9; Old = 'E9 D4 00 00 00'; New = '90 90 90 90 90' }
                     # draw_offscreen: draw all H rows, not H-1 (jae -> ja)
                     @{ Offset = 0x6D7B; Old = '0F 83'; New = '0F 87' }
-                    # draw_offscreen: BltFast -> stretching Blt(primary, dest rect, movie surface)
-                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C'; New = '31 FF 89 7D 62 C7 45 66 00 00 00 00 C7 45 6A 00 05 00 00 C7 45 6E D0 02 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 40 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90' }
+                    # draw_offscreen: BltFast -> stretching Blt(back buffer, dest rect, movie surface) + Flip
+                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C 8D A5 82 00 00 00 5D 5F 5E 5A 59 5B C3'; New = '31 FF 89 7D 62 C7 45 66 00 00 00 00 C7 45 6A 00 05 00 00 C7 45 6E D0 02 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 44 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90 E9 9F F9 FF FF 90 90 90 90 90 90 90 90' }
                     # display thread: always draw through the 320x180 movie surface
                     @{ Offset = 0x7F9E; Old = '75 07'; New = 'EB 07' }
                     # minimap click: mouse x - minimap x
@@ -2298,7 +2298,7 @@ WAR screen is read from.
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 671 bytes in 210 edits
+            #  Changes    : 684 bytes in 210 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -2617,8 +2617,8 @@ WAR screen is read from.
                     @{ Offset = 0x68D9; Old = 'E9 D4 00 00 00'; New = '90 90 90 90 90' }
                     # draw_offscreen: draw all H rows, not H-1 (jae -> ja)
                     @{ Offset = 0x6D7B; Old = '0F 83'; New = '0F 87' }
-                    # draw_offscreen: BltFast -> stretching Blt(primary, dest rect, movie surface)
-                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C'; New = '31 FF 89 7D 62 C7 45 66 28 00 00 00 C7 45 6A 00 05 00 00 C7 45 6E F8 02 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 40 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90' }
+                    # draw_offscreen: BltFast -> stretching Blt(back buffer, dest rect, movie surface) + Flip
+                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C 8D A5 82 00 00 00 5D 5F 5E 5A 59 5B C3'; New = '31 FF 89 7D 62 C7 45 66 28 00 00 00 C7 45 6A 00 05 00 00 C7 45 6E F8 02 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 44 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90 E9 9F F9 FF FF 90 90 90 90 90 90 90 90' }
                     # display thread: always draw through the 320x180 movie surface
                     @{ Offset = 0x7F9E; Old = '75 07'; New = 'EB 07' }
                     # minimap click: mouse x - minimap x
@@ -2932,7 +2932,7 @@ WAR screen is read from.
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 623 bytes in 210 edits
+            #  Changes    : 636 bytes in 210 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -3251,8 +3251,8 @@ WAR screen is read from.
                     @{ Offset = 0x68D9; Old = 'E9 D4 00 00 00'; New = '90 90 90 90 90' }
                     # draw_offscreen: draw all H rows, not H-1 (jae -> ja)
                     @{ Offset = 0x6D7B; Old = '0F 83'; New = '0F 87' }
-                    # draw_offscreen: BltFast -> stretching Blt(primary, dest rect, movie surface)
-                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C'; New = '31 FF 89 7D 62 C7 45 66 00 00 00 00 C7 45 6A 80 07 00 00 C7 45 6E 38 04 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 40 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90' }
+                    # draw_offscreen: BltFast -> stretching Blt(back buffer, dest rect, movie surface) + Flip
+                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C 8D A5 82 00 00 00 5D 5F 5E 5A 59 5B C3'; New = '31 FF 89 7D 62 C7 45 66 00 00 00 00 C7 45 6A 80 07 00 00 C7 45 6E 38 04 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 44 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90 E9 9F F9 FF FF 90 90 90 90 90 90 90 90' }
                     # display thread: always draw through the 320x180 movie surface
                     @{ Offset = 0x7F9E; Old = '75 07'; New = 'EB 07' }
                     # minimap click: mouse x - minimap x
@@ -3566,7 +3566,7 @@ WAR screen is read from.
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 624 bytes in 210 edits
+            #  Changes    : 637 bytes in 210 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -3885,8 +3885,8 @@ WAR screen is read from.
                     @{ Offset = 0x68D9; Old = 'E9 D4 00 00 00'; New = '90 90 90 90 90' }
                     # draw_offscreen: draw all H rows, not H-1 (jae -> ja)
                     @{ Offset = 0x6D7B; Old = '0F 83'; New = '0F 87' }
-                    # draw_offscreen: BltFast -> stretching Blt(primary, dest rect, movie surface)
-                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C'; New = '31 FF 89 7D 62 C7 45 66 3C 00 00 00 C7 45 6A 80 07 00 00 C7 45 6E 74 04 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 40 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90' }
+                    # draw_offscreen: BltFast -> stretching Blt(back buffer, dest rect, movie surface) + Flip
+                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C 8D A5 82 00 00 00 5D 5F 5E 5A 59 5B C3'; New = '31 FF 89 7D 62 C7 45 66 3C 00 00 00 C7 45 6A 80 07 00 00 C7 45 6E 74 04 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 44 97 48 00 50 8B 08 FF 51 14 90 90 90 90 90 90 E9 9F F9 FF FF 90 90 90 90 90 90 90 90' }
                     # display thread: always draw through the 320x180 movie surface
                     @{ Offset = 0x7F9E; Old = '75 07'; New = 'EB 07' }
                     # minimap click: mouse x - minimap x
@@ -4200,7 +4200,7 @@ WAR screen is read from.
             #  Added      : 9 / 13 / 14 Sep 2026 (one fix since 1 Oct 2026)
             #  Made with  : tools/patch_resolution.py + patch_hd_paths.py + patch_clock.py (Dark-Colony-Server)
             #  Documented : docs/DC16_DISPLAY_AND_RESOLUTION.md sections 8-10, 10.15, 10.17, 10.24, 10.25, 10.58
-            #  Changes    : 680 bytes in 210 edits
+            #  Changes    : 693 bytes in 210 edits
             #  Everything the screen size changes, in ONE fix (until 1 Oct 2026 the three fixes "display",
             #  "interface data from its own folder" and "clock hand", which only worked together and were always
             #  selected together; the maintainer asked for one).  Three tools are replayed one after the other:
@@ -4519,8 +4519,8 @@ WAR screen is read from.
                     @{ Offset = 0x68D9; Old = 'E9 D4 00 00 00'; New = '90 90 90 90 90' }
                     # draw_offscreen: draw all H rows, not H-1 (jae -> ja)
                     @{ Offset = 0x6D7B; Old = '0F 83'; New = '0F 87' }
-                    # draw_offscreen: BltFast -> stretching Blt(primary, dest rect, movie surface)
-                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C'; New = '31 FF C7 45 62 C0 03 00 00 C7 45 66 00 00 00 00 C7 45 6A 40 0B 00 00 C7 45 6E 38 04 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 40 97 48 00 50 8B 08 FF 51 14 90 90' }
+                    # draw_offscreen: BltFast -> stretching Blt(back buffer, dest rect, movie surface) + Flip
+                    @{ Offset = 0x7274; Old = 'BA 40 01 00 00 B9 B4 00 00 00 6A 10 A1 40 97 48 00 89 55 5A 8D 55 52 8B 1D 28 8E 48 00 52 31 FF 8B 15 80 56 4A 00 53 01 D2 89 7D 52 52 89 7D 56 89 4D 5E 68 A0 00 00 00 8B 08 50 FF 51 1C 8D A5 82 00 00 00 5D 5F 5E 5A 59 5B C3'; New = '31 FF C7 45 62 C0 03 00 00 C7 45 66 00 00 00 00 C7 45 6A 40 0B 00 00 C7 45 6E 38 04 00 00 6A 00 68 00 00 00 01 6A 00 FF 35 28 8E 48 00 8D 55 62 52 A1 44 97 48 00 50 8B 08 FF 51 14 90 90 E9 9F F9 FF FF 90 90 90 90 90 90 90 90' }
                     # display thread: always draw through the 320x180 movie surface
                     @{ Offset = 0x7F9E; Old = '75 07'; New = 'EB 07' }
                     # minimap click: mouse x - minimap x
