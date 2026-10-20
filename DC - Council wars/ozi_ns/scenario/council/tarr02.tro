@@ -46,7 +46,7 @@ setarray 0 (c+5)
 setlifes 28 1
 end
 
-7 trip 0 (S==0)
+7 trip 0 (S==5)
 waypoint 30 29 2 44 51 44 49
 waypoint 31 29 2 44 51 44 49
 waypoint 29 29 2 44 51 44 49
@@ -106,13 +106,13 @@ waypoint 73 26 2 61 26 73 26
 waypoint 73 25 2 61 25 73 25
 end
 
-21 trip 0 (S==0)
+21 trip 0 (S==5)
 waypoint 44 51 2 87 79 89 79
 waypoint 44 50 2 87 79 89 79
 waypoint 44 49 2 87 79 89 79
 end
 
-23 trip 0 (S==0)
+23 trip 0 (S==5)
 waypoint 87 79 2 104 71 104 67
 waypoint 88 79 2 104 71 104 67
 waypoint 89 79 2 104 71 104 67
